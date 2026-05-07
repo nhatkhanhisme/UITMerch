@@ -1,0 +1,24 @@
+.github
+.vscode
+
+# Environment variables - never commit to version control
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# Build and dependencies
+target/
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
