@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background: #e7f5fa;
+}
+
+html,
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.background-effect-orbit {
+  animation: backgroundEffectOrbit 6s linear infinite;
+  left: 919.5px;
+  top: 536.5px;
+  transform: translate(-50%, -50%) rotate(0deg);
+  transform-origin: center;
+  will-change: transform;
+}
+
+@keyframes backgroundEffectOrbit {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(-50%, -50%) translate(-220px, 0) rotate(90deg);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) translate(-220px, -120px) rotate(180deg);
+  }
+
+  75% {
+    transform: translate(-50%, -50%) translate(150px, -120px) rotate(270deg);
+  }
+
+  99.99% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
