@@ -9,6 +9,7 @@ const logoTitleUrl =
 const logo20FrontUrl = "/assets/figma/logo-20-front.png";
 const logo20EffectUrl =
   "/assets/figma/logo-20-effect.png";
+const HIDE_HERO_DARK_LAYER = true;
 const heroParagraph =
   "Rhoncus morbi et augue nec, in id ullamcorper at sit. Condimentum sit nunc in eros scelerisque sed. Commodo in viverra nunc, ullamcorper ut. Non, amet, aliquet scelerisque nullam sagittis, pulvinar. Fermentum scelerisque sit consectetur hac mi. Mollis leo eleifend ultricies purus iaculis. Rhoncus morbi et augue nec, in id ullamcorper at sit. Condimentum sit nunc in eros scelerisque sed. Commodo in viverra nunc, ullamcorper ut. Non, amet, aliquet scelerisque nullam sagittis, pulvinar. Fermentum scelerisque sit consectetur hac mi. Mollis leo eleifend ultricies purus iaculis.";
 
@@ -77,11 +78,13 @@ export function HomeHero() {
             className="absolute left-[511px] top-[62px] h-[818px] w-[891px] overflow-hidden"
             data-node-id="28:12288"
           >
-            <img
-              alt=""
-              className="pointer-events-none absolute left-[128px] top-[90px] size-[615px] object-cover"
-              src={logo20FrontUrl}
-            />
+            {!HIDE_HERO_DARK_LAYER && (
+              <img
+                alt=""
+                className="pointer-events-none absolute left-[128px] top-[90px] size-[615px] object-cover"
+                src={logo20FrontUrl}
+              />
+            )}
             <div className="pointer-events-none absolute left-[131px] top-[113px] h-[613px] w-[630px] overflow-hidden">
               <img
                 alt="UIT 20 years anniversary"
