@@ -28,7 +28,12 @@ function InfoList({ items }: { items: string[] }) {
 export function HomeEnd() {
   return (
     <section
-      className="relative scroll-mt-16 overflow-hidden bg-canvas px-5 pb-8 pt-16 sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-20 lg:px-16 lg:pt-24"
+      className="
+        relative isolate scroll-mt-16 overflow-hidden
+        px-5 pb-8 pt-16
+        sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-20
+        lg:px-16 lg:pt-24
+      "
       data-section="home-end"
     >
       {/* RESPONSIVE */}
@@ -36,7 +41,7 @@ export function HomeEnd() {
         UIT
       </div>
 
-      <div className="relative mx-auto max-w-canvas pt-16 sm:pt-20 lg:pt-24">
+      <div className="relative z-10 mx-auto max-w-canvas pt-16 sm:pt-20 lg:pt-24">
         {/* RESPONSIVE */}
         <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-14">
           <div>

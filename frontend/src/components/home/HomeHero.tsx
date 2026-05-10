@@ -30,7 +30,6 @@ export function HomeHero() {
 
   return (
     <section
-      // FIX: Bug1
       className="relative mx-0 min-h-screen w-screen overflow-hidden bg-canvas px-0 pb-16 pt-24 sm:pb-20 sm:pt-28 lg:p-0"
       data-node-id="13:3814"
       data-section="home-hero"
@@ -44,7 +43,6 @@ export function HomeHero() {
       </div>
 
       <div
-        // FIX: Bug1
         className="relative mx-auto w-full max-w-canvas px-5 sm:px-8 lg:max-w-none lg:px-0"
         data-node-id="57:1326"
         data-name="slide 1"
@@ -98,6 +96,10 @@ export function HomeHero() {
           <ScrollDownButton className="mx-auto hidden sm:block lg:absolute lg:left-[683px] lg:top-[860px]" />
         </div>
       </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-[#E9FEFF]"
+      />
     </section>
   );
 }

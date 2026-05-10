@@ -22,10 +22,15 @@ export function HomeOrgan() {
   return (
     <section
       // FIX: sizing
-      className="relative scroll-mt-16 overflow-hidden bg-[linear-gradient(180deg,#E7F5FA_0%,#F6FCFE_48%,#E7F5FA_100%)] px-4 pb-8 pt-24 sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-28 lg:px-16 lg:pb-24"
+      className="
+        relative isolate scroll-mt-16 overflow-hidden
+        px-4 pb-8 pt-24
+        sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-28
+        lg:px-16 lg:pb-24
+      "
       data-section="home-organ"
     >
-      <div className="relative mx-auto max-w-canvas">
+      <div className="relative z-10 mx-auto max-w-canvas">
         <div className="max-w-3xl">
           <p className="font-google text-sm font-semibold uppercase tracking-[0.22em] text-slate/70">
             Cộng đồng UIT
