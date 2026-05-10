@@ -1,9 +1,23 @@
--- V1_01__init_enums.sql
--- Create all database enums for UITMerch
--- These must be created first as they are referenced by table definitions
+-- V1__init_enums.sql
 
 CREATE TYPE user_role AS ENUM ('CUSTOMER', 'ORGANIZER', 'ADMIN');
+
 CREATE TYPE organization_status AS ENUM ('PENDING', 'ACTIVE', 'INACTIVE');
+
+CREATE TYPE merch_item_status AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+
+CREATE TYPE event_status AS ENUM ('DRAFT', 'PUBLISHED', 'ENDED');
+
 CREATE TYPE cart_status AS ENUM ('ACTIVE', 'CHECKED_OUT');
-CREATE TYPE order_status AS ENUM ('PENDING', 'CONFIRMED', 'READY_FOR_PICKUP', 'SUCCESS', 'CANCELLED');
+
+CREATE TYPE order_status AS ENUM (
+    'PENDING',
+    'CONFIRMED',
+    'READY_FOR_PICKUP',
+    'SUCCESS',
+    'CANCELLED'
+);
+
 CREATE TYPE payment_method AS ENUM ('CASH_ON_DELIVERY');
+
+CREATE TYPE payment_status AS ENUM ('PENDING', 'PAID', 'FAILED', 'REFUNDED');
