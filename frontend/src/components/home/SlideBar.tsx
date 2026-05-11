@@ -13,7 +13,8 @@ const connectorShellStyle: CSSProperties = {
   width: 70,
   height: 128,
   position: "absolute",
-  filter: "drop-shadow(0 8px 18px rgba(82,128,145,0.1)) drop-shadow(0 0 10px rgba(255,255,255,0.18))",
+  filter:
+    "drop-shadow(0 8px 18px rgba(82,128,145,0.1)) drop-shadow(0 0 10px rgba(255,255,255,0.18))",
 };
 
 const connectorPath =
@@ -48,6 +49,9 @@ const activeCircleStyle: CSSProperties = {
   `,
   borderRadius: 9999,
   backdropFilter: "blur(6px)",
+  transition: "top 360ms cubic-bezier(0.22, 1, 0.36, 1)",
+  willChange: "top, transform",
+  transform: "translateZ(0)",
 };
 
 export function SlideBar({ activeIndex = 0 }: SlideBarProps) {
@@ -82,7 +86,13 @@ export function SlideBar({ activeIndex = 0 }: SlideBarProps) {
           }}
         >
           <defs>
-            <linearGradient id={`connector-fill-${top}`} x1="0" x2="1" y1="0" y2="0">
+            <linearGradient
+              id={`connector-fill-${top}`}
+              x1="0"
+              x2="1"
+              y1="0"
+              y2="0"
+            >
               <stop offset="0%" stopColor="rgba(255,255,255,0.08)" />
               <stop offset="24%" stopColor="rgba(255,255,255,0.2)" />
               <stop offset="50%" stopColor="rgba(255,255,255,0.3)" />

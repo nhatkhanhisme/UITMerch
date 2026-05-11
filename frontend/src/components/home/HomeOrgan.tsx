@@ -3,10 +3,9 @@ const organizations = [
   "CLB Lập trình",
   "Khoa CNTT",
   "Khoa KHMT",
-  "CLB Truyền thông",
   "Khoa MMT&TT",
   "UIT Guitar",
-  "Đoàn Hội UIT"
+  "Đoàn Hội UIT",
 ];
 
 function initials(name: string) {
@@ -23,11 +22,12 @@ export function HomeOrgan() {
     <section
       // FIX: sizing
       className="
-        relative isolate scroll-mt-16 overflow-hidden
-        px-4 pb-8 pt-24
-        sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-28
-        lg:px-16 lg:pb-24
+        relative isolate min-h-[100svh]
+        px-4 pb-8 pt-20
+        sm:px-8 sm:pb-10 sm:pt-24
+        lg:px-16 lg:pb-14 lg:pt-28
       "
+      id="home-organ"
       data-section="home-organ"
     >
       <div className="relative z-10 mx-auto max-w-canvas">
@@ -36,42 +36,38 @@ export function HomeOrgan() {
             Cộng đồng UIT
           </p>
           {/* // FIX: sizing */}
-          <h2 className="mb-6 mt-2 font-brand text-3xl font-bold leading-tight text-black-blue sm:text-4xl lg:text-6xl">
+          <h2 className="mb-5 mt-2 font-brand text-3xl font-bold leading-tight text-black-blue sm:text-4xl lg:text-5xl">
             Khám phá merch từ các CLB và Khoa
           </h2>
         </div>
 
         {/* // FIX: sizing */}
-        <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-3 md:pr-12 lg:grid-cols-4 lg:pr-16">
+        <div className="grid grid-cols-2 gap-5 sm:gap-6 md:grid-cols-3 md:pr-10 lg:grid-cols-4 lg:pr-14">
           {organizations.map((name, index) => (
             <article
               className="group flex min-w-0 flex-col items-center justify-center gap-3 bg-transparent transition duration-200 ease-out hover:-translate-y-1"
               key={name}
             >
-              <div className="relative h-36 w-36 sm:h-40 sm:w-40">
+              <div className="relative h-32 w-32 sm:h-36 sm:w-36">
                 <div className="relative z-10 inline-flex h-full w-full items-center justify-center rounded-full border border-white/70 bg-white/20 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px]">
                   <span className="text-base font-bold text-slate-700">
                     {index === 0 ? "GDSC" : initials(name)}
                   </span>
                 </div>
               </div>
-              <h3 className="text-sm font-bold text-slate-700 text-center mt-1 w-full truncate">
+              <h3 className="mt-1 w-full truncate text-center text-[13px] font-bold text-slate-700 sm:text-sm">
                 {name}
               </h3>
             </article>
           ))}
 
-          <article
-            className="group flex min-w-0 flex-col items-center justify-center gap-3 bg-transparent transition duration-200 ease-out hover:-translate-y-1"
-          >
-            <div className="relative h-36 w-36 sm:h-40 sm:w-40">
+          <article className="group flex min-w-0 flex-col items-center justify-center gap-3 bg-transparent transition duration-200 ease-out hover:-translate-y-1">
+            <div className="relative h-32 w-32 sm:h-36 sm:w-36">
               <div className="relative z-10 inline-flex h-full w-full items-center justify-center rounded-full border border-white/70 bg-white/20 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px]">
-                <span className="text-base font-bold text-slate-700">
-                  ...
-                </span>
+                <span className="text-base font-bold text-slate-700">...</span>
               </div>
             </div>
-            <p className="text-sm font-bold text-slate-700 text-center mt-1 w-full truncate">
+            <p className="mt-1 w-full truncate text-center text-[13px] font-bold text-slate-700 sm:text-sm">
               Nhiều đơn vị khác
             </p>
           </article>

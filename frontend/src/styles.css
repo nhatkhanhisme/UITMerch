@@ -19,6 +19,40 @@ body {
   overflow-x: hidden;
 }
 
+html.home-hide-native-scrollbar,
+body.home-hide-native-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html.home-hide-native-scrollbar::-webkit-scrollbar,
+body.home-hide-native-scrollbar::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+html.home-scroll-lock,
+body.home-scroll-lock {
+  overflow: hidden;
+}
+
+.home-scroll-snap-container {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+}
+
+.home-scroll-snap-container [data-section] {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.home-scroll-snap-container::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
 .background-effect-orbit {
   animation: backgroundEffectOrbit 6s linear infinite;
   left: 919.5px;
