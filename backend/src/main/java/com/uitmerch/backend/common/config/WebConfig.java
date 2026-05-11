@@ -1,19 +1,19 @@
 package com.uitmerch.backend.common.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Web configuration for Spring MVC.
- * Registers request interceptors like TraceIdInterceptor.
- */
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
-    
+
+    private final TraceIdInterceptor traceIdInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new TraceIdInterceptor())
+        registry.addInterceptor(traceIdInterceptor)
             .addPathPatterns("/api/**");
     }
 }

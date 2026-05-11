@@ -39,7 +39,7 @@ spring:
   # JPA & Hibernate Configuration
   # CRITICAL: ddl-auto=none enforces Flyway as the ONLY schema migration tool
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
     hibernate:
       ddl-auto: none
     show-sql: false

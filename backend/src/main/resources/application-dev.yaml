@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:uitmerch;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    secret: dev-secret-key-minimum-32-characters-long-for-hs256
+  storage:
+    endpoint: http://localhost
+    region: ap-southeast-2
+    access-key: dev
+    secret-key: dev
+    public-url: http://localhost/dev-storage

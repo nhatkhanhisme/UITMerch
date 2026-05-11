@@ -47,4 +47,15 @@ public class PaginationMeta {
     @JsonProperty("hasPrevious")
     @Schema(description = "Whether there are pages before current", example = "false")
     private Boolean hasPrevious;
+
+    public static PaginationMeta from(org.springframework.data.domain.Page<?> page) {
+        return PaginationMeta.builder()
+            .page(page.getNumber())
+            .pageSize(page.getSize())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .hasNext(page.hasNext())
+            .hasPrevious(page.hasPrevious())
+            .build();
+    }
 }
