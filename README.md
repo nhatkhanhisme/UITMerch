@@ -6,11 +6,11 @@
   A website for exploring "memory fragments" (merchandise) from the University of Information Technology (UIT).
 </p>
 
-</div>
-
 [![Java](https://img.shields.io/badge/Java-21-blue.svg?style=for-the-badge&logo=java)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3-green.svg?style=for-the-badge&logo=spring)](https://spring.io/projects/spring-boot)
 [![React](https://img.shields.io/badge/React-18.2.0-cyan.svg?style=for-the-badge&logo=react)](https://reactjs.org)
+
+</div>
 
 ## Overview
 
