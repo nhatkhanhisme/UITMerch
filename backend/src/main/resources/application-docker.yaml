@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db:5432/uitmerch}
+    username: ${SPRING_DATASOURCE_USERNAME:uitmerch}
+    password: ${SPRING_DATASOURCE_PASSWORD:uitmerch_dev}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 30000
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    out-of-order: false
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:docker-dev-jwt-secret-uitmerch-min-32-chars!}
+    expiration: 86400000
+    refresh-expiration: 604800000
+
+logging:
+  level:
+    root: INFO
+    com.uitmerch: DEBUG
+    org.flywaydb: INFO

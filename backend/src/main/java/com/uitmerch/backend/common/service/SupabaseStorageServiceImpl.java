@@ -5,6 +5,7 @@ import com.uitmerch.backend.common.util.FileUploadResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -36,6 +37,7 @@ import java.util.UUID;
  * Database stores only the fileUrl returned here, not the file content.
  */
 @Service
+@Profile("!(dev | docker)")
 public class SupabaseStorageServiceImpl implements StorageService {
     
     private static final Logger logger = LoggerFactory.getLogger(SupabaseStorageServiceImpl.class);

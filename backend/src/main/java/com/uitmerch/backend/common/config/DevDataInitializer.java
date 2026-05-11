@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-@Profile("dev")
+@Profile("dev | docker")
 @RequiredArgsConstructor
 @Slf4j
 public class DevDataInitializer implements ApplicationRunner {
@@ -57,6 +57,10 @@ public class DevDataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        if (userRepository.count() > 0) {
+            log.info("Sample data already present, skipping seed.");
+            return;
+        }
         log.info("Seeding dev sample data...");
 
         // ── Users ─────────────────────────────────────────────────────────────

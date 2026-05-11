@@ -10,14 +10,15 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 
 import java.net.URI;
+import org.springframework.context.annotation.Profile;
 
 /**
  * AWS S3 / Supabase Storage configuration.
- * Supabase Storage is S3-compatible, so we use AWS SDK with custom endpoint.
- * 
- * NFR03: Supabase Storage used for images; Base64/BLOB persistence in DB is strictly prohibited.
+ * Inactive in dev and docker profiles — DevStorageService handles storage there.
+ * NFR03: Supabase Storage used for images; Base64/BLOB persistence in DB prohibited.
  */
 @Configuration
+@Profile("!(dev | docker)")
 public class SupabaseStorageConfig {
     
     @Value("${app.storage.endpoint}")
