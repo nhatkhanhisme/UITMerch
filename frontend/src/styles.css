@@ -19,6 +19,19 @@ body {
   overflow-x: hidden;
 }
 
+html.home-hide-native-scrollbar,
+body.home-hide-native-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html.home-hide-native-scrollbar::-webkit-scrollbar,
+body.home-hide-native-scrollbar::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
 .background-effect-orbit {
   animation: backgroundEffectOrbit 6s linear infinite;
   left: 919.5px;
