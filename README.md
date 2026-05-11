@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1>UITMerch</h1>
+<img src="frontend/public/assets/figma/logo-title.svg" alt="UITMerch" height="120" />
 
 <p>
   A website for exploring "memory fragments" (merchandise) from the University of Information Technology (UIT).
