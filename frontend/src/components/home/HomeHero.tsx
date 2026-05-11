@@ -7,7 +7,7 @@ const logo20FrontUrl = "/assets/figma/logo-20-front.png";
 const logo20EffectUrl = "/assets/figma/logo-20-effect.png";
 const HIDE_HERO_DARK_LAYER = true;
 const heroParagraph =
-  "Rhoncus morbi et augue nec, in id ullamcorper at sit. Condimentum sit nunc in eros scelerisque sed. Commodo in viverra nunc, ullamcorper ut. Non, amet, aliquet scelerisque nullam sagittis, pulvinar. Fermentum scelerisque sit consectetur hac mi. Mollis leo eleifend ultricies purus iaculis. Rhoncus morbi et augue nec, in id ullamcorper at sit. Condimentum sit nunc in eros scelerisque sed. Commodo in viverra nunc, ullamcorper ut. Non, amet, aliquet scelerisque nullam sagittis, pulvinar. Fermentum scelerisque sit consectetur hac mi. Mollis leo eleifend ultricies purus iaculis.";
+  "UITMerch là một Website mang đến một không gian lưu trữ những sản phầm lưu niệm của các câu lạc bộ và khoa tại Trường Đại học Công nghệ Thông tin. Tại đây bạn có thể tìm thấy những món đồ độc quyền, được thiết kế dành riêng cho cộng đồng UIT, giúp bạn thể hiện tình yêu và sự gắn kết với mái trường thân yêu của mình.";
 
 export function HomeHero() {
   const [scale, setScale] = useState(1);
@@ -69,7 +69,7 @@ export function HomeHero() {
               src={logoTitleUrl}
             />
             <p
-              className="relative mt-8 max-w-[472px] text-center font-google text-sm leading-6 text-gray sm:mt-10 sm:text-[15px] lg:absolute lg:left-0 lg:top-[357px] lg:mt-0 lg:h-[264px] lg:w-[472px] lg:text-[15px] lg:leading-[1.35]"
+              className="relative mt-8 max-w-[472px] text-center font-google text-base leading-7 text-gray sm:mt-10 sm:text-[16px] lg:absolute lg:left-0 lg:top-[357px] lg:mt-0 lg:h-[264px] lg:w-[472px] lg:text-[16px] lg:leading-[1.45]"
               data-node-id="17:4943"
             >
               {heroParagraph}
