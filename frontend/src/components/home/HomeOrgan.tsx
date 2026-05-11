@@ -23,7 +23,7 @@ export function HomeOrgan() {
     <section
       // FIX: sizing
       className="
-        relative isolate scroll-mt-16 overflow-hidden
+        relative isolate min-h-[100svh] scroll-mt-16 overflow-hidden
         px-4 pb-8 pt-24
         sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-28
         lg:px-16 lg:pb-24

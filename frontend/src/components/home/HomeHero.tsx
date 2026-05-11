@@ -30,7 +30,7 @@ export function HomeHero() {
 
   return (
     <section
-      className="relative mx-0 min-h-screen w-screen overflow-hidden bg-canvas px-0 pb-16 pt-24 sm:pb-20 sm:pt-28 lg:p-0"
+      className="relative mx-0 min-h-[100svh] w-screen overflow-hidden bg-canvas px-0 pb-16 pt-24 sm:pb-20 sm:pt-28 lg:p-0"
       id="home-hero"
       data-node-id="13:3814"
       data-section="home-hero"

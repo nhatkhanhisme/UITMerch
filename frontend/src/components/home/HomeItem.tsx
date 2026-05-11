@@ -10,7 +10,7 @@ export function HomeItem() {
   return (
     <section
       className="
-        relative isolate scroll-mt-16 overflow-hidden
+        relative isolate min-h-[100svh] scroll-mt-16 overflow-hidden
         px-5 py-16
         sm:scroll-mt-20 sm:px-8 sm:py-20
         lg:px-16 lg:py-24

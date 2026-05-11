@@ -29,7 +29,7 @@ export function HomeEnd() {
   return (
     <section
       className="
-        relative isolate scroll-mt-16 overflow-hidden
+        relative isolate min-h-[100svh] scroll-mt-16 overflow-hidden
         px-5 pb-8 pt-16
         sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-20
         lg:px-16 lg:pt-24
