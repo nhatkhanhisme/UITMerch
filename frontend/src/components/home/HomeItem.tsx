@@ -1,7 +1,7 @@
 const productHighlights = [
   "Chất liệu decal nhám chống nước",
   "Kích thước gọn cho laptop, bình nước, sổ tay",
-  "Thiết kế nhận diện GDGoC UIT phiên bản giới hạn"
+  "Thiết kế nhận diện GDGoC UIT phiên bản giới hạn",
 ];
 
 const stickerUrl = "/assets/figma/sticker/Layer_1.svg";
@@ -15,6 +15,7 @@ export function HomeItem() {
         sm:scroll-mt-20 sm:px-8 sm:py-20
         lg:px-16 lg:py-24
       "
+      id="home-item"
       data-section="home-item"
     >
       {/* Content */}

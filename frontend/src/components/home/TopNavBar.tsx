@@ -1,12 +1,33 @@
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const logoHeaderUrl = "/assets/figma/logo-header.svg";
 const accountIconUrl = "/assets/figma/account-icon.svg";
 
-const navItems = ["Trang chủ", "Vật phẩm", "Tổ chức"];
+const navItems = [
+  { label: "Trang chủ", href: "/" },
+  { label: "Merch", href: "/merch" },
+  { label: "Organization", href: "/organization" },
+];
 
 export function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const normalizePath = (pathname: string) =>
+    pathname.replace(/\/+$/, "") || "/";
+  const currentPath = normalizePath(location.pathname);
+
+  const linkClassName = (href: string) => {
+    const isActive = normalizePath(href) === currentPath;
+
+    return [
+      "flex min-h-11 items-center rounded-full px-4 py-2 transition duration-200 ease-out",
+      isActive
+        ? "bg-white/70 text-black-blue shadow-[0_8px_20px_rgba(82,128,145,0.12)]"
+        : "text-gray hover:bg-white/35 hover:text-black-blue",
+    ].join(" ");
+  };
 
   return (
     <div className="relative h-14 w-full sm:h-16 lg:w-[1280.41px]">
@@ -28,9 +49,13 @@ export function TopNavBar() {
           data-node-id="I17:4918;17:4888"
         >
           {navItems.map((item) => (
-            <a className="flex min-h-11 flex-col justify-center" href="#" key={item}>
-              {item}
-            </a>
+            <Link
+              className={linkClassName(item.href)}
+              to={item.href}
+              key={item.label}
+            >
+              {item.label}
+            </Link>
           ))}
         </div>
 
@@ -71,14 +96,14 @@ export function TopNavBar() {
       {isMenuOpen && (
         <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 rounded-[28px] border border-white/70 bg-white/75 p-3 font-google text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl md:hidden">
           {navItems.map((item) => (
-            <a
-              className="flex min-h-11 items-center rounded-2xl px-4 transition duration-200 ease-out hover:bg-white/70"
-              href="#"
-              key={item}
+            <Link
+              className={linkClassName(item.href)}
+              key={item.label}
+              to={item.href}
               onClick={() => setIsMenuOpen(false)}
             >
-              {item}
-            </a>
+              {item.label}
+            </Link>
           ))}
         </div>
       )}

@@ -6,7 +6,7 @@ const organizations = [
   "CLB Truyền thông",
   "Khoa MMT&TT",
   "UIT Guitar",
-  "Đoàn Hội UIT"
+  "Đoàn Hội UIT",
 ];
 
 function initials(name: string) {
@@ -28,6 +28,7 @@ export function HomeOrgan() {
         sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-28
         lg:px-16 lg:pb-24
       "
+      id="home-organ"
       data-section="home-organ"
     >
       <div className="relative z-10 mx-auto max-w-canvas">
@@ -61,14 +62,10 @@ export function HomeOrgan() {
             </article>
           ))}
 
-          <article
-            className="group flex min-w-0 flex-col items-center justify-center gap-3 bg-transparent transition duration-200 ease-out hover:-translate-y-1"
-          >
+          <article className="group flex min-w-0 flex-col items-center justify-center gap-3 bg-transparent transition duration-200 ease-out hover:-translate-y-1">
             <div className="relative h-36 w-36 sm:h-40 sm:w-40">
               <div className="relative z-10 inline-flex h-full w-full items-center justify-center rounded-full border border-white/70 bg-white/20 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px]">
-                <span className="text-base font-bold text-slate-700">
-                  ...
-                </span>
+                <span className="text-base font-bold text-slate-700">...</span>
               </div>
             </div>
             <p className="text-sm font-bold text-slate-700 text-center mt-1 w-full truncate">

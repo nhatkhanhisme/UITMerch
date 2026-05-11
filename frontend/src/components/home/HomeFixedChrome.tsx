@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { SlideBar } from "./SlideBar";
 import { TopNavBar } from "./TopNavBar";
 
-export function HomeFixedChrome() {
+type HomeFixedChromeProps = {
+  showSlideBar?: boolean;
+};
+
+export function HomeFixedChrome({ showSlideBar = true }: HomeFixedChromeProps) {
   const [scale, setScale] = useState(1);
   const [viewportWidth, setViewportWidth] = useState(1440);
   const [activeIndex, setActiveIndex] = useState<0 | 1 | 2 | 3>(0);
@@ -21,6 +25,10 @@ export function HomeFixedChrome() {
   }, []);
 
   useEffect(() => {
+    if (!showSlideBar) {
+      return undefined;
+    }
+
     const sectionIds = ["home-hero", "home-item", "home-organ", "home-end"];
     const sections = sectionIds
       .map((id) => document.querySelector(`[data-section="${id}"]`))
@@ -63,7 +71,7 @@ export function HomeFixedChrome() {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [showSlideBar]);
 
   return (
     <>
@@ -81,17 +89,19 @@ export function HomeFixedChrome() {
         <TopNavBar />
       </div>
 
-      <div
-        // FIX: Bug2
-        className="pointer-events-none fixed right-0 z-20 hidden sm:right-4 lg:block"
-        style={{
-          top: "50%",
-          transform: `translateY(-50%) scale(${scale})`,
-          transformOrigin: "right center",
-        }}
-      >
-        <SlideBar activeIndex={activeIndex} />
-      </div>
+      {showSlideBar && (
+        <div
+          // FIX: Bug2
+          className="pointer-events-none fixed right-0 z-20 hidden sm:right-4 lg:block"
+          style={{
+            top: "50%",
+            transform: `translateY(-50%) scale(${scale})`,
+            transformOrigin: "right center",
+          }}
+        >
+          <SlideBar activeIndex={activeIndex} />
+        </div>
+      )}
     </>
   );
 }

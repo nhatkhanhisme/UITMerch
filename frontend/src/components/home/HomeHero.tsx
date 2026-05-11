@@ -31,14 +31,13 @@ export function HomeHero() {
   return (
     <section
       className="relative mx-0 min-h-screen w-screen overflow-hidden bg-canvas px-0 pb-16 pt-24 sm:pb-20 sm:pt-28 lg:p-0"
+      id="home-hero"
       data-node-id="13:3814"
       data-section="home-hero"
       style={{ height: isResponsiveHero ? "auto" : 1024 * scale }}
     >
       {/* FIX: Bug1 */}
-      <div
-        className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden"
-      >
+      <div className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden">
         <BackgroundEffect />
       </div>
 
@@ -48,7 +47,7 @@ export function HomeHero() {
         data-name="slide 1"
         style={{
           height: isResponsiveHero ? "auto" : 1024 * scale,
-          width: isResponsiveHero ? "100%" : 1440 * scale
+          width: isResponsiveHero ? "100%" : 1440 * scale,
         }}
       >
         <div

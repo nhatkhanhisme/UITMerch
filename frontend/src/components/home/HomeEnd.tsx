@@ -3,13 +3,13 @@ const logoHeaderUrl = "/assets/figma/logo-header.svg";
 const infoLeft = [
   "Khu phố 6, phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh",
   "Không gian học tập công nghệ, nghiên cứu và đổi mới sáng tạo",
-  "Kết nối sinh viên với các hoạt động học thuật và cộng đồng"
+  "Kết nối sinh viên với các hoạt động học thuật và cộng đồng",
 ];
 
 const infoRight = [
   "Merch chính thức từ các khoa, câu lạc bộ và sự kiện UIT",
   "Sản phẩm được cập nhật theo từng đợt mở bán",
-  "Thiết kế dành cho sinh viên, cựu sinh viên và người yêu UIT"
+  "Thiết kế dành cho sinh viên, cựu sinh viên và người yêu UIT",
 ];
 
 function InfoList({ items }: { items: string[] }) {
@@ -34,6 +34,7 @@ export function HomeEnd() {
         sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-20
         lg:px-16 lg:pt-24
       "
+      id="home-end"
       data-section="home-end"
     >
       {/* RESPONSIVE */}
@@ -59,7 +60,7 @@ export function HomeEnd() {
             </div>
           </div>
 
-          <img 
+          <img
             src="/assets/figma/sticker/uit%20image-01%202.svg"
             alt="UIT Campus"
             className="w-full h-auto object-contain"
