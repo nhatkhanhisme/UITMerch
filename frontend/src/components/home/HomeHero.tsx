@@ -27,6 +27,8 @@ export function HomeHero() {
 
   // RESPONSIVE
   const isResponsiveHero = viewportWidth < 1024;
+  const desktopScale = scale * 0.9;
+  const heroScale = isResponsiveHero ? 1 : desktopScale;
 
   return (
     <section
@@ -34,7 +36,7 @@ export function HomeHero() {
       id="home-hero"
       data-node-id="13:3814"
       data-section="home-hero"
-      style={{ height: isResponsiveHero ? "auto" : 1024 * scale }}
+      style={{ height: isResponsiveHero ? "auto" : 1024 * heroScale }}
     >
       {/* FIX: Bug1 */}
       <div className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden">
@@ -46,13 +48,15 @@ export function HomeHero() {
         data-node-id="57:1326"
         data-name="slide 1"
         style={{
-          height: isResponsiveHero ? "auto" : 1024 * scale,
-          width: isResponsiveHero ? "100%" : 1440 * scale,
+          height: isResponsiveHero ? "auto" : 1024 * heroScale,
+          width: isResponsiveHero ? "100%" : 1440 * heroScale,
         }}
       >
         <div
           className="relative z-[1] grid w-full items-center gap-10 sm:grid-cols-[0.82fr_1.18fr] sm:gap-6 lg:absolute lg:left-0 lg:top-0 lg:block lg:h-[1024px] lg:w-[1440px] lg:origin-top-left"
-          style={{ transform: isResponsiveHero ? "none" : `scale(${scale})` }}
+          style={{
+            transform: isResponsiveHero ? "none" : `scale(${heroScale})`,
+          }}
         >
           <div
             className="relative mx-auto flex w-full max-w-[472px] flex-col items-center text-center lg:absolute lg:left-[71px] lg:top-[189px] lg:block lg:h-[621px] lg:w-[472px] lg:max-w-none"
@@ -60,12 +64,12 @@ export function HomeHero() {
           >
             <img
               alt="UIT Merch"
-              className="relative h-auto w-[220px] sm:w-[260px] lg:absolute lg:left-[79px] lg:top-0 lg:h-[243px] lg:w-[340px]"
+              className="relative h-auto w-[200px] sm:w-[236px] lg:absolute lg:left-[79px] lg:top-0 lg:h-[228px] lg:w-[320px]"
               data-node-id="17:4228"
               src={logoTitleUrl}
             />
             <p
-              className="relative mt-8 max-w-[472px] text-center font-google text-sm leading-6 text-gray sm:mt-10 sm:text-[15px] lg:absolute lg:left-0 lg:top-[357px] lg:mt-0 lg:h-[264px] lg:w-[472px] lg:text-[16px] lg:leading-[1.4]"
+              className="relative mt-8 max-w-[472px] text-center font-google text-sm leading-6 text-gray sm:mt-10 sm:text-[15px] lg:absolute lg:left-0 lg:top-[357px] lg:mt-0 lg:h-[264px] lg:w-[472px] lg:text-[15px] lg:leading-[1.35]"
               data-node-id="17:4943"
             >
               {heroParagraph}
@@ -73,7 +77,7 @@ export function HomeHero() {
           </div>
 
           <div
-            className="relative mx-auto aspect-[1.09] w-full max-w-[620px] overflow-hidden sm:max-w-[700px] lg:absolute lg:left-[511px] lg:top-[62px] lg:h-[818px] lg:w-[891px] lg:max-w-none"
+            className="relative mx-auto aspect-[1.09] w-full max-w-[560px] overflow-hidden sm:max-w-[640px] lg:absolute lg:left-[511px] lg:top-[62px] lg:h-[818px] lg:w-[891px] lg:max-w-none"
             data-node-id="28:12288"
           >
             {!HIDE_HERO_DARK_LAYER && (

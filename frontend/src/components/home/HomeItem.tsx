@@ -11,9 +11,9 @@ export function HomeItem() {
     <section
       className="
         relative isolate min-h-[100svh] scroll-mt-16 overflow-hidden
-        px-5 py-16
-        sm:scroll-mt-20 sm:px-8 sm:py-20
-        lg:px-16 lg:py-24
+        px-5 py-12
+        sm:scroll-mt-20 sm:px-8 sm:py-16
+        lg:px-16 lg:py-20
       "
       id="home-item"
       data-section="home-item"
@@ -22,10 +22,10 @@ export function HomeItem() {
       <div
         className="
           relative z-10 mx-auto grid max-w-canvas items-center
-          gap-12 pt-10
-          sm:pt-14
-          md:grid-cols-[0.9fr_1.1fr] md:gap-10 md:pt-16
-          lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:pt-20
+          gap-10 pt-8
+          sm:pt-12
+          md:grid-cols-[0.9fr_1.1fr] md:gap-8 md:pt-14
+          lg:grid-cols-[0.9fr_1.1fr] lg:gap-14 lg:pt-16
         "
       >
         <div className="order-2 mx-auto max-w-xl text-center md:order-1 md:text-left">
@@ -42,10 +42,10 @@ export function HomeItem() {
           <h2
             className="
               mt-5 font-brand font-extrabold leading-[1.05] text-peach
-              text-[44px]
-              sm:text-6xl
-              lg:text-[82px]
-              xl:text-[88px]
+              text-[40px]
+              sm:text-5xl
+              lg:text-[70px]
+              xl:text-[76px]
             "
           >
             Sticker
@@ -56,8 +56,8 @@ export function HomeItem() {
           <p
             className="
               mt-5 font-google font-semibold text-black-blue
-              text-xl
-              sm:text-2xl
+              text-lg
+              sm:text-xl
               lg:max-w-[620px]
             "
           >
@@ -68,7 +68,7 @@ export function HomeItem() {
             className="
               mx-auto mt-5 max-w-[560px]
               font-google text-sm leading-7 text-gray
-              sm:text-base sm:leading-8
+              sm:text-[15px] sm:leading-7
               md:mx-0
             "
           >
@@ -96,7 +96,7 @@ export function HomeItem() {
           <button
             className="
               mt-9 min-h-11 rounded-full bg-black-blue
-              px-8 py-4
+              px-7 py-3.5
               font-google text-sm font-semibold uppercase tracking-[0.18em]
               text-white
               shadow-[0_20px_45px_rgba(19,27,46,0.22)]
@@ -112,10 +112,10 @@ export function HomeItem() {
         <div
           className="
             relative order-1 mx-auto
-            w-[82%] max-w-[380px]
-            md:order-2 md:w-full md:max-w-[500px]
-            lg:max-w-[580px]
-            xl:max-w-[620px]
+            w-[80%] max-w-[340px]
+            md:order-2 md:w-full md:max-w-[440px]
+            lg:max-w-[520px]
+            xl:max-w-[560px]
           "
         >
           <div className="absolute inset-6 rounded-[44px] bg-white/35 blur-2xl" />
@@ -148,7 +148,7 @@ export function HomeItem() {
                   bg-white/70 px-4 py-2
                   font-google text-xs font-semibold text-slate
                   shadow-[0_12px_30px_rgba(82,128,145,0.14)]
-                  sm:left-8 sm:top-8 sm:px-5 sm:text-sm
+                  sm:left-7 sm:top-7 sm:px-4 sm:text-xs
                 "
               >
                 Wow Pingle so cute
@@ -170,7 +170,7 @@ export function HomeItem() {
           </div>
 
           <div
-            className="mt-8 flex justify-center gap-3"
+            className="mt-6 flex justify-center gap-3"
             aria-label="Product slides"
           >
             <span className="h-2.5 w-8 rounded-full bg-peach" />
