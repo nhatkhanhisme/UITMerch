@@ -2,6 +2,8 @@ package com.uitmerch.backend.organization.controller;
 
 import com.uitmerch.backend.common.model.ApiResponse;
 import com.uitmerch.backend.common.model.PaginationMeta;
+import com.uitmerch.backend.event.dto.EventResponse;
+import com.uitmerch.backend.event.service.EventService;
 import com.uitmerch.backend.merch.dto.MerchResponse;
 import com.uitmerch.backend.merch.service.MerchService;
 import com.uitmerch.backend.organization.dto.OrganizationResponse;
@@ -26,6 +28,7 @@ public class PublicOrganizationController {
 
     private final OrganizationService organizationService;
     private final MerchService merchService;
+    private final EventService eventService;
 
     @GetMapping
     @Operation(summary = "List active organizations", description = "Returns all ACTIVE organizations. Supports pagination.")
@@ -53,5 +56,15 @@ public class PublicOrganizationController {
     ) {
         Page<MerchResponse> page = merchService.listByOrganization(id, pageable);
         return ResponseEntity.ok(ApiResponse.success("Merch items retrieved.", page.getContent(), PaginationMeta.from(page)));
+    }
+
+    @GetMapping("/{id}/events")
+    @Operation(summary = "List published events for an organization")
+    public ResponseEntity<ApiResponse<java.util.List<EventResponse>>> getOrgEvents(
+        @PathVariable UUID id,
+        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<EventResponse> page = eventService.getPublicEventsByOrg(id, pageable);
+        return ResponseEntity.ok(ApiResponse.success("Events retrieved.", page.getContent(), PaginationMeta.from(page)));
     }
 }
