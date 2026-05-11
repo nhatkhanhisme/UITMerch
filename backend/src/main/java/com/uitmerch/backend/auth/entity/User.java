@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.Builder;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.uitmerch.backend.common.model.UserRole;
 
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -44,6 +46,7 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;

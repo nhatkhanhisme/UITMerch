@@ -126,6 +126,12 @@
             <version>2.27.21</version>
         </dependency>
 
+        <!-- Mail -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- H2 (dev profile + tests) -->
         <dependency>
             <groupId>com.h2database</groupId>

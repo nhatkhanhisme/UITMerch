@@ -5,6 +5,7 @@ import com.uitmerch.backend.common.model.PaginationMeta;
 import com.uitmerch.backend.merch.dto.MerchResponse;
 import com.uitmerch.backend.merch.service.MerchService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,10 @@ public class PublicMerchController {
 
     @GetMapping
     @Operation(summary = "List published merch", description = "Supports optional ?keyword= filter and pagination.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Merch items retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<List<MerchResponse>>> listMerch(
         @RequestParam(required = false) String keyword,
         @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
@@ -37,12 +42,21 @@ public class PublicMerchController {
 
     @GetMapping("/popular")
     @Operation(summary = "Get popular merch", description = "Returns up to 10 recently published items.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Popular merch retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<List<MerchResponse>>> getPopular() {
         return ResponseEntity.ok(ApiResponse.success("Popular merch retrieved.", merchService.getPopularMerch()));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get merch item by ID")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Merch item retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Merch item not found or not published"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<MerchResponse>> getMerch(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success("Merch item retrieved.", merchService.getPublishedMerch(id)));
     }

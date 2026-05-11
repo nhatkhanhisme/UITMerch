@@ -5,6 +5,7 @@ import com.uitmerch.backend.user.dto.UpdateProfileRequest;
 import com.uitmerch.backend.user.dto.UserProfileResponse;
 import com.uitmerch.backend.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,12 @@ public class UserController {
     @GetMapping("/profile")
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "Get own profile")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — CUSTOMER role required"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(
         @RequestAttribute("userId") String userId
     ) {
@@ -35,6 +42,13 @@ public class UserController {
     @PatchMapping("/profile")
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "Update own profile", description = "Only provided fields are updated.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile updated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — CUSTOMER role required"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(
         @RequestBody UpdateProfileRequest request,
         @RequestAttribute("userId") String userId

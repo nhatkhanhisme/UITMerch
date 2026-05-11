@@ -11,8 +11,9 @@ import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.exception.UnverifiedEmailException;
 import com.uitmerch.backend.common.exception.UserAlreadyExistsException;
 import com.uitmerch.backend.common.exception.ValidationException;
-import com.uitmerch.backend.common.security.JwtTokenProvider;
 import com.uitmerch.backend.common.model.UserRole;
+import com.uitmerch.backend.common.security.JwtTokenProvider;
+import com.uitmerch.backend.common.service.EmailService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class AuthService {
     private final OtpTokenRepository otpTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final EmailService emailService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -166,7 +168,7 @@ public class AuthService {
 
         otpTokenRepository.save(otp);
 
-        // TODO: send via email (SendGrid / JavaMailSender)
+        emailService.sendOtp(user.getEmail(), code);
     }
 
     private String generateOtpCode() {

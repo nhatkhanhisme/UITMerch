@@ -7,6 +7,7 @@ import com.uitmerch.backend.order.dto.OrderResponse;
 import com.uitmerch.backend.order.dto.UpdateOrderStatusRequest;
 import com.uitmerch.backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,6 +34,12 @@ public class OrganizerOrderController {
     @GetMapping
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "List organization orders", description = "Returns paginated orders for the organizer's organization. Filter by status using ?status=PENDING.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Orders retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — ORGANIZER role required"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<java.util.List<OrderResponse>>> getOrgOrders(
         @RequestParam(required = false) OrderStatus status,
         @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -45,6 +52,13 @@ public class OrganizerOrderController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Get organization order by ID")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — ORGANIZER role required or order belongs to another organization"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<OrderResponse>> getOrgOrder(
         @PathVariable UUID id,
         @RequestAttribute("userId") String userId
@@ -59,6 +73,14 @@ public class OrganizerOrderController {
         summary = "Update order status",
         description = "Valid transitions (BR05): PENDING→CONFIRMED, PENDING→CANCELLED, CONFIRMED→READY_FOR_PICKUP, CONFIRMED→CANCELLED, READY_FOR_PICKUP→SUCCESS"
     )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order status updated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed or invalid status transition"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — ORGANIZER role required or order belongs to another organization"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatus(
         @PathVariable UUID id,
         @Valid @RequestBody UpdateOrderStatusRequest request,

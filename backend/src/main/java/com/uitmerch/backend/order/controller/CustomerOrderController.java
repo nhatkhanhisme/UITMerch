@@ -7,6 +7,7 @@ import com.uitmerch.backend.order.dto.InstantOrderRequest;
 import com.uitmerch.backend.order.dto.OrderResponse;
 import com.uitmerch.backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,6 +35,12 @@ public class CustomerOrderController {
     @GetMapping
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "List customer orders", description = "Returns paginated orders for the authenticated customer. Filter by status using ?status=PENDING.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Orders retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — CUSTOMER role required"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<java.util.List<OrderResponse>>> getOrders(
         @RequestParam(required = false) OrderStatus status,
         @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -46,6 +53,13 @@ public class CustomerOrderController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "Get order by ID")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — CUSTOMER role required or order belongs to another customer"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<OrderResponse>> getOrder(
         @PathVariable UUID id,
         @RequestAttribute("userId") String userId
@@ -57,6 +71,14 @@ public class CustomerOrderController {
     @PostMapping("/instant")
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "Create instant order", description = "Places an immediate order for a single item without going through the cart.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Order placed successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors or insufficient stock"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — CUSTOMER role required"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Merch item not found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<OrderResponse>> createInstantOrder(
         @Valid @RequestBody InstantOrderRequest request,
         @RequestAttribute("userId") String userId

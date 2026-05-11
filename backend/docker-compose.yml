@@ -23,7 +23,7 @@ services:
   # ── Spring Boot backend ───────────────────────────────────────────────────────
   backend:
     build:
-      context: ./backend
+      context: ''
       dockerfile: Dockerfile
     container_name: uitmerch-backend
     ports:
@@ -33,7 +33,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/uitmerch
       SPRING_DATASOURCE_USERNAME: uitmerch
       SPRING_DATASOURCE_PASSWORD: uitmerch_dev
-      APP_JWT_SECRET: docker-dev-jwt-secret-uitmerch-min-32-chars!
+      APP_JWT_SECRET: ${APP_JWT_SECRET} 
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
     depends_on:
       db:
         condition: service_healthy

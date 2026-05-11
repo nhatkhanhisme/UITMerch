@@ -4,6 +4,7 @@ import com.uitmerch.backend.auth.dto.*;
 import com.uitmerch.backend.common.model.ApiResponse;
 import com.uitmerch.backend.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,12 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register customer account")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Registration successful — OTP sent to email"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Email already registered"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<Void>> register(
             @Valid @RequestBody RegisterRequest request
     ) {
@@ -32,6 +39,12 @@ public class AuthController {
 
     @PostMapping("/register/organizer")
     @Operation(summary = "Register organizer account")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Organizer registration successful — OTP sent to email"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Email already registered"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<Void>> registerOrganizer(
             @Valid @RequestBody RegisterOrganizerRequest request
     ) {
@@ -43,6 +56,12 @@ public class AuthController {
 
     @PostMapping("/verify-email")
     @Operation(summary = "Verify email with OTP")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Email verified successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed or OTP is invalid/expired"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<Void>> verifyEmail(
             @Valid @RequestBody VerifyEmailRequest request
     ) {
@@ -52,6 +71,13 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Login and receive JWT tokens")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Login successful — JWT tokens returned"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Invalid email or password"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Email not yet verified"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest request
     ) {
