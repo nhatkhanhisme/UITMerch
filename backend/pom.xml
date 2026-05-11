@@ -126,6 +126,13 @@
             <version>2.27.21</version>
         </dependency>
 
+        <!-- H2 (dev profile + tests) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
