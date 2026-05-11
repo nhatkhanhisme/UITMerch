@@ -6,8 +6,8 @@ const accountIconUrl = "/assets/figma/account-icon.svg";
 
 const navItems = [
   { label: "Trang chủ", href: "/" },
-  { label: "Merch", href: "/merch" },
-  { label: "Organization", href: "/organization" },
+  { label: "Vật phẩm", href: "/merch" },
+  { label: "Tổ chức", href: "/organization" },
 ];
 
 export function TopNavBar() {
