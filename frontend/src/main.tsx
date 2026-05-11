@@ -4,7 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { HomeFixedChrome } from "./components/home/HomeFixedChrome";
 import { HomePage } from "./pages/HomePage";
 import { MerchPage } from "./pages/MerchPage";
-import { OrganizationPage } from "./pages/OrganizationPage.tsx";
+import { OrganizationPage } from "./pages/OrganizationPage";
 import "./styles.css";
 
 function AppRouter() {

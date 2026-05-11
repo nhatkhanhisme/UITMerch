@@ -10,10 +10,10 @@ export function HomeItem() {
   return (
     <section
       className="
-        relative isolate min-h-[100svh] scroll-mt-16 overflow-hidden
-        px-5 py-12
-        sm:scroll-mt-20 sm:px-8 sm:py-16
-        lg:px-16 lg:py-20
+        relative isolate min-h-[100svh]
+        px-5 pb-10 pt-20
+        sm:px-8 sm:pb-12 sm:pt-24
+        lg:px-16 lg:pb-14 lg:pt-28
       "
       id="home-item"
       data-section="home-item"
@@ -22,10 +22,9 @@ export function HomeItem() {
       <div
         className="
           relative z-10 mx-auto grid max-w-canvas items-center
-          gap-10 pt-8
-          sm:pt-12
-          md:grid-cols-[0.9fr_1.1fr] md:gap-8 md:pt-14
-          lg:grid-cols-[0.9fr_1.1fr] lg:gap-14 lg:pt-16
+          gap-10
+          md:grid-cols-[0.9fr_1.1fr] md:gap-8
+          lg:grid-cols-[0.9fr_1.1fr] lg:gap-14
         "
       >
         <div className="order-2 mx-auto max-w-xl text-center md:order-1 md:text-left">

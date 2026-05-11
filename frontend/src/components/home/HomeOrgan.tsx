@@ -3,7 +3,6 @@ const organizations = [
   "CLB Lập trình",
   "Khoa CNTT",
   "Khoa KHMT",
-  "CLB Truyền thông",
   "Khoa MMT&TT",
   "UIT Guitar",
   "Đoàn Hội UIT",
@@ -23,10 +22,10 @@ export function HomeOrgan() {
     <section
       // FIX: sizing
       className="
-        relative isolate min-h-[100svh] scroll-mt-16 overflow-hidden
+        relative isolate min-h-[100svh]
         px-4 pb-8 pt-20
-        sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-24
-        lg:px-16 lg:pb-20
+        sm:px-8 sm:pb-10 sm:pt-24
+        lg:px-16 lg:pb-14 lg:pt-28
       "
       id="home-organ"
       data-section="home-organ"

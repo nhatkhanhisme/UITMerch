@@ -32,7 +32,7 @@ export function HomeHero() {
 
   return (
     <section
-      className="relative mx-0 min-h-[100svh] w-screen overflow-hidden bg-canvas px-0 pb-16 pt-24 sm:pb-20 sm:pt-28 lg:p-0"
+      className="relative mx-0 min-h-[100svh] w-screen bg-canvas "
       id="home-hero"
       data-node-id="13:3814"
       data-section="home-hero"
@@ -95,8 +95,6 @@ export function HomeHero() {
               />
             </div>
           </div>
-
-          <ScrollDownButton className="mx-auto hidden sm:block lg:absolute lg:left-[683px] lg:top-[860px]" />
         </div>
       </div>
       <div

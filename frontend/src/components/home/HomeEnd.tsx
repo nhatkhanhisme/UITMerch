@@ -29,10 +29,10 @@ export function HomeEnd() {
   return (
     <section
       className="
-        relative isolate min-h-[100svh] scroll-mt-16 overflow-hidden
-        px-5 pb-8 pt-14
-        sm:scroll-mt-20 sm:px-8 sm:pb-10 sm:pt-16
-        lg:px-16 lg:pt-20
+        relative isolate min-h-[100svh]
+        px-5 pb-8 pt-20
+        sm:px-8 sm:pb-10 sm:pt-24
+        lg:px-16 lg:pb-14 lg:pt-28
       "
       id="home-end"
       data-section="home-end"
