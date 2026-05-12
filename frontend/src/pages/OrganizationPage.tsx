@@ -75,10 +75,10 @@ export function OrganizationPage() {
         <GlassContainer>
           {/* Header */}
           <header className="mb-6">
-            <h1 className="font-brand text-3xl font-bold text-black-blue sm:text-4xl">
+            <h1 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
               Tổ Chức
             </h1>
-            <p className="mt-1 font-google text-sm text-ink/60">
+            <p className="mt-1 font-sans text-sm text-ink/60">
               {processed.length} tổ chức
               {query ? ` phù hợp với "${query}"` : ""}
             </p>
@@ -116,7 +116,7 @@ export function OrganizationPage() {
                   strokeLinejoin="round"
                 />
               </svg>
-              <p className="font-google text-base">Không tìm thấy tổ chức nào.</p>
+              <p className="font-sans text-base">Không tìm thấy tổ chức nào.</p>
             </div>
           )}
 

@@ -123,32 +123,32 @@ export function HomeItem() {
             <div className="grid">
               {previousProduct && (
                 <div className="home-item-exit">
-                  <p className="font-google text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
+                  <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
                     Vật phẩm nổi bật
                   </p>
-                  <h2 className="mt-5 whitespace-nowrap font-google text-[36px] font-black leading-[1.08] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
+                  <h2 className="mt-5 whitespace-nowrap font-fredoka text-[36px] font-bold leading-[1.06] tracking-[0.01em] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
                     {previousProduct.title}
                   </h2>
-                  <p className="mt-1 font-google text-xl font-bold text-gold sm:text-2xl">
+                  <p className="mt-1 font-sans text-xl font-semibold text-gold sm:text-2xl">
                     {previousProduct.subtitle}
                   </p>
-                  <p className="mx-auto mt-10 max-w-[430px] font-google text-sm leading-6 text-gray">
+                  <p className="mx-auto mt-10 max-w-[430px] font-sans text-sm font-normal leading-6 text-gray">
                     {previousProduct.description}
                   </p>
                 </div>
               )}
 
               <div className="home-item-enter" key={`copy-${activeSlide}`}>
-                <p className="font-google text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
                   Vật phẩm nổi bật
                 </p>
-                <h2 className="mt-5 whitespace-nowrap font-google text-[36px] font-black leading-[1.08] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
+                <h2 className="mt-5 whitespace-nowrap font-fredoka text-[36px] font-bold leading-[1.06] tracking-[0.01em] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
                   {activeProduct.title}
                 </h2>
-                <p className="mt-1 font-google text-xl font-bold text-gold sm:text-2xl">
+                <p className="mt-1 font-sans text-xl font-semibold text-gold sm:text-2xl">
                   {activeProduct.subtitle}
                 </p>
-                <p className="mx-auto mt-10 max-w-[430px] font-google text-sm leading-6 text-gray">
+                <p className="mx-auto mt-10 max-w-[430px] font-sans text-sm font-normal leading-6 text-gray">
                   {activeProduct.description}
                 </p>
               </div>
@@ -167,12 +167,12 @@ export function HomeItem() {
             >
               <div className="absolute left-7 top-7 z-20 grid">
                 {previousProduct && (
-                  <div className="home-item-exit rounded-full bg-white/70 px-4 py-2 font-google text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]">
+                  <div className="home-item-exit rounded-full bg-white/70 px-4 py-2 font-sans text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]">
                     {previousProduct.badge}
                   </div>
                 )}
                 <div
-                  className="home-item-enter rounded-full bg-white/70 px-4 py-2 font-google text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]"
+                  className="home-item-enter rounded-full bg-white/70 px-4 py-2 font-sans text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]"
                   key={`badge-${activeSlide}`}
                 >
                   {activeProduct.badge}

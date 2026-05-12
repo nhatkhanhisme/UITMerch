@@ -173,18 +173,18 @@ export function AuthPage() {
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 lg:flex-row">
         <section className="flex flex-1 flex-col gap-6">
           <div className="rounded-panel border border-white/60 bg-white/50 p-6 shadow-[0_24px_80px_rgba(16,24,40,0.12)] backdrop-blur">
-            <p className="font-google text-xs font-semibold uppercase tracking-[0.3em] text-slate/70">
+            <p className="font-sans text-xs font-semibold uppercase tracking-[0.3em] text-slate/70">
               UITMerch Account
             </p>
-            <h1 className="mt-4 font-brand text-3xl font-black text-black-blue sm:text-4xl">
+            <h1 className="mt-4 font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
               Welcome back to the merch studio.
             </h1>
-            <p className="mt-4 max-w-lg font-google text-sm text-gray">
+            <p className="mt-4 max-w-lg font-sans text-sm text-gray">
               Sign in to keep shopping or register as an organizer to prepare
               your next drop. Organizer dashboards will be available soon.
             </p>
             <div className="mt-6">
-              <p className="font-google text-sm text-gray">
+              <p className="font-sans text-sm text-gray">
                 Create an account to start shopping. Choose your role during
                 registration — customers can browse and buy, organizers can
                 publish merch.
@@ -193,7 +193,7 @@ export function AuthPage() {
           </div>
 
           <div className="rounded-panel border border-white/60 bg-white/40 p-5 text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)] backdrop-blur">
-            <p className="font-google">
+            <p className="font-sans">
               After registration, check your email for the OTP to verify your
               account.
             </p>
@@ -204,17 +204,17 @@ export function AuthPage() {
           <div className="rounded-panel border border-white/70 bg-white/80 p-6 shadow-[0_20px_60px_rgba(16,24,40,0.16)] backdrop-blur">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
+                <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
                   {modeLabel}
                 </p>
-                <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
+                <h2 className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
                   {modeTitle}
                 </h2>
               </div>
               <div className="inline-flex rounded-full border border-white/70 bg-white/80 p-1">
                 <button
                   className={[
-                    "rounded-full px-4 py-2 text-sm font-google font-semibold transition",
+                    "rounded-full px-4 py-2 text-sm font-sans font-semibold transition",
                     mode === "signin"
                       ? "bg-brand-gradient text-black-blue shadow-[0_8px_20px_rgba(82,128,145,0.2)]"
                       : "text-gray",
@@ -226,7 +226,7 @@ export function AuthPage() {
                 </button>
                 <button
                   className={[
-                    "rounded-full px-4 py-2 text-sm font-google font-semibold transition",
+                    "rounded-full px-4 py-2 text-sm font-sans font-semibold transition",
                     mode === "register"
                       ? "bg-brand-gradient text-black-blue shadow-[0_8px_20px_rgba(82,128,145,0.2)]"
                       : "text-gray",
@@ -238,7 +238,7 @@ export function AuthPage() {
                 </button>
                 <button
                   className={[
-                    "rounded-full px-4 py-2 text-sm font-google font-semibold transition",
+                    "rounded-full px-4 py-2 text-sm font-sans font-semibold transition",
                     mode === "verify"
                       ? "bg-brand-gradient text-black-blue shadow-[0_8px_20px_rgba(82,128,145,0.2)]"
                       : "text-gray",
@@ -253,7 +253,7 @@ export function AuthPage() {
 
             {mode === "register" ? (
               <div className="mt-6">
-                <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
+                <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
                   Account type
                 </p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -272,10 +272,10 @@ export function AuthPage() {
                         onClick={() => handleAccountTypeChange(type.value)}
                         type="button"
                       >
-                        <p className="font-brand text-lg font-black text-black-blue">
+                        <p className="font-fredoka text-lg font-bold text-black-blue">
                           {type.label}
                         </p>
-                        <p className="mt-1 font-google text-xs text-gray">
+                        <p className="mt-1 font-sans text-xs text-gray">
                           {type.description}
                         </p>
                       </button>

@@ -12,7 +12,7 @@ export function HomeMoreLink({ ariaLabel, to }: HomeMoreLinkProps) {
       className="
         group inline-flex min-h-[64px] items-center gap-5 rounded-full
         border border-white/80 bg-white/35 px-8 py-4
-        font-google text-2xl font-bold text-peach
+        font-sans text-2xl font-semibold text-peach
         shadow-[0_18px_42px_rgba(82,128,145,0.18),inset_2px_2px_10px_rgba(255,255,255,0.95)]
         backdrop-blur-md
         transition duration-200 ease-out

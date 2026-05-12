@@ -132,7 +132,7 @@ export function MerchToolbar({
               <button
                 className={[
                   "flex w-full items-center justify-between px-5 py-3",
-                  "font-google text-sm transition",
+                  "font-sans text-sm transition",
                   option.value === activeFilter
                     ? "bg-aqua/30 font-semibold text-black-blue"
                     : "text-ink hover:bg-white/60",

@@ -45,19 +45,19 @@ export function FeaturedSlider({ items, autoPlayInterval = 4000 }: FeaturedSlide
                   className="max-h-full max-w-full object-contain drop-shadow-xl"
                 />
               ) : (
-                <span className="text-4xl font-bold text-black-blue/30">{item.name.charAt(0)}</span>
+                <span className="font-fredoka text-4xl font-bold text-black-blue/30">{item.name.charAt(0)}</span>
               )}
             </div>
 
             <div className="w-2/3 sm:w-1/2 flex flex-col justify-center">
               {item.orgName && (
-                <Link to="#" className="text-sm font-semibold text-black-blue/60 hover:text-black-blue hover:underline mb-2">
+                <Link to="#" className="mb-2 font-sans text-sm font-medium text-black-blue/60 hover:text-black-blue hover:underline">
                   {item.orgName}
                 </Link>
               )}
-              <h2 className="text-2xl sm:text-4xl font-bold text-black-blue mb-3">{item.name}</h2>
+              <h2 className="mb-3 font-fredoka text-2xl font-bold tracking-[0.01em] text-black-blue sm:text-4xl">{item.name}</h2>
               {item.desc && (
-                <p className="text-black-blue/70 text-sm sm:text-base line-clamp-3 mb-4">{item.desc}</p>
+                <p className="mb-4 line-clamp-3 font-sans text-sm font-normal text-black-blue/70 sm:text-base">{item.desc}</p>
               )}
             </div>
           </div>

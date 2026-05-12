@@ -27,7 +27,7 @@ export function ProductGrid({
             strokeLinejoin="round"
           />
         </svg>
-        <p className="font-google text-base">{emptyMessage}</p>
+        <p className="font-sans text-base">{emptyMessage}</p>
       </div>
     );
   }
