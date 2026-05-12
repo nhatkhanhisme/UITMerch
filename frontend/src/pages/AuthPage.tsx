@@ -183,20 +183,12 @@ export function AuthPage() {
               Sign in to keep shopping or register as an organizer to prepare
               your next drop. Organizer dashboards will be available soon.
             </p>
-            <div className="mt-6 grid gap-3">
-              {accountTypes.map((type) => (
-                <div
-                  key={type.value}
-                  className="rounded-2xl border border-white/70 bg-white/70 px-4 py-3 shadow-[0_12px_25px_rgba(82,128,145,0.12)]"
-                >
-                  <p className="font-brand text-lg font-black text-black-blue">
-                    {type.label}
-                  </p>
-                  <p className="mt-1 font-google text-sm text-gray">
-                    {type.description}
-                  </p>
-                </div>
-              ))}
+            <div className="mt-6">
+              <p className="font-google text-sm text-gray">
+                Create an account to start shopping. Choose your role during
+                registration — customers can browse and buy, organizers can
+                publish merch.
+              </p>
             </div>
           </div>
 
@@ -259,7 +251,7 @@ export function AuthPage() {
               </div>
             </div>
 
-            {!isVerifyMode ? (
+            {mode === "register" ? (
               <div className="mt-6">
                 <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
                   Account type
@@ -352,20 +344,7 @@ export function AuthPage() {
 
               {mode === "register" ? (
                 <>
-                  <Input
-                    label="Phone"
-                    name="phone"
-                    onChange={handleInputChange}
-                    placeholder="Optional"
-                    value={formState.phone}
-                  />
-                  <Input
-                    label="Address"
-                    name="address"
-                    onChange={handleInputChange}
-                    placeholder="Optional"
-                    value={formState.address}
-                  />
+                  {/* Keep registration minimal: only full name and email/password by default */}
                 </>
               ) : null}
 
