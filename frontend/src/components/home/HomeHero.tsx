@@ -210,7 +210,7 @@ export function HomeHero() {
                 src={logoTitleUrl}
               />
               <p
-                className="relative mt-8 max-w-[472px] text-center font-google text-base leading-7 text-gray sm:mt-10 sm:text-[16px] lg:mt-0 lg:w-[472px] lg:text-[16px] lg:leading-[1.45]"
+                className="relative mt-8 max-w-[472px] text-center font-sans text-base leading-7 text-gray sm:mt-10 sm:text-[16px] lg:mt-0 lg:w-[472px] lg:text-[16px] lg:leading-[1.45]"
                 data-node-id="17:4943"
               >
                 {heroParagraph}

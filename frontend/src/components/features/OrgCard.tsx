@@ -27,14 +27,14 @@ export function OrgCard({ org }: OrgCardProps) {
             src={org.logo}
           />
         ) : (
-          <div className="flex size-full items-center justify-center bg-transparent text-5xl font-black text-black-blue/20">
+          <div className="flex size-full items-center justify-center bg-transparent text-5xl font-bold text-black-blue/20">
             {org.shortName.charAt(0)}
           </div>
         )}
       </div>
 
       {/* Org name below */}
-      <p className="text-center font-brand text-base font-black leading-tight text-black-blue">
+      <p className="text-center font-fredoka text-base font-bold leading-tight text-black-blue">
         {org.shortName}
       </p>
     </div>

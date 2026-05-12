@@ -44,7 +44,7 @@ export function ProductCard({
             src={image}
           />
         ) : (
-          <div className="flex size-full items-center justify-center bg-transparent text-4xl font-black text-black-blue/10">
+          <div className="flex size-full items-center justify-center bg-transparent text-4xl font-bold text-black-blue/10">
             {name.charAt(0)}
           </div>
         )}
@@ -54,26 +54,26 @@ export function ProductCard({
       <div className="mt-4 flex flex-col gap-1">
         {/* Org name with underline hover */}
         <Link
-          className="font-google text-xs font-medium text-ink/50 transition-colors hover:text-black-blue hover:underline"
+          className="font-sans text-xs font-medium text-ink/50 transition-colors hover:text-black-blue hover:underline"
           to="#"
         >
           {orgName}
         </Link>
 
         {/* Product name */}
-        <h3 className="font-brand text-xl font-black leading-tight text-black-blue">
+        <h3 className="font-fredoka text-xl font-bold leading-tight tracking-[0.01em] text-black-blue">
           {name}
         </h3>
 
         {/* Description */}
         {description ? (
-          <p className="line-clamp-2 mt-1 font-google text-xs text-ink/60">
+          <p className="line-clamp-2 mt-1 font-sans text-xs text-ink/60">
             {description}
           </p>
         ) : null}
 
         {/* Price or free tag */}
-        <p className="mt-3 font-google text-sm font-semibold text-ink">
+        <p className="mt-3 font-sans text-sm font-semibold text-ink">
           {price !== undefined && price > 0
             ? currencyFormatter.format(price)
             : "Sự kiện / Miễn phí"}

@@ -74,10 +74,10 @@ type InfoRowProps = {
 function InfoRow({ label, value }: InfoRowProps) {
   return (
     <div className="rounded-2xl border border-white/70 bg-white/70 px-4 py-3 shadow-[0_10px_24px_rgba(82,128,145,0.12)]">
-      <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/60">
+      <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/60">
         {label}
       </p>
-      <p className="mt-2 font-brand text-base font-black text-black-blue">
+      <p className="mt-2 font-fredoka text-base font-bold text-black-blue">
         {value && value.trim().length > 0 ? value : "N/A"}
       </p>
     </div>
@@ -384,19 +384,19 @@ export function ProfilePage() {
                 src={user.avatarUrl}
               />
             ) : (
-              <span className="font-brand text-lg font-black text-black-blue">
+              <span className="font-fredoka text-lg font-bold text-black-blue">
                 {avatarLabel}
               </span>
             )}
           </div>
           <div>
-            <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
+            <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
               Profile
             </p>
-            <h1 className="mt-2 font-brand text-3xl font-black text-black-blue">
+            <h1 className="mt-2 font-fredoka text-3xl font-bold text-black-blue">
               {user.fullName}
             </h1>
-            <p className="mt-1 font-google text-sm text-gray">
+            <p className="mt-1 font-sans text-sm text-gray">
               {user.role === "CUSTOMER"
                 ? "Customer account"
                 : "Organizer account"}
@@ -416,15 +416,15 @@ export function ProfilePage() {
         {canEdit ? (
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-panel border border-white/60 bg-white/70 px-6 py-5 shadow-[0_16px_40px_rgba(82,128,145,0.16)] backdrop-blur">
             <div>
-              <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
+              <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
                 Profile details
               </p>
-              <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
+              <h2 className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
                 {user.role === "CUSTOMER"
                   ? "Customer information"
                   : "Organization information"}
               </h2>
-              <p className="mt-1 font-google text-sm text-gray">
+              <p className="mt-1 font-sans text-sm text-gray">
                 Keep your profile details up to date for a smoother experience.
               </p>
             </div>
@@ -465,25 +465,25 @@ export function ProfilePage() {
         ) : null}
 
         {isLoading ? (
-          <div className="rounded-panel border border-white/60 bg-white/60 p-6 text-center font-google text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
+          <div className="rounded-panel border border-white/60 bg-white/60 p-6 text-center font-sans text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
             Loading your profile...
           </div>
         ) : null}
 
         {!isLoading && errorMessage ? (
-          <div className="rounded-panel border border-peach bg-peach/20 p-6 font-google text-sm text-black-blue">
+          <div className="rounded-panel border border-peach bg-peach/20 p-6 font-sans text-sm text-black-blue">
             {errorMessage}
           </div>
         ) : null}
 
         {!isLoading && successMessage ? (
-          <div className="rounded-panel border border-aqua bg-aqua/20 p-6 font-google text-sm text-black-blue">
+          <div className="rounded-panel border border-aqua bg-aqua/20 p-6 font-sans text-sm text-black-blue">
             {successMessage}
           </div>
         ) : null}
 
         {!isLoading && isMissingOrganization ? (
-          <div className="rounded-panel border border-aqua bg-white/70 p-6 font-google text-sm text-black-blue shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
+          <div className="rounded-panel border border-aqua bg-white/70 p-6 font-sans text-sm text-black-blue shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
             No organization profile yet. Create one from the organizer dashboard
             when it is available.
           </div>
@@ -617,19 +617,19 @@ export function ProfilePage() {
                         src={organizerProfile.logoUrl}
                       />
                     ) : (
-                      <span className="font-brand text-lg font-black text-black-blue">
+                      <span className="font-fredoka text-lg font-bold text-black-blue">
                         {organizerProfile.name.slice(0, 2).toUpperCase()}
                       </span>
                     )}
                   </div>
                   <div>
-                    <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
+                    <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
                       Organization
                     </p>
-                    <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
+                    <h2 className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
                       {organizerProfile.name}
                     </h2>
-                    <p className="mt-2 font-google text-sm text-gray">
+                    <p className="mt-2 font-sans text-sm text-gray">
                       {organizerProfile.description ||
                         "No organization description yet."}
                     </p>

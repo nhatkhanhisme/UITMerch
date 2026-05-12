@@ -19,11 +19,12 @@ const config: Config = {
         aqua: "#92FBFF"
       },
       fontFamily: {
-        sans: ["Roboto", "sans-serif"],
-        brand: ["Akatab", "sans-serif"],
-        google: ["Google Sans", "sans-serif"],
-        display: ["Nico Moji", "sans-serif"],
-        condensed: ["Noto Sans", "sans-serif"]
+        sans: ['"Be Vietnam Pro"', "sans-serif"],
+        fredoka: ["Fredoka", "sans-serif"],
+        brand: ["Fredoka", "sans-serif"],
+        google: ['"Be Vietnam Pro"', "sans-serif"],
+        display: ["Fredoka", "sans-serif"],
+        condensed: ['"Be Vietnam Pro"', "sans-serif"]
       },
       spacing: {
         canvas: "1440px",

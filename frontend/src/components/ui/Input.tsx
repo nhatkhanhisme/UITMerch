@@ -23,7 +23,7 @@ export function Input({
   return (
     <div className="flex w-full flex-col gap-2">
       {label ? (
-        <label className="font-google text-sm text-gray" htmlFor={inputId}>
+        <label className="font-sans text-sm text-gray" htmlFor={inputId}>
           {label}
         </label>
       ) : null}
@@ -43,7 +43,7 @@ export function Input({
         />
         {type === "password" ? (
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 font-google text-sm text-gray transition hover:text-black-blue"
+            className="absolute right-4 top-1/2 -translate-y-1/2 font-sans text-sm text-gray transition hover:text-black-blue"
             onClick={() => setShowPassword((current) => !current)}
             type="button"
           >
@@ -52,7 +52,7 @@ export function Input({
         ) : null}
       </div>
       {errorMessage ? (
-        <p className="font-google text-sm text-peach">{errorMessage}</p>
+        <p className="font-sans text-sm text-peach">{errorMessage}</p>
       ) : null}
     </div>
   );

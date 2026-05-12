@@ -81,10 +81,10 @@ export function MerchPage() {
       <div className="relative z-10">
         <GlassContainer>
           <header className="mb-8">
-            <h1 className="font-brand text-3xl font-bold text-black-blue sm:text-4xl">
+            <h1 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
               Kho Vật Phẩm
             </h1>
-            <p className="mt-2 font-google text-sm text-ink/60">
+            <p className="mt-2 font-sans text-sm text-ink/60">
               {processed.length} vật phẩm
               {query ? ` phù hợp với "${query}"` : ""}
             </p>

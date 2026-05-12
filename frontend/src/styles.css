@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,6 +13,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-weight: 400;
   overflow-x: hidden;
 }
 

@@ -14,7 +14,7 @@ const infoRight = [
 
 function InfoList({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-4 font-google text-sm leading-7 text-gray sm:text-[15px]">
+    <ul className="space-y-4 font-sans text-sm leading-7 text-gray sm:text-[15px]">
       {items.map((item) => (
         <li className="flex gap-3" key={item}>
           <span className="mt-2 h-0.5 w-7 shrink-0 rounded-full bg-peach" />
@@ -38,7 +38,7 @@ export function HomeEnd() {
       data-section="home-end"
     >
       {/* RESPONSIVE */}
-      <div className="pointer-events-none absolute left-1/2 top-8 -translate-x-1/2 font-display text-[32vw] leading-none text-blue-100/10 sm:top-12 sm:text-blue-100/10 lg:text-[300px] lg:text-blue-100/10">
+      <div className="pointer-events-none absolute left-1/2 top-8 -translate-x-1/2 font-fredoka text-[32vw] leading-none text-blue-100/10 sm:top-12 sm:text-blue-100/10 lg:text-[300px] lg:text-blue-100/10">
         UIT
       </div>
 
@@ -46,11 +46,11 @@ export function HomeEnd() {
         {/* RESPONSIVE */}
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12">
           <div>
-            <p className="font-google text-sm font-semibold uppercase tracking-[0.22em] text-slate/70">
+            <p className="font-sans text-sm font-semibold uppercase tracking-[0.22em] text-slate/70">
               Đại học Công nghệ Thông tin
             </p>
             {/* RESPONSIVE */}
-            <h2 className="mt-4 max-w-4xl font-brand text-[30px] font-extrabold leading-[1.1] text-black-blue sm:text-4xl lg:text-[62px]">
+            <h2 className="mt-4 max-w-4xl font-fredoka text-[30px] font-bold leading-[1.1] text-black-blue sm:text-4xl lg:text-[62px]">
               University of Information Technology
             </h2>
             {/* RESPONSIVE */}
@@ -68,7 +68,7 @@ export function HomeEnd() {
         </div>
 
         {/* RESPONSIVE */}
-        <footer className="relative mt-12 flex flex-col gap-5 border-t border-slate/10 pt-8 text-center font-google text-sm text-gray sm:mt-16 sm:flex-row sm:items-center sm:justify-between sm:text-left">
+        <footer className="relative mt-12 flex flex-col gap-5 border-t border-slate/10 pt-8 text-center font-sans text-sm text-gray sm:mt-16 sm:flex-row sm:items-center sm:justify-between sm:text-left">
           <img
             alt="UITMerch"
             className="mx-auto h-[30px] w-[145px] sm:mx-0"

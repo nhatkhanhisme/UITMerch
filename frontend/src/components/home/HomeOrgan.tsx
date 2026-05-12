@@ -34,11 +34,11 @@ export function HomeOrgan() {
     >
       <div className="relative z-10 mx-auto w-full max-w-canvas">
         <div className="mx-auto max-w-6xl text-center">
-          <p className="font-google text-sm font-semibold uppercase tracking-[0.22em] text-slate/70">
+          <p className="font-sans text-sm font-semibold uppercase tracking-[0.22em] text-slate/70">
             Cộng đồng UIT
           </p>
           {/* // FIX: sizing */}
-          <h2 className="mb-5 mt-2 font-brand text-3xl font-bold leading-tight text-black-blue sm:text-4xl lg:whitespace-nowrap lg:text-[44px] xl:text-[56px] 2xl:text-[64px]">
+          <h2 className="mb-5 mt-2 font-fredoka text-3xl font-bold leading-tight text-black-blue sm:text-4xl lg:whitespace-nowrap lg:text-[44px] xl:text-[56px] 2xl:text-[64px]">
             Khám phá merch từ các CLB và Khoa
           </h2>
         </div>

@@ -20,7 +20,7 @@ export function Badge({
   return (
     <span
       className={[
-        "inline-flex h-8 items-center rounded-glass border px-4 font-brand text-sm font-black leading-none shadow-glass",
+        "inline-flex h-8 items-center rounded-glass border px-4 font-sans text-sm font-semibold leading-none shadow-glass",
         variantClasses[variant],
         className
       ].join(" ")}
