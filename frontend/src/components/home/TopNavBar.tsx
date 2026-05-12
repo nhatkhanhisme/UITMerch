@@ -17,6 +17,8 @@ export function TopNavBar() {
   const normalizePath = (pathname: string) =>
     pathname.replace(/\/+$/, "") || "/";
   const currentPath = normalizePath(location.pathname);
+  const accountReturnPath = `${location.pathname}${location.search}${location.hash}`;
+  const isAccountActive = normalizePath("/auth") === currentPath;
 
   const linkClassName = (href: string) => {
     const isActive = normalizePath(href) === currentPath;
@@ -63,11 +65,17 @@ export function TopNavBar() {
           className="hidden shrink-0 items-center pr-[1.01px] md:flex"
           data-node-id="I17:4918;17:4808"
         >
-          <button
+          <Link
             aria-label="Account"
-            className="flex min-h-11 items-center py-0.5"
+            className={[
+              "flex min-h-11 items-center rounded-full py-0.5 transition duration-200",
+              isAccountActive
+                ? "bg-white/70 shadow-[0_8px_20px_rgba(82,128,145,0.12)]"
+                : "hover:bg-white/35",
+            ].join(" ")}
             data-node-id="I17:4918;17:4809"
-            type="button"
+            state={{ from: accountReturnPath }}
+            to="/auth"
           >
             <span className="flex size-[30.4px] scale-95 items-center justify-center rounded-full p-2">
               <img
@@ -77,7 +85,7 @@ export function TopNavBar() {
                 src={accountIconUrl}
               />
             </span>
-          </button>
+          </Link>
         </div>
 
         {/* RESPONSIVE */}
@@ -105,6 +113,14 @@ export function TopNavBar() {
               {item.label}
             </Link>
           ))}
+          <Link
+            className={linkClassName("/auth")}
+            onClick={() => setIsMenuOpen(false)}
+            state={{ from: accountReturnPath }}
+            to="/auth"
+          >
+            Account
+          </Link>
         </div>
       )}
     </div>
