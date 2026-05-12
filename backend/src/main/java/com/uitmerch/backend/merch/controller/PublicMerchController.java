@@ -27,16 +27,18 @@ public class PublicMerchController {
     private final MerchService merchService;
 
     @GetMapping
-    @Operation(summary = "List published merch", description = "Supports optional ?keyword= filter and pagination.")
+    @Operation(summary = "List published merch", description = "Supports optional ?keyword= and ?category= (slug) filters with pagination.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Merch items retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Category slug not found"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<List<MerchResponse>>> listMerch(
         @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) String category,
         @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<MerchResponse> page = merchService.listPublished(keyword, pageable);
+        Page<MerchResponse> page = merchService.listPublished(keyword, category, pageable);
         return ResponseEntity.ok(ApiResponse.success("Merch items retrieved.", page.getContent(), PaginationMeta.from(page)));
     }
 

@@ -60,7 +60,7 @@ mvn spring-boot:run
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 3.3.5, Java 21 |
-| Database | PostgreSQL 16, Flyway (V1–V11 migrations) |
+| Database | PostgreSQL 16, Flyway (V1–V13 migrations) |
 | Auth | JWT via JJWT 0.12.x — stateless, role embedded in token |
 | Storage | Supabase Storage (S3-compatible via AWS SDK) |
 | API Docs | springdoc-openapi 2.6 — Swagger UI at `/swagger-ui.html` |
@@ -78,7 +78,8 @@ Each domain follows the pattern: `entity/ → repository/ → dto/ → service/ 
 | **user** | — | `GET/PATCH /api/v1/customer/profile` | — |
 | **organization** | `GET/POST/PATCH /api/v1/organizations/me` | — | `GET /api/v1/public/organizations/**` |
 | **merch** | `CRUD /api/v1/organizations/merchs/**` | — | `GET /api/v1/public/merch/**` |
-| **cart** | — | `CRUD /api/v1/customer/cart/**` | — |
+| **categories** | — | — | `GET /api/v1/categories` |
+| **cart** | — | `GET/POST/PATCH/DELETE /api/v1/customer/cart/**` | — |
 | **order** | `GET/PATCH /api/v1/organizations/orders/**` | `GET/POST /api/v1/customer/orders/**` | `POST /api/v1/public/orders` |
 | **wishlist** | — | `GET/POST/DELETE /api/v1/customer/wishlist/**` | — |
 | **event** | `CRUD /api/v1/organizations/events/**` | — | `GET /api/v1/public/events/**` |
@@ -88,23 +89,144 @@ Role enforcement is via `@PreAuthorize` at method level (not in `SecurityConfig`
 
 ---
 
-## Sample Data
+## API Reference
 
-Auto-seeded in `dev` and `docker` profiles. Skipped if data already exists (safe for PostgreSQL restarts).
+### Auth — `/api/v1/auth`
 
-| Email | Password | Role | State |
+| Method | Path | Description |
+|---|---|---|
+| POST | `/register` | Register a customer account |
+| POST | `/register/organizer` | Register an organizer account |
+| POST | `/verify-email` | Verify email with OTP |
+| POST | `/login` | Login and receive JWT tokens |
+
+### User — `/api/v1/customer` *(CUSTOMER)*
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/profile` | Get own profile |
+| PATCH | `/profile` | Update own profile (partial) |
+
+### Organization — `/api/v1/organizations` *(ORGANIZER)*
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/me` | Create organization (PENDING, one per organizer) |
+| GET | `/me` | Get own organization |
+| PATCH | `/me` | Update name, description, logo, cover |
+
+### Public Organizations — `/api/v1/public/organizations`
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | List ACTIVE organizations (paginated) |
+| GET | `/{id}` | Get organization by ID |
+| GET | `/{id}/merch` | List published merch for an organization |
+| GET | `/{id}/events` | List published events for an organization |
+
+### Merch — `/api/v1/organizations/merchs` *(ORGANIZER)*
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/` | Create merch item (org must be ACTIVE) |
+| GET | `/` | List own merch items (all statuses, paginated) |
+| GET | `/{id}` | Get own merch item by ID |
+| PATCH | `/{id}` | Partial update (name, description, price, stock, imageUrl, status, categorySlug) |
+| DELETE | `/{id}` | Soft-delete — sets status to ARCHIVED |
+
+### Public Merch — `/api/v1/public/merch`
+
+| Method | Path | Query params | Description |
 |---|---|---|---|
-| `admin@uit.edu.vn` | `Admin123` | ADMIN | — |
-| `org1@uit.edu.vn` | `Org12345` | ORGANIZER | ACTIVE org · has merch, events, orders |
-| `org2@uit.edu.vn` | `Org12345` | ORGANIZER | PENDING org · test admin approval |
-| `cust1@uit.edu.vn` | `Cust1234` | CUSTOMER | Active cart · wishlist · 2 orders |
-| `cust2@uit.edu.vn` | `Cust1234` | CUSTOMER | 1 order READY\_FOR\_PICKUP |
+| GET | `/` | `?keyword=`, `?category=<slug>`, pagination | List published merch |
+| GET | `/popular` | — | Up to 10 recently published items |
+| GET | `/{id}` | — | Get published merch item by ID |
 
-Seeded merch (under UIT Dev Club — ACTIVE):
-- UIT Hoodie — 250,000 VND · PUBLISHED
-- UIT Classic T-Shirt — 150,000 VND · PUBLISHED
-- UIT Baseball Cap — 80,000 VND · PUBLISHED
-- UIT Tote Bag — 70,000 VND · DRAFT
+### Categories — `/api/v1/categories`
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | List all 7 categories ordered by display order |
+
+Categories seeded:
+
+| Slug | Display name |
+|---|---|
+| `trang-phuc` | Trang phục |
+| `tui-balo` | Túi & Balo |
+| `do-dung` | Đồ dùng |
+| `phu-kien-ca-nhan` | Phụ kiện cá nhân |
+| `luu-niem` | Đồ lưu niệm |
+| `qua-tang-handmade` | Quà tặng & Handmade |
+| `combo-hop-qua` | Combo & Hộp quà |
+
+### Cart — `/api/v1/customer/cart` *(CUSTOMER)*
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | Get active cart with all items |
+| POST | `/items` | Add merch item to cart (409 if already exists) |
+| PATCH | `/items/{itemId}` | Update cart item quantity |
+| DELETE | `/items/{itemId}` | Remove item from cart |
+| POST | `/checkout` | Checkout cart — creates orders grouped by organization |
+
+### Orders — Customer `/api/v1/customer/orders` *(CUSTOMER)*
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | List own orders (`?status=` filter, paginated) |
+| GET | `/{id}` | Get order by ID |
+| POST | `/instant` | Instant order — single item without cart |
+
+### Orders — Organizer `/api/v1/organizations/orders` *(ORGANIZER)*
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | List org orders (`?status=` filter, paginated) |
+| GET | `/{id}` | Get order by ID |
+| PATCH | `/{id}/status` | Advance order status |
+
+### Orders — Public `/api/v1/public/orders`
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/` | Guest checkout — no account required |
+
+### Wishlist — `/api/v1/customer/wishlist` *(CUSTOMER)*
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | Get wishlist with full merch details |
+| POST | `/{merchId}` | Add merch item to wishlist |
+| DELETE | `/{merchId}` | Remove merch item from wishlist |
+
+### Events — `/api/v1/organizations/events` *(ORGANIZER)*
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/` | Create event |
+| GET | `/` | List own events |
+| GET | `/{id}` | Get own event by ID |
+| PATCH | `/{id}` | Update event |
+| POST | `/{id}/merch` | Attach a merch item to an event |
+| DELETE | `/{id}/merch/{merchId}` | Detach a merch item from an event |
+
+### Public Events — `/api/v1/public/events`
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | List published events |
+| GET | `/{id}` | Get published event by ID |
+
+### Admin — `/api/v1/admin` *(ADMIN)*
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/users` | List all users (`?role=` filter, paginated) |
+| PATCH | `/users/{id}/role` | Update a user's role |
+| GET | `/organizations` | List all organizations (`?status=` filter, paginated) |
+| PATCH | `/organizations/{id}/status` | Approve/reject/deactivate an organization |
+| GET | `/orders` | List all orders (`?status=` filter, paginated) |
 
 ---
 
@@ -125,7 +247,35 @@ All responses follow this envelope:
 }
 ```
 
+Paginated `meta`:
+```json
+{ "page": 0, "size": 20, "total": 100 }
+```
+
 Error responses: `success: false`, `message` explains what went wrong, `data: null` (or field map for validation errors).
+
+---
+
+## Sample Data
+
+### Dev / Docker profile (DevDataInitializer)
+
+Auto-seeded on startup. Skipped if data already exists.
+
+| Email | Password | Role | State |
+|---|---|---|---|
+| `admin@uit.edu.vn` | `Admin123` | ADMIN | — |
+| `org1@uit.edu.vn` | `Org12345` | ORGANIZER | ACTIVE org · has merch, events, orders |
+| `org2@uit.edu.vn` | `Org12345` | ORGANIZER | PENDING org · test admin approval |
+| `cust1@uit.edu.vn` | `Cust1234` | CUSTOMER | Active cart · wishlist · 2 orders |
+| `cust2@uit.edu.vn` | `Cust1234` | CUSTOMER | 1 order READY\_FOR\_PICKUP |
+
+### PostgreSQL real seed (V12 + V13 migrations)
+
+14 real UIT clubs and organizations with 40+ merch items across all 7 categories.
+All organizer accounts use password `UIT@2025`.
+
+Sample organizers: `cs.khmt@uit.edu.vn`, `uitstore@uit.edu.vn`, `handmade.xtn@uit.edu.vn` and 11 more.
 
 ---
 
@@ -181,11 +331,13 @@ Flyway manages schema versions in `src/main/resources/db/migration/`:
 | V4 | `merch_items` |
 | V5 | `events`, `event_merch` |
 | V6 | `carts`, `cart_items` |
-| V7 | `orders`, `order_items` (includes guest check constraint) |
+| V7 | `orders`, `order_items` |
 | V8 | `wishlists`, `wishlist_items` |
 | V9 | Indexes on all FK + frequently queried columns |
 | V10 | `users.full_name` NOT NULL |
 | V11 | `merch_items.stock >= 0` check constraint |
+| V12 | Seed 14 real UIT organizations with 40+ merch items |
+| V13 | `categories` table + 7 seeded categories + `merch_items.category_id` FK |
 
 Flyway is **disabled** in the `dev` profile (Hibernate generates schema from entities).
 Never modify existing migration files — add a new `VN__description.sql` instead.

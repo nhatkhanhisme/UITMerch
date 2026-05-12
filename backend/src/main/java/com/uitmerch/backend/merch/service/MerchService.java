@@ -7,26 +7,29 @@ import com.uitmerch.backend.common.model.OrganizationStatus;
 import com.uitmerch.backend.merch.dto.CreateMerchRequest;
 import com.uitmerch.backend.merch.dto.MerchResponse;
 import com.uitmerch.backend.merch.dto.UpdateMerchRequest;
+import com.uitmerch.backend.merch.entity.Category;
 import com.uitmerch.backend.merch.entity.MerchItem;
+import com.uitmerch.backend.merch.repository.CategoryRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MerchService {
 
     private final MerchItemRepository merchItemRepository;
+    private final CategoryRepository categoryRepository;
     private final OrganizationService organizationService;
 
     // ------------------------------------------------------------------ //
@@ -40,6 +43,8 @@ public class MerchService {
             throw new ValidationException("Your organization must be ACTIVE to create merch. Current status: " + org.getStatus());
         }
 
+        Category category = resolveCategory(request.getCategorySlug());
+
         MerchItem item = MerchItem.builder()
             .orgId(org.getId())
             .name(request.getName())
@@ -47,19 +52,24 @@ public class MerchService {
             .price(request.getPrice())
             .stock(request.getStock())
             .imageUrl(request.getImageUrl())
+            .categoryId(category != null ? category.getId() : null)
             .build();
 
-        return MerchResponse.from(merchItemRepository.save(item));
+        return MerchResponse.from(merchItemRepository.save(item), category);
     }
 
     public Page<MerchResponse> getOwnMerch(UUID ownerId, Pageable pageable) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId);
-        return merchItemRepository.findByOrgId(org.getId(), pageable).map(MerchResponse::from);
+        Map<UUID, Category> categoryMap = buildCategoryMap();
+        return merchItemRepository.findByOrgId(org.getId(), pageable)
+            .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())));
     }
 
     public MerchResponse getOwnMerchItem(UUID ownerId, UUID merchId) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId);
-        return MerchResponse.from(findOwnItemOrThrow(org.getId(), merchId));
+        MerchItem item = findOwnItemOrThrow(org.getId(), merchId);
+        Category category = item.getCategoryId() != null ? categoryRepository.findById(item.getCategoryId()).orElse(null) : null;
+        return MerchResponse.from(item, category);
     }
 
     @Transactional
@@ -89,7 +99,15 @@ public class MerchService {
             item.setStatus(request.getStatus());
         }
 
-        return MerchResponse.from(merchItemRepository.save(item));
+        Category category = null;
+        if (request.getCategorySlug() != null) {
+            category = resolveCategory(request.getCategorySlug());
+            item.setCategoryId(category != null ? category.getId() : null);
+        } else if (item.getCategoryId() != null) {
+            category = categoryRepository.findById(item.getCategoryId()).orElse(null);
+        }
+
+        return MerchResponse.from(merchItemRepository.save(item), category);
     }
 
     @Transactional
@@ -104,32 +122,55 @@ public class MerchService {
     //  PUBLIC
     // ------------------------------------------------------------------ //
 
-    public Page<MerchResponse> listPublished(String keyword, Pageable pageable) {
+    public Page<MerchResponse> listPublished(String keyword, String categorySlug, Pageable pageable) {
+        Map<UUID, Category> categoryMap = buildCategoryMap();
+
+        if (categorySlug != null && !categorySlug.isBlank()) {
+            Category category = categoryRepository.findBySlug(categorySlug.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", categorySlug));
+            UUID catId = category.getId();
+
+            if (keyword != null && !keyword.isBlank()) {
+                return merchItemRepository
+                    .findByStatusAndCategoryIdAndNameContainingIgnoreCase(MerchItemStatus.PUBLISHED, catId, keyword.trim(), pageable)
+                    .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())));
+            }
+            return merchItemRepository
+                .findByStatusAndCategoryId(MerchItemStatus.PUBLISHED, catId, pageable)
+                .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())));
+        }
+
         if (keyword != null && !keyword.isBlank()) {
             return merchItemRepository
                 .findByStatusAndNameContainingIgnoreCase(MerchItemStatus.PUBLISHED, keyword.trim(), pageable)
-                .map(MerchResponse::from);
+                .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())));
         }
-        return merchItemRepository.findByStatus(MerchItemStatus.PUBLISHED, pageable).map(MerchResponse::from);
+        return merchItemRepository.findByStatus(MerchItemStatus.PUBLISHED, pageable)
+            .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())));
     }
 
     public MerchResponse getPublishedMerch(UUID merchId) {
         MerchItem item = merchItemRepository.findById(merchId)
             .filter(m -> m.getStatus() == MerchItemStatus.PUBLISHED)
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
-        return MerchResponse.from(item);
+        Category category = item.getCategoryId() != null ? categoryRepository.findById(item.getCategoryId()).orElse(null) : null;
+        return MerchResponse.from(item, category);
     }
 
     public List<MerchResponse> getPopularMerch() {
+        Map<UUID, Category> categoryMap = buildCategoryMap();
         return merchItemRepository
             .findTop10ByStatusOrderByCreatedAtDesc(MerchItemStatus.PUBLISHED)
-            .stream().map(MerchResponse::from).toList();
+            .stream()
+            .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())))
+            .toList();
     }
 
     public Page<MerchResponse> listByOrganization(UUID orgId, Pageable pageable) {
+        Map<UUID, Category> categoryMap = buildCategoryMap();
         return merchItemRepository
             .findByOrgIdAndStatus(orgId, MerchItemStatus.PUBLISHED, pageable)
-            .map(MerchResponse::from);
+            .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())));
     }
 
     // ------------------------------------------------------------------ //
@@ -153,8 +194,23 @@ public class MerchService {
         merchItemRepository.save(item);
     }
 
+    // ------------------------------------------------------------------ //
+    //  PRIVATE HELPERS
+    // ------------------------------------------------------------------ //
+
     private MerchItem findOwnItemOrThrow(UUID orgId, UUID merchId) {
         return merchItemRepository.findByIdAndOrgId(merchId, orgId)
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
+    }
+
+    private Category resolveCategory(String slug) {
+        if (slug == null || slug.isBlank()) return null;
+        return categoryRepository.findBySlug(slug.trim())
+            .orElseThrow(() -> new ResourceNotFoundException("Category", slug));
+    }
+
+    private Map<UUID, Category> buildCategoryMap() {
+        return categoryRepository.findAll().stream()
+            .collect(Collectors.toMap(Category::getId, c -> c));
     }
 }
