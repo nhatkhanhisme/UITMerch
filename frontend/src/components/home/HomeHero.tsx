@@ -196,7 +196,7 @@ export function HomeHero() {
           }}
         >
           <div
-            className="contents lg:absolute lg:left-[71px] lg:flex lg:h-[718px] lg:w-[1292px] lg:items-center lg:gap-[37px]"
+            className="contents lg:absolute lg:left-[120px] lg:flex lg:h-[718px] lg:w-[1292px] lg:items-center lg:gap-[37px]"
             style={{ top: isResponsiveHero ? undefined : desktopHeroRowTop }}
           >
             <div
