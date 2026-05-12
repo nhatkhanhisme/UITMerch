@@ -89,10 +89,10 @@ export function HomeFixedChrome({ showSlideBar = true }: HomeFixedChromeProps) {
         <TopNavBar />
       </div>
 
-      {showSlideBar && (
+      {showSlideBar && activeIndex !== 1 && (
         <div
           // FIX: Bug2
-          className="pointer-events-none fixed right-0 z-20 hidden sm:right-4 lg:block"
+          className="pointer-events-none fixed right-0 z-20 hidden sm:right-8 lg:block"
           style={{
             top: "50%",
             transform: `translateY(-50%) scale(${scale})`,
