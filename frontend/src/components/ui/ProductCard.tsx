@@ -1,13 +1,13 @@
 import type { HTMLAttributes } from "react";
 import { Link } from "react-router-dom";
 
-// ─── Props ────────────────────────────────────────────────────────────────────
 export interface ProductCardProps extends HTMLAttributes<HTMLElement> {
   name: string;
   image: string | null;
   orgName: string;
   description?: string;
   price?: number;
+  detailPath?: string;
 }
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
@@ -15,27 +15,26 @@ const currencyFormatter = new Intl.NumberFormat("vi-VN", {
   style: "currency",
 });
 
-// ─── ProductCard ──────────────────────────────────────────────────────────────
 export function ProductCard({
   className = "",
   description,
+  detailPath,
   image,
   name,
   orgName,
   price,
   ...props
 }: ProductCardProps) {
-  return (
+  const content = (
     <article
       className={[
-        "group flex flex-col overflow-hidden rounded-panel border border-white/40 bg-white/20 p-4",
+        "group flex h-full flex-col overflow-hidden rounded-panel border border-white/40 bg-white/20 p-4",
         "shadow-glass transition duration-300",
         "hover:-translate-y-1 hover:border-aqua hover:bg-white/30 hover:shadow-glass-inset",
         className,
       ].join(" ")}
       {...props}
     >
-      {/* Image Area - Transparent if no image */}
       <div className="relative aspect-square overflow-hidden rounded-[28px] border border-white/20 bg-white/5">
         {image ? (
           <img
@@ -50,35 +49,41 @@ export function ProductCard({
         )}
       </div>
 
-      {/* Info */}
-      <div className="mt-4 flex flex-col gap-1">
-        {/* Org name with underline hover */}
-        <Link
-          className="font-sans text-xs font-medium text-ink/50 transition-colors hover:text-black-blue hover:underline"
-          to="#"
-        >
+      <div className="mt-4 flex flex-1 flex-col gap-1">
+        <span className="font-sans text-xs font-medium text-ink/50 transition-colors group-hover:text-black-blue">
           {orgName}
-        </Link>
+        </span>
 
-        {/* Product name */}
-        <h3 className="font-fredoka text-xl font-bold leading-tight tracking-[0.01em] text-black-blue">
+        <h3 className="font-fredoka text-xl font-bold leading-tight text-black-blue">
           {name}
         </h3>
 
-        {/* Description */}
         {description ? (
           <p className="line-clamp-2 mt-1 font-sans text-xs text-ink/60">
             {description}
           </p>
         ) : null}
 
-        {/* Price or free tag */}
-        <p className="mt-3 font-sans text-sm font-semibold text-ink">
+        <p className="mt-auto pt-3 font-sans text-sm font-semibold text-ink">
           {price !== undefined && price > 0
             ? currencyFormatter.format(price)
             : "Sự kiện / Miễn phí"}
         </p>
       </div>
     </article>
+  );
+
+  if (!detailPath) {
+    return content;
+  }
+
+  return (
+    <Link
+      aria-label={`Xem chi tiết ${name}`}
+      className="block h-full rounded-panel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-aqua"
+      to={detailPath}
+    >
+      {content}
+    </Link>
   );
 }
