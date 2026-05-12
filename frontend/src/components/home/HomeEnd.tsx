@@ -29,10 +29,10 @@ export function HomeEnd() {
   return (
     <section
       className="
-        relative isolate min-h-[100svh]
-        px-5 pb-8 pt-20
-        sm:px-8 sm:pb-10 sm:pt-24
-        lg:px-16 lg:pb-14 lg:pt-28
+        relative isolate flex min-h-[100svh] items-center
+        px-5 py-20
+        sm:px-8 sm:py-24
+        lg:px-16 lg:py-16
       "
       id="home-end"
       data-section="home-end"
@@ -42,7 +42,7 @@ export function HomeEnd() {
         UIT
       </div>
 
-      <div className="relative z-10 mx-auto max-w-canvas pt-12 sm:pt-16 lg:pt-20">
+      <div className="relative z-10 mx-auto w-full max-w-canvas">
         {/* RESPONSIVE */}
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12">
           <div>
@@ -50,7 +50,7 @@ export function HomeEnd() {
               Đại học Công nghệ Thông tin
             </p>
             {/* RESPONSIVE */}
-            <h2 className="mt-4 max-w-4xl font-brand text-[30px] font-extrabold leading-tight text-black-blue sm:text-4xl lg:text-[62px]">
+            <h2 className="mt-4 max-w-4xl font-brand text-[30px] font-extrabold leading-[1.1] text-black-blue sm:text-4xl lg:text-[62px]">
               University of Information Technology
             </h2>
             {/* RESPONSIVE */}
