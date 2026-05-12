@@ -5,7 +5,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
 import { Button, Input } from "../components/ui";
@@ -87,6 +87,7 @@ function InfoRow({ label, value }: InfoRowProps) {
 export function ProfilePage() {
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
+  const clearSession = useAuthStore((state) => state.clearSession);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -100,6 +101,7 @@ export function ProfilePage() {
   const [customerForm, setCustomerForm] = useState(initialCustomerForm);
   const [organizerForm, setOrganizerForm] = useState(initialOrganizerForm);
   const location = useLocation();
+  const navigate = useNavigate();
   const returnTo = `${location.pathname}${location.search}${location.hash}`;
 
   const avatarLabel = useMemo(() => {
@@ -359,6 +361,11 @@ export function ProfilePage() {
     }
   };
 
+  const handleLogout = () => {
+    clearSession();
+    navigate("/");
+  };
+
   if (!user) {
     return <Navigate replace state={{ from: returnTo }} to="/auth" />;
   }
@@ -395,6 +402,15 @@ export function ProfilePage() {
                 : "Organizer account"}
             </p>
           </div>
+          <Button
+            className="ml-auto"
+            disabled={isSaving}
+            type="button"
+            variant="outline"
+            onClick={handleLogout}
+          >
+            Log out
+          </Button>
         </header>
 
         {canEdit ? (
