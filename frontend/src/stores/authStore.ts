@@ -9,6 +9,7 @@ type AuthState = {
   refreshToken: string | null;
   tokenType: string | null;
   setSession: (session: AuthSession | null) => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
   clearSession: () => void;
 };
 
@@ -29,6 +30,18 @@ export const useAuthStore = create<AuthState>()(
           tokenType: session?.tokenType ?? null,
         });
         setAuthHeader(session?.accessToken ?? null);
+      },
+      updateUser: (updates) => {
+        set((state) =>
+          state.user
+            ? {
+                user: {
+                  ...state.user,
+                  ...updates,
+                },
+              }
+            : state,
+        );
       },
       clearSession: () => {
         set({

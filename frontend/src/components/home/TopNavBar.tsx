@@ -1,5 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuthStore } from "../../stores/authStore";
+import { getCustomerProfile, getOrganizerProfile } from "../../api/profile";
 
 const logoHeaderUrl = "/assets/figma/logo-header.svg";
 const accountIconUrl = "/assets/figma/account-icon.svg";
@@ -10,15 +12,78 @@ const navItems = [
   { label: "Tổ chức", href: "/organization" },
 ];
 
+const getInitials = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return "U";
+  }
+
+  const [first, last] =
+    parts.length === 1 ? [parts[0], ""] : [parts[0], parts[parts.length - 1]];
+  return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
+};
+
 export function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const user = useAuthStore((state) => state.user);
+  const updateUser = useAuthStore((state) => state.updateUser);
 
   const normalizePath = (pathname: string) =>
     pathname.replace(/\/+$/, "") || "/";
   const currentPath = normalizePath(location.pathname);
   const accountReturnPath = `${location.pathname}${location.search}${location.hash}`;
-  const isAccountActive = normalizePath("/auth") === currentPath;
+  const accountTarget = user ? "/profile" : "/auth";
+  const isAccountActive = ["/auth", "/profile"].includes(currentPath);
+  const accountLabel = user ? user.fullName : "Account";
+  const avatarFallback = useMemo(
+    () => (user?.fullName ? getInitials(user.fullName) : "U"),
+    [user?.fullName],
+  );
+  const accountState = user ? undefined : { from: accountReturnPath };
+
+  useEffect(() => {
+    if (!user || user.avatarUrl) {
+      return;
+    }
+
+    let isActive = true;
+
+    const loadAvatar = async () => {
+      try {
+        if (user.role === "CUSTOMER") {
+          const response = await getCustomerProfile();
+          const profile = response.data;
+
+          if (isActive && profile?.avatarUrl) {
+            updateUser({
+              avatarUrl: profile.avatarUrl,
+              fullName: profile.fullName,
+            });
+          }
+
+          return;
+        }
+
+        if (user.role === "ORGANIZER") {
+          const response = await getOrganizerProfile();
+          const profile = response.data;
+
+          if (isActive && profile?.logoUrl) {
+            updateUser({ avatarUrl: profile.logoUrl });
+          }
+        }
+      } catch {
+        // Ignore avatar fetch errors for nav display.
+      }
+    };
+
+    void loadAvatar();
+
+    return () => {
+      isActive = false;
+    };
+  }, [updateUser, user]);
 
   const linkClassName = (href: string) => {
     const isActive = normalizePath(href) === currentPath;
@@ -66,25 +131,43 @@ export function TopNavBar() {
           data-node-id="I17:4918;17:4808"
         >
           <Link
-            aria-label="Account"
+            aria-label={accountLabel}
             className={[
-              "flex min-h-11 items-center rounded-full py-0.5 transition duration-200",
+              "flex min-h-11 items-center gap-3 rounded-full py-0.5 pl-2 pr-4 transition duration-200",
               isAccountActive
                 ? "bg-white/70 shadow-[0_8px_20px_rgba(82,128,145,0.12)]"
                 : "hover:bg-white/35",
             ].join(" ")}
             data-node-id="I17:4918;17:4809"
-            state={{ from: accountReturnPath }}
-            to="/auth"
+            state={accountState}
+            to={accountTarget}
           >
-            <span className="flex size-[30.4px] scale-95 items-center justify-center rounded-full p-2">
-              <img
-                alt=""
-                className="size-4"
-                data-node-id="I17:4918;17:4811"
-                src={accountIconUrl}
-              />
+            <span className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-white/80 shadow-[0_6px_16px_rgba(82,128,145,0.16)]">
+              {user?.avatarUrl ? (
+                <img
+                  alt=""
+                  className="size-full object-cover"
+                  data-node-id="I17:4918;17:4811"
+                  src={user.avatarUrl}
+                />
+              ) : user ? (
+                <span className="font-brand text-xs font-black text-black-blue">
+                  {avatarFallback}
+                </span>
+              ) : (
+                <img
+                  alt=""
+                  className="size-4"
+                  data-node-id="I17:4918;17:4811"
+                  src={accountIconUrl}
+                />
+              )}
             </span>
+            {user ? (
+              <span className="max-w-[160px] truncate font-google text-sm font-semibold text-black-blue">
+                {user.fullName}
+              </span>
+            ) : null}
           </Link>
         </div>
 
@@ -114,12 +197,12 @@ export function TopNavBar() {
             </Link>
           ))}
           <Link
-            className={linkClassName("/auth")}
+            className={linkClassName(accountTarget)}
             onClick={() => setIsMenuOpen(false)}
-            state={{ from: accountReturnPath }}
-            to="/auth"
+            state={accountState}
+            to={accountTarget}
           >
-            Account
+            {user ? "Profile" : "Account"}
           </Link>
         </div>
       )}

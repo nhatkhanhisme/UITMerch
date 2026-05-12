@@ -5,6 +5,7 @@ import { HomeFixedChrome } from "./components/home/HomeFixedChrome";
 import { HomePage } from "./pages/HomePage";
 import { MerchPage } from "./pages/MerchPage";
 import { AuthPage } from "./pages/AuthPage";
+import { ProfilePage } from "./pages/ProfilePage";
 import { OrganizerDashboardPage } from "./pages/OrganizerDashboardPage";
 import { OrganizationPage } from "./pages/OrganizationPage";
 import "./styles.css";
@@ -31,6 +32,15 @@ function AppRouter() {
             </>
           }
           path="/auth"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <ProfilePage />
+            </>
+          }
+          path="/profile"
         />
         <Route
           element={
