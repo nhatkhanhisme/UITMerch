@@ -249,7 +249,7 @@ function PurchasePanel({
   const [added, setAdded] = useState(false);
 
   return (
-    <aside className="self-start rounded-panel border border-white/55 bg-white/45 p-6 shadow-glass backdrop-blur-xl lg:sticky lg:top-28">
+    <aside className="self-start rounded-panel border border-white/55 bg-white/45 p-6 shadow-glass backdrop-blur-xl lg:fixed lg:right-16 lg:top-28 lg:w-[430px] xl:right-[max(4rem,calc((100vw-1320px)/2))] xl:w-[480px]">
       <div className="border-b border-ink/10 pb-6">
         <Link
           className="inline-flex items-center rounded-full border border-white/70 bg-white/65 px-5 py-2.5 text-sm font-bold text-black-blue shadow-glass-inset transition hover:-translate-y-0.5 hover:border-aqua hover:bg-white"
