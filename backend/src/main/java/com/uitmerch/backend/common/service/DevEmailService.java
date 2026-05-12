@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@Profile("dev")
+@Profile("dev | docker")
 public class DevEmailService implements EmailService {
 
     @Override

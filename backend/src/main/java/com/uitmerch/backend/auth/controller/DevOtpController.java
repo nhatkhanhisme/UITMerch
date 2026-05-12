@@ -22,7 +22,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/dev")
 @RequiredArgsConstructor
-@Profile("dev")
+@Profile("dev | docker")
 public class DevOtpController {
 
     private final UserRepository userRepository;

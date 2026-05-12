@@ -19,6 +19,11 @@ docker compose up --build
 
 No `.env` file required. Sample data is seeded automatically on first startup and persists across restarts.
 
+OTPs are not emailed — fetch them directly:
+```
+GET http://localhost:8080/api/v1/dev/otps?email=<email>
+```
+
 ```bash
 docker compose up           # subsequent starts (faster, uses cached image)
 docker compose down         # stop (data volume kept)
@@ -303,7 +308,7 @@ Required only for the **production** profile. Docker and dev profiles have built
 | Variable | Default | Description |
 |---|---|---|
 | `SERVER_PORT` | `8080` | HTTP port |
-| `APP_JWT_SECRET` | *(required)* | JWT signing secret — min 32 chars |
+| `APP_JWT_SECRET` | *(required for production; docker has a built-in default)* | JWT signing secret — min 32 chars |
 | `APP_JWT_EXPIRATION` | `86400000` | Access token TTL (ms) — 24 h |
 | `APP_JWT_REFRESH_EXPIRATION` | `604800000` | Refresh token TTL (ms) — 7 days |
 | `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:5173` | Comma-separated list of allowed CORS origins |

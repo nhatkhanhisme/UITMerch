@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@Profile("!dev")
+@Profile("!(dev | docker)")
 @RequiredArgsConstructor
 public class JavaMailEmailService implements EmailService {
 
