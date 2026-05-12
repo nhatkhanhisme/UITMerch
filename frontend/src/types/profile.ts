@@ -11,6 +11,13 @@ export type CustomerProfile = {
   createdAt: string;
 };
 
+export type CustomerProfileUpdate = {
+  fullName?: string;
+  phone?: string;
+  address?: string;
+  avatarUrl?: string;
+};
+
 export type OrganizationStatus = "PENDING" | "ACTIVE" | "INACTIVE";
 
 export type OrganizerProfile = {
@@ -23,4 +30,11 @@ export type OrganizerProfile = {
   status: OrganizationStatus;
   createdAt: string;
   updatedAt: string;
+};
+
+export type OrganizerProfileUpdate = {
+  name?: string;
+  description?: string;
+  logoUrl?: string;
+  coverUrl?: string;
 };

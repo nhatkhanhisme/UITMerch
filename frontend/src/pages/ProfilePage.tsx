@@ -1,9 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
+import { Button, Input } from "../components/ui";
 import { getApiErrorMessage } from "../api/auth";
-import { getCustomerProfile, getOrganizerProfile } from "../api/profile";
+import {
+  getCustomerProfile,
+  getOrganizerProfile,
+  updateCustomerProfile,
+  updateOrganizerProfile,
+} from "../api/profile";
 import { useAuthStore } from "../stores/authStore";
 import type { CustomerProfile, OrganizerProfile } from "../types/profile";
 
@@ -35,6 +47,25 @@ const getInitials = (fullName: string) => {
   return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
 };
 
+const toOptionalValue = (value: string) => {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const initialCustomerForm = {
+  fullName: "",
+  phone: "",
+  address: "",
+  avatarUrl: "",
+};
+
+const initialOrganizerForm = {
+  name: "",
+  description: "",
+  logoUrl: "",
+  coverUrl: "",
+};
+
 type InfoRowProps = {
   label: string;
   value?: string | null;
@@ -57,12 +88,17 @@ export function ProfilePage() {
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isMissingOrganization, setIsMissingOrganization] = useState(false);
   const [customerProfile, setCustomerProfile] =
     useState<CustomerProfile | null>(null);
   const [organizerProfile, setOrganizerProfile] =
     useState<OrganizerProfile | null>(null);
+  const [customerForm, setCustomerForm] = useState(initialCustomerForm);
+  const [organizerForm, setOrganizerForm] = useState(initialOrganizerForm);
   const location = useLocation();
   const returnTo = `${location.pathname}${location.search}${location.hash}`;
 
@@ -84,6 +120,7 @@ export function ProfilePage() {
     const loadProfile = async () => {
       setIsLoading(true);
       setErrorMessage(null);
+      setSuccessMessage(null);
       setIsMissingOrganization(false);
 
       try {
@@ -101,6 +138,12 @@ export function ProfilePage() {
 
           setCustomerProfile(profile);
           setOrganizerProfile(null);
+          setCustomerForm({
+            fullName: profile.fullName,
+            phone: profile.phone ?? "",
+            address: profile.address ?? "",
+            avatarUrl: profile.avatarUrl ?? "",
+          });
           updateUser({
             fullName: profile.fullName,
             avatarUrl: profile.avatarUrl ?? null,
@@ -122,6 +165,12 @@ export function ProfilePage() {
 
           setOrganizerProfile(profile);
           setCustomerProfile(null);
+          setOrganizerForm({
+            name: profile.name,
+            description: profile.description ?? "",
+            logoUrl: profile.logoUrl ?? "",
+            coverUrl: profile.coverUrl ?? "",
+          });
 
           if (profile.logoUrl) {
             updateUser({ avatarUrl: profile.logoUrl });
@@ -156,6 +205,159 @@ export function ProfilePage() {
       isActive = false;
     };
   }, [user, updateUser]);
+
+  const canEdit =
+    !isLoading &&
+    (user?.role === "CUSTOMER"
+      ? Boolean(customerProfile)
+      : Boolean(organizerProfile) && !isMissingOrganization);
+
+  const startEditing = () => {
+    setIsEditing(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (user?.role === "CUSTOMER" && customerProfile) {
+      setCustomerForm({
+        fullName: customerProfile.fullName,
+        phone: customerProfile.phone ?? "",
+        address: customerProfile.address ?? "",
+        avatarUrl: customerProfile.avatarUrl ?? "",
+      });
+    }
+
+    if (user?.role === "ORGANIZER" && organizerProfile) {
+      setOrganizerForm({
+        name: organizerProfile.name,
+        description: organizerProfile.description ?? "",
+        logoUrl: organizerProfile.logoUrl ?? "",
+        coverUrl: organizerProfile.coverUrl ?? "",
+      });
+    }
+  };
+
+  const handleCustomerChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setCustomerForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleOrganizerChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setOrganizerForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleCustomerSave = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const fullName = customerForm.fullName.trim();
+    if (!fullName) {
+      setErrorMessage("Full name is required.");
+      return;
+    }
+
+    setIsSaving(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await updateCustomerProfile({
+        fullName,
+        phone: toOptionalValue(customerForm.phone),
+        address: toOptionalValue(customerForm.address),
+        avatarUrl: toOptionalValue(customerForm.avatarUrl),
+      });
+      const profile = response.data;
+
+      if (!profile) {
+        throw new Error("Profile update failed.");
+      }
+
+      setCustomerProfile(profile);
+      setCustomerForm({
+        fullName: profile.fullName,
+        phone: profile.phone ?? "",
+        address: profile.address ?? "",
+        avatarUrl: profile.avatarUrl ?? "",
+      });
+      updateUser({
+        fullName: profile.fullName,
+        avatarUrl: profile.avatarUrl ?? null,
+      });
+      setSuccessMessage(response.message || "Profile updated.");
+      setIsEditing(false);
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleOrganizerSave = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const name = organizerForm.name.trim();
+    if (!name) {
+      setErrorMessage("Organization name is required.");
+      return;
+    }
+
+    setIsSaving(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const response = await updateOrganizerProfile({
+        name,
+        description: toOptionalValue(organizerForm.description),
+        logoUrl: toOptionalValue(organizerForm.logoUrl),
+        coverUrl: toOptionalValue(organizerForm.coverUrl),
+      });
+      const profile = response.data;
+
+      if (!profile) {
+        throw new Error("Organization update failed.");
+      }
+
+      setOrganizerProfile(profile);
+      setOrganizerForm({
+        name: profile.name,
+        description: profile.description ?? "",
+        logoUrl: profile.logoUrl ?? "",
+        coverUrl: profile.coverUrl ?? "",
+      });
+      if (profile.logoUrl) {
+        updateUser({ avatarUrl: profile.logoUrl });
+      }
+      setSuccessMessage(response.message || "Organization updated.");
+      setIsEditing(false);
+    } catch (error) {
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.status === 404 &&
+        user?.role === "ORGANIZER"
+      ) {
+        setIsMissingOrganization(true);
+        setOrganizerProfile(null);
+        setIsEditing(false);
+      } else {
+        setErrorMessage(getApiErrorMessage(error));
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (!user) {
     return <Navigate replace state={{ from: returnTo }} to="/auth" />;
@@ -195,6 +397,57 @@ export function ProfilePage() {
           </div>
         </header>
 
+        {canEdit ? (
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-panel border border-white/60 bg-white/70 px-6 py-5 shadow-[0_16px_40px_rgba(82,128,145,0.16)] backdrop-blur">
+            <div>
+              <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
+                Profile details
+              </p>
+              <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
+                {user.role === "CUSTOMER"
+                  ? "Customer information"
+                  : "Organization information"}
+              </h2>
+              <p className="mt-1 font-google text-sm text-gray">
+                Keep your profile details up to date for a smoother experience.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {isEditing ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={cancelEditing}
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    form={
+                      user.role === "CUSTOMER"
+                        ? "customer-profile-form"
+                        : "organizer-profile-form"
+                    }
+                    loading={isSaving}
+                    type="submit"
+                  >
+                    Save changes
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={startEditing}
+                >
+                  Edit profile
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : null}
+
         {isLoading ? (
           <div className="rounded-panel border border-white/60 bg-white/60 p-6 text-center font-google text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
             Loading your profile...
@@ -207,6 +460,12 @@ export function ProfilePage() {
           </div>
         ) : null}
 
+        {!isLoading && successMessage ? (
+          <div className="rounded-panel border border-aqua bg-aqua/20 p-6 font-google text-sm text-black-blue">
+            {successMessage}
+          </div>
+        ) : null}
+
         {!isLoading && isMissingOrganization ? (
           <div className="rounded-panel border border-aqua bg-white/70 p-6 font-google text-sm text-black-blue shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
             No organization profile yet. Create one from the organizer dashboard
@@ -215,71 +474,167 @@ export function ProfilePage() {
         ) : null}
 
         {!isLoading && user.role === "CUSTOMER" && customerProfile ? (
-          <section className="grid gap-4 md:grid-cols-2">
-            <InfoRow label="Email" value={customerProfile.email} />
-            <InfoRow label="Phone" value={customerProfile.phone ?? ""} />
-            <InfoRow label="Address" value={customerProfile.address ?? ""} />
-            <InfoRow
-              label="Member since"
-              value={formatDate(customerProfile.createdAt)}
-            />
-          </section>
+          isEditing ? (
+            <form
+              className="grid gap-4 md:grid-cols-2"
+              id="customer-profile-form"
+              onSubmit={handleCustomerSave}
+            >
+              <Input
+                label="Full name"
+                name="fullName"
+                onChange={handleCustomerChange}
+                placeholder="Your full name"
+                required
+                value={customerForm.fullName}
+              />
+              <Input
+                label="Email"
+                name="email"
+                placeholder="you@uit.edu.vn"
+                value={customerProfile.email}
+                disabled
+              />
+              <Input
+                label="Phone"
+                name="phone"
+                onChange={handleCustomerChange}
+                placeholder="Optional"
+                value={customerForm.phone}
+              />
+              <Input
+                label="Address"
+                name="address"
+                onChange={handleCustomerChange}
+                placeholder="Optional"
+                value={customerForm.address}
+              />
+              <div className="md:col-span-2">
+                <Input
+                  label="Avatar URL"
+                  name="avatarUrl"
+                  onChange={handleCustomerChange}
+                  placeholder="https://"
+                  value={customerForm.avatarUrl}
+                />
+              </div>
+            </form>
+          ) : (
+            <section className="grid gap-4 md:grid-cols-2">
+              <InfoRow label="Email" value={customerProfile.email} />
+              <InfoRow label="Phone" value={customerProfile.phone ?? ""} />
+              <InfoRow label="Address" value={customerProfile.address ?? ""} />
+              <InfoRow
+                label="Member since"
+                value={formatDate(customerProfile.createdAt)}
+              />
+            </section>
+          )
         ) : null}
 
         {!isLoading && user.role === "ORGANIZER" && organizerProfile ? (
-          <section className="grid gap-6">
-            <div className="overflow-hidden rounded-panel border border-white/60 bg-white/70 shadow-[0_20px_60px_rgba(16,24,40,0.12)]">
-              {organizerProfile.coverUrl ? (
-                <img
-                  alt={organizerProfile.name}
-                  className="h-48 w-full object-cover"
-                  src={organizerProfile.coverUrl}
+          isEditing ? (
+            <form
+              className="grid gap-4"
+              id="organizer-profile-form"
+              onSubmit={handleOrganizerSave}
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input
+                  label="Organization name"
+                  name="name"
+                  onChange={handleOrganizerChange}
+                  placeholder="Organization name"
+                  required
+                  value={organizerForm.name}
                 />
-              ) : (
-                <div className="h-48 w-full bg-brand-gradient" />
-              )}
-              <div className="grid gap-4 px-6 py-5 md:grid-cols-[auto_1fr]">
-                <div className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
-                  {organizerProfile.logoUrl ? (
-                    <img
-                      alt=""
-                      className="size-full object-cover"
-                      src={organizerProfile.logoUrl}
-                    />
-                  ) : (
-                    <span className="font-brand text-lg font-black text-black-blue">
-                      {organizerProfile.name.slice(0, 2).toUpperCase()}
-                    </span>
-                  )}
+                <Input
+                  label="Status"
+                  name="status"
+                  placeholder=""
+                  value={organizerProfile.status}
+                  disabled
+                />
+                <div className="md:col-span-2">
+                  <Input
+                    label="Description"
+                    name="description"
+                    onChange={handleOrganizerChange}
+                    placeholder="Optional"
+                    value={organizerForm.description}
+                  />
                 </div>
-                <div>
-                  <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
-                    Organization
-                  </p>
-                  <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
-                    {organizerProfile.name}
-                  </h2>
-                  <p className="mt-2 font-google text-sm text-gray">
-                    {organizerProfile.description ||
-                      "No organization description yet."}
-                  </p>
+                <Input
+                  label="Logo URL"
+                  name="logoUrl"
+                  onChange={handleOrganizerChange}
+                  placeholder="https://"
+                  value={organizerForm.logoUrl}
+                />
+                <Input
+                  label="Cover URL"
+                  name="coverUrl"
+                  onChange={handleOrganizerChange}
+                  placeholder="https://"
+                  value={organizerForm.coverUrl}
+                />
+              </div>
+            </form>
+          ) : (
+            <section className="grid gap-6">
+              <div className="overflow-hidden rounded-panel border border-white/60 bg-white/70 shadow-[0_20px_60px_rgba(16,24,40,0.12)]">
+                {organizerProfile.coverUrl ? (
+                  <img
+                    alt={organizerProfile.name}
+                    className="h-48 w-full object-cover"
+                    src={organizerProfile.coverUrl}
+                  />
+                ) : (
+                  <div className="h-48 w-full bg-brand-gradient" />
+                )}
+                <div className="grid gap-4 px-6 py-5 md:grid-cols-[auto_1fr]">
+                  <div className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
+                    {organizerProfile.logoUrl ? (
+                      <img
+                        alt=""
+                        className="size-full object-cover"
+                        src={organizerProfile.logoUrl}
+                      />
+                    ) : (
+                      <span className="font-brand text-lg font-black text-black-blue">
+                        {organizerProfile.name.slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-google text-xs uppercase tracking-[0.3em] text-slate/70">
+                      Organization
+                    </p>
+                    <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
+                      {organizerProfile.name}
+                    </h2>
+                    <p className="mt-2 font-google text-sm text-gray">
+                      {organizerProfile.description ||
+                        "No organization description yet."}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <InfoRow label="Status" value={organizerProfile.status} />
-              <InfoRow label="Owner ID" value={organizerProfile.ownerId} />
-              <InfoRow
-                label="Created"
-                value={formatDate(organizerProfile.createdAt)}
-              />
-              <InfoRow
-                label="Updated"
-                value={formatDate(organizerProfile.updatedAt)}
-              />
-            </div>
-          </section>
+              <div className="grid gap-4 md:grid-cols-2">
+                <InfoRow label="Status" value={organizerProfile.status} />
+                <InfoRow label="Owner ID" value={organizerProfile.ownerId} />
+                <InfoRow
+                  label="Created"
+                  value={formatDate(organizerProfile.createdAt)}
+                />
+                <InfoRow
+                  label="Updated"
+                  value={formatDate(organizerProfile.updatedAt)}
+                />
+              </div>
+            </section>
+          )
         ) : null}
       </div>
     </main>
