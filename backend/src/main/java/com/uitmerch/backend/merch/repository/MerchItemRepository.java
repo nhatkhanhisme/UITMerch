@@ -18,6 +18,10 @@ public interface MerchItemRepository extends JpaRepository<MerchItem, UUID> {
 
     Page<MerchItem> findByStatusAndNameContainingIgnoreCase(MerchItemStatus status, String name, Pageable pageable);
 
+    Page<MerchItem> findByStatusAndCategoryId(MerchItemStatus status, UUID categoryId, Pageable pageable);
+
+    Page<MerchItem> findByStatusAndCategoryIdAndNameContainingIgnoreCase(MerchItemStatus status, UUID categoryId, String name, Pageable pageable);
+
     Page<MerchItem> findByOrgId(UUID orgId, Pageable pageable);
 
     Page<MerchItem> findByOrgIdAndStatus(UUID orgId, MerchItemStatus status, Pageable pageable);

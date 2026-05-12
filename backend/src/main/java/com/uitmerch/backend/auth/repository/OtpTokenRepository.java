@@ -11,10 +11,7 @@ import java.util.UUID;
 @Repository
 public interface OtpTokenRepository extends JpaRepository<OtpToken, UUID> {
 
-    Optional<OtpToken> findTopByUserAndOtpCodeAndIsUsedFalseOrderByCreatedAtDesc(
-            User user, String otpCode);
+    Optional<OtpToken> findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(User user);
 
     void deleteAllByUser(User user);
-
-    Optional<OtpToken> findTopByUserOrderByCreatedAtDesc(User user);
 }

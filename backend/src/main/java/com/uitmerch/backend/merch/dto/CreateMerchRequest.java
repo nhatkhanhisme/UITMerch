@@ -24,4 +24,6 @@ public class CreateMerchRequest {
     private int stock;
 
     private String imageUrl;
+
+    private String categorySlug;
 }

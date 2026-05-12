@@ -21,4 +21,5 @@ public class UpdateMerchRequest {
 
     private String imageUrl;
     private MerchItemStatus status;
+    private String categorySlug;
 }

@@ -1,26 +1,22 @@
 package com.uitmerch.backend.merch.entity;
 
-import com.uitmerch.backend.common.model.MerchItemStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
-import org.hibernate.type.SqlTypes;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "merch_items")
+@Table(name = "categories")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MerchItem {
+public class Category {
 
     @Id
     @GeneratedValue
@@ -28,8 +24,8 @@ public class MerchItem {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "org_id", nullable = false, updatable = false)
-    private UUID orgId;
+    @Column(unique = true, nullable = false, length = 100)
+    private String slug;
 
     @Column(nullable = false)
     private String name;
@@ -37,23 +33,8 @@ public class MerchItem {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal price;
-
-    @Column(nullable = false)
-    private int stock;
-
-    @Column(name = "image_url")
-    private String imageUrl;
-
-    @Column(name = "category_id")
-    private UUID categoryId;
-
-    @Builder.Default
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MerchItemStatus status = MerchItemStatus.DRAFT;
+    @Column(name = "display_order", nullable = false)
+    private int displayOrder;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
