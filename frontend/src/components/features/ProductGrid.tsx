@@ -36,11 +36,13 @@ export function ProductGrid({
     <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
       {products.map((product) => (
         <ProductCard
-          category={product.category}
+          detailPath={`/merch/${product.id}`}
+          description={product.description}
           id={`product-${product.id}`}
           image={product.image}
           key={product.id}
           name={product.name}
+          orgName={product.orgName}
           price={product.price}
         />
       ))}

@@ -83,3 +83,7 @@ export const MOCK_ORGANIZATIONS: MockOrganization[] = [
     description: "Toán học ứng dụng trong khoa học dữ liệu.",
   },
 ];
+
+export function findOrganizationById(id: string | undefined) {
+  return MOCK_ORGANIZATIONS.find((organization) => organization.id === id);
+}
