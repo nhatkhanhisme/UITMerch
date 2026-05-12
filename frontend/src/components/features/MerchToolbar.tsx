@@ -54,12 +54,12 @@ export function MerchToolbar({
   onQueryChange,
   query,
 }: MerchToolbarProps) {
-  const [isHovered, setIsHovered] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const activeLabel = filterOptions.find((o) => o.value === activeFilter)?.label ?? "Lọc";
 
   const handleOptionClick = (value: string) => {
     onFilterChange(activeFilter === value ? null : value);
-    setIsHovered(false);
+    setIsOpen(false);
   };
 
   return (
@@ -97,10 +97,12 @@ export function MerchToolbar({
       {/* ── Filter Dropdown ── */}
       <div
         className="group relative z-50"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
       >
         <button
+          aria-expanded={isOpen}
+          aria-haspopup="menu"
           className={[
             "flex items-center gap-2 rounded-full border px-5 py-3",
             "text-sm font-semibold backdrop-blur-md transition",
@@ -109,6 +111,7 @@ export function MerchToolbar({
               : "border-white/60 bg-white/50 text-ink hover:bg-white/75",
           ].join(" ")}
           id="merch-filter-trigger"
+          onClick={() => setIsOpen((open) => !open)}
           type="button"
         >
           <span>{activeLabel}</span>
@@ -119,7 +122,7 @@ export function MerchToolbar({
         <div className="absolute top-full right-0 h-2 w-full bg-transparent" />
 
         {/* Dropdown panel */}
-        {(isHovered || document.activeElement?.id === "merch-filter-trigger") && (
+        {isOpen && (
           <div
             className={[
               "absolute right-0 top-[calc(100%+8px)] min-w-[160px]",
@@ -127,6 +130,7 @@ export function MerchToolbar({
               "shadow-[0_8px_32px_rgba(82,128,145,0.15)] overflow-hidden",
               "animate-in fade-in slide-in-from-top-2 duration-200"
             ].join(" ")}
+            role="menu"
           >
             {filterOptions.map((option) => (
               <button
@@ -140,6 +144,7 @@ export function MerchToolbar({
                 id={`filter-option-${option.value}`}
                 key={option.value}
                 onClick={() => handleOptionClick(option.value)}
+                role="menuitem"
                 type="button"
               >
                 <span>{option.label}</span>
