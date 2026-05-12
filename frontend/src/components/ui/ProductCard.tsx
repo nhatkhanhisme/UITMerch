@@ -1,49 +1,82 @@
-import type { ProductCardBaseProps } from "@repo/shared";
 import type { HTMLAttributes } from "react";
-import { Badge } from "./Badge";
+import { Link } from "react-router-dom";
 
-interface ProductCardProps
-  extends ProductCardBaseProps,
-    HTMLAttributes<HTMLElement> {}
+// ─── Props ────────────────────────────────────────────────────────────────────
+export interface ProductCardProps extends HTMLAttributes<HTMLElement> {
+  name: string;
+  image: string | null;
+  orgName: string;
+  description?: string;
+  price?: number;
+}
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
   currency: "VND",
-  style: "currency"
+  style: "currency",
 });
 
+// ─── ProductCard ──────────────────────────────────────────────────────────────
 export function ProductCard({
-  category,
   className = "",
+  description,
   image,
   name,
+  orgName,
   price,
   ...props
 }: ProductCardProps) {
   return (
     <article
       className={[
-        "group overflow-hidden rounded-panel border border-white/40 bg-white/20 p-4 shadow-glass transition duration-300",
+        "group flex flex-col overflow-hidden rounded-panel border border-white/40 bg-white/20 p-4",
+        "shadow-glass transition duration-300",
         "hover:-translate-y-1 hover:border-aqua hover:bg-white/30 hover:shadow-glass-inset",
-        className
+        className,
       ].join(" ")}
       {...props}
     >
-      <div className="aspect-square overflow-hidden rounded-panel bg-canvas">
-        <img
-          alt={name}
-          className="size-full object-cover transition duration-300 group-hover:scale-105"
-          src={image}
-        />
+      {/* Image Area - Transparent if no image */}
+      <div className="relative aspect-square overflow-hidden rounded-[28px] border border-white/20 bg-white/5">
+        {image ? (
+          <img
+            alt={name}
+            className="size-full object-cover mix-blend-multiply transition duration-300 group-hover:scale-105"
+            src={image}
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center bg-transparent text-4xl font-black text-black-blue/10">
+            {name.charAt(0)}
+          </div>
+        )}
       </div>
-      <div className="mt-4 flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <Badge variant="aqua">{category}</Badge>
-          <h3 className="mt-3 truncate font-brand text-2xl font-black leading-tight text-black-blue">
-            {name}
-          </h3>
-        </div>
-        <p className="shrink-0 font-google text-base text-ink">
-          {currencyFormatter.format(price)}
+
+      {/* Info */}
+      <div className="mt-4 flex flex-col gap-1">
+        {/* Org name with underline hover */}
+        <Link
+          className="font-google text-xs font-medium text-ink/50 transition-colors hover:text-black-blue hover:underline"
+          to="#"
+        >
+          {orgName}
+        </Link>
+
+        {/* Product name */}
+        <h3 className="font-brand text-xl font-black leading-tight text-black-blue">
+          {name}
+        </h3>
+
+        {/* Description */}
+        {description ? (
+          <p className="line-clamp-2 mt-1 font-google text-xs text-ink/60">
+            {description}
+          </p>
+        ) : null}
+
+        {/* Price or free tag */}
+        <p className="mt-3 font-google text-sm font-semibold text-ink">
+          {price !== undefined && price > 0
+            ? currencyFormatter.format(price)
+            : "Sự kiện / Miễn phí"}
         </p>
       </div>
     </article>
