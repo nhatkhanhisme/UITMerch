@@ -60,7 +60,7 @@ mvn spring-boot:run
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 3.3.5, Java 21 |
-| Database | PostgreSQL 16, Flyway (V1–V13 migrations) |
+| Database | PostgreSQL 16, Flyway (V1–V15 migrations) |
 | Auth | JWT via JJWT 0.12.x — stateless, role embedded in token |
 | Storage | Supabase Storage (S3-compatible via AWS SDK) |
 | API Docs | springdoc-openapi 2.6 — Swagger UI at `/swagger-ui.html` |
@@ -97,8 +97,9 @@ Role enforcement is via `@PreAuthorize` at method level (not in `SecurityConfig`
 |---|---|---|
 | POST | `/register` | Register a customer account |
 | POST | `/register/organizer` | Register an organizer account |
-| POST | `/verify-email` | Verify email with OTP |
+| POST | `/verify-email` | Verify email with OTP (locked for 15 min after 5 failed attempts) |
 | POST | `/login` | Login and receive JWT tokens |
+| POST | `/logout` | Invalidate the current JWT (requires Bearer token) |
 
 ### User — `/api/v1/customer` *(CUSTOMER)*
 
@@ -270,12 +271,26 @@ Auto-seeded on startup. Skipped if data already exists.
 | `cust1@uit.edu.vn` | `Cust1234` | CUSTOMER | Active cart · wishlist · 2 orders |
 | `cust2@uit.edu.vn` | `Cust1234` | CUSTOMER | 1 order READY\_FOR\_PICKUP |
 
-### PostgreSQL real seed (V12 + V13 migrations)
+### PostgreSQL real seed (V12–V15 migrations)
 
-14 real UIT clubs and organizations with 40+ merch items across all 7 categories.
-All organizer accounts use password `UIT@2025`.
+14 real UIT clubs and organizations with 35 merch items across all 7 categories.
+All seeded accounts use password `UIT@2025`.
 
-Sample organizers: `cs.khmt@uit.edu.vn`, `uitstore@uit.edu.vn`, `handmade.xtn@uit.edu.vn` and 11 more.
+| Email | Role | Notes |
+|---|---|---|
+| `admin@uitmerch.edu.vn` | ADMIN | Platform administrator |
+| `cs.khmt@uit.edu.vn` | ORGANIZER | Khoa Khoa học Máy tính — ACTIVE org |
+| `uitstore@uit.edu.vn` | ORGANIZER | UIT Store — ACTIVE org |
+| `handmade.xtn@uit.edu.vn` | ORGANIZER | Đội hình Handmade — ACTIVE org |
+| *(11 more organizers)* | ORGANIZER | See V12 migration for full list |
+| `nguyen.van.an@student.uit.edu.vn` | CUSTOMER | Has active cart + wishlist + 2 orders |
+| `tran.thi.bich@student.uit.edu.vn` | CUSTOMER | Has active cart + wishlist + 1 order |
+| `le.minh.cuong@student.uit.edu.vn` | CUSTOMER | Has active cart + wishlist + 1 order |
+| `pham.hong.duc@gmail.com` | CUSTOMER | 1 order READY\_FOR\_PICKUP |
+| `hoang.thu.em@gmail.com` | CUSTOMER | 1 order SUCCESS |
+
+5 events seeded (PUBLISHED, DRAFT, ENDED) with event–merch links.
+8 orders seeded covering all status values (PENDING → SUCCESS → CANCELLED, including 2 guest orders).
 
 ---
 
@@ -291,6 +306,7 @@ Required only for the **production** profile. Docker and dev profiles have built
 | `APP_JWT_SECRET` | *(required)* | JWT signing secret — min 32 chars |
 | `APP_JWT_EXPIRATION` | `86400000` | Access token TTL (ms) — 24 h |
 | `APP_JWT_REFRESH_EXPIRATION` | `604800000` | Refresh token TTL (ms) — 7 days |
+| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:5173` | Comma-separated list of allowed CORS origins |
 
 ### Database
 
@@ -336,8 +352,10 @@ Flyway manages schema versions in `src/main/resources/db/migration/`:
 | V9 | Indexes on all FK + frequently queried columns |
 | V10 | `users.full_name` NOT NULL |
 | V11 | `merch_items.stock >= 0` check constraint |
-| V12 | Seed 14 real UIT organizations with 40+ merch items |
+| V12 | Seed 14 real UIT organizations with 35 merch items |
 | V13 | `categories` table + 7 seeded categories + `merch_items.category_id` FK |
+| V14 | Seed 1 admin + 5 customers, 5 events + event–merch links, 8 orders, 3 carts, 3 wishlists |
+| V15 | `otp_tokens.attempt_count` + `locked_until` for brute-force protection |
 
 Flyway is **disabled** in the `dev` profile (Hibernate generates schema from entities).
 Never modify existing migration files — add a new `VN__description.sql` instead.
