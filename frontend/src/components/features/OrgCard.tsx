@@ -1,4 +1,5 @@
 import type { MockOrganization } from "../../mocks/orgData";
+import { Link } from "react-router-dom";
 
 // ─── OrgCard ──────────────────────────────────────────────────────────────────
 // Circular Liquid Glass card specifically for Organizations.
@@ -10,7 +11,12 @@ interface OrgCardProps {
 
 export function OrgCard({ org }: OrgCardProps) {
   return (
-    <div className="flex flex-col items-center gap-4" id={`org-${org.id}`}>
+    <Link
+      aria-label={`Xem chi tiết ${org.name}`}
+      className="flex flex-col items-center gap-4 rounded-panel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-aqua"
+      id={`org-${org.id}`}
+      to={`/organization/${org.id}`}
+    >
       {/* Liquid glass circle strictly aspect-square and rounded-full */}
       <div
         className={[
@@ -37,6 +43,6 @@ export function OrgCard({ org }: OrgCardProps) {
       <p className="text-center font-fredoka text-base font-bold leading-tight text-black-blue">
         {org.shortName}
       </p>
-    </div>
+    </Link>
   );
 }

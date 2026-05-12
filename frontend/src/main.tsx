@@ -7,6 +7,7 @@ import { MerchPage } from "./pages/MerchPage";
 import { AuthPage } from "./pages/AuthPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { OrganizerDashboardPage } from "./pages/OrganizerDashboardPage";
+import { OrganizationDetailPage } from "./pages/OrganizationDetailPage";
 import { OrganizationPage } from "./pages/OrganizationPage";
 import "./styles.css";
 
@@ -50,6 +51,15 @@ function AppRouter() {
             </>
           }
           path="/organization"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <OrganizationDetailPage />
+            </>
+          }
+          path="/organization/:id"
         />
         <Route
           element={
