@@ -91,6 +91,11 @@ public class JwtTokenProvider {
         return getClaim(token, ROLE_CLAIM, String.class);
     }
 
+    public Instant getExpiryFromToken(String token) {
+        Date expiry = getAllClaims(token).getExpiration();
+        return expiry.toInstant();
+    }
+
     public long getAccessTokenExpiration() {
         return accessTokenExpiration;
     }

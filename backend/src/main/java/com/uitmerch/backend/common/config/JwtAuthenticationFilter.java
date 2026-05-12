@@ -1,6 +1,7 @@
 package com.uitmerch.backend.common.config;
 
 import com.uitmerch.backend.common.security.JwtTokenProvider;
+import com.uitmerch.backend.common.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,9 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
     
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
+                                   TokenBlacklistService tokenBlacklistService) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
     
     @Override
@@ -47,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = extractToken(request);
             
-            if (jwt != null && jwtTokenProvider.validateToken(jwt)) {
+            if (jwt != null && jwtTokenProvider.validateToken(jwt) && !tokenBlacklistService.isBlacklisted(jwt)) {
                 // Extract claims and set authentication
                 String userId = jwtTokenProvider.getUserIdFromToken(jwt);
                 String email = jwtTokenProvider.getEmailFromToken(jwt);

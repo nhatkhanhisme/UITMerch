@@ -12,6 +12,10 @@ app:
     expiration: ${APP_JWT_EXPIRATION:86400000}  # 24 hours in milliseconds
     refresh-expiration: ${APP_JWT_REFRESH_EXPIRATION:604800000}  # 7 days in milliseconds
 
+  # CORS: comma-separated list of allowed origins
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+
   # Supabase Storage Configuration
   # NFR03: Supabase Storage used for images; Base64/BLOB persistence in DB is strictly prohibited
   storage:

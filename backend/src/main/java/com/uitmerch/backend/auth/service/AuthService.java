@@ -7,13 +7,13 @@ import com.uitmerch.backend.auth.repository.OtpTokenRepository;
 import com.uitmerch.backend.auth.repository.UserRepository;
 import com.uitmerch.backend.common.exception.AuthenticationException;
 import com.uitmerch.backend.common.exception.InvalidOtpException;
-import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.exception.UnverifiedEmailException;
 import com.uitmerch.backend.common.exception.UserAlreadyExistsException;
 import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.UserRole;
 import com.uitmerch.backend.common.security.JwtTokenProvider;
 import com.uitmerch.backend.common.service.EmailService;
+import com.uitmerch.backend.common.service.TokenBlacklistService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
@@ -30,12 +31,15 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private static final int OTP_EXPIRY_MINUTES = 15;
+    private static final int OTP_MAX_ATTEMPTS   = 5;
+    private static final int OTP_LOCK_MINUTES   = 15;
 
     private final UserRepository userRepository;
     private final OtpTokenRepository otpTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final EmailService emailService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -63,19 +67,38 @@ public class AuthService {
 
     @Transactional
     public void verifyEmail(VerifyEmailRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User", request.getEmail()));
+        // Generic error for both unknown email and wrong code — prevents user enumeration
+        final InvalidOtpException genericError = new InvalidOtpException("Invalid email or OTP code");
 
-        OtpToken otpToken = otpTokenRepository
-                .findTopByUserAndOtpCodeAndIsUsedFalseOrderByCreatedAtDesc(user, request.getOtpCode())
-                .orElseThrow(() -> new InvalidOtpException("OTP code is invalid or expired"));
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> genericError);
 
-        if (otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new InvalidOtpException("OTP code has expired");
+        OtpToken otp = otpTokenRepository
+                .findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)
+                .orElseThrow(() -> genericError);
+
+        // Enforce lock-out after repeated failures
+        if (otp.getLockedUntil() != null && otp.getLockedUntil().isAfter(LocalDateTime.now())) {
+            long minutesLeft = ChronoUnit.MINUTES.between(LocalDateTime.now(), otp.getLockedUntil()) + 1;
+            throw new InvalidOtpException(
+                    "Too many failed attempts. Please try again in " + minutesLeft + " minute(s).");
         }
 
-        otpToken.setUsed(true);
-        otpTokenRepository.save(otpToken);
+        if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw genericError;
+        }
+
+        if (!otp.getOtpCode().equals(request.getOtpCode())) {
+            otp.setAttemptCount(otp.getAttemptCount() + 1);
+            if (otp.getAttemptCount() >= OTP_MAX_ATTEMPTS) {
+                otp.setLockedUntil(LocalDateTime.now().plusMinutes(OTP_LOCK_MINUTES));
+                log.warn("OTP locked for user {} after {} failed attempts", user.getEmail(), OTP_MAX_ATTEMPTS);
+            }
+            otpTokenRepository.save(otp);
+            throw genericError;
+        }
+
+        otp.setUsed(true);
+        otpTokenRepository.save(otp);
 
         user.setVerified(true);
         userRepository.save(user);
@@ -111,6 +134,12 @@ public class AuthService {
             .role(user.getRole())
             .isVerified(user.isVerified())
             .build();
+    }
+
+    public void logout(String token) {
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            tokenBlacklistService.add(token, jwtTokenProvider.getExpiryFromToken(token));
+        }
     }
 
     private void registerWithRole(

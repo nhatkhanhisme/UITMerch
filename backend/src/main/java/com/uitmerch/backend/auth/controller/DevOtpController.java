@@ -33,7 +33,7 @@ public class DevOtpController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", email));
 
-        Optional<OtpToken> otpOpt = otpTokenRepository.findTopByUserOrderByCreatedAtDesc(user);
+        Optional<OtpToken> otpOpt = otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user);
         if (otpOpt.isEmpty()) {
             return ResponseEntity.ok(ApiResponse.success("No OTP found for this user.", null));
         }

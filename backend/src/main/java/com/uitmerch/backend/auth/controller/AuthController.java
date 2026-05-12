@@ -5,7 +5,9 @@ import com.uitmerch.backend.common.model.ApiResponse;
 import com.uitmerch.backend.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -83,5 +85,20 @@ public class AuthController {
     ) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful.", response));
+    }
+
+    @PostMapping("/logout")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Logout and invalidate the current JWT")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Logged out successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Missing or invalid token")
+    })
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        String token = (authHeader != null && authHeader.startsWith("Bearer "))
+                ? authHeader.substring(7) : null;
+        authService.logout(token);
+        return ResponseEntity.ok(ApiResponse.success("Logged out successfully.", null));
     }
 }

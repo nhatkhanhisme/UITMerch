@@ -38,6 +38,13 @@ public class OtpToken {
     @Column(name = "is_used", nullable = false)
     private boolean isUsed = false;
 
+    @Builder.Default
+    @Column(name = "attempt_count", nullable = false)
+    private int attemptCount = 0;
+
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
