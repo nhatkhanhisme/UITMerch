@@ -19,10 +19,11 @@ public class OrganizationResponse {
     private String logoUrl;
     private String coverUrl;
     private OrganizationStatus status;
+    private long totalMerch;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static OrganizationResponse from(Organization org) {
+    public static OrganizationResponse from(Organization org, long totalMerch) {
         return OrganizationResponse.builder()
             .id(org.getId())
             .ownerId(org.getOwnerId())
@@ -31,8 +32,13 @@ public class OrganizationResponse {
             .logoUrl(org.getLogoUrl())
             .coverUrl(org.getCoverUrl())
             .status(org.getStatus())
+            .totalMerch(totalMerch)
             .createdAt(org.getCreatedAt())
             .updatedAt(org.getUpdatedAt())
             .build();
+    }
+
+    public static OrganizationResponse from(Organization org) {
+        return from(org, 0L);
     }
 }

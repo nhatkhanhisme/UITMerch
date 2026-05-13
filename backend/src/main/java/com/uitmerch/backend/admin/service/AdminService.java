@@ -5,9 +5,11 @@ import com.uitmerch.backend.auth.entity.User;
 import com.uitmerch.backend.auth.repository.UserRepository;
 import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.exception.ValidationException;
+import com.uitmerch.backend.common.model.MerchItemStatus;
 import com.uitmerch.backend.common.model.OrderStatus;
 import com.uitmerch.backend.common.model.OrganizationStatus;
 import com.uitmerch.backend.common.model.UserRole;
+import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.order.dto.OrderResponse;
 import com.uitmerch.backend.order.service.OrderService;
 import com.uitmerch.backend.organization.dto.OrganizationResponse;
@@ -19,7 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
+    private final MerchItemRepository merchItemRepository;
     private final OrderService orderService;
 
     public Page<UserSummaryResponse> listUsers(String roleFilter, Pageable pageable) {
@@ -51,6 +57,7 @@ public class AdminService {
     }
 
     public Page<OrganizationResponse> listOrganizations(String statusFilter, Pageable pageable) {
+        Page<Organization> page;
         if (statusFilter != null) {
             OrganizationStatus status;
             try {
@@ -58,9 +65,12 @@ public class AdminService {
             } catch (IllegalArgumentException e) {
                 throw new ValidationException("Invalid status filter: " + statusFilter);
             }
-            return organizationRepository.findByStatus(status, pageable).map(OrganizationResponse::from);
+            page = organizationRepository.findByStatus(status, pageable);
+        } else {
+            page = organizationRepository.findAll(pageable);
         }
-        return organizationRepository.findAll(pageable).map(OrganizationResponse::from);
+        Map<UUID, Long> counts = batchCountPublishedMerch(page.getContent().stream().map(Organization::getId).toList());
+        return page.map(org -> OrganizationResponse.from(org, counts.getOrDefault(org.getId(), 0L)));
     }
 
     @Transactional
@@ -68,7 +78,9 @@ public class AdminService {
         Organization org = organizationRepository.findById(orgId)
             .orElseThrow(() -> new ResourceNotFoundException("Organization", orgId.toString()));
         org.setStatus(newStatus);
-        return OrganizationResponse.from(organizationRepository.save(org));
+        Organization saved = organizationRepository.save(org);
+        long count = merchItemRepository.countByOrgIdAndStatus(saved.getId(), MerchItemStatus.PUBLISHED);
+        return OrganizationResponse.from(saved, count);
     }
 
     public Page<OrderResponse> listAllOrders(String statusFilter, Pageable pageable) {
@@ -82,5 +94,12 @@ public class AdminService {
             return orderService.getAllOrders(status, pageable);
         }
         return orderService.getAllOrders(null, pageable);
+    }
+
+    private Map<UUID, Long> batchCountPublishedMerch(List<UUID> orgIds) {
+        if (orgIds.isEmpty()) return Map.of();
+        return merchItemRepository.countByOrgIdsAndStatus(orgIds, MerchItemStatus.PUBLISHED)
+            .stream()
+            .collect(Collectors.toMap(row -> (UUID) row[0], row -> (Long) row[1]));
     }
 }

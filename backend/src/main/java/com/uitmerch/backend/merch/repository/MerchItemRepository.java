@@ -5,6 +5,8 @@ import com.uitmerch.backend.merch.entity.MerchItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.UUID;
 public interface MerchItemRepository extends JpaRepository<MerchItem, UUID> {
 
     Page<MerchItem> findByStatus(MerchItemStatus status, Pageable pageable);
+
+    List<MerchItem> findAllByStatus(MerchItemStatus status);
 
     Page<MerchItem> findByStatusAndNameContainingIgnoreCase(MerchItemStatus status, String name, Pageable pageable);
 
@@ -28,7 +32,11 @@ public interface MerchItemRepository extends JpaRepository<MerchItem, UUID> {
 
     Optional<MerchItem> findByIdAndOrgId(UUID id, UUID orgId);
 
-    List<MerchItem> findTop10ByStatusOrderByCreatedAtDesc(MerchItemStatus status);
-
     boolean existsByIdAndOrgId(UUID id, UUID orgId);
+
+
+    long countByOrgIdAndStatus(UUID orgId, MerchItemStatus status);
+
+    @Query("SELECT m.orgId, COUNT(m) FROM MerchItem m WHERE m.orgId IN :orgIds AND m.status = :status GROUP BY m.orgId")
+    List<Object[]> countByOrgIdsAndStatus(@Param("orgIds") List<UUID> orgIds, @Param("status") MerchItemStatus status);
 }
