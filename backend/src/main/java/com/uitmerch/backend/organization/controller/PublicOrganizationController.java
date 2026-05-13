@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,7 +39,7 @@ public class PublicOrganizationController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<java.util.List<OrganizationResponse>>> listOrganizations(
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+        @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<OrganizationResponse> page = organizationService.listActiveOrganizations(pageable);
         return ResponseEntity.ok(
@@ -67,7 +68,7 @@ public class PublicOrganizationController {
     })
     public ResponseEntity<ApiResponse<java.util.List<MerchResponse>>> getOrgMerch(
         @PathVariable UUID id,
-        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+        @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<MerchResponse> page = merchService.listByOrganization(id, pageable);
         return ResponseEntity.ok(ApiResponse.success("Merch items retrieved.", page.getContent(), PaginationMeta.from(page)));
@@ -82,7 +83,7 @@ public class PublicOrganizationController {
     })
     public ResponseEntity<ApiResponse<java.util.List<EventResponse>>> getOrgEvents(
         @PathVariable UUID id,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+        @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<EventResponse> page = eventService.getPublicEventsByOrg(id, pageable);
         return ResponseEntity.ok(ApiResponse.success("Events retrieved.", page.getContent(), PaginationMeta.from(page)));

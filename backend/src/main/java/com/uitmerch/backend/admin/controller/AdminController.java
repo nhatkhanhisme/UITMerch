@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -45,7 +46,7 @@ public class AdminController {
     })
     public ResponseEntity<ApiResponse<List<UserSummaryResponse>>> listUsers(
         @RequestParam(required = false) String role,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+        @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<UserSummaryResponse> page = adminService.listUsers(role, pageable);
         return ResponseEntity.ok(
@@ -83,7 +84,7 @@ public class AdminController {
     })
     public ResponseEntity<ApiResponse<List<OrganizationResponse>>> listOrganizations(
         @RequestParam(required = false) String status,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+        @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<OrganizationResponse> page = adminService.listOrganizations(status, pageable);
         return ResponseEntity.ok(
@@ -121,7 +122,7 @@ public class AdminController {
     })
     public ResponseEntity<ApiResponse<List<OrderResponse>>> listAllOrders(
         @RequestParam(required = false) String status,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+        @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<OrderResponse> page = adminService.listAllOrders(status, pageable);
         return ResponseEntity.ok(

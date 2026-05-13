@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -42,7 +43,7 @@ public class OrganizerOrderController {
     })
     public ResponseEntity<ApiResponse<java.util.List<OrderResponse>>> getOrgOrders(
         @RequestParam(required = false) OrderStatus status,
-        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+        @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @RequestAttribute("userId") String userId
     ) {
         Page<OrderResponse> page = orderService.getOrgOrders(UUID.fromString(userId), status, pageable);
