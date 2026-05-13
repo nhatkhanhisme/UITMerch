@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+const safeSansFontStack = ["Noto Sans", "Inter", "Roboto", "Arial", "sans-serif"];
+
 const config: Config = {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
@@ -19,12 +21,12 @@ const config: Config = {
         aqua: "#92FBFF"
       },
       fontFamily: {
-        sans: ['"Be Vietnam Pro"', "sans-serif"],
-        fredoka: ["Fredoka", "sans-serif"],
-        brand: ["Fredoka", "sans-serif"],
-        google: ['"Be Vietnam Pro"', "sans-serif"],
-        display: ["Fredoka", "sans-serif"],
-        condensed: ['"Be Vietnam Pro"', "sans-serif"]
+        sans: safeSansFontStack,
+        fredoka: safeSansFontStack,
+        brand: safeSansFontStack,
+        google: safeSansFontStack,
+        display: safeSansFontStack,
+        condensed: safeSansFontStack
       },
       spacing: {
         canvas: "1440px",
