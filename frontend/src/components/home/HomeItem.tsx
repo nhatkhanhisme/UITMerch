@@ -123,32 +123,32 @@ export function HomeItem() {
             <div className="grid">
               {previousProduct && (
                 <div className="home-item-exit">
-                  <p className="font-google text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
+                  <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
                     Vật phẩm nổi bật
                   </p>
-                  <h2 className="mt-5 whitespace-nowrap font-brand text-[36px] font-extrabold leading-[1.02] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
+                  <h2 className="mt-5 whitespace-nowrap font-fredoka text-[36px] font-bold leading-[1.06] tracking-[0.01em] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
                     {previousProduct.title}
                   </h2>
-                  <p className="mt-1 font-google text-xl font-bold text-gold sm:text-2xl">
+                  <p className="mt-1 font-sans text-xl font-semibold text-gold sm:text-2xl">
                     {previousProduct.subtitle}
                   </p>
-                  <p className="mx-auto mt-10 max-w-[430px] font-google text-sm leading-6 text-gray">
+                  <p className="mx-auto mt-10 max-w-[430px] font-sans text-sm font-normal leading-6 text-gray">
                     {previousProduct.description}
                   </p>
                 </div>
               )}
 
               <div className="home-item-enter" key={`copy-${activeSlide}`}>
-                <p className="font-google text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
                   Vật phẩm nổi bật
                 </p>
-                <h2 className="mt-5 whitespace-nowrap font-brand text-[36px] font-extrabold leading-[1.02] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
+                <h2 className="mt-5 whitespace-nowrap font-fredoka text-[36px] font-bold leading-[1.06] tracking-[0.01em] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
                   {activeProduct.title}
                 </h2>
-                <p className="mt-1 font-google text-xl font-bold text-gold sm:text-2xl">
+                <p className="mt-1 font-sans text-xl font-semibold text-gold sm:text-2xl">
                   {activeProduct.subtitle}
                 </p>
-                <p className="mx-auto mt-10 max-w-[430px] font-google text-sm leading-6 text-gray">
+                <p className="mx-auto mt-10 max-w-[430px] font-sans text-sm font-normal leading-6 text-gray">
                   {activeProduct.description}
                 </p>
               </div>
@@ -167,12 +167,12 @@ export function HomeItem() {
             >
               <div className="absolute left-7 top-7 z-20 grid">
                 {previousProduct && (
-                  <div className="home-item-exit rounded-full bg-white/70 px-4 py-2 font-google text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]">
+                  <div className="home-item-exit rounded-full bg-white/70 px-4 py-2 font-sans text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]">
                     {previousProduct.badge}
                   </div>
                 )}
                 <div
-                  className="home-item-enter rounded-full bg-white/70 px-4 py-2 font-google text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]"
+                  className="home-item-enter rounded-full bg-white/70 px-4 py-2 font-sans text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]"
                   key={`badge-${activeSlide}`}
                 >
                   {activeProduct.badge}
@@ -222,13 +222,20 @@ export function HomeItem() {
                     "hover:-translate-y-0.5 hover:bg-white/65 hover:shadow-[0_8px_18px_rgba(82,128,145,0.22),inset_1px_1px_6px_rgba(255,255,255,1)]",
                     "sm:h-5 sm:w-5",
                     isActive
-                      ? "scale-115 border-peach bg-peach/35 shadow-[0_0_0_3px_rgba(248,191,135,0.24),0_0_18px_rgba(248,191,135,0.42),0_8px_18px_rgba(82,128,145,0.22),inset_1px_1px_6px_rgba(255,255,255,0.98)]"
+                      ? "scale-[1.35] border-white/95 bg-white/35 shadow-[0_10px_24px_rgba(82,128,145,0.16),0_0_0_1px_rgba(255,255,255,0.72),inset_2px_2px_8px_rgba(255,255,255,0.96),inset_-2px_-2px_5px_rgba(82,128,145,0.12)]"
                       : "",
                   ].join(" ")}
                   key={product.title}
                   onClick={() => goToSlide(index)}
                   type="button"
-                />
+                >
+                  {isActive ? (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-[3px] rounded-full bg-white/45 shadow-[inset_1px_1px_4px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(82,128,145,0.1)]"
+                    />
+                  ) : null}
+                </button>
               );
             })}
           </div>

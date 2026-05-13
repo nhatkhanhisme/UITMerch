@@ -148,7 +148,7 @@ export function TopNavBar() {
 
         {/* RESPONSIVE */}
         <div
-          className="hidden min-w-0 flex-1 items-center justify-center gap-6 whitespace-nowrap font-google text-[15px] leading-5 tracking-[-0.35px] text-gray md:flex lg:gap-10"
+          className="hidden min-w-0 flex-1 items-center justify-center gap-6 whitespace-nowrap font-sans text-[15px] font-medium leading-5 text-gray md:flex lg:gap-10"
           data-node-id="I17:4918;17:4888"
         >
           {navItems.map((item) => (
@@ -192,13 +192,13 @@ export function TopNavBar() {
                       src={user.avatarUrl}
                     />
                   ) : (
-                    <span className="font-brand text-xs font-black text-black-blue">
+                    <span className="font-fredoka text-xs font-bold text-black-blue">
                       {avatarFallback}
                     </span>
                   )}
                 </span>
                 <span
-                  className="min-w-0 max-w-[140px] truncate font-google text-sm font-semibold text-black-blue sm:max-w-[180px]"
+                  className="min-w-0 max-w-[140px] truncate font-sans text-sm font-medium text-black-blue sm:max-w-[180px]"
                   title={user.fullName}
                 >
                   {user.fullName}
@@ -220,7 +220,7 @@ export function TopNavBar() {
               </button>
               {isAccountMenuOpen ? (
                 <div
-                  className="absolute right-0 top-[calc(100%+10px)] z-20 w-[220px] rounded-[24px] border border-white/70 bg-white/80 p-2 font-google text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl"
+                  className="absolute right-0 top-[calc(100%+10px)] z-20 w-[220px] rounded-[24px] border border-white/70 bg-white/80 p-2 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl"
                   role="menu"
                 >
                   <Link
@@ -266,7 +266,7 @@ export function TopNavBar() {
                   src={accountIconUrl}
                 />
               </span>
-              <span className="font-google text-sm font-semibold text-black-blue">
+              <span className="font-sans text-sm font-medium text-black-blue">
                 Account
               </span>
             </Link>
@@ -277,7 +277,7 @@ export function TopNavBar() {
         <button
           aria-expanded={isMenuOpen}
           aria-label="Open navigation"
-          className="grid size-11 place-items-center rounded-full font-google text-2xl leading-none text-slate transition duration-200 ease-out hover:bg-white/35 md:hidden"
+          className="grid size-11 place-items-center rounded-full font-sans text-2xl leading-none text-slate transition duration-200 ease-out hover:bg-white/35 md:hidden"
           onClick={() => setIsMenuOpen((open) => !open)}
           type="button"
         >
@@ -287,7 +287,7 @@ export function TopNavBar() {
 
       {/* RESPONSIVE */}
       {isMenuOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 rounded-[28px] border border-white/70 bg-white/75 p-3 font-google text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl md:hidden">
+        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 rounded-[28px] border border-white/70 bg-white/75 p-3 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl md:hidden">
           {navItems.map((item) => (
             <Link
               className={linkClassName(item.href)}
