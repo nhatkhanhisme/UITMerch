@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/public/orders")
 @RequiredArgsConstructor
-@Tag(name = "Public — Orders", description = "Guest checkout without authentication")
+@Tag(name = "Public", description = "Guest checkout without authentication")
 public class PublicOrderController {
 
     private final OrderService orderService;

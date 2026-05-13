@@ -27,7 +27,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/organizations/merchs")
 @RequiredArgsConstructor
-@Tag(name = "Organizer — Merch", description = "Manage merch catalog for own organization")
+@Tag(name = "Organizer", description = "Manage merch catalog for own organization")
 @SecurityRequirement(name = "bearerAuth")
 public class MerchController {
 

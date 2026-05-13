@@ -26,7 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/organizations/orders")
 @RequiredArgsConstructor
-@Tag(name = "Organizer — Orders", description = "Manage incoming orders for the organizer's organization")
+@Tag(name = "Organizer", description = "Manage incoming orders for the organizer's organization")
 @SecurityRequirement(name = "bearerAuth")
 public class OrganizerOrderController {
 

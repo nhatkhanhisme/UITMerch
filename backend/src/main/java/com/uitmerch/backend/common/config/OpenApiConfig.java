@@ -30,22 +30,12 @@ public class OpenApiConfig {
                 .title("UITMerch API")
                 .version("2.0")
                 .description("UIT Merchandise Platform — multi-role e-commerce for clubs and faculties."))
-            // Tag order follows SRS NFR07: Auth → Public → Customer → Organizer → Admin
             .tags(List.of(
+                new Tag().name("Admin").description("Platform governance — users, organizations, orders"),
                 new Tag().name("Auth").description("Registration, email verification, and login"),
-                new Tag().name("Public — Merch").description("Browse published merchandise (no auth)"),
-                new Tag().name("Public — Organizations").description("Browse active organizations and their merch (no auth)"),
-                new Tag().name("Public — Events").description("Browse published events (no auth)"),
-                new Tag().name("Public — Orders").description("Guest checkout (no auth)"),
-                new Tag().name("Customer — Profile").description("View and update own profile"),
-                new Tag().name("Customer — Cart").description("Cart management and checkout"),
-                new Tag().name("Customer — Orders").description("Order history"),
-                new Tag().name("Customer — Wishlist").description("Save and manage favourite merch items"),
-                new Tag().name("Organizer — Organization").description("Manage own organization profile"),
-                new Tag().name("Organizer — Merch").description("Manage merch catalog"),
-                new Tag().name("Organizer — Orders").description("View and process incoming orders"),
-                new Tag().name("Organizer — Events").description("Create and manage events"),
-                new Tag().name("Admin").description("Platform governance — users, organizations, orders")
+                new Tag().name("Public").description("Browse merchandise, organizations, events (no auth)"),
+                new Tag().name("Organizer").description("Manage organization, merch catalog, orders, and events"),
+                new Tag().name("Customer").description("Profile, cart, orders, and wishlist")
             ));
     }
 }

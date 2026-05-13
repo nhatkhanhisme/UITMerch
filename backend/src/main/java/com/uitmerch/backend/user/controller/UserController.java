@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/customer")
 @RequiredArgsConstructor
-@Tag(name = "Customer — Profile", description = "Manage own profile")
+@Tag(name = "Customer", description = "Manage own profile")
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
 

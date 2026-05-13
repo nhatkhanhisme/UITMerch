@@ -27,7 +27,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/customer/orders")
 @RequiredArgsConstructor
-@Tag(name = "Customer — Orders", description = "View and place orders for authenticated customers")
+@Tag(name = "Customer", description = "View and place orders for authenticated customers")
 @SecurityRequirement(name = "bearerAuth")
 public class CustomerOrderController {
 

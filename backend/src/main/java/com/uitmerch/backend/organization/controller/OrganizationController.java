@@ -21,7 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/organizations")
 @RequiredArgsConstructor
-@Tag(name = "Organizer — Organization", description = "Manage own organization profile")
+@Tag(name = "Organizer", description = "Manage own organization profile")
 @SecurityRequirement(name = "bearerAuth")
 public class OrganizationController {
 

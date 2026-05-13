@@ -25,7 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/public/organizations")
 @RequiredArgsConstructor
-@Tag(name = "Public — Organizations", description = "Browse active organizations")
+@Tag(name = "Public", description = "Browse active organizations")
 public class PublicOrganizationController {
 
     private final OrganizationService organizationService;

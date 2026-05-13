@@ -21,7 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/customer/cart")
 @RequiredArgsConstructor
-@Tag(name = "Customer — Cart", description = "Manage shopping cart for authenticated customers")
+@Tag(name = "Customer", description = "Manage shopping cart for authenticated customers")
 @SecurityRequirement(name = "bearerAuth")
 public class CartController {
 
