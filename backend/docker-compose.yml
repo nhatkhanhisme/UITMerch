@@ -1,26 +1,7 @@
 services:
 
-  # ── PostgreSQL ───────────────────────────────────────────────────────────────
-  db:
-    image: postgres:16-alpine
-    container_name: uitmerch-db
-    environment:
-      POSTGRES_DB: uitmerch
-      POSTGRES_USER: uitmerch
-      POSTGRES_PASSWORD: uitmerch_dev
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U uitmerch -d uitmerch"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    restart: unless-stopped
-
   # ── Spring Boot backend ───────────────────────────────────────────────────────
+  # Connects to real Supabase (DB + Storage + Mail) via credentials in .env
   backend:
     build:
       context: .
@@ -28,19 +9,8 @@ services:
     container_name: uitmerch-backend
     ports:
       - "8080:8080"
+    env_file: .env
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/uitmerch
-      SPRING_DATASOURCE_USERNAME: uitmerch
-      SPRING_DATASOURCE_PASSWORD: uitmerch_dev
-      # JWT secret — has a safe default for local dev; override in production
-      APP_JWT_SECRET: ${APP_JWT_SECRET:-docker-dev-jwt-secret-uitmerch-min-32-chars!}
-      # CORS — add your frontend origin if different from the defaults
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
-    depends_on:
-      db:
-        condition: service_healthy
     restart: on-failure
-
-volumes:
-  pgdata:
