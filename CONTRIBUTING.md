@@ -70,36 +70,35 @@ Default frontend dev URL: `http://localhost:5173` (Vite will choose another port
 
 ```text
 UITMerch/
-+- backend/                      # Spring Boot backend service
-�  +- src/main/java/com/uitmerch/backend/
-�  �  +- auth/                   # Registration, OTP verification, login, logout
-�  �  +- user/                   # Customer profile management
-�  �  +- organization/           # Organization CRUD and admin approval
-�  �  +- merch/                  # Merch catalog (organizer CRUD + public listing)
-�  �  +- cart/                   # Cart and cart items
-�  �  +- order/                  # Order lifecycle, checkout, status transitions
-�  �  +- wishlist/               # Wishlist management
-�  �  +- event/                  # Event CRUD and event-merch links
-�  �  +- admin/                  # Admin-facing APIs (users, orgs, orders)
-�  �  +- common/                 # Shared config, security, exceptions, models
-�  +- src/main/resources/
-�  �  +- application.yaml        # Main runtime configuration
-�  �  +- db/migration/           # Flyway SQL migrations (V1–V15)
-�  +- src/test/                  # Backend tests
-�  +- .env.example               # Backend env template
-�  +- pom.xml                    # Maven dependencies/build config
-+- frontend/                     # React frontend app
-�  +- src/
-�  �  +- api/                    # API client setup
-�  �  +- components/             # UI and page-specific components
-�  �  +- pages/                  # Route-level pages
-�  �  +- stores/                 # Zustand stores (auth/cart)
-�  �  +- mocks/                  # Mock responses and sample data
-�  �  +- main.tsx                # App entry
-�  +- public/assets/figma/       # Static design assets
-�  +- .env.example               # Frontend env template
-�  +- package.json               # Frontend scripts and dependencies
-+- README.md                     # Root readme (currently minimal)
+├── backend/                      # Spring Boot backend service
+│   ├── src/main/java/com/uitmerch/backend/
+│   │   ├── auth/                 # Registration, OTP verification, login, logout
+│   │   ├── user/                 # Customer profile management
+│   │   ├── organization/         # Organization CRUD and admin approval
+│   │   ├── merch/                # Merch catalog (organizer CRUD + public listing)
+│   │   ├── cart/                 # Cart and cart items
+│   │   ├── order/                # Order lifecycle, checkout, status transitions
+│   │   ├── wishlist/             # Wishlist management
+│   │   ├── event/                # Event CRUD and event-merch links
+│   │   ├── admin/                # Admin-facing APIs (users, orgs, orders)
+│   │   └── common/               # Shared config, security, exceptions, models
+│   ├── src/main/resources/
+│   │   ├── application.yaml      # Main runtime configuration
+│   │   └── db/migration/         # Flyway SQL migrations (V1–V15)
+│   ├── src/test/                 # Backend tests
+│   ├── .env.example              # Backend env template
+│   └── pom.xml                   # Maven dependencies/build config
+└── frontend/                     # React frontend app
+    ├── src/
+    │   ├── api/                  # API client setup
+    │   ├── components/           # UI and page-specific components
+    │   ├── pages/                # Route-level pages
+    │   ├── stores/               # Zustand stores (auth/cart)
+    │   ├── mocks/                # Mock responses and sample data
+    │   └── main.tsx              # App entry
+    ├── public/assets/figma/      # Static design assets
+    ├── .env.example              # Frontend env template
+    └── package.json              # Frontend scripts and dependencies
 ```
 
 ## Git Workflow
