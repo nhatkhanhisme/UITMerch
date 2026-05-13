@@ -10,6 +10,7 @@ import axios from "axios";
 import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
 import { Button, Input } from "../components/ui";
 import { getApiErrorMessage } from "../api/auth";
+import { uploadAvatarImage } from "../api/storage";
 import {
   getCustomerProfile,
   getOrganizerProfile,
@@ -91,6 +92,7 @@ export function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isMissingOrganization, setIsMissingOrganization] = useState(false);
@@ -103,6 +105,8 @@ export function ProfilePage() {
   const location = useLocation();
   const navigate = useNavigate();
   const returnTo = `${location.pathname}${location.search}${location.hash}`;
+  const userId = user?.id;
+  const userRole = user?.role;
 
   const avatarLabel = useMemo(() => {
     if (!user?.fullName) {
@@ -113,7 +117,7 @@ export function ProfilePage() {
   }, [user?.fullName]);
 
   useEffect(() => {
-    if (!user) {
+    if (!userId || !userRole) {
       return;
     }
 
@@ -126,7 +130,7 @@ export function ProfilePage() {
       setIsMissingOrganization(false);
 
       try {
-        if (user.role === "CUSTOMER") {
+        if (userRole === "CUSTOMER") {
           const response = await getCustomerProfile();
           const profile = response.data;
 
@@ -153,7 +157,7 @@ export function ProfilePage() {
           return;
         }
 
-        if (user.role === "ORGANIZER") {
+        if (userRole === "ORGANIZER") {
           const response = await getOrganizerProfile();
           const profile = response.data;
 
@@ -184,7 +188,7 @@ export function ProfilePage() {
         }
 
         if (
-          user.role === "ORGANIZER" &&
+          userRole === "ORGANIZER" &&
           axios.isAxiosError(error) &&
           error.response?.status === 404
         ) {
@@ -206,7 +210,7 @@ export function ProfilePage() {
     return () => {
       isActive = false;
     };
-  }, [user, updateUser]);
+  }, [userId, userRole, updateUser]);
 
   const canEdit =
     !isLoading &&
@@ -224,6 +228,7 @@ export function ProfilePage() {
     setIsEditing(false);
     setErrorMessage(null);
     setSuccessMessage(null);
+    setIsUploadingAvatar(false);
 
     if (user?.role === "CUSTOMER" && customerProfile) {
       setCustomerForm({
@@ -252,6 +257,33 @@ export function ProfilePage() {
     }));
   };
 
+  const handleAvatarUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) {
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const input = event.target;
+
+    try {
+      const publicUrl = await uploadAvatarImage(file, user.id);
+      setCustomerForm((current) => ({
+        ...current,
+        avatarUrl: publicUrl,
+      }));
+      setSuccessMessage("Avatar uploaded. Save changes to apply it.");
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error));
+    } finally {
+      setIsUploadingAvatar(false);
+      input.value = "";
+    }
+  };
+
   const handleOrganizerChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setOrganizerForm((current) => ({
@@ -262,6 +294,11 @@ export function ProfilePage() {
 
   const handleCustomerSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isUploadingAvatar) {
+      setErrorMessage("Please wait for the avatar upload to finish.");
+      return;
+    }
 
     const fullName = customerForm.fullName.trim();
     if (!fullName) {
@@ -435,7 +472,7 @@ export function ProfilePage() {
                     type="button"
                     variant="outline"
                     onClick={cancelEditing}
-                    disabled={isSaving}
+                    disabled={isSaving || isUploadingAvatar}
                   >
                     Cancel
                   </Button>
@@ -447,6 +484,7 @@ export function ProfilePage() {
                     }
                     loading={isSaving}
                     type="submit"
+                    disabled={isSaving || isUploadingAvatar}
                   >
                     Save changes
                   </Button>
@@ -526,13 +564,42 @@ export function ProfilePage() {
                 value={customerForm.address}
               />
               <div className="md:col-span-2">
-                <Input
-                  label="Avatar URL"
-                  name="avatarUrl"
-                  onChange={handleCustomerChange}
-                  placeholder="https://"
-                  value={customerForm.avatarUrl}
-                />
+                <label
+                  className="font-sans text-sm text-gray"
+                  htmlFor="avatar-upload"
+                >
+                  Avatar image
+                </label>
+                <div className="mt-2 flex flex-wrap items-center gap-4">
+                  <div className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
+                    {customerForm.avatarUrl ? (
+                      <img
+                        alt={customerForm.fullName}
+                        className="size-full object-cover"
+                        src={customerForm.avatarUrl}
+                      />
+                    ) : (
+                      <span className="font-fredoka text-lg font-bold text-black-blue">
+                        {avatarLabel}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      accept="image/*"
+                      className="h-12 w-full rounded-glass border border-white/40 bg-white/20 px-4 font-sans text-sm text-ink shadow-glass transition duration-200 file:mr-4 file:rounded-glass file:border-0 file:bg-aqua file:px-4 file:py-2 file:font-sans file:text-sm file:font-semibold file:text-black-blue hover:file:bg-gold"
+                      disabled={isSaving || isUploadingAvatar}
+                      id="avatar-upload"
+                      onChange={handleAvatarUpload}
+                      type="file"
+                    />
+                    <p className="mt-2 font-sans text-xs text-gray">
+                      {isUploadingAvatar
+                        ? "Uploading avatar..."
+                        : "PNG, JPG, GIF, SVG, or WEBP up to 10MB."}
+                    </p>
+                  </div>
+                </div>
               </div>
             </form>
           ) : (
