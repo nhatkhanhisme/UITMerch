@@ -10,7 +10,7 @@ import axios from "axios";
 import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
 import { Button, Input } from "../components/ui";
 import { getApiErrorMessage } from "../api/auth";
-import { uploadAvatarImage } from "../api/storage";
+import { uploadAvatarImage, uploadOrganizerImage } from "../api/storage";
 import {
   getCustomerProfile,
   getOrganizerProfile,
@@ -93,6 +93,8 @@ export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isMissingOrganization, setIsMissingOrganization] = useState(false);
@@ -107,6 +109,9 @@ export function ProfilePage() {
   const returnTo = `${location.pathname}${location.search}${location.hash}`;
   const userId = user?.id;
   const userRole = user?.role;
+  const isUploadingOrganizerMedia = isUploadingLogo || isUploadingCover;
+  const isUploadingProfileMedia =
+    userRole === "CUSTOMER" ? isUploadingAvatar : isUploadingOrganizerMedia;
 
   const avatarLabel = useMemo(() => {
     if (!user?.fullName) {
@@ -229,6 +234,8 @@ export function ProfilePage() {
     setErrorMessage(null);
     setSuccessMessage(null);
     setIsUploadingAvatar(false);
+    setIsUploadingLogo(false);
+    setIsUploadingCover(false);
 
     if (user?.role === "CUSTOMER" && customerProfile) {
       setCustomerForm({
@@ -280,6 +287,72 @@ export function ProfilePage() {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
       setIsUploadingAvatar(false);
+      input.value = "";
+    }
+  };
+
+  const handleOrganizerLogoUpload = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file || !organizerProfile) {
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const input = event.target;
+
+    try {
+      const publicUrl = await uploadOrganizerImage(
+        file,
+        organizerProfile.id,
+        "logo",
+      );
+      setOrganizerForm((current) => ({
+        ...current,
+        logoUrl: publicUrl,
+      }));
+      setSuccessMessage("Logo uploaded. Save changes to apply it.");
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error));
+    } finally {
+      setIsUploadingLogo(false);
+      input.value = "";
+    }
+  };
+
+  const handleOrganizerCoverUpload = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file || !organizerProfile) {
+      return;
+    }
+
+    setIsUploadingCover(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const input = event.target;
+
+    try {
+      const publicUrl = await uploadOrganizerImage(
+        file,
+        organizerProfile.id,
+        "cover",
+      );
+      setOrganizerForm((current) => ({
+        ...current,
+        coverUrl: publicUrl,
+      }));
+      setSuccessMessage("Cover uploaded. Save changes to apply it.");
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error));
+    } finally {
+      setIsUploadingCover(false);
       input.value = "";
     }
   };
@@ -345,6 +418,11 @@ export function ProfilePage() {
 
   const handleOrganizerSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isUploadingOrganizerMedia) {
+      setErrorMessage("Please wait for the image upload to finish.");
+      return;
+    }
 
     const name = organizerForm.name.trim();
     if (!name) {
@@ -472,7 +550,7 @@ export function ProfilePage() {
                     type="button"
                     variant="outline"
                     onClick={cancelEditing}
-                    disabled={isSaving || isUploadingAvatar}
+                    disabled={isSaving || isUploadingProfileMedia}
                   >
                     Cancel
                   </Button>
@@ -484,7 +562,7 @@ export function ProfilePage() {
                     }
                     loading={isSaving}
                     type="submit"
-                    disabled={isSaving || isUploadingAvatar}
+                    disabled={isSaving || isUploadingProfileMedia}
                   >
                     Save changes
                   </Button>
@@ -647,20 +725,80 @@ export function ProfilePage() {
                     value={organizerForm.description}
                   />
                 </div>
-                <Input
-                  label="Logo URL"
-                  name="logoUrl"
-                  onChange={handleOrganizerChange}
-                  placeholder="https://"
-                  value={organizerForm.logoUrl}
-                />
-                <Input
-                  label="Cover URL"
-                  name="coverUrl"
-                  onChange={handleOrganizerChange}
-                  placeholder="https://"
-                  value={organizerForm.coverUrl}
-                />
+                <div className="md:col-span-2">
+                  <label
+                    className="font-sans text-sm text-gray"
+                    htmlFor="org-logo-upload"
+                  >
+                    Logo image
+                  </label>
+                  <div className="mt-2 flex flex-wrap items-center gap-4">
+                    <div className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
+                      {organizerForm.logoUrl ? (
+                        <img
+                          alt="Organization logo"
+                          className="size-full object-cover"
+                          src={organizerForm.logoUrl}
+                        />
+                      ) : (
+                        <span className="font-fredoka text-lg font-bold text-black-blue">
+                          {organizerForm.name
+                            ? organizerForm.name.slice(0, 2).toUpperCase()
+                            : "OR"}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        accept="image/*"
+                        className="h-12 w-full rounded-glass border border-white/40 bg-white/20 px-4 font-sans text-sm text-ink shadow-glass transition duration-200 file:mr-4 file:rounded-glass file:border-0 file:bg-aqua file:px-4 file:py-2 file:font-sans file:text-sm file:font-semibold file:text-black-blue hover:file:bg-gold"
+                        disabled={isSaving || isUploadingOrganizerMedia}
+                        id="org-logo-upload"
+                        onChange={handleOrganizerLogoUpload}
+                        type="file"
+                      />
+                      <p className="mt-2 font-sans text-xs text-gray">
+                        {isUploadingLogo
+                          ? "Uploading logo..."
+                          : "PNG, JPG, GIF, SVG, or WEBP up to 10MB."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <label
+                    className="font-sans text-sm text-gray"
+                    htmlFor="org-cover-upload"
+                  >
+                    Cover image
+                  </label>
+                  <div className="mt-2 grid gap-3">
+                    <div className="h-40 w-full overflow-hidden rounded-panel border border-white/60 bg-white/70 shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
+                      {organizerForm.coverUrl ? (
+                        <img
+                          alt="Organization cover"
+                          className="h-full w-full object-cover"
+                          src={organizerForm.coverUrl}
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-brand-gradient" />
+                      )}
+                    </div>
+                    <input
+                      accept="image/*"
+                      className="h-12 w-full rounded-glass border border-white/40 bg-white/20 px-4 font-sans text-sm text-ink shadow-glass transition duration-200 file:mr-4 file:rounded-glass file:border-0 file:bg-aqua file:px-4 file:py-2 file:font-sans file:text-sm file:font-semibold file:text-black-blue hover:file:bg-gold"
+                      disabled={isSaving || isUploadingOrganizerMedia}
+                      id="org-cover-upload"
+                      onChange={handleOrganizerCoverUpload}
+                      type="file"
+                    />
+                    <p className="font-sans text-xs text-gray">
+                      {isUploadingCover
+                        ? "Uploading cover..."
+                        : "PNG, JPG, GIF, SVG, or WEBP up to 10MB."}
+                    </p>
+                  </div>
+                </div>
               </div>
             </form>
           ) : (
