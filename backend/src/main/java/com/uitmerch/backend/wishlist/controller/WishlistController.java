@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/customer/wishlist")
 @RequiredArgsConstructor
-@Tag(name = "Customer — Wishlist", description = "Save and manage favourite merch items")
+@Tag(name = "Customer", description = "Save and manage favourite merch items")
 @SecurityRequirement(name = "bearerAuth")
 public class WishlistController {
 

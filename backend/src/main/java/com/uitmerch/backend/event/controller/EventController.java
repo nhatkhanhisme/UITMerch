@@ -29,7 +29,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/organizations/events")
 @RequiredArgsConstructor
-@Tag(name = "Organizer — Events", description = "Manage own organization events")
+@Tag(name = "Organizer", description = "Manage own organization events")
 @SecurityRequirement(name = "bearerAuth")
 public class EventController {
 

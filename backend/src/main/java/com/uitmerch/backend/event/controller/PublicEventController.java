@@ -22,7 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/public/events")
 @RequiredArgsConstructor
-@Tag(name = "Public — Events", description = "Browse published events")
+@Tag(name = "Public", description = "Browse published events")
 public class PublicEventController {
 
     private final EventService eventService;

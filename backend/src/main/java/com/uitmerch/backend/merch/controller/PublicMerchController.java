@@ -22,7 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/public/merch")
 @RequiredArgsConstructor
-@Tag(name = "Public — Merch", description = "Browse published merchandise")
+@Tag(name = "Public", description = "Browse published merchandise")
 public class PublicMerchController {
 
     private final MerchService merchService;
