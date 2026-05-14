@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
 import { MerchToolbar } from "../components/features/MerchToolbar";
@@ -11,6 +11,7 @@ import { findOrganizationById } from "../mocks/orgData";
 import type { MockOrganization } from "../mocks/orgData";
 import {
   getPublicOrganizationDetail,
+  getPublicOrganizations,
   getPublicOrgMerch,
 } from "../api/organization";
 import {
@@ -64,6 +65,8 @@ function OrganizationNotFound() {
 
 export function OrganizationDetailPage() {
   const { id } = useParams();
+  const location = useLocation();
+  const locationOrg = location.state?.org as MockOrganization | undefined;
   const fallbackOrg = findOrganizationById(id);
 
   const [query, setQuery] = useState("");
@@ -71,7 +74,7 @@ export function OrganizationDetailPage() {
   const [page, setPage] = useState(1);
 
   // Live States
-  const [liveOrg, setLiveOrg] = useState<MockOrganization | null>(null);
+  const [liveOrg, setLiveOrg] = useState<MockOrganization | null>(locationOrg || null);
   const [liveProducts, setLiveProducts] = useState<MockProduct[]>([]);
   const [totalItems, setTotalItems] = useState<number | null>(null);
   const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
@@ -88,52 +91,72 @@ export function OrganizationDetailPage() {
 
     async function fetchDetail() {
       try {
-        const [orgRes, merchRes] = await Promise.all([
-          getPublicOrganizationDetail(id as string),
-          getPublicOrgMerch(id as string, {
+        // Fetch organization detail independently from products to ensure robust rendering
+        let fetchedOrg: MockOrganization | null = null;
+        try {
+          const orgRes = await getPublicOrganizationDetail(id as string);
+          if (orgRes?.data) {
+            fetchedOrg = mapOrgToMockOrganization(orgRes.data);
+          }
+        } catch {
+          // If direct detail query fails or endpoint is unseeded, look up gracefully in the list API
+          try {
+            const listRes = await getPublicOrganizations({ size: 50 });
+            const matched = listRes?.data?.find((o) => o.id === id);
+            if (matched) {
+              fetchedOrg = mapOrgToMockOrganization(matched);
+            }
+          } catch {
+            // retain fallback/state org
+          }
+        }
+
+        if (isActive && fetchedOrg) {
+          setLiveOrg(fetchedOrg);
+        }
+
+        // Fetch products independently
+        try {
+          const merchRes = await getPublicOrgMerch(id as string, {
             page: page - 1,
             size: PAGE_SIZE,
             sort: activeFilter || undefined,
-          }),
-        ]);
+          });
 
-        if (isActive) {
-          if (orgRes?.data) {
-            setLiveOrg(mapOrgToMockOrganization(orgRes.data));
-          }
-          if (merchRes?.data) {
-            const orgMap = orgRes?.data
-              ? { [orgRes.data.id]: orgRes.data.name }
-              : undefined;
-            let mapped = merchRes.data.map((item) =>
-              mapMerchToMockProduct(item, orgMap),
-            );
-
-            // local keyword fallback if query present
-            if (query) {
-              const q = query.toLowerCase();
-              mapped = mapped.filter(
-                (p) =>
-                  p.name.toLowerCase().includes(q) ||
-                  p.category.toLowerCase().includes(q) ||
-                  p.description.toLowerCase().includes(q),
+          if (isActive) {
+            if (merchRes?.data) {
+              const orgMap = fetchedOrg ? { [fetchedOrg.id]: fetchedOrg.name } : undefined;
+              let mapped = merchRes.data.map((item) =>
+                mapMerchToMockProduct(item, orgMap),
               );
-            }
 
-            setLiveProducts(mapped);
-            if (merchRes.meta) {
-              setTotalItems(merchRes.meta.totalElements);
-              setServerTotalPages(merchRes.meta.totalPages);
+              if (query) {
+                const q = query.toLowerCase();
+                mapped = mapped.filter(
+                  (p) =>
+                    p.name.toLowerCase().includes(q) ||
+                    p.category.toLowerCase().includes(q) ||
+                    p.description.toLowerCase().includes(q),
+                );
+              }
+
+              setLiveProducts(mapped);
+              if (merchRes.meta) {
+                setTotalItems(merchRes.meta.totalElements);
+                setServerTotalPages(merchRes.meta.totalPages);
+              } else {
+                setTotalItems(mapped.length);
+                setServerTotalPages(Math.ceil(mapped.length / PAGE_SIZE));
+              }
             } else {
-              setTotalItems(mapped.length);
-              setServerTotalPages(Math.ceil(mapped.length / PAGE_SIZE));
+              setLiveProducts([]);
             }
+            setHasApiError(false);
           }
-          setHasApiError(false);
-        }
-      } catch {
-        if (isActive) {
-          setHasApiError(true);
+        } catch {
+          if (isActive) {
+            setHasApiError(true);
+          }
         }
       } finally {
         if (isActive) {
@@ -158,28 +181,32 @@ export function OrganizationDetailPage() {
     }
 
     const q = query.toLowerCase();
+    const orgNameSafe = organization.name || "";
+    const shortNameSafe = organization.shortName || "";
+
     let list = MOCK_PRODUCTS.filter((product) => {
+      const pOrgSafe = product.orgName || "";
       const belongsToOrganization =
-        product.orgName === organization.name ||
-        product.orgName.includes(organization.shortName);
+        pOrgSafe === orgNameSafe ||
+        (shortNameSafe && pOrgSafe.includes(shortNameSafe));
 
       if (!belongsToOrganization) {
         return false;
       }
 
       return (
-        product.name.toLowerCase().includes(q) ||
-        product.category.toLowerCase().includes(q) ||
-        product.description.toLowerCase().includes(q)
+        (product.name || "").toLowerCase().includes(q) ||
+        (product.category || "").toLowerCase().includes(q) ||
+        (product.description || "").toLowerCase().includes(q)
       );
     });
 
     switch (activeFilter) {
       case "az":
-        list = [...list].sort((a, b) => a.name.localeCompare(b.name, "vi"));
+        list = [...list].sort((a, b) => (a.name || "").localeCompare(b.name || "", "vi"));
         break;
       case "za":
-        list = [...list].sort((a, b) => b.name.localeCompare(a.name, "vi"));
+        list = [...list].sort((a, b) => (b.name || "").localeCompare(a.name || "", "vi"));
         break;
       case "price-asc":
         list = [...list].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
@@ -244,7 +271,7 @@ export function OrganizationDetailPage() {
                   />
                 ) : (
                   <span className="font-fredoka text-6xl font-bold text-black-blue/20">
-                    {organization.shortName.charAt(0)}
+                    {(organization.shortName || organization.name || "U").charAt(0)}
                   </span>
                 )}
               </div>
