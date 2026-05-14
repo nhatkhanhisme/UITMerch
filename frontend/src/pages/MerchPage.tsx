@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
 import { FeaturedSlider } from "../components/features/FeaturedSlider";
@@ -6,11 +6,15 @@ import { MerchToolbar } from "../components/features/MerchToolbar";
 import type { FilterOption } from "../components/features/MerchToolbar";
 import { ProductGrid } from "../components/features/ProductGrid";
 import { FEATURED_PRODUCTS, MOCK_PRODUCTS } from "../mocks/merchData";
+import type { MockProduct } from "../mocks/merchData";
+import { getPublicMerchList } from "../api/merch";
+import { getPublicOrganizations } from "../api/organization";
+import { mapMerchToMockProduct } from "../types/shared";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
     default: m.ShaderBackground,
-  }))
+  })),
 );
 
 const PAGE_SIZE = 8;
@@ -27,12 +31,79 @@ export function MerchPage() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  const processed = useMemo(() => {
+  // Live API State
+  const [liveProducts, setLiveProducts] = useState<MockProduct[]>([]);
+  const [totalItems, setTotalItems] = useState<number | null>(null);
+  const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasApiError, setHasApiError] = useState(false);
+
+  // Load live data with debounce/effects
+  useEffect(() => {
+    let isActive = true;
+    setIsLoading(true);
+
+    const timer = window.setTimeout(() => {
+      async function fetchData() {
+        try {
+          // Fetch org map
+          const orgsRes = await getPublicOrganizations({ size: 50 });
+          const orgMap: Record<string, string> = {};
+          if (orgsRes?.data) {
+            orgsRes.data.forEach((o) => {
+              orgMap[o.id] = o.name;
+            });
+          }
+
+          const res = await getPublicMerchList({
+            keyword: query || undefined,
+            page: page - 1,
+            size: PAGE_SIZE,
+            sort: activeFilter || undefined,
+          });
+
+          if (isActive && res?.data) {
+            const mapped = res.data.map((item) =>
+              mapMerchToMockProduct(item, orgMap),
+            );
+            setLiveProducts(mapped);
+            setHasApiError(false);
+
+            if (res.meta) {
+              setTotalItems(res.meta.totalElements);
+              setServerTotalPages(res.meta.totalPages);
+            } else {
+              setTotalItems(mapped.length);
+              setServerTotalPages(Math.ceil(mapped.length / PAGE_SIZE));
+            }
+          }
+        } catch {
+          if (isActive) {
+            setHasApiError(true);
+          }
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
+        }
+      }
+
+      void fetchData();
+    }, 300);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(timer);
+    };
+  }, [query, activeFilter, page]);
+
+  // Fallback local processed list if API fails or is not available
+  const localProcessed = useMemo(() => {
     let list = MOCK_PRODUCTS.filter(
       (p) =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.orgName.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase())
+        p.category.toLowerCase().includes(query.toLowerCase()),
     );
 
     switch (activeFilter) {
@@ -53,12 +124,23 @@ export function MerchPage() {
     return list;
   }, [query, activeFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(processed.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const paginated = processed.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
+  const localTotalPages = Math.max(1, Math.ceil(localProcessed.length / PAGE_SIZE));
+  const localPaginated = useMemo(() => {
+    const currentPage = Math.min(page, localTotalPages);
+    return localProcessed.slice(
+      (currentPage - 1) * PAGE_SIZE,
+      currentPage * PAGE_SIZE,
+    );
+  }, [localProcessed, page, localTotalPages]);
+
+  // Decide whether to show live products or fall back cleanly
+  const displayedProducts = hasApiError ? localPaginated : liveProducts;
+  const countDisplay = hasApiError
+    ? localProcessed.length
+    : totalItems ?? liveProducts.length;
+  const pagesDisplay = hasApiError
+    ? localTotalPages
+    : serverTotalPages ?? (Math.ceil(liveProducts.length / PAGE_SIZE) || 1);
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
@@ -71,7 +153,7 @@ export function MerchPage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-transparent pb-10 pt-28 px-5 sm:px-8 lg:px-16">
+    <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
         <div className="z-0">
           <ShaderBackground />
@@ -85,8 +167,14 @@ export function MerchPage() {
               Kho Vật Phẩm
             </h1>
             <p className="mt-2 font-sans text-sm text-ink/60">
-              {processed.length} vật phẩm
-              {query ? ` phù hợp với "${query}"` : ""}
+              {isLoading ? (
+                <span>Đang tải dữ liệu...</span>
+              ) : (
+                <span>
+                  {countDisplay} vật phẩm
+                  {query ? ` phù hợp với "${query}"` : ""}
+                </span>
+              )}
             </p>
           </header>
 
@@ -100,12 +188,14 @@ export function MerchPage() {
             query={query}
           />
 
-          <ProductGrid products={paginated} />
+          <div className={isLoading ? "opacity-50 transition-opacity" : ""}>
+            <ProductGrid products={displayedProducts} />
+          </div>
 
           <Pagination
-            currentPage={currentPage}
+            currentPage={page}
             onPageChange={setPage}
-            totalPages={totalPages}
+            totalPages={pagesDisplay}
           />
         </GlassContainer>
       </div>

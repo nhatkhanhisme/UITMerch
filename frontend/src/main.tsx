@@ -12,6 +12,7 @@ import { OrganizerProfilePage } from "./pages/OrganizerProfilePage";
 import { OrganizerDashboardPage } from "./pages/OrganizerDashboardPage";
 import { OrganizationDetailPage } from "./pages/OrganizationDetailPage";
 import { OrganizationPage } from "./pages/OrganizationPage";
+import { EventPage } from "./pages/EventPage";
 import { ToastContainer } from "./components/ui";
 import "./styles.css";
 
@@ -92,6 +93,15 @@ function AppRouter() {
             </>
           }
           path="/organization/:id"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <EventPage />
+            </>
+          }
+          path="/events"
         />
         <Route
           element={

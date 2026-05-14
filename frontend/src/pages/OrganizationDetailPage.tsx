@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
@@ -6,7 +6,17 @@ import { MerchToolbar } from "../components/features/MerchToolbar";
 import type { FilterOption } from "../components/features/MerchToolbar";
 import { ProductGrid } from "../components/features/ProductGrid";
 import { MOCK_PRODUCTS } from "../mocks/merchData";
+import type { MockProduct } from "../mocks/merchData";
 import { findOrganizationById } from "../mocks/orgData";
+import type { MockOrganization } from "../mocks/orgData";
+import {
+  getPublicOrganizationDetail,
+  getPublicOrgMerch,
+} from "../api/organization";
+import {
+  mapMerchToMockProduct,
+  mapOrgToMockOrganization,
+} from "../types/shared";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -54,11 +64,94 @@ function OrganizationNotFound() {
 
 export function OrganizationDetailPage() {
   const { id } = useParams();
-  const organization = findOrganizationById(id);
+  const fallbackOrg = findOrganizationById(id);
+
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
+  // Live States
+  const [liveOrg, setLiveOrg] = useState<MockOrganization | null>(null);
+  const [liveProducts, setLiveProducts] = useState<MockProduct[]>([]);
+  const [totalItems, setTotalItems] = useState<number | null>(null);
+  const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasApiError, setHasApiError] = useState(false);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let isActive = true;
+    setIsLoading(true);
+
+    async function fetchDetail() {
+      try {
+        const [orgRes, merchRes] = await Promise.all([
+          getPublicOrganizationDetail(id as string),
+          getPublicOrgMerch(id as string, {
+            page: page - 1,
+            size: PAGE_SIZE,
+            sort: activeFilter || undefined,
+          }),
+        ]);
+
+        if (isActive) {
+          if (orgRes?.data) {
+            setLiveOrg(mapOrgToMockOrganization(orgRes.data));
+          }
+          if (merchRes?.data) {
+            const orgMap = orgRes?.data
+              ? { [orgRes.data.id]: orgRes.data.name }
+              : undefined;
+            let mapped = merchRes.data.map((item) =>
+              mapMerchToMockProduct(item, orgMap),
+            );
+
+            // local keyword fallback if query present
+            if (query) {
+              const q = query.toLowerCase();
+              mapped = mapped.filter(
+                (p) =>
+                  p.name.toLowerCase().includes(q) ||
+                  p.category.toLowerCase().includes(q) ||
+                  p.description.toLowerCase().includes(q),
+              );
+            }
+
+            setLiveProducts(mapped);
+            if (merchRes.meta) {
+              setTotalItems(merchRes.meta.totalElements);
+              setServerTotalPages(merchRes.meta.totalPages);
+            } else {
+              setTotalItems(mapped.length);
+              setServerTotalPages(Math.ceil(mapped.length / PAGE_SIZE));
+            }
+          }
+          setHasApiError(false);
+        }
+      } catch {
+        if (isActive) {
+          setHasApiError(true);
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void fetchDetail();
+
+    return () => {
+      isActive = false;
+    };
+  }, [id, page, activeFilter, query]);
+
+  const organization = liveOrg || fallbackOrg;
+
+  // Fallback processed list if API missing/error
   const processed = useMemo(() => {
     if (!organization) {
       return [];
@@ -66,7 +159,9 @@ export function OrganizationDetailPage() {
 
     const q = query.toLowerCase();
     let list = MOCK_PRODUCTS.filter((product) => {
-      const belongsToOrganization = product.orgName === organization.name;
+      const belongsToOrganization =
+        product.orgName === organization.name ||
+        product.orgName.includes(organization.shortName);
 
       if (!belongsToOrganization) {
         return false;
@@ -97,16 +192,26 @@ export function OrganizationDetailPage() {
     return list;
   }, [activeFilter, organization, query]);
 
-  if (!organization) {
+  if (!organization && !isLoading) {
     return <OrganizationNotFound />;
   }
 
-  const totalPages = Math.max(1, Math.ceil(processed.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const paginated = processed.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
+  const localTotalPages = Math.max(1, Math.ceil(processed.length / PAGE_SIZE));
+  const localPaginated = useMemo(() => {
+    const currentPage = Math.min(page, localTotalPages);
+    return processed.slice(
+      (currentPage - 1) * PAGE_SIZE,
+      currentPage * PAGE_SIZE,
+    );
+  }, [processed, page, localTotalPages]);
+
+  const displayedProducts = hasApiError ? localPaginated : liveProducts;
+  const countDisplay = hasApiError
+    ? processed.length
+    : totalItems ?? liveProducts.length;
+  const pagesDisplay = hasApiError
+    ? localTotalPages
+    : serverTotalPages ?? (Math.ceil(liveProducts.length / PAGE_SIZE) || 1);
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
@@ -127,102 +232,115 @@ export function OrganizationDetailPage() {
       </Suspense>
 
       <div className="relative z-10">
-        <GlassContainer>
-          <section className="grid gap-8 border-b border-white/50 pb-10 lg:grid-cols-[minmax(220px,320px)_minmax(0,1fr)] lg:items-center">
-            <div className="mx-auto flex aspect-square w-full max-w-[280px] items-center justify-center overflow-hidden rounded-full border border-white/60 bg-white/25 p-8 shadow-[inset_2px_2px_18px_rgba(255,255,255,0.72),0_16px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl lg:mx-0">
-              {organization.logo ? (
-                <img
-                  alt={organization.name}
-                  className="size-full object-contain mix-blend-multiply"
-                  src={organization.logo}
-                />
-              ) : (
-                <span className="font-fredoka text-6xl font-bold text-black-blue/20">
-                  {organization.shortName.charAt(0)}
-                </span>
-              )}
-            </div>
+        {organization ? (
+          <GlassContainer>
+            <section className="grid gap-8 border-b border-white/50 pb-10 lg:grid-cols-[minmax(220px,320px)_minmax(0,1fr)] lg:items-center">
+              <div className="mx-auto flex aspect-square w-full max-w-[280px] items-center justify-center overflow-hidden rounded-full border border-white/60 bg-white/25 p-8 shadow-[inset_2px_2px_18px_rgba(255,255,255,0.72),0_16px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl lg:mx-0">
+                {organization.logo ? (
+                  <img
+                    alt={organization.name}
+                    className="size-full object-contain mix-blend-multiply"
+                    src={organization.logo}
+                  />
+                ) : (
+                  <span className="font-fredoka text-6xl font-bold text-black-blue/20">
+                    {organization.shortName.charAt(0)}
+                  </span>
+                )}
+              </div>
 
-            <div className="text-center lg:text-left">
-              <Link
-                className="inline-flex items-center rounded-full border border-white/70 bg-white/55 px-5 py-2.5 text-sm font-bold text-black-blue shadow-glass-inset transition hover:-translate-y-0.5 hover:border-aqua hover:bg-white"
-                to="/organization"
-              >
-                ← Tổ chức
-              </Link>
-              <p className="mt-6 font-sans text-sm font-semibold uppercase text-ink/45">
-                {organization.category}
-              </p>
-              <h1 className="mt-3 font-fredoka text-4xl font-bold leading-tight text-black-blue sm:text-5xl">
-                {organization.name}
-              </h1>
-              <p className="mt-3 font-sans text-lg font-semibold text-ink/70">
-                {organization.shortName}
-              </p>
-              <p className="mx-auto mt-5 max-w-3xl font-sans text-base leading-8 text-ink/65 lg:mx-0">
-                {organization.description}
-              </p>
+              <div className="text-center lg:text-left">
+                <Link
+                  className="inline-flex items-center rounded-full border border-white/70 bg-white/55 px-5 py-2.5 text-sm font-bold text-black-blue shadow-glass-inset transition hover:-translate-y-0.5 hover:border-aqua hover:bg-white"
+                  to="/organization"
+                >
+                  ← Tổ chức
+                </Link>
+                <p className="mt-6 font-sans text-sm font-semibold uppercase text-ink/45">
+                  {organization.category}
+                </p>
+                <h1 className="mt-3 font-fredoka text-4xl font-bold leading-tight text-black-blue sm:text-5xl">
+                  {organization.name}
+                </h1>
+                <p className="mt-3 font-sans text-lg font-semibold text-ink/70">
+                  {organization.shortName}
+                </p>
+                <p className="mx-auto mt-5 max-w-3xl font-sans text-base leading-8 text-ink/65 lg:mx-0">
+                  {organization.description}
+                </p>
 
-              <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
-                  <p className="text-xs font-semibold uppercase text-ink/45">
-                    Thành viên
-                  </p>
-                  <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
-                    {organization.memberCount}
-                  </p>
-                </div>
-                <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
-                  <p className="text-xs font-semibold uppercase text-ink/45">
-                    Vật phẩm
-                  </p>
-                  <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
-                    {processed.length}
-                  </p>
-                </div>
-                <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
-                  <p className="text-xs font-semibold uppercase text-ink/45">
-                    Nhóm
-                  </p>
-                  <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
-                    {organization.category}
-                  </p>
+                <div className="mt-7 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
+                    <p className="text-xs font-semibold uppercase text-ink/45">
+                      Thành viên
+                    </p>
+                    <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
+                      {organization.memberCount}
+                    </p>
+                  </div>
+                  <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
+                    <p className="text-xs font-semibold uppercase text-ink/45">
+                      Vật phẩm
+                    </p>
+                    <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
+                      {countDisplay}
+                    </p>
+                  </div>
+                  <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
+                    <p className="text-xs font-semibold uppercase text-ink/45">
+                      Nhóm
+                    </p>
+                    <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
+                      {organization.category}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <section className="pt-9">
-            <header className="mb-6">
-              <h2 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
-                Vật phẩm đang mở bán
-              </h2>
-              <p className="mt-2 font-sans text-sm text-ink/60">
-                {processed.length} vật phẩm
-                {query ? ` phù hợp với "${query}"` : ""} từ {organization.shortName}
-              </p>
-            </header>
+            <section className="pt-9">
+              <header className="mb-6">
+                <h2 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
+                  Vật phẩm đang mở bán
+                </h2>
+                <p className="mt-2 font-sans text-sm text-ink/60">
+                  {isLoading ? (
+                    <span>Đang tải danh sách vật phẩm...</span>
+                  ) : (
+                    <span>
+                      {countDisplay} vật phẩm
+                      {query ? ` phù hợp với "${query}"` : ""} từ{" "}
+                      {organization.shortName}
+                    </span>
+                  )}
+                </p>
+              </header>
 
-            <MerchToolbar
-              activeFilter={activeFilter}
-              filterOptions={FILTER_OPTIONS}
-              onFilterChange={handleFilterChange}
-              onQueryChange={handleQueryChange}
-              query={query}
-            />
+              <MerchToolbar
+                activeFilter={activeFilter}
+                filterOptions={FILTER_OPTIONS}
+                onFilterChange={handleFilterChange}
+                onQueryChange={handleQueryChange}
+                query={query}
+              />
 
-            <ProductGrid
-              emptyMessage="Không tìm thấy vật phẩm nào của tổ chức này."
-              products={paginated}
-            />
+              <div className={isLoading ? "opacity-50 transition-opacity" : ""}>
+                <ProductGrid
+                  emptyMessage="Không tìm thấy vật phẩm nào của tổ chức này."
+                  products={displayedProducts}
+                />
+              </div>
 
-            <Pagination
-              currentPage={currentPage}
-              onPageChange={setPage}
-              totalPages={totalPages}
-            />
-          </section>
-        </GlassContainer>
+              <Pagination
+                currentPage={page}
+                onPageChange={setPage}
+                totalPages={pagesDisplay}
+              />
+            </section>
+          </GlassContainer>
+        ) : (
+          <div className="py-24 text-center">Đang tải chi tiết tổ chức...</div>
+        )}
       </div>
     </main>
   );

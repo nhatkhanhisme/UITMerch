@@ -10,6 +10,7 @@ const navItems = [
   { label: "Trang chủ", href: "/" },
   { label: "Vật phẩm", href: "/merch" },
   { label: "Tổ chức", href: "/organization" },
+  { label: "Sự kiện", href: "/events" },
 ];
 
 const getInitials = (fullName: string) => {
