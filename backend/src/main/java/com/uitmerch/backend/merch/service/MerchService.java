@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
@@ -194,9 +195,24 @@ public class MerchService {
 
     private static Map<UUID, Long> toOrderCountMap(List<Object[]> rows) {
         return rows.stream().collect(Collectors.toMap(
-            row -> (UUID) row[0],
-            row -> ((Number) row[1]).longValue()
+            row -> toUuid(row[0]),
+            row -> ((Number) row[1]).longValue(),
+            Long::sum
         ));
+    }
+
+    private static UUID toUuid(Object value) {
+        if (value instanceof UUID uuid) {
+            return uuid;
+        }
+        if (value instanceof String text) {
+            return UUID.fromString(text);
+        }
+        if (value instanceof byte[] bytes && bytes.length == 16) {
+            ByteBuffer buffer = ByteBuffer.wrap(bytes);
+            return new UUID(buffer.getLong(), buffer.getLong());
+        }
+        throw new IllegalArgumentException("Unsupported UUID value from query: " + value);
     }
 
     public Page<MerchResponse> listByOrganization(UUID orgId, Pageable pageable) {

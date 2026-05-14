@@ -1,12 +1,16 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
 import { MerchToolbar } from "../components/features/MerchToolbar";
 import type { FilterOption } from "../components/features/MerchToolbar";
 import { ProductGrid } from "../components/features/ProductGrid";
-import { MOCK_PRODUCTS } from "../mocks/merchData";
-import { findOrganizationById } from "../mocks/orgData";
+import type { MockProduct } from "../mocks/merchData";
+import type { MockOrganization } from "../mocks/orgData";
+import {
+  getCatalogOrganizationById,
+  getCatalogOrganizationProducts,
+} from "../api/catalog";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -54,10 +58,65 @@ function OrganizationNotFound() {
 
 export function OrganizationDetailPage() {
   const { id } = useParams();
-  const organization = findOrganizationById(id);
+  const [organization, setOrganization] = useState<MockOrganization | null>(null);
+  const [organizationProducts, setOrganizationProducts] = useState<MockProduct[]>(
+    [],
+  );
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadOrganization = async () => {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const org = await getCatalogOrganizationById(id);
+
+        if (!org) {
+          if (isActive) {
+            setOrganization(null);
+            setOrganizationProducts([]);
+          }
+          return;
+        }
+
+        const products = await getCatalogOrganizationProducts(org);
+
+        if (!isActive) {
+          return;
+        }
+
+        setOrganization(org);
+        setOrganizationProducts(products.items);
+      } catch {
+        if (!isActive) {
+          return;
+        }
+
+        setOrganization(null);
+        setOrganizationProducts([]);
+        setErrorMessage(
+          "Chua tai duoc chi tiet to chuc tu backend. Ban co the bat VITE_USE_MOCK=true de dung du lieu demo.",
+        );
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadOrganization();
+
+    return () => {
+      isActive = false;
+    };
+  }, [id]);
 
   const processed = useMemo(() => {
     if (!organization) {
@@ -65,13 +124,7 @@ export function OrganizationDetailPage() {
     }
 
     const q = query.toLowerCase();
-    let list = MOCK_PRODUCTS.filter((product) => {
-      const belongsToOrganization = product.orgName === organization.name;
-
-      if (!belongsToOrganization) {
-        return false;
-      }
-
+    let list = organizationProducts.filter((product) => {
       return (
         product.name.toLowerCase().includes(q) ||
         product.category.toLowerCase().includes(q) ||
@@ -95,7 +148,52 @@ export function OrganizationDetailPage() {
     }
 
     return list;
-  }, [activeFilter, organization, query]);
+  }, [activeFilter, organization, organizationProducts, query]);
+
+  if (isLoading) {
+    return (
+      <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
+        <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
+          <ShaderBackground />
+        </Suspense>
+        <section className="relative z-10 mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center rounded-panel border border-white/50 bg-white/35 px-8 text-center shadow-glass backdrop-blur-xl">
+          <p className="font-sans text-sm font-semibold uppercase text-ink/50">
+            Dang tai
+          </p>
+          <h1 className="mt-3 font-fredoka text-4xl font-bold text-black-blue">
+            Dang tai chi tiet to chuc...
+          </h1>
+        </section>
+      </main>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
+        <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
+          <ShaderBackground />
+        </Suspense>
+        <section className="relative z-10 mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center rounded-panel border border-peach bg-white/45 px-8 text-center shadow-glass backdrop-blur-xl">
+          <p className="font-sans text-sm font-semibold uppercase text-ink/50">
+            Backend chua san sang
+          </p>
+          <h1 className="mt-3 font-fredoka text-4xl font-bold text-black-blue">
+            Chua tai duoc to chuc
+          </h1>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-ink/65">
+            {errorMessage}
+          </p>
+          <Link
+            className="mt-8 rounded-full bg-black-blue px-8 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-ink"
+            to="/organization"
+          >
+            Quay ve to chuc
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
   if (!organization) {
     return <OrganizationNotFound />;

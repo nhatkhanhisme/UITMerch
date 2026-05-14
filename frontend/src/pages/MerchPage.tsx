@@ -1,11 +1,12 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
 import { FeaturedSlider } from "../components/features/FeaturedSlider";
 import { MerchToolbar } from "../components/features/MerchToolbar";
 import type { FilterOption } from "../components/features/MerchToolbar";
 import { ProductGrid } from "../components/features/ProductGrid";
-import { FEATURED_PRODUCTS, MOCK_PRODUCTS } from "../mocks/merchData";
+import type { MockProduct } from "../mocks/merchData";
+import { getCatalogProducts, getPopularProducts } from "../api/catalog";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -26,9 +27,56 @@ export function MerchPage() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [products, setProducts] = useState<MockProduct[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<MockProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadProducts = async () => {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const [productList, popularList] = await Promise.all([
+          getCatalogProducts(),
+          getPopularProducts(),
+        ]);
+
+        if (!isActive) {
+          return;
+        }
+
+        setProducts(productList.items);
+        setFeaturedProducts(popularList);
+      } catch {
+        if (!isActive) {
+          return;
+        }
+
+        setProducts([]);
+        setFeaturedProducts([]);
+        setErrorMessage(
+          "Chưa tải được danh sách vật phẩm từ backend. Bạn có thể bật VITE_USE_MOCK=true để dùng dữ liệu demo.",
+        );
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadProducts();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const processed = useMemo(() => {
-    let list = MOCK_PRODUCTS.filter(
+    let list = products.filter(
       (p) =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.orgName.toLowerCase().includes(query.toLowerCase()) ||
@@ -51,7 +99,7 @@ export function MerchPage() {
     }
 
     return list;
-  }, [query, activeFilter]);
+  }, [query, activeFilter, products]);
 
   const totalPages = Math.max(1, Math.ceil(processed.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -90,7 +138,19 @@ export function MerchPage() {
             </p>
           </header>
 
-          <FeaturedSlider items={FEATURED_PRODUCTS} />
+          {isLoading ? (
+            <div className="mb-8 rounded-[28px] border border-white/50 bg-white/40 p-6 text-center font-sans text-sm text-ink/60 shadow-glass">
+              Đang tải vật phẩm từ backend...
+            </div>
+          ) : null}
+
+          {!isLoading && errorMessage ? (
+            <div className="mb-8 rounded-[28px] border border-peach bg-peach/15 p-6 font-sans text-sm leading-6 text-black-blue">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          <FeaturedSlider items={featuredProducts} />
 
           <MerchToolbar
             activeFilter={activeFilter}
@@ -100,7 +160,14 @@ export function MerchPage() {
             query={query}
           />
 
-          <ProductGrid products={paginated} />
+          <ProductGrid
+            emptyMessage={
+              errorMessage
+                ? "Chưa có vật phẩm để hiển thị."
+                : "Không tìm thấy vật phẩm nào."
+            }
+            products={paginated}
+          />
 
           <Pagination
             currentPage={currentPage}

@@ -100,9 +100,17 @@ export function setAuthHeader(token: string | null) {
 
 export function getApiErrorMessage(
   error: unknown,
-  fallbackMessage = "Something went wrong. Please try again.",
+  fallbackMessage = "Backend is not available right now. You can still browse the demo merch and organizations.",
 ) {
   if (axios.isAxiosError(error)) {
+    if (error.code === "ECONNABORTED") {
+      return "Backend took too long to respond. You can still browse the demo merch and organizations.";
+    }
+
+    if (!error.response) {
+      return "Backend is not reachable right now. You can still browse the demo merch and organizations.";
+    }
+
     const message = error.response?.data?.message;
     if (typeof message === "string" && message.trim().length > 0) {
       return message;

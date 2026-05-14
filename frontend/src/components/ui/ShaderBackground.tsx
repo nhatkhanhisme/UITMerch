@@ -1,5 +1,7 @@
-import { Suspense } from 'react';
+import { Suspense, type ComponentType } from 'react';
 import { ShaderGradientCanvas, ShaderGradient } from '@shadergradient/react';
+
+const DemoShaderGradient = ShaderGradient as unknown as ComponentType<Record<string, unknown>>;
 
 export function ShaderBackground() {
     return (
@@ -16,8 +18,7 @@ export function ShaderBackground() {
                     pointerEvents: 'none'
                 }}
             >
-                {/* @ts-ignore - Bỏ qua lỗi type của thư viện */}
-                <ShaderGradient
+                <DemoShaderGradient
                     animate="on"
                     axesHelper="off"
                     brightness={1.6}

@@ -1,5 +1,5 @@
-import type { BadgeBaseProps } from "@repo/shared";
 import type { HTMLAttributes, ReactNode } from "react";
+import type { BadgeBaseProps } from "../../types/ui";
 
 interface BadgeProps extends BadgeBaseProps, HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;

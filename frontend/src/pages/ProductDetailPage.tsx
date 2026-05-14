@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { findProductById, MOCK_PRODUCTS } from "../mocks/merchData";
 import type { MockProduct, ProductColorOption } from "../mocks/merchData";
+import { getCatalogProductById, getCatalogProducts } from "../api/catalog";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -308,19 +308,21 @@ function PurchasePanel({
             stock={Math.max(product.stock, 1)}
           />
           <button
+            aria-live="polite"
             className="min-h-14 flex-1 rounded-full bg-black px-8 text-sm font-bold uppercase text-white transition hover:-translate-y-0.5 hover:bg-black-blue disabled:cursor-not-allowed disabled:opacity-45"
             disabled={product.stock <= 0}
             onClick={() => setAdded(true)}
             type="button"
           >
-            {added ? "Đã chọn vật phẩm" : "Thêm vào giỏ hàng"}
+            {added ? "Đã thêm vào giỏ demo" : "Thêm vào giỏ demo"}
           </button>
         </div>
 
         {added ? (
           <div className="rounded-[24px] border border-aqua/60 bg-white/55 p-4 text-sm leading-6 text-ink/70">
-            Đã chọn {quantity} sản phẩm, màu {selectedColor.name},{" "}
-            {product.sizeLabel.toLowerCase()} {selectedSize}.
+            Đã thêm {quantity} sản phẩm vào giỏ demo, màu {selectedColor.name},{" "}
+            {product.sizeLabel.toLowerCase()} {selectedSize}. Đây là thao tác
+            mô phỏng để quay video; checkout thật sẽ nối backend sau.
           </div>
         ) : null}
       </div>
@@ -345,8 +347,54 @@ function PurchasePanel({
 
 export function ProductDetailPage() {
   const { id } = useParams();
-  const product = findProductById(id);
+  const [product, setProduct] = useState<MockProduct | null>(null);
+  const [allProducts, setAllProducts] = useState<MockProduct[]>([]);
   const [activeImage, setActiveImage] = useState(product?.image ?? "");
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadProduct = async () => {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const [productDetail, productList] = await Promise.all([
+          getCatalogProductById(id),
+          getCatalogProducts(),
+        ]);
+
+        if (!isActive) {
+          return;
+        }
+
+        setProduct(productDetail);
+        setAllProducts(productList.items);
+      } catch {
+        if (!isActive) {
+          return;
+        }
+
+        setProduct(null);
+        setAllProducts([]);
+        setErrorMessage(
+          "Chưa tải được chi tiết vật phẩm từ backend. Bạn có thể bật VITE_USE_MOCK=true để dùng dữ liệu demo.",
+        );
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadProduct();
+
+    return () => {
+      isActive = false;
+    };
+  }, [id]);
 
   useEffect(() => {
     setActiveImage(product?.image ?? "");
@@ -355,12 +403,57 @@ export function ProductDetailPage() {
   const relatedProducts = useMemo(
     () =>
       product
-        ? MOCK_PRODUCTS.filter(
+        ? allProducts.filter(
             (item) => item.id !== product.id && item.category === product.category,
           ).slice(0, 3)
         : [],
-    [product],
+    [allProducts, product],
   );
+
+  if (isLoading) {
+    return (
+      <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
+        <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
+          <ShaderBackground />
+        </Suspense>
+        <section className="relative z-10 mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center rounded-panel border border-white/50 bg-white/35 px-8 text-center shadow-glass backdrop-blur-xl">
+          <p className="font-sans text-sm font-semibold uppercase text-ink/50">
+            Đang tải
+          </p>
+          <h1 className="mt-3 font-fredoka text-4xl font-bold text-black-blue">
+            Đang tải chi tiết vật phẩm...
+          </h1>
+        </section>
+      </main>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
+        <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
+          <ShaderBackground />
+        </Suspense>
+        <section className="relative z-10 mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center rounded-panel border border-peach bg-white/45 px-8 text-center shadow-glass backdrop-blur-xl">
+          <p className="font-sans text-sm font-semibold uppercase text-ink/50">
+            Backend chưa sẵn sàng
+          </p>
+          <h1 className="mt-3 font-fredoka text-4xl font-bold text-black-blue">
+            Chưa tải được vật phẩm
+          </h1>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-ink/65">
+            {errorMessage}
+          </p>
+          <Link
+            className="mt-8 rounded-full bg-black-blue px-8 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-ink"
+            to="/merch"
+          >
+            Quay về kho vật phẩm
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
   if (!product) {
     return <ProductNotFound />;

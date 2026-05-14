@@ -1,5 +1,5 @@
-import type { ButtonBaseProps } from "@repo/shared";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonBaseProps } from "../../types/ui";
 
 interface ButtonProps
   extends ButtonBaseProps,

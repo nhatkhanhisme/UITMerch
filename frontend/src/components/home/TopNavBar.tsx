@@ -26,6 +26,8 @@ const getInitials = (fullName: string) => {
 export function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const [accountIconFailed, setAccountIconFailed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
@@ -139,12 +141,22 @@ export function TopNavBar() {
         data-node-id="17:4918"
         data-name="TopNavBar Component"
       >
-        <img
-          alt="UITMerch"
-          className="h-[26px] w-[126px] shrink-0 sm:h-[30px] sm:w-[145px]"
-          data-node-id="17:4151"
-          src={logoHeaderUrl}
-        />
+        {logoFailed ? (
+          <Link
+            className="shrink-0 font-fredoka text-2xl font-bold text-black-blue sm:text-[28px]"
+            to="/"
+          >
+            UITMerch
+          </Link>
+        ) : (
+          <img
+            alt="UITMerch"
+            className="h-[26px] w-[126px] shrink-0 sm:h-[30px] sm:w-[145px]"
+            data-node-id="17:4151"
+            onError={() => setLogoFailed(true)}
+            src={logoHeaderUrl}
+          />
+        )}
 
         {/* RESPONSIVE */}
         <div
@@ -259,12 +271,19 @@ export function TopNavBar() {
               to={accountTarget}
             >
               <span className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-white/80 shadow-[0_6px_16px_rgba(82,128,145,0.16)]">
-                <img
-                  alt=""
-                  className="size-4"
-                  data-node-id="I17:4918;17:4811"
-                  src={accountIconUrl}
-                />
+                {accountIconFailed ? (
+                  <span className="font-fredoka text-xs font-bold text-black-blue">
+                    U
+                  </span>
+                ) : (
+                  <img
+                    alt=""
+                    className="size-4"
+                    data-node-id="I17:4918;17:4811"
+                    onError={() => setAccountIconFailed(true)}
+                    src={accountIconUrl}
+                  />
+                )}
               </span>
               <span className="font-sans text-sm font-medium text-black-blue">
                 Account

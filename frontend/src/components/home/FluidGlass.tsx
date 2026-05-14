@@ -73,9 +73,6 @@ function useModel(glbPath: string, geometryKey: string): LoadedModel | null {
       undefined,
       () => {
         if (mounted) {
-          if (import.meta.env.DEV) {
-            console.warn(`[FluidGlass] Failed to load model: ${glbPath}`);
-          }
           setModel(null);
         }
       },

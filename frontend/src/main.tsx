@@ -66,10 +66,28 @@ function AppRouter() {
           element={
             <>
               <HomeFixedChrome showSlideBar={false} />
+              <OrganizationPage />
+            </>
+          }
+          path="/organizations"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
               <OrganizationDetailPage />
             </>
           }
           path="/organization/:id"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <OrganizationDetailPage />
+            </>
+          }
+          path="/organizations/:id"
         />
         <Route
           element={

@@ -1,6 +1,6 @@
-import type { InputBaseProps } from "@repo/shared";
 import type { InputHTMLAttributes } from "react";
 import { useState } from "react";
+import type { InputBaseProps } from "../../types/ui";
 
 interface InputProps
   extends InputBaseProps,
