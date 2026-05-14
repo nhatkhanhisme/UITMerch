@@ -42,7 +42,7 @@ export function OrgCard({ org }: OrgCardProps) {
 
       {/* Org name below */}
       <p className="text-center font-fredoka text-base font-bold leading-tight text-black-blue">
-        {org.shortName}
+        {org.name}
       </p>
     </Link>
   );
