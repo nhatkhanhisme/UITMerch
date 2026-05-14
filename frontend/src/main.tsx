@@ -7,6 +7,8 @@ import { MerchPage } from "./pages/MerchPage";
 import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { AuthPage } from "./pages/AuthPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { CustomerProfilePage } from "./pages/CustomerProfilePage";
+import { OrganizerProfilePage } from "./pages/OrganizerProfilePage";
 import { OrganizerDashboardPage } from "./pages/OrganizerDashboardPage";
 import { OrganizationDetailPage } from "./pages/OrganizationDetailPage";
 import { OrganizationPage } from "./pages/OrganizationPage";
@@ -52,6 +54,24 @@ function AppRouter() {
             </>
           }
           path="/profile"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <CustomerProfilePage />
+            </>
+          }
+          path="/profile/customer"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <OrganizerProfilePage />
+            </>
+          }
+          path="/profile/organizer"
         />
         <Route
           element={

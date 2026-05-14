@@ -38,7 +38,8 @@ export function TopNavBar() {
   const currentPath = normalizePath(location.pathname);
   const accountReturnPath = `${location.pathname}${location.search}${location.hash}`;
   const accountTarget = user ? "/profile" : "/auth";
-  const isAccountActive = ["/auth", "/profile"].includes(currentPath);
+  const isAccountActive =
+    currentPath === "/auth" || currentPath.startsWith("/profile");
   const isAccountMenuActive = isAccountActive || isAccountMenuOpen;
   const accountLabel = user ? user.fullName : "Account";
   const avatarFallback = useMemo(
@@ -122,7 +123,10 @@ export function TopNavBar() {
   };
 
   const linkClassName = (href: string) => {
-    const isActive = normalizePath(href) === currentPath;
+    const isActive =
+      href === "/profile"
+        ? currentPath.startsWith("/profile")
+        : normalizePath(href) === currentPath;
 
     return [
       "flex min-h-11 items-center rounded-full px-4 py-2 transition duration-200 ease-out",

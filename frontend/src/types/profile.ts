@@ -15,7 +15,7 @@ export type CustomerProfileUpdate = {
   fullName?: string;
   phone?: string;
   address?: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 };
 
 export type OrganizationStatus = "PENDING" | "ACTIVE" | "INACTIVE";
@@ -35,6 +35,6 @@ export type OrganizerProfile = {
 export type OrganizerProfileUpdate = {
   name?: string;
   description?: string;
-  logoUrl?: string;
-  coverUrl?: string;
+  logoUrl?: string | null;
+  coverUrl?: string | null;
 };
