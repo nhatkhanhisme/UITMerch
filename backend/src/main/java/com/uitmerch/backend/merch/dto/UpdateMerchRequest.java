@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class UpdateMerchRequest {
@@ -19,7 +20,7 @@ public class UpdateMerchRequest {
     @Min(value = 0, message = "Stock must be 0 or more")
     private Integer stock;
 
-    private String imageUrl;
+    private List<String> imageUrls;
     private MerchItemStatus status;
     private String categorySlug;
 }

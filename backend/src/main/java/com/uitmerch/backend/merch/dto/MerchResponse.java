@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -21,6 +22,7 @@ public class MerchResponse {
     private BigDecimal price;
     private int stock;
     private String imageUrl;
+    private List<String> images;
     private MerchItemStatus status;
     private UUID categoryId;
     private String categorySlug;
@@ -29,10 +31,19 @@ public class MerchResponse {
     private LocalDateTime updatedAt;
 
     public static MerchResponse from(MerchItem item) {
-        return from(item, null);
+        return from(item, null, List.of());
     }
 
     public static MerchResponse from(MerchItem item, Category category) {
+        return from(item, category, List.of());
+    }
+
+    public static MerchResponse from(MerchItem item, Category category, List<String> images) {
+        // Backward compat: if no images in the new table, fall back to the legacy imageUrl column.
+        List<String> resolvedImages = (images != null && !images.isEmpty())
+            ? images
+            : (item.getImageUrl() != null ? List.of(item.getImageUrl()) : List.of());
+
         return MerchResponse.builder()
             .id(item.getId())
             .orgId(item.getOrgId())
@@ -40,7 +51,8 @@ public class MerchResponse {
             .description(item.getDescription())
             .price(item.getPrice())
             .stock(item.getStock())
-            .imageUrl(item.getImageUrl())
+            .imageUrl(resolvedImages.isEmpty() ? null : resolvedImages.get(0))
+            .images(resolvedImages)
             .status(item.getStatus())
             .categoryId(category != null ? category.getId() : item.getCategoryId())
             .categorySlug(category != null ? category.getSlug() : null)
