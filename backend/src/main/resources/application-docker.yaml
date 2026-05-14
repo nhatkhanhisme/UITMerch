@@ -22,7 +22,7 @@ spring:
 
 app:
   jwt:
-    secret: ${APP_JWT_SECRET:docker-dev-jwt-secret-uitmerch-min-32-chars!}
+    secret: ${APP_JWT_SECRET}
     expiration: 86400000
     refresh-expiration: 604800000
 

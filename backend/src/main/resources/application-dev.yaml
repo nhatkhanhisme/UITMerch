@@ -36,3 +36,17 @@ app:
     access-key: dev
     secret-key: dev
     public-url: http://localhost/dev-storage
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.uitmerch: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.flywaydb: DEBUG

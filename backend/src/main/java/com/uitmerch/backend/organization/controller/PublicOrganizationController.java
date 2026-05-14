@@ -75,7 +75,7 @@ public class PublicOrganizationController {
     }
 
     @GetMapping("/{id}/events")
-    @Operation(summary = "List published events for an organization")
+    @Operation(summary = "List published and ended events for an organization")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Events retrieved"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Organization not found"),

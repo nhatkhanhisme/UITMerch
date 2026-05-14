@@ -136,6 +136,36 @@ public class AuthService {
             .build();
     }
 
+    public AuthResponse refreshToken(String refreshToken) {
+        if (refreshToken == null
+                || !jwtTokenProvider.validateToken(refreshToken)
+                || tokenBlacklistService.isBlacklisted(refreshToken)) {
+            throw new AuthenticationException("Invalid or expired refresh token");
+        }
+
+        String userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
+        User user = userRepository.findById(java.util.UUID.fromString(userId))
+                .orElseThrow(() -> new AuthenticationException("Invalid or expired refresh token"));
+
+        // Rotate: blacklist the used refresh token
+        tokenBlacklistService.add(refreshToken, jwtTokenProvider.getExpiryFromToken(refreshToken));
+
+        String newAccessToken = jwtTokenProvider.generateAccessToken(
+                user.getId().toString(), user.getEmail(), user.getRole().name());
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId().toString());
+
+        return AuthResponse.builder()
+                .token(newAccessToken)
+                .tokenType("Bearer")
+                .refreshToken(newRefreshToken)
+                .userId(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .isVerified(user.isVerified())
+                .build();
+    }
+
     public void logout(String token) {
         if (token != null && jwtTokenProvider.validateToken(token)) {
             tokenBlacklistService.add(token, jwtTokenProvider.getExpiryFromToken(token));
