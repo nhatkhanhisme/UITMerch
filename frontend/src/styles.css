@@ -42,6 +42,23 @@ body::-webkit-scrollbar {
   overflow-x: hidden;
 }
 
+/*
+ * Hide the blinking text caret on all non-editable elements.
+ * Text selection and accessibility remain fully intact.
+ * Editable fields (input, textarea, contenteditable) restore their
+ * native caret via the rule below.
+ */
+*:not(input):not(textarea):not([contenteditable]):not([contenteditable="true"]) {
+  caret-color: transparent;
+}
+
+input,
+textarea,
+[contenteditable],
+[contenteditable="true"] {
+  caret-color: auto;
+}
+
 html.home-hide-native-scrollbar,
 body.home-hide-native-scrollbar {
   -ms-overflow-style: none;
