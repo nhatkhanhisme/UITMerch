@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
 import { MerchToolbar } from "../components/features/MerchToolbar";
@@ -17,6 +17,8 @@ const ShaderBackground = lazy(() =>
 
 const PAGE_SIZE = 8;
 
+// "newest" → default sort by createdAt,desc (no param needed)
+// "upcoming" → status filter, NOT a sort param
 const FILTER_OPTIONS: FilterOption[] = [
   { label: "Mới nhất", value: "newest" },
   { label: "Sắp diễn ra", value: "upcoming" },
@@ -33,48 +35,6 @@ type UIEventItem = {
   orgName: string;
   status: string;
 };
-
-const fallbackEvents: UIEventItem[] = [
-  {
-    bannerUrl:
-      "https://placehold.co/800x400/e9feff/1a3a4a?font=montserrat&text=GDGoC+DevFest",
-    description:
-      "Sự kiện công nghệ thường niên lớn nhất dành cho cộng đồng lập trình viên và sinh viên đam mê công nghệ tại UIT.",
-    endDate: "2026-11-20T17:00:00Z",
-    id: "ev-1",
-    location: "Hội trường E, Đại học CNTT",
-    name: "GDGoC DevFest 2026",
-    orgName: "GDGoC UIT",
-    startDate: "2026-11-20T08:00:00Z",
-    status: "UPCOMING",
-  },
-  {
-    bannerUrl:
-      "https://placehold.co/800x400/e9feff/1a3a4a?font=montserrat&text=UIT+Sport+Day",
-    description:
-      "Hội thao truyền thống sinh viên UIT với các bộ môn bóng đá, bóng rổ, cầu lông và cờ vua vô cùng kịch tính.",
-    endDate: "2026-12-05T17:00:00Z",
-    id: "ev-2",
-    location: "Sân vận động UIT",
-    name: "Hội Thao Sinh Viên UIT 2026",
-    orgName: "Đoàn Hội UIT",
-    startDate: "2026-12-01T07:00:00Z",
-    status: "ONGOING",
-  },
-  {
-    bannerUrl:
-      "https://placehold.co/800x400/e9feff/1a3a4a?font=montserrat&text=IT+Job+Fair",
-    description:
-      "Ngày hội việc làm kết nối sinh viên UIT với hơn 50 doanh nghiệp công nghệ hàng đầu trong và ngoài nước.",
-    endDate: "2026-10-15T16:00:00Z",
-    id: "ev-3",
-    location: "Sảnh C, Đại học CNTT",
-    name: "UIT IT Job Fair 2026",
-    orgName: "Khoa CNTT",
-    startDate: "2026-10-15T08:00:00Z",
-    status: "COMPLETED",
-  },
-];
 
 function formatDate(isoString?: string) {
   if (!isoString) {
@@ -128,12 +88,11 @@ export function EventPage() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  // Live States
   const [liveEvents, setLiveEvents] = useState<UIEventItem[]>([]);
   const [totalItems, setTotalItems] = useState<number | null>(null);
   const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasApiError, setHasApiError] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -150,10 +109,15 @@ export function EventPage() {
             });
           }
 
+          // "newest" → default (createdAt,desc), no sort param needed
+          // "upcoming" → filter by status=UPCOMING, not a sort
+          const isStatusFilter = activeFilter === "upcoming";
+
           const res = await getPublicEvents({
             page: page - 1,
             size: PAGE_SIZE,
-            sort: activeFilter || undefined,
+            sort: (!activeFilter || activeFilter === "newest") ? "createdAt,desc" : undefined,
+            status: isStatusFilter ? "UPCOMING" : undefined,
           });
 
           if (isActive && res?.data) {
@@ -183,7 +147,7 @@ export function EventPage() {
             }
 
             setLiveEvents(mapped);
-            setHasApiError(false);
+            setApiError(null);
 
             if (res.meta) {
               setTotalItems(res.meta.totalElements);
@@ -195,7 +159,7 @@ export function EventPage() {
           }
         } catch {
           if (isActive) {
-            setHasApiError(true);
+            setApiError("Không thể tải danh sách sự kiện. Vui lòng thử lại.");
           }
         } finally {
           if (isActive) {
@@ -213,43 +177,8 @@ export function EventPage() {
     };
   }, [page, activeFilter, query]);
 
-  const processedFallback = useMemo(() => {
-    const q = query.toLowerCase();
-    return fallbackEvents.filter(
-      (ev) =>
-        ev.name.toLowerCase().includes(q) ||
-        ev.description.toLowerCase().includes(q) ||
-        ev.location.toLowerCase().includes(q) ||
-        ev.orgName.toLowerCase().includes(q),
-    );
-  }, [query]);
-
-  const localTotalPages = Math.max(1, Math.ceil(processedFallback.length / PAGE_SIZE));
-  const localPaginated = useMemo(() => {
-    const currentPage = Math.min(page, localTotalPages);
-    return processedFallback.slice(
-      (currentPage - 1) * PAGE_SIZE,
-      currentPage * PAGE_SIZE,
-    );
-  }, [processedFallback, page, localTotalPages]);
-
-  const displayedEvents = hasApiError ? localPaginated : liveEvents;
-  const countDisplay = hasApiError
-    ? processedFallback.length
-    : totalItems ?? liveEvents.length;
-  const pagesDisplay = hasApiError
-    ? localTotalPages
-    : serverTotalPages ?? (Math.ceil(liveEvents.length / PAGE_SIZE) || 1);
-
-  const handleQueryChange = (value: string) => {
-    setQuery(value);
-    setPage(1);
-  };
-
-  const handleFilterChange = (value: string | null) => {
-    setActiveFilter(value);
-    setPage(1);
-  };
+  const pagesDisplay = serverTotalPages ?? (Math.ceil(liveEvents.length / PAGE_SIZE) || 1);
+  const countDisplay = totalItems ?? liveEvents.length;
 
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
@@ -263,11 +192,13 @@ export function EventPage() {
         <GlassContainer>
           <header className="mb-6">
             <h1 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
-              Sự Kiện & Hoạt Động
+              Sự Kiện &amp; Hoạt Động
             </h1>
             <p className="mt-1 font-sans text-sm text-ink/60">
               {isLoading ? (
                 <span>Đang tải danh sách sự kiện...</span>
+              ) : apiError ? (
+                <span className="text-red-500">{apiError}</span>
               ) : (
                 <span>
                   {countDisplay} sự kiện
@@ -280,15 +211,19 @@ export function EventPage() {
           <MerchToolbar
             activeFilter={activeFilter}
             filterOptions={FILTER_OPTIONS}
-            onFilterChange={handleFilterChange}
-            onQueryChange={handleQueryChange}
+            onFilterChange={(v) => { setActiveFilter(v); setPage(1); }}
+            onQueryChange={(v) => { setQuery(v); setPage(1); }}
             query={query}
           />
 
           <div className={isLoading ? "opacity-50 transition-opacity" : ""}>
-            {displayedEvents.length > 0 ? (
+            {!isLoading && apiError ? (
+              <div className="flex flex-col items-center justify-center py-24 text-red-400">
+                <p className="font-sans text-base">{apiError}</p>
+              </div>
+            ) : liveEvents.length > 0 ? (
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {displayedEvents.map((ev) => (
+                {liveEvents.map((ev) => (
                   <Link
                     to={`/event/${ev.id}`}
                     className="group flex flex-col overflow-hidden rounded-[32px] border border-white/60 bg-white/40 shadow-glass backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-aqua hover:shadow-glass-inset focus-visible:outline-aqua focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
@@ -332,11 +267,11 @@ export function EventPage() {
                   </Link>
                 ))}
               </div>
-            ) : (
+            ) : !isLoading ? (
               <div className="flex flex-col items-center justify-center py-24 text-ink/50">
                 <p className="font-sans text-base">Không tìm thấy sự kiện nào.</p>
               </div>
-            )}
+            ) : null}
           </div>
 
           <Pagination

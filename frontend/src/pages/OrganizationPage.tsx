@@ -1,10 +1,9 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
 import { MerchToolbar } from "../components/features/MerchToolbar";
 import type { FilterOption } from "../components/features/MerchToolbar";
 import { OrgCard } from "../components/features/OrgCard";
-import { MOCK_ORGANIZATIONS } from "../mocks/orgData";
 import type { MockOrganization } from "../mocks/orgData";
 import { getPublicOrganizations } from "../api/organization";
 import { mapOrgToMockOrganization } from "../types/shared";
@@ -17,6 +16,12 @@ const ShaderBackground = lazy(() =>
 
 const PAGE_SIZE = 8;
 
+// Map UI filter values → Spring Pageable sort params
+const SORT_MAP: Record<string, string> = {
+  az: "name,asc",
+  za: "name,desc",
+};
+
 const FILTER_OPTIONS: FilterOption[] = [
   { label: "A → Z", value: "az" },
   { label: "Z → A", value: "za" },
@@ -27,12 +32,11 @@ export function OrganizationPage() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  // Live API State
   const [liveOrgs, setLiveOrgs] = useState<MockOrganization[]>([]);
   const [totalItems, setTotalItems] = useState<number | null>(null);
   const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasApiError, setHasApiError] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -44,13 +48,13 @@ export function OrganizationPage() {
           const res = await getPublicOrganizations({
             page: page - 1,
             size: PAGE_SIZE,
-            sort: activeFilter || undefined,
+            sort: activeFilter ? SORT_MAP[activeFilter] : undefined,
           });
 
           if (isActive && res?.data) {
             let mapped = res.data.map(mapOrgToMockOrganization);
 
-            // Optional custom search keyword filter locally if backend endpoint doesn't accept keyword param natively
+            // Client-side keyword filter (backend doesn't support keyword search on this endpoint)
             if (query) {
               const q = query.toLowerCase();
               mapped = mapped.filter(
@@ -62,7 +66,7 @@ export function OrganizationPage() {
             }
 
             setLiveOrgs(mapped);
-            setHasApiError(false);
+            setApiError(null);
 
             if (res.meta) {
               setTotalItems(res.meta.totalElements);
@@ -74,7 +78,7 @@ export function OrganizationPage() {
           }
         } catch {
           if (isActive) {
-            setHasApiError(true);
+            setApiError("Không thể tải danh sách tổ chức. Vui lòng thử lại.");
           }
         } finally {
           if (isActive) {
@@ -92,51 +96,8 @@ export function OrganizationPage() {
     };
   }, [page, activeFilter, query]);
 
-  // Fallback local list
-  const processed = useMemo(() => {
-    const q = query.toLowerCase();
-    let list = MOCK_ORGANIZATIONS.filter(
-      (o) =>
-        o.name.toLowerCase().includes(q) ||
-        o.shortName.toLowerCase().includes(q) ||
-        o.category.toLowerCase().includes(q),
-    );
-
-    if (activeFilter === "az") {
-      list = [...list].sort((a, b) => a.name.localeCompare(b.name, "vi"));
-    } else if (activeFilter === "za") {
-      list = [...list].sort((a, b) => b.name.localeCompare(a.name, "vi"));
-    }
-
-    return list;
-  }, [query, activeFilter]);
-
-  const localTotalPages = Math.max(1, Math.ceil(processed.length / PAGE_SIZE));
-  const localPaginated = useMemo(() => {
-    const currentPage = Math.min(page, localTotalPages);
-    return processed.slice(
-      (currentPage - 1) * PAGE_SIZE,
-      currentPage * PAGE_SIZE,
-    );
-  }, [processed, page, localTotalPages]);
-
-  const displayedOrgs = hasApiError ? localPaginated : liveOrgs;
-  const countDisplay = hasApiError
-    ? processed.length
-    : totalItems ?? liveOrgs.length;
-  const pagesDisplay = hasApiError
-    ? localTotalPages
-    : serverTotalPages ?? (Math.ceil(liveOrgs.length / PAGE_SIZE) || 1);
-
-  const handleQueryChange = (value: string) => {
-    setQuery(value);
-    setPage(1);
-  };
-
-  const handleFilterChange = (value: string | null) => {
-    setActiveFilter(value);
-    setPage(1);
-  };
+  const pagesDisplay = serverTotalPages ?? (Math.ceil(liveOrgs.length / PAGE_SIZE) || 1);
+  const countDisplay = totalItems ?? liveOrgs.length;
 
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
@@ -155,6 +116,8 @@ export function OrganizationPage() {
             <p className="mt-1 font-sans text-sm text-ink/60">
               {isLoading ? (
                 <span>Đang tải dữ liệu...</span>
+              ) : apiError ? (
+                <span className="text-red-500">{apiError}</span>
               ) : (
                 <span>
                   {countDisplay} tổ chức
@@ -167,19 +130,23 @@ export function OrganizationPage() {
           <MerchToolbar
             activeFilter={activeFilter}
             filterOptions={FILTER_OPTIONS}
-            onFilterChange={handleFilterChange}
-            onQueryChange={handleQueryChange}
+            onFilterChange={(v) => { setActiveFilter(v); setPage(1); }}
+            onQueryChange={(v) => { setQuery(v); setPage(1); }}
             query={query}
           />
 
           <div className={isLoading ? "opacity-50 transition-opacity" : ""}>
-            {displayedOrgs.length > 0 ? (
+            {!isLoading && apiError ? (
+              <div className="flex flex-col items-center justify-center py-24 text-red-400">
+                <p className="font-sans text-base">{apiError}</p>
+              </div>
+            ) : liveOrgs.length > 0 ? (
               <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-10 md:grid-cols-4">
-                {displayedOrgs.map((org) => (
+                {liveOrgs.map((org) => (
                   <OrgCard key={org.id} org={org} />
                 ))}
               </div>
-            ) : (
+            ) : !isLoading ? (
               <div className="flex flex-col items-center justify-center py-24 text-ink/50">
                 <svg
                   aria-hidden="true"
@@ -197,7 +164,7 @@ export function OrganizationPage() {
                 </svg>
                 <p className="font-sans text-base">Không tìm thấy tổ chức nào.</p>
               </div>
-            )}
+            ) : null}
           </div>
 
           <Pagination

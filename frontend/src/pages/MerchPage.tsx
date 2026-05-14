@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
 import { FeaturedSlider } from "../components/features/FeaturedSlider";
@@ -6,7 +6,6 @@ import type { FeaturedItem } from "../components/features/FeaturedSlider";
 import { MerchToolbar } from "../components/features/MerchToolbar";
 import type { FilterOption } from "../components/features/MerchToolbar";
 import { ProductGrid } from "../components/features/ProductGrid";
-import { FEATURED_PRODUCTS, MOCK_PRODUCTS } from "../mocks/merchData";
 import type { MockProduct } from "../mocks/merchData";
 import { getPublicMerchList, getPopularMerch, getCategories } from "../api/merch";
 import { getPublicOrganizations } from "../api/organization";
@@ -19,6 +18,14 @@ const ShaderBackground = lazy(() =>
 );
 
 const PAGE_SIZE = 8;
+
+// Map UI filter labels → Spring Pageable sort param format
+const SORT_MAP: Record<string, string> = {
+  az: "name,asc",
+  za: "name,desc",
+  "price-asc": "price,asc",
+  "price-desc": "price,desc",
+};
 
 const FILTER_OPTIONS: FilterOption[] = [
   { label: "A → Z", value: "az" },
@@ -33,84 +40,84 @@ export function MerchPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  // Live API State
   const [liveProducts, setLiveProducts] = useState<MockProduct[]>([]);
   const [popularProducts, setPopularProducts] = useState<FeaturedItem[] | null>(null);
   const [categoryOptions, setCategoryOptions] = useState<FilterOption[]>([]);
   const [totalItems, setTotalItems] = useState<number | null>(null);
   const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasApiError, setHasApiError] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  // Load live data with debounce/effects
+  // One-time: load popular merch + categories
+  useEffect(() => {
+    let isActive = true;
+    async function fetchMeta() {
+      try {
+        const orgsRes = await getPublicOrganizations({ size: 50 });
+        const orgMap: Record<string, string> = {};
+        if (orgsRes?.data) {
+          orgsRes.data.forEach((o) => { orgMap[o.id] = o.name; });
+        }
+
+        const [catRes, popRes] = await Promise.allSettled([
+          getCategories(),
+          getPopularMerch(),
+        ]);
+
+        if (isActive && catRes.status === "fulfilled" && catRes.value?.data) {
+          setCategoryOptions(
+            catRes.value.data.map((cat) => ({ label: cat.name, value: cat.slug ?? cat.id }))
+          );
+        }
+
+        if (isActive && popRes.status === "fulfilled" && popRes.value?.data?.length) {
+          setPopularProducts(
+            popRes.value.data.slice(0, 5).map((item) => ({
+              id: item.id,
+              name: item.name,
+              orgName: orgMap[item.orgId] || "Tổ chức UIT",
+              desc: item.description,
+              image: item.imageUrl || null,
+              link: `/merch/${item.id}`,
+            }))
+          );
+        } else if (isActive) {
+          setPopularProducts([]);
+        }
+      } catch {
+        if (isActive) setPopularProducts([]);
+      }
+    }
+    void fetchMeta();
+    return () => { isActive = false; };
+  }, []);
+
+  // Paginated merch list — re-fetched on filter/search/page change
   useEffect(() => {
     let isActive = true;
     setIsLoading(true);
 
     const timer = window.setTimeout(() => {
-      async function fetchData() {
+      async function fetchList() {
         try {
-          // Fetch org map
-          const orgsRes = await getPublicOrganizations({ size: 50 });
-          const orgMap: Record<string, string> = {};
-          if (orgsRes?.data) {
-            orgsRes.data.forEach((o) => {
-              orgMap[o.id] = o.name;
-            });
-          }
-
-          // Fetch Categories
-          try {
-            const catRes = await getCategories();
-            if (isActive && catRes?.data) {
-              setCategoryOptions(
-                catRes.data.map((cat) => ({
-                  label: cat.name,
-                  value: cat.slug, // Use slug for filtering
-                }))
-              );
-            }
-          } catch {
-            // keep empty categories
-          }
-
-          // Fetch Popular
-          try {
-            const popRes = await getPopularMerch();
-            if (isActive && popRes?.data && popRes.data.length > 0) {
-              const mappedFeatured = popRes.data.slice(0, 5).map((item) => ({
-                id: item.id,
-                name: item.name,
-                orgName: orgMap[item.orgId] || "Tổ chức UIT",
-                desc: item.description,
-                image: item.imageUrl || null,
-                link: `/merch/${item.id}`,
-              }));
-              setPopularProducts(mappedFeatured);
-            } else if (isActive) {
-              setPopularProducts(FEATURED_PRODUCTS);
-            }
-          } catch {
-            if (isActive) {
-              setPopularProducts(FEATURED_PRODUCTS);
-            }
-          }
-
-          // Fetch Merch List
           const res = await getPublicMerchList({
             keyword: query || undefined,
             category: activeCategory || undefined,
             page: page - 1,
             size: PAGE_SIZE,
-            sort: activeFilter || undefined,
+            sort: activeFilter ? SORT_MAP[activeFilter] : undefined,
           });
 
           if (isActive && res?.data) {
-            const mapped = res.data.map((item) =>
-              mapMerchToMockProduct(item, orgMap),
-            );
+            const orgsRes = await getPublicOrganizations({ size: 50 });
+            const orgMap: Record<string, string> = {};
+            if (orgsRes?.data) {
+              orgsRes.data.forEach((o) => { orgMap[o.id] = o.name; });
+            }
+
+            const mapped = res.data.map((item) => mapMerchToMockProduct(item, orgMap));
             setLiveProducts(mapped);
-            setHasApiError(false);
+            setApiError(null);
 
             if (res.meta) {
               setTotalItems(res.meta.totalElements);
@@ -121,90 +128,19 @@ export function MerchPage() {
             }
           }
         } catch {
-          if (isActive) {
-            setHasApiError(true);
-          }
+          if (isActive) setApiError("Không thể tải danh sách vật phẩm. Vui lòng thử lại.");
         } finally {
-          if (isActive) {
-            setIsLoading(false);
-          }
+          if (isActive) setIsLoading(false);
         }
       }
-
-      void fetchData();
+      void fetchList();
     }, 300);
 
-    return () => {
-      isActive = false;
-      window.clearTimeout(timer);
-    };
+    return () => { isActive = false; window.clearTimeout(timer); };
   }, [query, activeFilter, activeCategory, page]);
 
-  // Fallback local processed list if API fails or is not available
-  const localProcessed = useMemo(() => {
-    let list = MOCK_PRODUCTS.filter((p) => {
-      const matchQuery =
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.orgName.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase());
-      
-      const matchCategory = activeCategory 
-        ? p.category.toLowerCase() === activeCategory.toLowerCase() // Simple fallback comparison
-        : true;
-        
-      return matchQuery && matchCategory;
-    });
-
-    switch (activeFilter) {
-      case "az":
-        list = [...list].sort((a, b) => a.name.localeCompare(b.name, "vi"));
-        break;
-      case "za":
-        list = [...list].sort((a, b) => b.name.localeCompare(a.name, "vi"));
-        break;
-      case "price-asc":
-        list = [...list].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-        break;
-      case "price-desc":
-        list = [...list].sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-        break;
-    }
-
-    return list;
-  }, [query, activeFilter, activeCategory]);
-
-  const localTotalPages = Math.max(1, Math.ceil(localProcessed.length / PAGE_SIZE));
-  const localPaginated = useMemo(() => {
-    const currentPage = Math.min(page, localTotalPages);
-    return localProcessed.slice(
-      (currentPage - 1) * PAGE_SIZE,
-      currentPage * PAGE_SIZE,
-    );
-  }, [localProcessed, page, localTotalPages]);
-
-  // Decide whether to show live products or fall back cleanly
-  const displayedProducts = hasApiError ? localPaginated : liveProducts;
-  const countDisplay = hasApiError
-    ? localProcessed.length
-    : totalItems ?? liveProducts.length;
-  const pagesDisplay = hasApiError
-    ? localTotalPages
-    : serverTotalPages ?? (Math.ceil(liveProducts.length / PAGE_SIZE) || 1);
-
-  const handleQueryChange = (value: string) => {
-    setQuery(value);
-    setPage(1);
-  };
-
-  const handleFilterChange = (value: string | null) => {
-    setActiveFilter(value);
-    setPage(1);
-  };
-
-  const handleCategoryChange = (value: string | null) => {
-    setActiveCategory(value);
-    setPage(1);
-  };
+  const pagesDisplay = serverTotalPages ?? (Math.ceil(liveProducts.length / PAGE_SIZE) || 1);
+  const countDisplay = totalItems ?? liveProducts.length;
 
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
@@ -223,6 +159,8 @@ export function MerchPage() {
             <p className="mt-2 font-sans text-sm text-ink/60">
               {isLoading ? (
                 <span>Đang tải dữ liệu...</span>
+              ) : apiError ? (
+                <span className="text-red-500">{apiError}</span>
               ) : (
                 <span>
                   {countDisplay} vật phẩm
@@ -232,11 +170,11 @@ export function MerchPage() {
             </p>
           </header>
 
-          {isLoading && !popularProducts ? (
+          {popularProducts === null ? (
             <div className="relative mb-10 flex h-64 w-full items-center justify-center overflow-hidden rounded-[32px] border border-white/30 bg-white/10 shadow-glass backdrop-blur-md sm:h-80">
               <div className="size-10 animate-spin rounded-full border-4 border-white/20 border-t-aqua"></div>
             </div>
-          ) : popularProducts && popularProducts.length > 0 ? (
+          ) : popularProducts.length > 0 ? (
             <FeaturedSlider items={popularProducts} />
           ) : null}
 
@@ -245,14 +183,20 @@ export function MerchPage() {
             activeCategory={activeCategory}
             categoryOptions={categoryOptions.length > 0 ? categoryOptions : undefined}
             filterOptions={FILTER_OPTIONS}
-            onFilterChange={handleFilterChange}
-            onCategoryChange={handleCategoryChange}
-            onQueryChange={handleQueryChange}
+            onFilterChange={(v) => { setActiveFilter(v); setPage(1); }}
+            onCategoryChange={(v) => { setActiveCategory(v); setPage(1); }}
+            onQueryChange={(v) => { setQuery(v); setPage(1); }}
             query={query}
           />
 
           <div className={isLoading ? "opacity-50 transition-opacity" : ""}>
-            <ProductGrid products={displayedProducts} />
+            {!isLoading && apiError ? (
+              <div className="flex flex-col items-center justify-center py-24 text-red-400">
+                <p className="font-sans text-base">{apiError}</p>
+              </div>
+            ) : (
+              <ProductGrid products={liveProducts} />
+            )}
           </div>
 
           <Pagination
