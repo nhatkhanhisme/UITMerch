@@ -75,6 +75,15 @@ export type ApiResponse<T> = {
 
 // ─── Real Backend Response Interfaces ─────────────────────────────────────────
 
+export type CategoryResponse = {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  displayOrder: number;
+};
+
+
 export type MerchResponse = {
   id: string;
   orgId: string;

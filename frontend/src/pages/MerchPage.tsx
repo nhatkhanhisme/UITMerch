@@ -2,12 +2,13 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { GlassContainer } from "../components/common/GlassContainer";
 import { Pagination } from "../components/common/Pagination";
 import { FeaturedSlider } from "../components/features/FeaturedSlider";
+import type { FeaturedItem } from "../components/features/FeaturedSlider";
 import { MerchToolbar } from "../components/features/MerchToolbar";
 import type { FilterOption } from "../components/features/MerchToolbar";
 import { ProductGrid } from "../components/features/ProductGrid";
 import { FEATURED_PRODUCTS, MOCK_PRODUCTS } from "../mocks/merchData";
 import type { MockProduct } from "../mocks/merchData";
-import { getPublicMerchList } from "../api/merch";
+import { getPublicMerchList, getPopularMerch, getCategories } from "../api/merch";
 import { getPublicOrganizations } from "../api/organization";
 import { mapMerchToMockProduct } from "../types/shared";
 
@@ -29,10 +30,13 @@ const FILTER_OPTIONS: FilterOption[] = [
 export function MerchPage() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   // Live API State
   const [liveProducts, setLiveProducts] = useState<MockProduct[]>([]);
+  const [popularProducts, setPopularProducts] = useState<FeaturedItem[]>(FEATURED_PRODUCTS);
+  const [categoryOptions, setCategoryOptions] = useState<FilterOption[]>([]);
   const [totalItems, setTotalItems] = useState<number | null>(null);
   const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,8 +59,43 @@ export function MerchPage() {
             });
           }
 
+          // Fetch Categories
+          try {
+            const catRes = await getCategories();
+            if (isActive && catRes?.data) {
+              setCategoryOptions(
+                catRes.data.map((cat) => ({
+                  label: cat.name,
+                  value: cat.slug, // Use slug for filtering
+                }))
+              );
+            }
+          } catch {
+            // keep empty categories
+          }
+
+          // Fetch Popular
+          try {
+            const popRes = await getPopularMerch();
+            if (isActive && popRes?.data && popRes.data.length > 0) {
+              const mappedFeatured = popRes.data.slice(0, 5).map((item) => ({
+                id: item.id,
+                name: item.name,
+                orgName: orgMap[item.orgId] || "Tổ chức UIT",
+                desc: item.description,
+                image: item.imageUrl || null,
+                link: `/merch/${item.id}`,
+              }));
+              setPopularProducts(mappedFeatured);
+            }
+          } catch {
+            // Keep local FEATURED_PRODUCTS
+          }
+
+          // Fetch Merch List
           const res = await getPublicMerchList({
             keyword: query || undefined,
+            category: activeCategory || undefined,
             page: page - 1,
             size: PAGE_SIZE,
             sort: activeFilter || undefined,
@@ -95,16 +134,22 @@ export function MerchPage() {
       isActive = false;
       window.clearTimeout(timer);
     };
-  }, [query, activeFilter, page]);
+  }, [query, activeFilter, activeCategory, page]);
 
   // Fallback local processed list if API fails or is not available
   const localProcessed = useMemo(() => {
-    let list = MOCK_PRODUCTS.filter(
-      (p) =>
+    let list = MOCK_PRODUCTS.filter((p) => {
+      const matchQuery =
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.orgName.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase()),
-    );
+        p.category.toLowerCase().includes(query.toLowerCase());
+      
+      const matchCategory = activeCategory 
+        ? p.category.toLowerCase() === activeCategory.toLowerCase() // Simple fallback comparison
+        : true;
+        
+      return matchQuery && matchCategory;
+    });
 
     switch (activeFilter) {
       case "az":
@@ -122,7 +167,7 @@ export function MerchPage() {
     }
 
     return list;
-  }, [query, activeFilter]);
+  }, [query, activeFilter, activeCategory]);
 
   const localTotalPages = Math.max(1, Math.ceil(localProcessed.length / PAGE_SIZE));
   const localPaginated = useMemo(() => {
@@ -152,6 +197,11 @@ export function MerchPage() {
     setPage(1);
   };
 
+  const handleCategoryChange = (value: string | null) => {
+    setActiveCategory(value);
+    setPage(1);
+  };
+
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
@@ -178,12 +228,15 @@ export function MerchPage() {
             </p>
           </header>
 
-          <FeaturedSlider items={FEATURED_PRODUCTS} />
+          <FeaturedSlider items={popularProducts} />
 
           <MerchToolbar
             activeFilter={activeFilter}
+            activeCategory={activeCategory}
+            categoryOptions={categoryOptions.length > 0 ? categoryOptions : undefined}
             filterOptions={FILTER_OPTIONS}
             onFilterChange={handleFilterChange}
+            onCategoryChange={handleCategoryChange}
             onQueryChange={handleQueryChange}
             query={query}
           />

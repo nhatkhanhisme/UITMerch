@@ -8,6 +8,7 @@ export interface ProductCardProps extends HTMLAttributes<HTMLElement> {
   description?: string;
   price?: number;
   detailPath?: string;
+  category?: string;
 }
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
@@ -23,6 +24,7 @@ export function ProductCard({
   name,
   orgName,
   price,
+  category,
   ...props
 }: ProductCardProps) {
   const content = (
@@ -45,6 +47,11 @@ export function ProductCard({
         ) : (
           <div className="flex size-full items-center justify-center bg-transparent text-4xl font-bold text-black-blue/10">
             {name.charAt(0)}
+          </div>
+        )}
+        {category && (
+          <div className="absolute top-2 right-2 rounded-full bg-white/70 backdrop-blur-md px-2 py-0.5 border border-white/40 shadow-sm">
+            <span className="text-[10px] font-bold text-black-blue/80 uppercase tracking-wider">{category}</span>
           </div>
         )}
       </div>

@@ -12,6 +12,10 @@ interface MerchToolbarProps {
   filterOptions: FilterOption[];
   onQueryChange: (value: string) => void;
   onFilterChange: (value: string | null) => void;
+  // Optional category filter
+  activeCategory?: string | null;
+  categoryOptions?: FilterOption[];
+  onCategoryChange?: (value: string | null) => void;
 }
 
 // ─── Icons ─────────────────────────────────────────────────────────────────────
@@ -53,13 +57,24 @@ export function MerchToolbar({
   onFilterChange,
   onQueryChange,
   query,
+  activeCategory,
+  categoryOptions,
+  onCategoryChange,
 }: MerchToolbarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const activeLabel = filterOptions.find((o) => o.value === activeFilter)?.label ?? "Lọc";
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isCatOpen, setIsCatOpen] = useState(false);
+  
+  const activeSortLabel = filterOptions.find((o) => o.value === activeFilter)?.label ?? "Sắp xếp";
+  const activeCatLabel = categoryOptions?.find((o) => o.value === activeCategory)?.label ?? "Tất cả danh mục";
 
-  const handleOptionClick = (value: string) => {
+  const handleSortClick = (value: string) => {
     onFilterChange(activeFilter === value ? null : value);
-    setIsOpen(false);
+    setIsSortOpen(false);
+  };
+
+  const handleCatClick = (value: string) => {
+    onCategoryChange?.(activeCategory === value ? null : value);
+    setIsCatOpen(false);
   };
 
   return (
@@ -94,27 +109,103 @@ export function MerchToolbar({
         )}
       </label>
 
-      {/* ── Filter Dropdown ── */}
+      {/* ── Category Dropdown ── */}
+      {categoryOptions && onCategoryChange && (
+        <div
+          className="group relative z-40"
+          onMouseEnter={() => setIsCatOpen(true)}
+          onMouseLeave={() => setIsCatOpen(false)}
+        >
+          <button
+            aria-expanded={isCatOpen}
+            aria-haspopup="menu"
+            className={[
+              "flex items-center gap-2 rounded-full border px-5 py-3",
+              "text-sm font-semibold backdrop-blur-md transition whitespace-nowrap",
+              activeCategory
+                ? "border-aqua bg-aqua/20 text-black-blue shadow-inner"
+                : "border-white/60 bg-white/50 text-ink hover:bg-white/75",
+            ].join(" ")}
+            type="button"
+          >
+            <span>{activeCatLabel}</span>
+            <ChevronDownIcon />
+          </button>
+
+          <div className="absolute top-full right-0 h-2 w-full bg-transparent" />
+
+          {isCatOpen && (
+            <div
+              className={[
+                "absolute right-0 top-[calc(100%+8px)] min-w-[200px] max-h-[300px] overflow-y-auto",
+                "rounded-[20px] border border-white/60 bg-white/80 backdrop-blur-2xl",
+                "shadow-[0_8px_32px_rgba(82,128,145,0.15)]",
+                "animate-in fade-in slide-in-from-top-2 duration-200 custom-scrollbar"
+              ].join(" ")}
+              role="menu"
+            >
+              {/* Reset category option */}
+              <button
+                className={[
+                  "flex w-full items-center justify-between px-5 py-3",
+                  "font-sans text-sm transition",
+                  !activeCategory
+                    ? "bg-aqua/30 font-semibold text-black-blue"
+                    : "text-ink hover:bg-white/60",
+                ].join(" ")}
+                onClick={() => handleCatClick("")}
+                role="menuitem"
+                type="button"
+              >
+                <span>Tất cả danh mục</span>
+                {!activeCategory && <span aria-hidden="true" className="text-xs">✓</span>}
+              </button>
+
+              {categoryOptions.map((option) => (
+                <button
+                  className={[
+                    "flex w-full items-center justify-between px-5 py-3",
+                    "font-sans text-sm transition",
+                    option.value === activeCategory
+                      ? "bg-aqua/30 font-semibold text-black-blue"
+                      : "text-ink hover:bg-white/60",
+                  ].join(" ")}
+                  key={option.value}
+                  onClick={() => handleCatClick(option.value)}
+                  role="menuitem"
+                  type="button"
+                >
+                  <span>{option.label}</span>
+                  {option.value === activeCategory && (
+                    <span aria-hidden="true" className="text-xs">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Sort Dropdown ── */}
       <div
         className="group relative z-50"
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
+        onMouseEnter={() => setIsSortOpen(true)}
+        onMouseLeave={() => setIsSortOpen(false)}
       >
         <button
-          aria-expanded={isOpen}
+          aria-expanded={isSortOpen}
           aria-haspopup="menu"
           className={[
             "flex items-center gap-2 rounded-full border px-5 py-3",
-            "text-sm font-semibold backdrop-blur-md transition",
+            "text-sm font-semibold backdrop-blur-md transition whitespace-nowrap",
             activeFilter
               ? "border-aqua bg-aqua/20 text-black-blue shadow-inner"
               : "border-white/60 bg-white/50 text-ink hover:bg-white/75",
           ].join(" ")}
-          id="merch-filter-trigger"
-          onClick={() => setIsOpen((open) => !open)}
+          onClick={() => setIsSortOpen((open) => !open)}
           type="button"
         >
-          <span>{activeLabel}</span>
+          <span>{activeSortLabel}</span>
           <ChevronDownIcon />
         </button>
 
@@ -122,7 +213,7 @@ export function MerchToolbar({
         <div className="absolute top-full right-0 h-2 w-full bg-transparent" />
 
         {/* Dropdown panel */}
-        {isOpen && (
+        {isSortOpen && (
           <div
             className={[
               "absolute right-0 top-[calc(100%+8px)] min-w-[160px]",
@@ -143,7 +234,7 @@ export function MerchToolbar({
                 ].join(" ")}
                 id={`filter-option-${option.value}`}
                 key={option.value}
-                onClick={() => handleOptionClick(option.value)}
+                onClick={() => handleSortClick(option.value)}
                 role="menuitem"
                 type="button"
               >
