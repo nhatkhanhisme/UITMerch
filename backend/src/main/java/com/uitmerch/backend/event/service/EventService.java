@@ -4,7 +4,6 @@ import com.uitmerch.backend.common.exception.ConflictException;
 import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.EventStatus;
-import com.uitmerch.backend.event.dto.AttachMerchRequest;
 import com.uitmerch.backend.event.dto.CreateEventRequest;
 import com.uitmerch.backend.event.dto.EventResponse;
 import com.uitmerch.backend.event.dto.UpdateEventRequest;
@@ -14,8 +13,10 @@ import com.uitmerch.backend.event.repository.EventMerchRepository;
 import com.uitmerch.backend.event.repository.EventRepository;
 import com.uitmerch.backend.merch.dto.MerchResponse;
 import com.uitmerch.backend.merch.entity.Category;
+import com.uitmerch.backend.merch.entity.MerchImage;
 import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.CategoryRepository;
+import com.uitmerch.backend.merch.repository.MerchImageRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.service.OrganizationService;
@@ -38,6 +39,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final EventMerchRepository eventMerchRepository;
     private final MerchItemRepository merchItemRepository;
+    private final MerchImageRepository merchImageRepository;
     private final CategoryRepository categoryRepository;
     private final OrganizationService organizationService;
 
@@ -185,8 +187,15 @@ public class EventService {
             .stream()
             .collect(Collectors.toMap(Category::getId, c -> c));
 
+        Map<UUID, List<String>> imageMap = merchImageRepository.findByMerchIdInOrderByPosition(merchIds)
+            .stream()
+            .collect(Collectors.groupingBy(
+                MerchImage::getMerchId,
+                Collectors.mapping(MerchImage::getUrl, Collectors.toList())
+            ));
+
         return items.stream()
-            .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())))
+            .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId()), imageMap.get(item.getId())))
             .toList();
     }
 

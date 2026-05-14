@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -20,7 +21,7 @@ public class MerchResponse {
     private String description;
     private BigDecimal price;
     private int stock;
-    private String imageUrl;
+    private List<String> images;
     private MerchItemStatus status;
     private UUID categoryId;
     private String categorySlug;
@@ -29,10 +30,16 @@ public class MerchResponse {
     private LocalDateTime updatedAt;
 
     public static MerchResponse from(MerchItem item) {
-        return from(item, null);
+        return from(item, null, List.of());
     }
 
     public static MerchResponse from(MerchItem item, Category category) {
+        return from(item, category, List.of());
+    }
+
+    public static MerchResponse from(MerchItem item, Category category, List<String> images) {
+        List<String> resolvedImages = images != null ? images : List.of();
+
         return MerchResponse.builder()
             .id(item.getId())
             .orgId(item.getOrgId())
@@ -40,7 +47,7 @@ public class MerchResponse {
             .description(item.getDescription())
             .price(item.getPrice())
             .stock(item.getStock())
-            .imageUrl(item.getImageUrl())
+            .images(resolvedImages)
             .status(item.getStatus())
             .categoryId(category != null ? category.getId() : item.getCategoryId())
             .categorySlug(category != null ? category.getSlug() : null)

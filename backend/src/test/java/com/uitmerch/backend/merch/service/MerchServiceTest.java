@@ -10,6 +10,7 @@ import com.uitmerch.backend.merch.dto.UpdateMerchRequest;
 import com.uitmerch.backend.merch.entity.Category;
 import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.CategoryRepository;
+import com.uitmerch.backend.merch.repository.MerchImageRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.order.repository.OrderItemRepository;
 import com.uitmerch.backend.organization.entity.Organization;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.when;
 class MerchServiceTest {
 
     @Mock private MerchItemRepository merchItemRepository;
+    @Mock private MerchImageRepository merchImageRepository;
     @Mock private CategoryRepository categoryRepository;
     @Mock private OrganizationService organizationService;
     @Mock private OrderItemRepository orderItemRepository;
@@ -158,6 +160,7 @@ class MerchServiceTest {
         when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
         when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(item));
         when(merchItemRepository.save(any())).thenReturn(item);
+        when(merchImageRepository.findByMerchIdOrderByPosition(any())).thenReturn(Collections.emptyList());
 
         UpdateMerchRequest req = new UpdateMerchRequest();
         req.setStatus(MerchItemStatus.PUBLISHED);
@@ -174,6 +177,7 @@ class MerchServiceTest {
         when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
         when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(item));
         when(merchItemRepository.save(any())).thenReturn(item);
+        when(merchImageRepository.findByMerchIdOrderByPosition(any())).thenReturn(Collections.emptyList());
 
         UpdateMerchRequest req = new UpdateMerchRequest();
         req.setName("New Name");
@@ -229,6 +233,7 @@ class MerchServiceTest {
         item.setStatus(MerchItemStatus.PUBLISHED);
 
         when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(item));
+        when(merchImageRepository.findByMerchIdOrderByPosition(any())).thenReturn(Collections.emptyList());
 
         MerchResponse response = merchService.getPublishedMerch(merchId);
 
@@ -280,10 +285,10 @@ class MerchServiceTest {
         }
 
         when(merchItemRepository.findAllByStatus(MerchItemStatus.PUBLISHED)).thenReturn(items);
-        List<UUID> ids = items.stream().map(MerchItem::getId).toList();
         when(orderItemRepository.sumQuantityByMerchIds(any())).thenReturn(Collections.emptyList());
         when(orderItemRepository.sumQuantityByMerchIdsSince(any(), any())).thenReturn(Collections.emptyList());
         when(categoryRepository.findAll()).thenReturn(Collections.emptyList());
+        when(merchImageRepository.findByMerchIdInOrderByPosition(any())).thenReturn(Collections.emptyList());
 
         List<MerchResponse> result = merchService.getPopularMerch();
 
