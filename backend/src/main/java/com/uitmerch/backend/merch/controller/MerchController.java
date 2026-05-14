@@ -35,7 +35,7 @@ public class MerchController {
 
     @PostMapping
     @PreAuthorize("hasRole('ORGANIZER')")
-    @Operation(summary = "Create merch item", description = "Organization must be ACTIVE (BR08).")
+    @Operation(summary = "Create merch item", description = "Organization must be ACTIVE (BR08). Pass imageUrls as an ordered list of image URLs.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Merch item created"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors or organization not ACTIVE"),
@@ -90,7 +90,7 @@ public class MerchController {
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ORGANIZER')")
-    @Operation(summary = "Update merch item", description = "Supports partial update including status change.")
+    @Operation(summary = "Update merch item", description = "Supports partial update including status change. Pass imageUrls to replace all images; omit to keep existing images; pass an empty list to remove all.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Merch item updated"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
