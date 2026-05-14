@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -13,7 +13,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  font-family: "Be Vietnam Pro", sans-serif;
+  font-family: "Noto Sans", "Inter", "Roboto", Arial, sans-serif;
   font-weight: 400;
   overflow-x: hidden;
 }
