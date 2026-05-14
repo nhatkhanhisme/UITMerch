@@ -42,7 +42,7 @@ export function TopNavBar() {
   const isAccountActive =
     currentPath === "/auth" || currentPath.startsWith("/profile");
   const isAccountMenuActive = isAccountActive || isAccountMenuOpen;
-  const accountLabel = user ? user.fullName : "Account";
+  const accountLabel = user ? user.fullName : "Tài khoản";
   const avatarFallback = useMemo(
     () => (user?.fullName ? getInitials(user.fullName) : "U"),
     [user?.fullName],
@@ -234,8 +234,8 @@ export function TopNavBar() {
                     role="menuitem"
                     to="/profile"
                   >
-                    Profile
-                    <span className="text-xs text-gray">View</span>
+                    Hồ sơ
+                    <span className="text-xs text-gray">Xem</span>
                   </Link>
                   <button
                     className="mt-1 flex w-full items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
@@ -243,8 +243,8 @@ export function TopNavBar() {
                     role="menuitem"
                     type="button"
                   >
-                    Log out
-                    <span className="text-xs text-gray">Sign out</span>
+                    Đăng xuất
+                    <span className="text-xs text-gray">Thoát</span>
                   </button>
                 </div>
               ) : null}
@@ -272,7 +272,7 @@ export function TopNavBar() {
                 />
               </span>
               <span className="font-sans text-sm font-medium text-black-blue">
-                Account
+                Tài khoản
               </span>
             </Link>
           )}
@@ -281,7 +281,7 @@ export function TopNavBar() {
         {/* RESPONSIVE */}
         <button
           aria-expanded={isMenuOpen}
-          aria-label="Open navigation"
+          aria-label="Mở điều hướng"
           className="grid size-11 place-items-center rounded-full font-sans text-2xl leading-none text-slate transition duration-200 ease-out hover:bg-white/35 md:hidden"
           onClick={() => setIsMenuOpen((open) => !open)}
           type="button"
@@ -310,14 +310,14 @@ export function TopNavBar() {
                 onClick={() => setIsMenuOpen(false)}
                 to="/profile"
               >
-                Profile
+                Hồ sơ
               </Link>
               <button
                 className={`${linkClassName("/logout")} w-full text-left`}
                 onClick={handleLogout}
                 type="button"
               >
-                Log out
+                Đăng xuất
               </button>
             </>
           ) : (
@@ -327,7 +327,7 @@ export function TopNavBar() {
               state={accountState}
               to={accountTarget}
             >
-              Account
+              Tài khoản
             </Link>
           )}
         </div>

@@ -27,6 +27,13 @@ const ShaderBackground = lazy(() =>
 
 const PAGE_SIZE = 8;
 
+const SORT_MAP: Record<string, string> = {
+  az: "name,asc",
+  za: "name,desc",
+  "price-asc": "price,asc",
+  "price-desc": "price,desc",
+};
+
 const FILTER_OPTIONS: FilterOption[] = [
   { label: "A → Z", value: "az" },
   { label: "Z → A", value: "za" },
@@ -117,7 +124,7 @@ export function OrganizationDetailPage() {
           const merchRes = await getPublicOrgMerch(id as string, {
             page: page - 1,
             size: PAGE_SIZE,
-            sort: activeFilter || undefined,
+            sort: activeFilter ? SORT_MAP[activeFilter] : undefined,
           });
 
           if (isActive) {
