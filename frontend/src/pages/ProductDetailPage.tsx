@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { findProductById, MOCK_PRODUCTS } from "../mocks/merchData";
-import type { MockProduct, ProductColorOption } from "../mocks/merchData";
+import type { MockProduct } from "../mocks/merchData";
 import { getPublicMerchDetail } from "../api/merch";
 import { getPublicOrganizationDetail } from "../api/organization";
 import { createGuestCheckoutOrder } from "../api/order";
@@ -55,153 +55,20 @@ function ProductNotFound() {
 }
 
 function Gallery({
-  activeImage,
-  images,
+  image,
   name,
-  onSelect,
 }: {
-  activeImage: string;
-  images: string[];
+  image: string;
   name: string;
-  onSelect: (image: string) => void;
-}) {
-  const activeIndex = Math.max(0, images.indexOf(activeImage));
-
-  const goTo = (direction: -1 | 1) => {
-    const nextIndex = (activeIndex + direction + images.length) % images.length;
-    onSelect(images[nextIndex]);
-  };
-
-  return (
-    <section className="space-y-5">
-      <div className="relative overflow-hidden rounded-[32px] bg-white/25 p-4 shadow-glass-inset">
-        <div className="aspect-square overflow-hidden rounded-[32px] bg-white/40">
-          <img
-            alt={name}
-            className="size-full object-cover mix-blend-multiply"
-            src={activeImage}
-          />
-        </div>
-
-        {images.length > 1 ? (
-          <>
-            <button
-              aria-label="Ảnh trước"
-              className="absolute left-6 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/60 bg-white/70 text-2xl text-black-blue shadow-glass backdrop-blur transition hover:-translate-x-0.5 hover:bg-white"
-              onClick={() => goTo(-1)}
-              type="button"
-            >
-              ‹
-            </button>
-            <button
-              aria-label="Ảnh kế tiếp"
-              className="absolute right-6 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/60 bg-white/70 text-2xl text-black-blue shadow-glass backdrop-blur transition hover:translate-x-0.5 hover:bg-white"
-              onClick={() => goTo(1)}
-              type="button"
-            >
-              ›
-            </button>
-          </>
-        ) : null}
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-        {images.map((image, index) => (
-          <button
-            aria-label={`Xem ảnh ${index + 1}`}
-            className={[
-              "aspect-square overflow-hidden rounded-[24px] border bg-white/35 p-1 transition",
-              image === activeImage
-                ? "border-black-blue shadow-glass"
-                : "border-white/50 hover:border-aqua",
-            ].join(" ")}
-            key={image}
-            onClick={() => onSelect(image)}
-            type="button"
-          >
-            <img
-              alt=""
-              className="size-full rounded-[20px] object-cover mix-blend-multiply"
-              src={image}
-            />
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ColorSelector({
-  colors,
-  selectedColor,
-  onSelect,
-}: {
-  colors: ProductColorOption[];
-  selectedColor: ProductColorOption;
-  onSelect: (color: ProductColorOption) => void;
 }) {
   return (
-    <div>
-      <p className="text-sm font-medium text-ink/60">
-        Màu sắc: <span className="text-ink">{selectedColor.name}</span>
-      </p>
-      <div className="mt-3 flex flex-wrap gap-3">
-        {colors.map((color) => (
-          <button
-            aria-label={`Chọn màu ${color.name}`}
-            className={[
-              "flex size-12 items-center justify-center rounded-full border bg-white/60 p-1 transition",
-              selectedColor.name === color.name
-                ? "border-black-blue ring-2 ring-black-blue/15"
-                : "border-white/70 hover:border-aqua",
-            ].join(" ")}
-            key={color.name}
-            onClick={() => onSelect(color)}
-            type="button"
-          >
-            <span
-              className="size-full rounded-full border border-black/10"
-              style={{ background: color.value }}
-            />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SizeSelector({
-  label,
-  options,
-  selectedSize,
-  onSelect,
-}: {
-  label: string;
-  options: string[];
-  selectedSize: string;
-  onSelect: (size: string) => void;
-}) {
-  return (
-    <div>
-      <p className="text-sm font-medium text-ink/60">
-        {label}: <span className="text-ink">{selectedSize}</span>
-      </p>
-      <div className="mt-3 flex flex-wrap gap-3">
-        {options.map((size) => (
-          <button
-            className={[
-              "min-h-12 min-w-16 rounded-none border px-5 text-sm font-bold transition",
-              selectedSize === size
-                ? "border-black bg-black text-white"
-                : "border-ink/20 bg-white/50 text-black-blue hover:border-black-blue",
-            ].join(" ")}
-            key={size}
-            onClick={() => onSelect(size)}
-            type="button"
-          >
-            {size}
-          </button>
-        ))}
+    <div className="relative overflow-hidden rounded-[32px] bg-white/25 p-4 shadow-glass-inset">
+      <div className="aspect-square overflow-hidden rounded-[32px] bg-white/40">
+        <img
+          alt={name}
+          className="size-full object-cover mix-blend-multiply"
+          src={image}
+        />
       </div>
     </div>
   );
@@ -242,14 +109,10 @@ function QuantityStepper({
 }
 
 function PurchasePanel({
-  onImageSelect,
   product,
 }: {
-  onImageSelect: (image: string) => void;
   product: MockProduct;
 }) {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
-  const [selectedSize, setSelectedSize] = useState(product.sizeOptions[0]);
   const [quantity, setQuantity] = useState(1);
 
   // Guest Checkout Flow States
@@ -261,12 +124,6 @@ function PurchasePanel({
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
-
-  // Synchronize initial selections if product data updates
-  useEffect(() => {
-    setSelectedColor(product.colors[0]);
-    setSelectedSize(product.sizeOptions[0]);
-  }, [product.id, product.colors, product.sizeOptions]);
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,8 +146,7 @@ function PurchasePanel({
             quantity,
           },
         ],
-        note:
-          `Màu: ${selectedColor.name}, Size: ${selectedSize}. ` + (note || ""),
+        note: note.trim() || undefined,
       });
 
       setOrderPlaced(true);
@@ -327,8 +183,7 @@ function PurchasePanel({
               <span className="text-ink/60">Vật phẩm:</span> {product.name}
             </p>
             <p>
-              <span className="text-ink/60">Phân loại:</span> {selectedColor.name} -{" "}
-              {selectedSize}
+              <span className="text-ink/60">Phân loại:</span> {product.category}
             </p>
             <p>
               <span className="text-ink/60">Số lượng:</span> {quantity}
@@ -379,26 +234,6 @@ function PurchasePanel({
       </div>
 
       <div className="space-y-7 py-7">
-        <ColorSelector
-          colors={product.colors}
-          onSelect={(color) => {
-            setSelectedColor(color);
-            if (color.image) {
-              onImageSelect(color.image);
-            }
-          }}
-          selectedColor={selectedColor}
-        />
-
-        <SizeSelector
-          label={product.sizeLabel}
-          onSelect={(size) => {
-            setSelectedSize(size);
-          }}
-          options={product.sizeOptions}
-          selectedSize={selectedSize}
-        />
-
         <div>
           <p className="font-fredoka text-4xl font-bold text-black-blue">
             {formatPrice(product.price)}
@@ -546,7 +381,6 @@ export function ProductDetailPage() {
 
   const [liveProduct, setLiveProduct] = useState<MockProduct | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeImage, setActiveImage] = useState("");
 
   useEffect(() => {
     if (!id) {
@@ -560,7 +394,6 @@ export function ProductDetailPage() {
       try {
         const res = await getPublicMerchDetail(id as string);
         if (isActive && res?.data) {
-          // let's try fetching the organization detail to map orgName correctly
           let orgMap: Record<string, string> | undefined;
           try {
             const orgRes = await getPublicOrganizationDetail(res.data.orgId);
@@ -573,7 +406,6 @@ export function ProductDetailPage() {
 
           const mapped = mapMerchToMockProduct(res.data, orgMap);
           setLiveProduct(mapped);
-          setActiveImage(mapped.image);
         }
       } catch {
         // Fall back gracefully to local static mock product if missing
@@ -593,12 +425,6 @@ export function ProductDetailPage() {
 
   const product = liveProduct || fallbackProduct;
 
-  useEffect(() => {
-    if (product?.image) {
-      setActiveImage(product.image);
-    }
-  }, [product?.id, product?.image]);
-
   const relatedProducts = useMemo(
     () =>
       product
@@ -613,9 +439,6 @@ export function ProductDetailPage() {
     return <ProductNotFound />;
   }
 
-  const images = product?.gallery?.length ? product.gallery : [product?.image ?? ""];
-  const shownImage = activeImage || images[0] || "";
-
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
@@ -627,10 +450,8 @@ export function ProductDetailPage() {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_430px] xl:grid-cols-[minmax(0,1fr)_480px]">
             <section className="overflow-hidden rounded-panel border border-white/50 bg-white/30 p-4 shadow-glass backdrop-blur-xl sm:p-5">
               <Gallery
-                activeImage={shownImage}
-                images={images}
+                image={product.image}
                 name={product.name}
-                onSelect={setActiveImage}
               />
 
               <section className="mt-6 border-t border-white/50 px-2 py-7 sm:px-3">
@@ -643,13 +464,7 @@ export function ProductDetailPage() {
                 <p className="mt-3 text-base font-semibold text-ink/70">
                   {product.orgName}
                 </p>
-                <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-[28px] border border-white/50 bg-white/35 p-5">
-                    <p className="text-xs uppercase text-ink/45">Chất liệu</p>
-                    <p className="mt-2 font-semibold text-black-blue">
-                      {product.material ?? "Đang cập nhật"}
-                    </p>
-                  </div>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   <div className="rounded-[28px] border border-white/50 bg-white/35 p-5">
                     <p className="text-xs uppercase text-ink/45">Tồn kho</p>
                     <p className="mt-2 font-semibold text-black-blue">
@@ -657,27 +472,13 @@ export function ProductDetailPage() {
                     </p>
                   </div>
                   <div className="rounded-[28px] border border-white/50 bg-white/35 p-5">
-                    <p className="text-xs uppercase text-ink/45">Phân loại</p>
+                    <p className="text-xs uppercase text-ink/45">Danh mục</p>
                     <p className="mt-2 font-semibold text-black-blue">
                       {product.category}
                     </p>
                   </div>
                 </div>
               </section>
-
-              {product.detailSections?.map((section) => (
-                <section
-                  className="border-t border-white/50 px-2 py-7 sm:px-3"
-                  key={section.title}
-                >
-                  <h2 className="font-fredoka text-3xl font-bold text-black-blue">
-                    {section.title}
-                  </h2>
-                  <p className="mt-4 max-w-3xl text-base leading-8 text-ink/70">
-                    {section.content}
-                  </p>
-                </section>
-              ))}
 
               {relatedProducts.length > 0 ? (
                 <section className="border-t border-white/50 px-2 py-7 sm:px-3">
@@ -711,7 +512,6 @@ export function ProductDetailPage() {
 
             <PurchasePanel
               key={product.id}
-              onImageSelect={setActiveImage}
               product={product}
             />
           </div>

@@ -91,7 +91,6 @@ export function OrganizationDetailPage() {
 
     async function fetchDetail() {
       try {
-        // Fetch organization detail independently from products to ensure robust rendering
         let fetchedOrg: MockOrganization | null = null;
         try {
           const orgRes = await getPublicOrganizationDetail(id as string);
@@ -99,7 +98,6 @@ export function OrganizationDetailPage() {
             fetchedOrg = mapOrgToMockOrganization(orgRes.data);
           }
         } catch {
-          // If direct detail query fails or endpoint is unseeded, look up gracefully in the list API
           try {
             const listRes = await getPublicOrganizations({ size: 50 });
             const matched = listRes?.data?.find((o) => o.id === id);
@@ -115,7 +113,6 @@ export function OrganizationDetailPage() {
           setLiveOrg(fetchedOrg);
         }
 
-        // Fetch products independently
         try {
           const merchRes = await getPublicOrgMerch(id as string, {
             page: page - 1,
@@ -182,13 +179,10 @@ export function OrganizationDetailPage() {
 
     const q = query.toLowerCase();
     const orgNameSafe = organization.name || "";
-    const shortNameSafe = organization.shortName || "";
 
     let list = MOCK_PRODUCTS.filter((product) => {
       const pOrgSafe = product.orgName || "";
-      const belongsToOrganization =
-        pOrgSafe === orgNameSafe ||
-        (shortNameSafe && pOrgSafe.includes(shortNameSafe));
+      const belongsToOrganization = pOrgSafe === orgNameSafe;
 
       if (!belongsToOrganization) {
         return false;
@@ -271,7 +265,7 @@ export function OrganizationDetailPage() {
                   />
                 ) : (
                   <span className="font-fredoka text-6xl font-bold text-black-blue/20">
-                    {(organization.shortName || organization.name || "U").charAt(0)}
+                    {(organization.name || "U").charAt(0)}
                   </span>
                 )}
               </div>
@@ -283,42 +277,20 @@ export function OrganizationDetailPage() {
                 >
                   ← Tổ chức
                 </Link>
-                <p className="mt-6 font-sans text-sm font-semibold uppercase text-ink/45">
-                  {organization.category}
-                </p>
-                <h1 className="mt-3 font-fredoka text-4xl font-bold leading-tight text-black-blue sm:text-5xl">
+                <h1 className="mt-5 font-fredoka text-4xl font-bold leading-tight text-black-blue sm:text-5xl">
                   {organization.name}
                 </h1>
-                <p className="mt-3 font-sans text-lg font-semibold text-ink/70">
-                  {organization.shortName}
-                </p>
-                <p className="mx-auto mt-5 max-w-3xl font-sans text-base leading-8 text-ink/65 lg:mx-0">
-                  {organization.description}
+                <p className="mx-auto mt-4 max-w-3xl font-sans text-base leading-8 text-ink/65 lg:mx-0">
+                  {organization.description || "Chưa có mô tả chi tiết cho tổ chức này."}
                 </p>
 
-                <div className="mt-7 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
-                    <p className="text-xs font-semibold uppercase text-ink/45">
-                      Thành viên
-                    </p>
-                    <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
-                      {organization.memberCount}
-                    </p>
-                  </div>
-                  <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
+                <div className="mt-7 flex flex-wrap gap-4">
+                  <div className="min-w-[140px] rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
                     <p className="text-xs font-semibold uppercase text-ink/45">
                       Vật phẩm
                     </p>
                     <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
                       {countDisplay}
-                    </p>
-                  </div>
-                  <div className="rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
-                    <p className="text-xs font-semibold uppercase text-ink/45">
-                      Nhóm
-                    </p>
-                    <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
-                      {organization.category}
                     </p>
                   </div>
                 </div>
@@ -337,7 +309,7 @@ export function OrganizationDetailPage() {
                     <span>
                       {countDisplay} vật phẩm
                       {query ? ` phù hợp với "${query}"` : ""} từ{" "}
-                      {organization.shortName}
+                      {organization.name}
                     </span>
                   )}
                 </p>
