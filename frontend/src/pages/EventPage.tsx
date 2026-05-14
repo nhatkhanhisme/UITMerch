@@ -6,6 +6,8 @@ import type { FilterOption } from "../components/features/MerchToolbar";
 import { getPublicEvents } from "../api/event";
 import { getPublicOrganizations } from "../api/organization";
 import type { EventResponse } from "../types/shared";
+import { Calendar, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -287,8 +289,9 @@ export function EventPage() {
             {displayedEvents.length > 0 ? (
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {displayedEvents.map((ev) => (
-                  <article
-                    className="group flex flex-col overflow-hidden rounded-[32px] border border-white/60 bg-white/40 shadow-glass backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-aqua hover:shadow-glass-inset"
+                  <Link
+                    to={`/event/${ev.id}`}
+                    className="group flex flex-col overflow-hidden rounded-[32px] border border-white/60 bg-white/40 shadow-glass backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-aqua hover:shadow-glass-inset focus-visible:outline-aqua focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
                     key={ev.id}
                   >
                     <div className="relative h-48 w-full overflow-hidden bg-white/50">
@@ -315,18 +318,18 @@ export function EventPage() {
 
                       <div className="mt-6 border-t border-white/50 pt-4 space-y-2 font-sans text-xs text-ink/65">
                         <div className="flex items-center gap-2">
-                          <span className="text-base">📅</span>
+                          <Calendar className="size-4 shrink-0 text-black-blue/60" />
                           <span>{formatDate(ev.startDate)}</span>
                         </div>
                         {ev.location && (
                           <div className="flex items-center gap-2">
-                            <span className="text-base">📍</span>
+                            <MapPin className="size-4 shrink-0 text-black-blue/60" />
                             <span className="truncate">{ev.location}</span>
                           </div>
                         )}
                       </div>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             ) : (

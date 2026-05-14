@@ -10,7 +10,7 @@ export async function getPublicEvents(params?: PaginationParams) {
   return data;
 }
 
-export async function getPublicEventDetail(id: string) {
+export async function getPublicEvent(id: string) {
   const { data } = await apiClient.get<ApiResponse<EventResponse>>(
     `/api/v1/public/events/${id}`,
   );
