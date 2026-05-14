@@ -35,7 +35,7 @@ export function MerchPage() {
 
   // Live API State
   const [liveProducts, setLiveProducts] = useState<MockProduct[]>([]);
-  const [popularProducts, setPopularProducts] = useState<FeaturedItem[]>(FEATURED_PRODUCTS);
+  const [popularProducts, setPopularProducts] = useState<FeaturedItem[] | null>(null);
   const [categoryOptions, setCategoryOptions] = useState<FilterOption[]>([]);
   const [totalItems, setTotalItems] = useState<number | null>(null);
   const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
@@ -87,9 +87,13 @@ export function MerchPage() {
                 link: `/merch/${item.id}`,
               }));
               setPopularProducts(mappedFeatured);
+            } else if (isActive) {
+              setPopularProducts(FEATURED_PRODUCTS);
             }
           } catch {
-            // Keep local FEATURED_PRODUCTS
+            if (isActive) {
+              setPopularProducts(FEATURED_PRODUCTS);
+            }
           }
 
           // Fetch Merch List
@@ -228,7 +232,13 @@ export function MerchPage() {
             </p>
           </header>
 
-          <FeaturedSlider items={popularProducts} />
+          {isLoading && !popularProducts ? (
+            <div className="relative mb-10 flex h-64 w-full items-center justify-center overflow-hidden rounded-[32px] border border-white/30 bg-white/10 shadow-glass backdrop-blur-md sm:h-80">
+              <div className="size-10 animate-spin rounded-full border-4 border-white/20 border-t-aqua"></div>
+            </div>
+          ) : popularProducts && popularProducts.length > 0 ? (
+            <FeaturedSlider items={popularProducts} />
+          ) : null}
 
           <MerchToolbar
             activeFilter={activeFilter}
