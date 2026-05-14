@@ -58,7 +58,7 @@ export function ProfileInfoRow({
           <p className="font-sans text-[11px] uppercase tracking-[0.3em] text-slate/60">
             {label}
           </p>
-          <p className="mt-2 truncate font-brand text-lg font-black text-black-blue sm:text-xl">
+          <p className="mt-2 break-words font-brand text-lg font-black text-black-blue sm:text-xl">
             {value && value.trim().length > 0 ? value : "N/A"}
           </p>
           {description ? (

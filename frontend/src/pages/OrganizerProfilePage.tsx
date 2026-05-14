@@ -21,6 +21,40 @@ import {
   toOptionalValue,
 } from "./profileUtils";
 
+// ─── Icons ────────────────────────────────────────────────────────────────────
+function CalendarIcon() {
+  return (
+    <svg aria-hidden="true" className="size-4 shrink-0 text-gold" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg aria-hidden="true" className="size-4 shrink-0 text-aqua" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+  );
+}
+
+function CameraIcon() {
+  return (
+    <svg aria-hidden="true" className="size-4 shrink-0 text-black-blue" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
+function ImageIcon() {
+  return (
+    <svg aria-hidden="true" className="size-4 shrink-0 text-black-blue" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  );
+}
+
 const initialOrganizerForm = {
   name: "",
   description: "",
@@ -53,7 +87,6 @@ export function OrganizerProfilePage() {
     if (!user?.fullName) {
       return "O";
     }
-
     return getInitials(user.fullName);
   }, [user?.fullName]);
 
@@ -88,7 +121,6 @@ export function OrganizerProfilePage() {
         if (!isActive) {
           return;
         }
-
         toast.error(getApiErrorMessage(error));
       } finally {
         if (isActive) {
@@ -165,7 +197,6 @@ export function OrganizerProfilePage() {
     }
 
     setIsUploadingLogo(true);
-
     const input = event.target;
 
     try {
@@ -206,7 +237,6 @@ export function OrganizerProfilePage() {
     }
 
     setIsUploadingCover(true);
-
     const input = event.target;
 
     try {
@@ -303,28 +333,193 @@ export function OrganizerProfilePage() {
     navigate("/");
   };
 
+  // Resolve which logo/cover to show in the left hero panel
+  const displayedLogoUrl = isEditing
+    ? organizerForm.logoUrl
+    : (organizerProfile?.logoUrl ?? user.avatarUrl ?? "");
+  const displayedCoverUrl = isEditing
+    ? organizerForm.coverUrl
+    : (organizerProfile?.coverUrl ?? "");
+
   return (
     <main className="relative min-h-screen bg-canvas pb-16 pt-28 sm:pt-32">
       <AmbientBackgroundGradients />
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6">
-        <section className="overflow-hidden rounded-[36px] border border-white/60 bg-white/75 shadow-[0_24px_80px_rgba(16,24,40,0.12)] backdrop-blur">
-          <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="relative min-h-[280px] bg-gradient-to-br from-black-blue via-slate to-aqua/70 p-6 text-white sm:p-8 lg:p-9">
-              {organizerProfile?.coverUrl ? (
-                <img
-                  alt={organizerProfile.name}
-                  className="absolute inset-0 h-full w-full object-cover opacity-35"
-                  src={organizerProfile.coverUrl}
-                />
-              ) : null}
-              <div className="relative z-10 flex h-full flex-col justify-between gap-8">
+        {/* ── Loading ── */}
+        {isLoading ? (
+          <div className="rounded-panel border border-white/60 bg-white/60 p-6 text-center font-sans text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
+            Loading your organization profile...
+          </div>
+        ) : null}
+
+        {/* ── Missing org notice ── */}
+        {!isLoading && isMissingOrganization ? (
+          <div className="rounded-panel border border-aqua bg-white/70 p-6 font-sans text-sm text-black-blue shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
+            No organization profile yet. Create one from the organizer dashboard
+            when it is available.
+          </div>
+        ) : null}
+
+        {/* ── Main unified card ── */}
+        {!isLoading && !isMissingOrganization ? (
+          <form
+            className="overflow-hidden rounded-[36px] border border-white/60 bg-white/75 shadow-[0_24px_80px_rgba(16,24,40,0.12)] backdrop-blur"
+            id="organizer-profile-form"
+            onSubmit={handleOrganizerSave}
+          >
+            <div className="grid gap-0 lg:grid-cols-2">
+              {/* ── Left: Cover hero + Logo identity ── */}
+              <div className="relative flex flex-col bg-gradient-to-br from-black-blue via-slate to-aqua/70 text-white min-w-0 min-h-[360px]">
+                {/* Cover image */}
+                <div className="relative h-48 w-full overflow-hidden sm:h-56">
+                  {displayedCoverUrl ? (
+                    <img
+                      alt="Organization cover"
+                      className="h-full w-full object-cover opacity-70"
+                      src={displayedCoverUrl}
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-black-blue via-slate to-aqua/70" />
+                  )}
+                  {/* Cover remove + choose file controls in edit mode */}
+                  {isEditing ? (
+                    <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1">
+                      {organizerForm.coverUrl ? (
+                        <button
+                          aria-label="Remove cover"
+                          className="flex size-7 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass hover:scale-110 transition z-10"
+                          disabled={isSaving || isUploadingMedia}
+                          onClick={handleOrganizerCoverRemove}
+                          type="button"
+                        >
+                          ✕
+                        </button>
+                      ) : null}
+                      <label
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/30 bg-black-blue/60 px-3 py-1 font-sans text-xs font-semibold text-white shadow-sm transition hover:bg-black-blue/80 backdrop-blur-sm"
+                        htmlFor="org-cover-upload"
+                      >
+                        <ImageIcon />
+                        <span className="text-white">{isUploadingCover ? "Uploading..." : "Change cover"}</span>
+                      </label>
+                      <input
+                        accept="image/*"
+                        className="hidden"
+                        disabled={isSaving || isUploadingMedia}
+                        id="org-cover-upload"
+                        onChange={handleOrganizerCoverUpload}
+                        type="file"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+
+                {/* Logo + name area below cover */}
+                <div className="relative flex flex-1 flex-col gap-4 p-6 sm:p-8">
+                  <div className="flex flex-wrap items-end gap-4 -mt-10">
+                    {/* Logo circle stacked with chooser */}
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="relative inline-block">
+                        <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/30 bg-white/15 shadow-[0_12px_30px_rgba(0,0,0,0.24)] backdrop-blur-sm">
+                          {displayedLogoUrl ? (
+                            <img
+                              alt={organizerForm.name || "Organization logo"}
+                              className="size-full object-cover"
+                              src={displayedLogoUrl}
+                            />
+                          ) : (
+                            <span className="font-brand text-2xl font-black text-white">
+                              {organizerForm.name
+                                ? organizerForm.name.slice(0, 2).toUpperCase()
+                                : avatarLabel}
+                            </span>
+                          )}
+                        </div>
+                        {isEditing && organizerForm.logoUrl ? (
+                          <button
+                            aria-label="Remove logo"
+                            className="absolute right-0 top-0 flex size-6 -translate-y-1/3 translate-x-1/3 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass z-10 hover:scale-110 transition"
+                            disabled={isSaving || isUploadingMedia}
+                            onClick={handleOrganizerLogoRemove}
+                            type="button"
+                          >
+                            ✕
+                          </button>
+                        ) : null}
+                      </div>
+                      {isEditing ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <label
+                            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-3 py-1 font-sans text-xs font-semibold text-white shadow-sm transition hover:bg-white/25 backdrop-blur-sm"
+                            htmlFor="org-logo-upload"
+                          >
+                            <CameraIcon />
+                            <span className="text-white">{isUploadingLogo ? "Uploading..." : "Logo"}</span>
+                          </label>
+                          <input
+                            accept="image/*"
+                            className="hidden"
+                            disabled={isSaving || isUploadingMedia}
+                            id="org-logo-upload"
+                            onChange={handleOrganizerLogoUpload}
+                            type="file"
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80 backdrop-blur-sm">
+                        Organizer profile
+                      </div>
+                      {isEditing ? (
+                        <div className="mt-3 max-w-sm">
+                          <Input
+                            label="Organization name"
+                            name="name"
+                            onChange={handleOrganizerChange}
+                            placeholder="Organization name"
+                            required
+                            value={organizerForm.name}
+                            disabled={isSaving || isUploadingMedia}
+                          />
+                        </div>
+                      ) : (
+                        <h1 className="mt-3 font-brand text-3xl font-black text-white sm:text-4xl break-words">
+                          {organizerProfile?.name ?? user.fullName}
+                        </h1>
+                      )}
+
+                      {/* Minimalist metadata */}
+                      <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-white/70">
+                        <div className="flex items-center gap-1.5">
+                          <ShieldIcon />
+                          <span className="text-white/80">{organizerProfile?.status ?? "Pending"}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CalendarIcon />
+                          <span>Since {formatDate(organizerProfile?.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Right: Actions + Inline Fields ── */}
+              <div className="p-6 sm:p-8 lg:p-9 border-t border-white/60 lg:border-t-0 lg:border-l min-w-0">
                 <div className="flex items-center justify-between gap-4">
-                  <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80 backdrop-blur-sm">
-                    Organizer profile
+                  <div>
+                    <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
+                      Organization details
+                    </p>
+                    <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
+                      {isEditing ? "Edit mode" : "Overview"}
+                    </h2>
                   </div>
                   <Button
-                    className="shrink-0 border-white/30 bg-white/10 text-white hover:bg-white/20"
+                    className="shrink-0"
                     disabled={isSaving}
                     type="button"
                     variant="outline"
@@ -334,304 +529,77 @@ export function OrganizerProfilePage() {
                   </Button>
                 </div>
 
-                <div className="flex flex-wrap items-end gap-4">
-                  <div className="flex size-20 items-center justify-center overflow-hidden rounded-full border border-white/30 bg-white/15 shadow-[0_12px_30px_rgba(0,0,0,0.16)] backdrop-blur-sm">
-                    {organizerProfile?.logoUrl || user.avatarUrl ? (
-                      <img
-                        alt={organizerProfile?.name ?? user.fullName}
-                        className="size-full object-cover"
-                        src={organizerProfile?.logoUrl ?? user.avatarUrl ?? ""}
-                      />
-                    ) : (
-                      <span className="font-brand text-2xl font-black text-white">
-                        {avatarLabel}
-                      </span>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-sans text-xs uppercase tracking-[0.3em] text-white/70">
-                      Organization workspace
-                    </p>
-                    <h1 className="mt-3 font-brand text-3xl font-black text-white sm:text-4xl">
-                      {organizerProfile?.name ?? user.fullName}
-                    </h1>
-                    <p className="mt-2 max-w-2xl font-google text-sm leading-6 text-white/80">
-                      Manage your merch identity with a cleaner overview for
-                      logo, cover art, and organization details.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 sm:p-8 lg:p-9">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
-                    Organization details
-                  </p>
-                  <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
-                    {isEditing ? "Edit mode" : "Overview"}
-                  </h2>
-                </div>
                 {canEdit ? (
-                  isEditing ? (
-                    <div className="flex flex-wrap items-center gap-3">
-                      {hasUnsavedMediaChange ? (
-                        <div className="inline-flex items-center rounded-full border border-gold/60 bg-gold/20 px-3 py-1.5 font-sans text-xs font-semibold text-black-blue shadow-glass">
-                          ● Unsaved image change
-                        </div>
-                      ) : null}
+                  <div className="mt-6 flex flex-wrap items-center gap-3">
+                    {isEditing ? (
+                      <>
+                        {hasUnsavedMediaChange ? (
+                          <div className="inline-flex items-center rounded-full border border-gold/60 bg-gold/20 px-3 py-1.5 font-sans text-xs font-semibold text-black-blue shadow-glass">
+                            ● Unsaved image change
+                          </div>
+                        ) : null}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={cancelEditing}
+                          disabled={isSaving || isUploadingMedia}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          form="organizer-profile-form"
+                          loading={isSaving}
+                          type="submit"
+                          disabled={isSaving || isUploadingMedia}
+                        >
+                          Save changes
+                        </Button>
+                      </>
+                    ) : (
                       <Button
                         type="button"
-                        variant="outline"
-                        onClick={cancelEditing}
-                        disabled={isSaving || isUploadingMedia}
+                        variant="secondary"
+                        onClick={startEditing}
                       >
-                        Cancel
+                        Edit profile
                       </Button>
-                      <Button
-                        form="organizer-profile-form"
-                        loading={isSaving}
-                        type="submit"
+                    )}
+                  </div>
+                ) : null}
+
+                {/* Dynamic field presentation */}
+                <div className="mt-6">
+                  {isEditing ? (
+                    <div className="grid gap-4">
+                      <Input
+                        label="Description"
+                        name="description"
+                        onChange={handleOrganizerChange}
+                        placeholder="Tell people about your organization (optional)"
+                        value={organizerForm.description}
                         disabled={isSaving || isUploadingMedia}
-                      >
-                        Save changes
-                      </Button>
+                      />
                     </div>
                   ) : (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={startEditing}
-                    >
-                      Edit profile
-                    </Button>
-                  )
-                ) : null}
-              </div>
-
-              <div className="mt-6 grid gap-3">
-                <ProfileInfoRow
-                  label="Status"
-                  value={organizerProfile?.status ?? "Pending"}
-                  description="Current organization state."
-                  leading="S"
-                />
-                <ProfileInfoRow
-                  label="Owner ID"
-                  value={organizerProfile?.ownerId ?? "N/A"}
-                  description="Linked account owner."
-                  leading="#"
-                />
-                <ProfileInfoRow
-                  label="Updated"
-                  value={formatDate(organizerProfile?.updatedAt)}
-                  description="Last profile change."
-                  leading="U"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {isLoading ? (
-          <div className="rounded-panel border border-white/60 bg-white/60 p-6 text-center font-sans text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
-            Loading your organization profile...
-          </div>
-        ) : null}
-
-
-
-        {!isLoading && isMissingOrganization ? (
-          <div className="rounded-panel border border-aqua bg-white/70 p-6 font-sans text-sm text-black-blue shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
-            No organization profile yet. Create one from the organizer dashboard
-            when it is available.
-          </div>
-        ) : null}
-
-        {!isLoading && organizerProfile && isEditing ? (
-          <form
-            className="grid gap-4 rounded-[32px] border border-white/60 bg-white/75 p-6 shadow-[0_20px_60px_rgba(16,24,40,0.12)] backdrop-blur-sm"
-            id="organizer-profile-form"
-            onSubmit={handleOrganizerSave}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <Input
-                label="Organization name"
-                name="name"
-                onChange={handleOrganizerChange}
-                placeholder="Organization name"
-                required
-                value={organizerForm.name}
-              />
-              <Input
-                label="Status"
-                name="status"
-                placeholder=""
-                value={organizerProfile.status}
-                disabled
-              />
-              <div className="md:col-span-2">
-                <Input
-                  label="Description"
-                  name="description"
-                  onChange={handleOrganizerChange}
-                  placeholder="Optional"
-                  value={organizerForm.description}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label
-                  className="font-sans text-sm text-gray"
-                  htmlFor="org-logo-upload"
-                >
-                  Logo image
-                </label>
-                <div className="mt-2 flex flex-wrap items-center gap-4">
-                  <div className="relative inline-block">
-                    <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
-                      {organizerForm.logoUrl ? (
-                        <img
-                          alt="Organization logo"
-                          className="size-full object-cover"
-                          src={organizerForm.logoUrl}
-                        />
-                      ) : (
-                        <span className="font-brand text-lg font-black text-black-blue">
-                          {organizerForm.name
-                            ? organizerForm.name.slice(0, 2).toUpperCase()
-                            : "OR"}
-                        </span>
-                      )}
-                    </div>
-                    {organizerForm.logoUrl ? (
-                      <button
-                        aria-label="Remove logo"
-                        className="absolute right-0 top-0 flex size-6 -translate-y-1/3 translate-x-1/3 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass z-10 hover:scale-110 transition"
-                        disabled={isSaving || isUploadingMedia}
-                        onClick={handleOrganizerLogoRemove}
-                        type="button"
-                      >
-                        ✕
-                      </button>
-                    ) : null}
-                  </div>
-                  <div className="flex-1">
-                    <input
-                      accept="image/*"
-                      className="h-12 w-full rounded-glass border border-white/40 bg-white/20 px-4 font-sans text-sm text-ink shadow-glass transition duration-200 file:mr-4 file:rounded-glass file:border-0 file:bg-aqua file:px-4 file:py-2 file:font-sans file:text-sm file:font-semibold file:text-black-blue hover:file:bg-gold"
-                      disabled={isSaving || isUploadingMedia}
-                      id="org-logo-upload"
-                      onChange={handleOrganizerLogoUpload}
-                      type="file"
-                    />
-                    <p className="mt-2 font-sans text-xs text-gray">
-                      {isUploadingLogo
-                        ? "Uploading logo..."
-                        : "PNG, JPG, GIF, SVG, or WEBP up to 10MB."}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label
-                  className="font-sans text-sm text-gray"
-                  htmlFor="org-cover-upload"
-                >
-                  Cover image
-                </label>
-                <div className="mt-2 grid gap-3">
-                  <div className="relative h-40 w-full overflow-hidden rounded-panel border border-white/60 bg-white/70 shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
-                    {organizerForm.coverUrl ? (
-                      <img
-                        alt="Organization cover"
-                        className="h-full w-full object-cover"
-                        src={organizerForm.coverUrl}
+                    <div className="grid gap-3">
+                      <ProfileInfoRow
+                        label="Description"
+                        value={organizerProfile?.description ?? ""}
+                        description="About your organization."
+                        leading="D"
                       />
-                    ) : (
-                      <div className="h-full w-full bg-brand-gradient" />
-                    )}
-                    {organizerForm.coverUrl ? (
-                      <button
-                        aria-label="Remove cover"
-                        className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass"
-                        disabled={isSaving || isUploadingMedia}
-                        onClick={handleOrganizerCoverRemove}
-                        type="button"
-                      >
-                        x
-                      </button>
-                    ) : null}
-                  </div>
-                  <input
-                    accept="image/*"
-                    className="h-12 w-full rounded-glass border border-white/40 bg-white/20 px-4 font-sans text-sm text-ink shadow-glass transition duration-200 file:mr-4 file:rounded-glass file:border-0 file:bg-aqua file:px-4 file:py-2 file:font-sans file:text-sm file:font-semibold file:text-black-blue hover:file:bg-gold"
-                    disabled={isSaving || isUploadingMedia}
-                    id="org-cover-upload"
-                    onChange={handleOrganizerCoverUpload}
-                    type="file"
-                  />
-                  <p className="font-sans text-xs text-gray">
-                    {isUploadingCover
-                      ? "Uploading cover..."
-                      : "PNG, JPG, GIF, SVG, or WEBP up to 10MB."}
-                  </p>
+                      <ProfileInfoRow
+                        label="Updated"
+                        value={formatDate(organizerProfile?.updatedAt)}
+                        description="Last profile change."
+                        leading="U"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </form>
-        ) : null}
-
-        {!isLoading && organizerProfile && !isEditing ? (
-          <section className="overflow-hidden rounded-[32px] border border-white/60 bg-white/75 shadow-[0_20px_60px_rgba(16,24,40,0.12)] backdrop-blur-sm">
-            <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="p-6 sm:p-8">
-                <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
-                  Organization overview
-                </p>
-                <h3 className="mt-3 font-brand text-2xl font-black text-black-blue">
-                  {organizerProfile.name}
-                </h3>
-                <p className="mt-3 font-google text-sm leading-6 text-gray">
-                  {organizerProfile.description ||
-                    "No organization description yet."}
-                </p>
-              </div>
-              <div className="border-t border-white/60 bg-gradient-to-br from-aqua/10 to-white p-6 sm:p-8 lg:border-l lg:border-t-0">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <ProfileInfoRow
-                    label="Created"
-                    value={formatDate(organizerProfile.createdAt)}
-                    description="First profile creation."
-                    leading="C"
-                  />
-                  <ProfileInfoRow
-                    label="Logo"
-                    value={organizerProfile.logoUrl ? "Uploaded" : "Missing"}
-                    description="Brand identity image."
-                    leading="L"
-                  />
-                  <ProfileInfoRow
-                    label="Cover"
-                    value={organizerProfile.coverUrl ? "Uploaded" : "Missing"}
-                    description="Main banner image."
-                    leading="B"
-                  />
-                  <ProfileInfoRow
-                    label="Role"
-                    value="Organizer"
-                    description="Manage merch and organization assets."
-                    leading="O"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
         ) : null}
       </div>
     </main>

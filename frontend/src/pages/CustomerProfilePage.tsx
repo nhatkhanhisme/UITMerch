@@ -278,9 +278,9 @@ export function CustomerProfilePage() {
           id="customer-profile-form"
           onSubmit={handleCustomerSave}
         >
-          <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid gap-0 lg:grid-cols-2">
             {/* ── Left Identity & Minimal Info Panel ── */}
-            <div className="bg-gradient-to-br from-white via-white/90 to-aqua/20 p-6 sm:p-8 lg:p-9">
+            <div className="bg-gradient-to-br from-white via-white/90 to-aqua/20 p-6 sm:p-8 lg:p-9 min-w-0">
               <div className="flex flex-wrap items-center gap-4">
                 {/* Avatar Display & Inline Controls */}
                 <div className="relative flex flex-col items-center gap-2">
@@ -376,7 +376,7 @@ export function CustomerProfilePage() {
             </div>
 
             {/* ── Right Action Controls & Inline Fields Panel ── */}
-            <div className="p-6 sm:p-8 lg:p-9 border-t border-white/60 lg:border-t-0 lg:border-l">
+            <div className="p-6 sm:p-8 lg:p-9 border-t border-white/60 lg:border-t-0 lg:border-l min-w-0">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
