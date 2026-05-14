@@ -87,6 +87,21 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Login successful.", response));
     }
 
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh access token", description = "Exchange a valid refresh token for a new access token and rotated refresh token.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tokens refreshed successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — refresh token missing"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Refresh token is invalid or expired"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
+        AuthResponse response = authService.refreshToken(request.getRefreshToken());
+        return ResponseEntity.ok(ApiResponse.success("Tokens refreshed successfully.", response));
+    }
+
     @PostMapping("/logout")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Logout and invalidate the current JWT")
