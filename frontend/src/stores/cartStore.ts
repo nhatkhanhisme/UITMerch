@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { OrderItem } from "@repo/shared";
+import type { OrderItem } from "../types/shared";
 
 type CartState = {
   items: OrderItem[];

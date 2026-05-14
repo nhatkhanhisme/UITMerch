@@ -1,6 +1,9 @@
 import { Suspense } from 'react';
 import { ShaderGradientCanvas, ShaderGradient } from '@shadergradient/react';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const GradientComponent = ShaderGradient as any;
+
 export function ShaderBackground() {
     return (
         // Dùng Suspense với fallback là màu nền tĩnh mờ để tránh đơ lúc load
@@ -16,8 +19,7 @@ export function ShaderBackground() {
                     pointerEvents: 'none'
                 }}
             >
-                {/* @ts-ignore - Bỏ qua lỗi type của thư viện */}
-                <ShaderGradient
+                <GradientComponent
                     animate="on"
                     axesHelper="off"
                     brightness={1.6}

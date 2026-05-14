@@ -4,7 +4,7 @@ import type {
   Order,
   Product,
   User
-} from "@repo/shared";
+} from "../types/shared";
 
 export const mockUsersResponse: ApiResponse<User[]> = {
   data: [],
