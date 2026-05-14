@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/organizations/orders")
+@RequestMapping("/api/v1/organizations/{orgId}/orders")
 @RequiredArgsConstructor
 @Tag(name = "Organizer", description = "Manage incoming orders for the organizer's organization")
 @SecurityRequirement(name = "bearerAuth")
@@ -42,11 +42,12 @@ public class OrganizerOrderController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<java.util.List<OrderResponse>>> getOrgOrders(
+        @PathVariable UUID orgId,
         @RequestParam(required = false) OrderStatus status,
         @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @RequestAttribute("userId") String userId
     ) {
-        Page<OrderResponse> page = orderService.getOrgOrders(UUID.fromString(userId), status, pageable);
+        Page<OrderResponse> page = orderService.getOrgOrders(UUID.fromString(userId), orgId, status, pageable);
         return ResponseEntity.ok(ApiResponse.success("Orders retrieved.", page.getContent(), PaginationMeta.from(page)));
     }
 
@@ -61,10 +62,11 @@ public class OrganizerOrderController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<OrderResponse>> getOrgOrder(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @RequestAttribute("userId") String userId
     ) {
-        OrderResponse order = orderService.getOrgOrder(UUID.fromString(userId), id);
+        OrderResponse order = orderService.getOrgOrder(UUID.fromString(userId), orgId, id);
         return ResponseEntity.ok(ApiResponse.success("Order retrieved.", order));
     }
 
@@ -83,11 +85,12 @@ public class OrganizerOrderController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<OrderResponse>> updateOrderStatus(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @Valid @RequestBody UpdateOrderStatusRequest request,
         @RequestAttribute("userId") String userId
     ) {
-        OrderResponse order = orderService.updateOrderStatus(UUID.fromString(userId), id, request.getStatus());
+        OrderResponse order = orderService.updateOrderStatus(UUID.fromString(userId), orgId, id, request.getStatus());
         return ResponseEntity.ok(ApiResponse.success("Order status updated.", order));
     }
 }

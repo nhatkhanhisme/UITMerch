@@ -46,8 +46,8 @@ public class MerchService {
     // ------------------------------------------------------------------ //
 
     @Transactional
-    public MerchResponse createMerch(UUID ownerId, CreateMerchRequest request) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public MerchResponse createMerch(UUID ownerId, UUID orgId, CreateMerchRequest request) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         if (org.getStatus() != OrganizationStatus.ACTIVE) {
             throw new ValidationException("Your organization must be ACTIVE to create merch. Current status: " + org.getStatus());
         }
@@ -68,16 +68,16 @@ public class MerchService {
         return MerchResponse.from(saved, category, images);
     }
 
-    public Page<MerchResponse> getOwnMerch(UUID ownerId, Pageable pageable) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public Page<MerchResponse> getOwnMerch(UUID ownerId, UUID orgId, Pageable pageable) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         Map<UUID, Category> categoryMap = buildCategoryMap();
         Page<MerchItem> page = merchItemRepository.findByOrgId(org.getId(), pageable);
         Map<UUID, List<String>> imageMap = buildImageMap(page.getContent());
         return page.map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId()), imageMap.get(item.getId())));
     }
 
-    public MerchResponse getOwnMerchItem(UUID ownerId, UUID merchId) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public MerchResponse getOwnMerchItem(UUID ownerId, UUID orgId, UUID merchId) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         MerchItem item = findOwnItemOrThrow(org.getId(), merchId);
         Category category = item.getCategoryId() != null ? categoryRepository.findById(item.getCategoryId()).orElse(null) : null;
         List<String> images = loadImages(item.getId());
@@ -85,8 +85,8 @@ public class MerchService {
     }
 
     @Transactional
-    public MerchResponse updateMerch(UUID ownerId, UUID merchId, UpdateMerchRequest request) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public MerchResponse updateMerch(UUID ownerId, UUID orgId, UUID merchId, UpdateMerchRequest request) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         MerchItem item = findOwnItemOrThrow(org.getId(), merchId);
 
         if (request.getName() != null && !request.getName().isBlank()) {
@@ -131,8 +131,8 @@ public class MerchService {
     }
 
     @Transactional
-    public void deleteMerch(UUID ownerId, UUID merchId) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public void deleteMerch(UUID ownerId, UUID orgId, UUID merchId) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         MerchItem item = findOwnItemOrThrow(org.getId(), merchId);
         item.setStatus(MerchItemStatus.ARCHIVED);
         merchItemRepository.save(item);

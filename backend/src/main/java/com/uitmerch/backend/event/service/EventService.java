@@ -44,8 +44,8 @@ public class EventService {
     private final OrganizationService organizationService;
 
     @Transactional
-    public EventResponse createEvent(UUID ownerId, CreateEventRequest request) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public EventResponse createEvent(UUID ownerId, UUID orgId, CreateEventRequest request) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         Event event = Event.builder()
             .orgId(org.getId())
@@ -59,14 +59,14 @@ public class EventService {
         return EventResponse.from(eventRepository.save(event));
     }
 
-    public Page<EventResponse> getOwnEvents(UUID ownerId, Pageable pageable) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public Page<EventResponse> getOwnEvents(UUID ownerId, UUID orgId, Pageable pageable) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         return eventRepository.findByOrgId(org.getId(), pageable)
             .map(EventResponse::from);
     }
 
-    public EventResponse getOwnEvent(UUID ownerId, UUID eventId) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public EventResponse getOwnEvent(UUID ownerId, UUID orgId, UUID eventId) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         Event event = eventRepository.findByIdAndOrgId(eventId, org.getId())
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
         List<MerchResponse> merch = fetchMerchForEvent(eventId);
@@ -74,8 +74,8 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse updateEvent(UUID ownerId, UUID eventId, UpdateEventRequest request) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public EventResponse updateEvent(UUID ownerId, UUID orgId, UUID eventId, UpdateEventRequest request) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         Event event = eventRepository.findByIdAndOrgId(eventId, org.getId())
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
 
@@ -103,8 +103,8 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse attachMerch(UUID ownerId, UUID eventId, UUID merchId) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public EventResponse attachMerch(UUID ownerId, UUID orgId, UUID eventId, UUID merchId) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         Event event = eventRepository.findByIdAndOrgId(eventId, org.getId())
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
 
@@ -129,8 +129,8 @@ public class EventService {
     }
 
     @Transactional
-    public void detachMerch(UUID ownerId, UUID eventId, UUID merchId) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public void detachMerch(UUID ownerId, UUID orgId, UUID eventId, UUID merchId) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         eventRepository.findByIdAndOrgId(eventId, org.getId())
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
 

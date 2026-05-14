@@ -13,9 +13,9 @@ import java.util.UUID;
 @Repository
 public interface OrganizationRepository extends JpaRepository<Organization, UUID> {
 
-    Optional<Organization> findByOwnerId(UUID ownerId);
+    Page<Organization> findByOwnerId(UUID ownerId, Pageable pageable);
 
-    boolean existsByOwnerId(UUID ownerId);
+    Optional<Organization> findByIdAndOwnerId(UUID id, UUID ownerId);
 
     Page<Organization> findByStatus(OrganizationStatus status, Pageable pageable);
 }

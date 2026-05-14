@@ -272,13 +272,13 @@ public class OrderService {
     // ------------------------------------------------------------------ //
 
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getOrgOrders(UUID ownerId, OrderStatus statusFilter, Pageable pageable) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
-        UUID orgId = org.getId();
+    public Page<OrderResponse> getOrgOrders(UUID ownerId, UUID orgId, OrderStatus statusFilter, Pageable pageable) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
+        UUID resolvedOrgId = org.getId();
 
         Page<Order> orders = statusFilter != null
-            ? orderRepository.findByOrgIdAndStatus(orgId, statusFilter, pageable)
-            : orderRepository.findByOrgId(orgId, pageable);
+            ? orderRepository.findByOrgIdAndStatus(resolvedOrgId, statusFilter, pageable)
+            : orderRepository.findByOrgId(resolvedOrgId, pageable);
 
         return orders.map(order -> {
             List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
@@ -287,8 +287,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponse getOrgOrder(UUID ownerId, UUID orderId) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public OrderResponse getOrgOrder(UUID ownerId, UUID orgId, UUID orderId) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
@@ -302,8 +302,8 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse updateOrderStatus(UUID ownerId, UUID orderId, OrderStatus newStatus) {
-        Organization org = organizationService.getOwnOrganizationEntity(ownerId);
+    public OrderResponse updateOrderStatus(UUID ownerId, UUID orgId, UUID orderId, OrderStatus newStatus) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
