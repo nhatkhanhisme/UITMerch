@@ -21,7 +21,6 @@ public class MerchResponse {
     private String description;
     private BigDecimal price;
     private int stock;
-    private String imageUrl;
     private List<String> images;
     private MerchItemStatus status;
     private UUID categoryId;
@@ -48,7 +47,6 @@ public class MerchResponse {
             .description(item.getDescription())
             .price(item.getPrice())
             .stock(item.getStock())
-            .imageUrl(resolvedImages.isEmpty() ? null : resolvedImages.get(0))
             .images(resolvedImages)
             .status(item.getStatus())
             .categoryId(category != null ? category.getId() : item.getCategoryId())
