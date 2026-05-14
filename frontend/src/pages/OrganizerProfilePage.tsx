@@ -492,29 +492,31 @@ export function OrganizerProfilePage() {
                   Logo image
                 </label>
                 <div className="mt-2 flex flex-wrap items-center gap-4">
-                  <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
-                    {organizerForm.logoUrl ? (
-                      <img
-                        alt="Organization logo"
-                        className="size-full object-cover"
-                        src={organizerForm.logoUrl}
-                      />
-                    ) : (
-                      <span className="font-brand text-lg font-black text-black-blue">
-                        {organizerForm.name
-                          ? organizerForm.name.slice(0, 2).toUpperCase()
-                          : "OR"}
-                      </span>
-                    )}
+                  <div className="relative inline-block">
+                    <div className="relative flex size-16 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
+                      {organizerForm.logoUrl ? (
+                        <img
+                          alt="Organization logo"
+                          className="size-full object-cover"
+                          src={organizerForm.logoUrl}
+                        />
+                      ) : (
+                        <span className="font-brand text-lg font-black text-black-blue">
+                          {organizerForm.name
+                            ? organizerForm.name.slice(0, 2).toUpperCase()
+                            : "OR"}
+                        </span>
+                      )}
+                    </div>
                     {organizerForm.logoUrl ? (
                       <button
                         aria-label="Remove logo"
-                        className="absolute right-0 top-0 flex size-6 -translate-y-1/3 translate-x-1/3 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass"
+                        className="absolute right-0 top-0 flex size-6 -translate-y-1/3 translate-x-1/3 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass z-10 hover:scale-110 transition"
                         disabled={isSaving || isUploadingMedia}
                         onClick={handleOrganizerLogoRemove}
                         type="button"
                       >
-                        x
+                        ✕
                       </button>
                     ) : null}
                   </div>
