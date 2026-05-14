@@ -13,6 +13,9 @@ import com.uitmerch.backend.event.entity.EventMerch;
 import com.uitmerch.backend.event.repository.EventMerchRepository;
 import com.uitmerch.backend.event.repository.EventRepository;
 import com.uitmerch.backend.merch.dto.MerchResponse;
+import com.uitmerch.backend.merch.entity.Category;
+import com.uitmerch.backend.merch.entity.MerchItem;
+import com.uitmerch.backend.merch.repository.CategoryRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.service.OrganizationService;
@@ -23,8 +26,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +38,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final EventMerchRepository eventMerchRepository;
     private final MerchItemRepository merchItemRepository;
+    private final CategoryRepository categoryRepository;
     private final OrganizationService organizationService;
 
     @Transactional
@@ -164,11 +170,23 @@ public class EventService {
     private List<MerchResponse> fetchMerchForEvent(UUID eventId) {
         List<UUID> merchIds = eventMerchRepository.findByEventId(eventId)
             .stream()
-            .map(em -> em.getMerchId())
+            .map(EventMerch::getMerchId)
             .toList();
-        return merchItemRepository.findAllById(merchIds)
+
+        List<MerchItem> items = merchItemRepository.findAllById(merchIds);
+
+        List<UUID> categoryIds = items.stream()
+            .map(MerchItem::getCategoryId)
+            .filter(id -> id != null)
+            .distinct()
+            .toList();
+
+        Map<UUID, Category> categoryMap = categoryRepository.findAllById(categoryIds)
             .stream()
-            .map(MerchResponse::from)
+            .collect(Collectors.toMap(Category::getId, c -> c));
+
+        return items.stream()
+            .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId())))
             .toList();
     }
 
