@@ -140,7 +140,7 @@ export function MerchToolbar({
                 "absolute right-0 top-[calc(100%+8px)] min-w-[200px] max-h-[300px] overflow-y-auto",
                 "rounded-[20px] border border-white/60 bg-white/80 backdrop-blur-2xl",
                 "shadow-[0_8px_32px_rgba(82,128,145,0.15)]",
-                "animate-in fade-in slide-in-from-top-2 duration-200 custom-scrollbar"
+                "animate-in fade-in slide-in-from-top-2 duration-200 scrollbar-hide"
               ].join(" ")}
               role="menu"
             >
