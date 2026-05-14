@@ -28,7 +28,7 @@ public class PublicEventController {
     private final EventService eventService;
 
     @GetMapping
-    @Operation(summary = "List published events")
+    @Operation(summary = "List published and ended events")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Events retrieved"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
@@ -43,10 +43,10 @@ public class PublicEventController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get a published event by ID")
+    @Operation(summary = "Get a published or ended event by ID")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Event retrieved"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Event not found or not published"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Event not found or not publicly visible"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<EventResponse>> getPublicEvent(@PathVariable UUID id) {

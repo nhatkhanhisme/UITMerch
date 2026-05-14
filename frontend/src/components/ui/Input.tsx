@@ -1,4 +1,4 @@
-import type { InputBaseProps } from "@repo/shared";
+import type { InputBaseProps } from "../../types/shared";
 import type { InputHTMLAttributes } from "react";
 import { useState } from "react";
 

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -132,13 +133,15 @@ public class EventService {
         eventMerchRepository.deleteByEventIdAndMerchId(eventId, merchId);
     }
 
+    private static final Set<EventStatus> PUBLIC_STATUSES = Set.of(EventStatus.PUBLISHED, EventStatus.ENDED);
+
     public Page<EventResponse> getPublicEvents(Pageable pageable) {
-        return eventRepository.findByStatus(EventStatus.PUBLISHED, pageable)
+        return eventRepository.findByStatusIn(PUBLIC_STATUSES, pageable)
             .map(EventResponse::from);
     }
 
     public Page<EventResponse> getPublicEventsByOrg(UUID orgId, Pageable pageable) {
-        return eventRepository.findByOrgIdAndStatus(orgId, EventStatus.PUBLISHED, pageable)
+        return eventRepository.findByOrgIdAndStatusIn(orgId, PUBLIC_STATUSES, pageable)
             .map(EventResponse::from);
     }
 
@@ -146,7 +149,7 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
 
-        if (event.getStatus() != EventStatus.PUBLISHED) {
+        if (!PUBLIC_STATUSES.contains(event.getStatus())) {
             throw new ResourceNotFoundException("Event", eventId.toString());
         }
 
