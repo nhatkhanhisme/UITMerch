@@ -76,21 +76,20 @@ spring:
     validate-on-migrate: true
     out-of-order: false
   
-  # OpenAPI/Swagger Documentation
+  # OpenAPI/Swagger Documentation — disabled by default in production
+  # Set SWAGGER_ENABLED=true to re-enable (e.g. for staging environments)
   springdoc:
     swagger-ui:
       path: /swagger-ui.html
       persistAuthorization: true
       tryItOutEnabled: true
-      enabled: true
+      enabled: ${SWAGGER_ENABLED:false}
     api-docs:
       path: /v3/api-docs
-  
-  # Logging Configuration
+      enabled: ${SWAGGER_ENABLED:false}
+
 logging:
   level:
     root: INFO
-    com.uitmerch: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.flywaydb: DEBUG
+    com.uitmerch: INFO
+    org.flywaydb: INFO

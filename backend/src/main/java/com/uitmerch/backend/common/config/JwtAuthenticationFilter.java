@@ -80,7 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 request.setAttribute("role", role);
             }
         } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e.getMessage());
+            logger.warn("JWT authentication failed — treating request as unauthenticated: {}", e.getMessage());
         }
         
         filterChain.doFilter(request, response);
