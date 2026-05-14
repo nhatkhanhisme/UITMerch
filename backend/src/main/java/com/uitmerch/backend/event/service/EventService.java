@@ -4,7 +4,6 @@ import com.uitmerch.backend.common.exception.ConflictException;
 import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.EventStatus;
-import com.uitmerch.backend.event.dto.AttachMerchRequest;
 import com.uitmerch.backend.event.dto.CreateEventRequest;
 import com.uitmerch.backend.event.dto.EventResponse;
 import com.uitmerch.backend.event.dto.UpdateEventRequest;

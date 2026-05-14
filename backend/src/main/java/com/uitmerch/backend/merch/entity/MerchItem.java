@@ -43,9 +43,6 @@ public class MerchItem {
     @Column(nullable = false)
     private int stock;
 
-    @Column(name = "image_url")
-    private String imageUrl;
-
     @Column(name = "category_id")
     private UUID categoryId;
 

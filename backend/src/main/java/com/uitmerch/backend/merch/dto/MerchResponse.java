@@ -39,10 +39,7 @@ public class MerchResponse {
     }
 
     public static MerchResponse from(MerchItem item, Category category, List<String> images) {
-        // Backward compat: if no images in the new table, fall back to the legacy imageUrl column.
-        List<String> resolvedImages = (images != null && !images.isEmpty())
-            ? images
-            : (item.getImageUrl() != null ? List.of(item.getImageUrl()) : List.of());
+        List<String> resolvedImages = images != null ? images : List.of();
 
         return MerchResponse.builder()
             .id(item.getId())
