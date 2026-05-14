@@ -12,6 +12,7 @@ import { getApiErrorMessage } from "../api/auth";
 import { uploadAvatarImage } from "../api/storage";
 import { getCustomerProfile, updateCustomerProfile } from "../api/profile";
 import { useAuthStore } from "../stores/authStore";
+import { toast } from "../stores/toastStore";
 import type { CustomerProfile } from "../types/profile";
 import {
   formatDate,
@@ -36,8 +37,6 @@ export function CustomerProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [customerProfile, setCustomerProfile] =
     useState<CustomerProfile | null>(null);
   const [customerForm, setCustomerForm] = useState(initialCustomerForm);
@@ -63,8 +62,6 @@ export function CustomerProfilePage() {
 
     const loadProfile = async () => {
       setIsLoading(true);
-      setErrorMessage(null);
-      setSuccessMessage(null);
 
       try {
         const response = await getCustomerProfile();
@@ -87,7 +84,7 @@ export function CustomerProfilePage() {
         });
       } catch (error) {
         if (isActive) {
-          setErrorMessage(getApiErrorMessage(error));
+          toast.error(getApiErrorMessage(error));
         }
       } finally {
         if (isActive) {
@@ -118,16 +115,16 @@ export function CustomerProfilePage() {
 
   const canEdit = !isLoading && Boolean(customerProfile);
 
+  const hasUnsavedAvatarChange =
+    isEditing &&
+    (isAvatarRemoved || customerForm.avatarUrl !== (customerProfile?.avatarUrl ?? ""));
+
   const startEditing = () => {
     setIsEditing(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
   };
 
   const cancelEditing = () => {
     setIsEditing(false);
-    setErrorMessage(null);
-    setSuccessMessage(null);
     setIsUploadingAvatar(false);
     setIsAvatarRemoved(false);
 
@@ -156,8 +153,6 @@ export function CustomerProfilePage() {
     }
 
     setIsUploadingAvatar(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
 
     const input = event.target;
 
@@ -168,9 +163,9 @@ export function CustomerProfilePage() {
         avatarUrl: publicUrl,
       }));
       setIsAvatarRemoved(false);
-      setSuccessMessage("Avatar uploaded. Save changes to apply it.");
+      toast.success("Avatar uploaded. Save changes to apply it.");
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsUploadingAvatar(false);
       input.value = "";
@@ -183,27 +178,24 @@ export function CustomerProfilePage() {
       avatarUrl: "",
     }));
     setIsAvatarRemoved(true);
-    setErrorMessage(null);
-    setSuccessMessage("Avatar removed. Save changes to apply it.");
+    toast.info("Avatar removed. Save changes to apply it.");
   };
 
   const handleCustomerSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isUploadingAvatar) {
-      setErrorMessage("Please wait for the avatar upload to finish.");
+      toast.error("Please wait for the avatar upload to finish.");
       return;
     }
 
     const fullName = customerForm.fullName.trim();
     if (!fullName) {
-      setErrorMessage("Full name is required.");
+      toast.error("Full name is required.");
       return;
     }
 
     setIsSaving(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
 
     try {
       const response = await updateCustomerProfile({
@@ -232,10 +224,10 @@ export function CustomerProfilePage() {
         fullName: profile.fullName,
         avatarUrl: profile.avatarUrl ?? null,
       });
-      setSuccessMessage(response.message || "Profile updated.");
+      toast.success(response.message || "Profile updated.");
       setIsEditing(false);
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -326,9 +318,14 @@ export function CustomerProfilePage() {
               </div>
 
               {canEdit ? (
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-wrap items-center gap-3">
                   {isEditing ? (
                     <>
+                      {hasUnsavedAvatarChange ? (
+                        <div className="inline-flex items-center rounded-full border border-gold/60 bg-gold/20 px-3 py-1.5 font-sans text-xs font-semibold text-black-blue shadow-glass">
+                          ● Unsaved image change
+                        </div>
+                      ) : null}
                       <Button
                         type="button"
                         variant="outline"
@@ -390,17 +387,7 @@ export function CustomerProfilePage() {
           </div>
         ) : null}
 
-        {!isLoading && errorMessage ? (
-          <div className="rounded-panel border border-peach bg-peach/20 p-6 font-sans text-sm text-black-blue">
-            {errorMessage}
-          </div>
-        ) : null}
 
-        {!isLoading && successMessage ? (
-          <div className="rounded-panel border border-aqua bg-aqua/20 p-6 font-sans text-sm text-black-blue">
-            {successMessage}
-          </div>
-        ) : null}
 
         {!isLoading && customerProfile && isEditing ? (
           <form

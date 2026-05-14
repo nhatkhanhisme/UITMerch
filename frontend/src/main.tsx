@@ -12,11 +12,13 @@ import { OrganizerProfilePage } from "./pages/OrganizerProfilePage";
 import { OrganizerDashboardPage } from "./pages/OrganizerDashboardPage";
 import { OrganizationDetailPage } from "./pages/OrganizationDetailPage";
 import { OrganizationPage } from "./pages/OrganizationPage";
+import { ToastContainer } from "./components/ui";
 import "./styles.css";
 
 function AppRouter() {
   return (
     <BrowserRouter>
+      <ToastContainer />
       <Routes>
         <Route element={<HomePage />} path="/" />
         <Route

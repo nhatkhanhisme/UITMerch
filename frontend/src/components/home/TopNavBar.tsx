@@ -312,7 +312,7 @@ export function TopNavBar() {
                 Profile
               </Link>
               <button
-                className={linkClassName("/logout")}
+                className={`${linkClassName("/logout")} w-full text-left`}
                 onClick={handleLogout}
                 type="button"
               >

@@ -12,6 +12,7 @@ import { getApiErrorMessage } from "../api/auth";
 import { uploadOrganizerImage } from "../api/storage";
 import { getOrganizerProfile, updateOrganizerProfile } from "../api/profile";
 import { useAuthStore } from "../stores/authStore";
+import { toast } from "../stores/toastStore";
 import type { OrganizerProfile } from "../types/profile";
 import {
   formatDate,
@@ -38,8 +39,6 @@ export function OrganizerProfilePage() {
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isLogoRemoved, setIsLogoRemoved] = useState(false);
   const [isCoverRemoved, setIsCoverRemoved] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isMissingOrganization, setIsMissingOrganization] = useState(false);
   const [organizerProfile, setOrganizerProfile] =
     useState<OrganizerProfile | null>(null);
@@ -67,8 +66,6 @@ export function OrganizerProfilePage() {
 
     const loadProfile = async () => {
       setIsLoading(true);
-      setErrorMessage(null);
-      setSuccessMessage(null);
       setIsMissingOrganization(false);
 
       try {
@@ -92,7 +89,7 @@ export function OrganizerProfilePage() {
           return;
         }
 
-        setErrorMessage(getApiErrorMessage(error));
+        toast.error(getApiErrorMessage(error));
       } finally {
         if (isActive) {
           setIsLoading(false);
@@ -123,16 +120,19 @@ export function OrganizerProfilePage() {
   const canEdit =
     !isLoading && Boolean(organizerProfile) && !isMissingOrganization;
 
+  const hasUnsavedMediaChange =
+    isEditing &&
+    (isLogoRemoved ||
+      isCoverRemoved ||
+      organizerForm.logoUrl !== (organizerProfile?.logoUrl ?? "") ||
+      organizerForm.coverUrl !== (organizerProfile?.coverUrl ?? ""));
+
   const startEditing = () => {
     setIsEditing(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
   };
 
   const cancelEditing = () => {
     setIsEditing(false);
-    setErrorMessage(null);
-    setSuccessMessage(null);
     setIsUploadingLogo(false);
     setIsUploadingCover(false);
     setIsLogoRemoved(false);
@@ -165,8 +165,6 @@ export function OrganizerProfilePage() {
     }
 
     setIsUploadingLogo(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
 
     const input = event.target;
 
@@ -181,9 +179,9 @@ export function OrganizerProfilePage() {
         logoUrl: publicUrl,
       }));
       setIsLogoRemoved(false);
-      setSuccessMessage("Logo uploaded. Save changes to apply it.");
+      toast.success("Logo uploaded. Save changes to apply it.");
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsUploadingLogo(false);
       input.value = "";
@@ -196,8 +194,7 @@ export function OrganizerProfilePage() {
       logoUrl: "",
     }));
     setIsLogoRemoved(true);
-    setErrorMessage(null);
-    setSuccessMessage("Logo removed. Save changes to apply it.");
+    toast.info("Logo removed. Save changes to apply it.");
   };
 
   const handleOrganizerCoverUpload = async (
@@ -209,8 +206,6 @@ export function OrganizerProfilePage() {
     }
 
     setIsUploadingCover(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
 
     const input = event.target;
 
@@ -225,9 +220,9 @@ export function OrganizerProfilePage() {
         coverUrl: publicUrl,
       }));
       setIsCoverRemoved(false);
-      setSuccessMessage("Cover uploaded. Save changes to apply it.");
+      toast.success("Cover uploaded. Save changes to apply it.");
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsUploadingCover(false);
       input.value = "";
@@ -240,27 +235,24 @@ export function OrganizerProfilePage() {
       coverUrl: "",
     }));
     setIsCoverRemoved(true);
-    setErrorMessage(null);
-    setSuccessMessage("Cover removed. Save changes to apply it.");
+    toast.info("Cover removed. Save changes to apply it.");
   };
 
   const handleOrganizerSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isUploadingMedia) {
-      setErrorMessage("Please wait for the image upload to finish.");
+      toast.error("Please wait for the image upload to finish.");
       return;
     }
 
     const name = organizerForm.name.trim();
     if (!name) {
-      setErrorMessage("Organization name is required.");
+      toast.error("Organization name is required.");
       return;
     }
 
     setIsSaving(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
 
     try {
       const response = await updateOrganizerProfile({
@@ -285,7 +277,7 @@ export function OrganizerProfilePage() {
       setIsLogoRemoved(false);
       setIsCoverRemoved(false);
       updateUser({ avatarUrl: profile.logoUrl ?? null });
-      setSuccessMessage(response.message || "Organization updated.");
+      toast.success(response.message || "Organization updated.");
       setIsEditing(false);
     } catch (error) {
       if (
@@ -299,7 +291,7 @@ export function OrganizerProfilePage() {
         setOrganizerProfile(null);
         setIsEditing(false);
       } else {
-        setErrorMessage(getApiErrorMessage(error));
+        toast.error(getApiErrorMessage(error));
       }
     } finally {
       setIsSaving(false);
@@ -384,7 +376,12 @@ export function OrganizerProfilePage() {
                 </div>
                 {canEdit ? (
                   isEditing ? (
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {hasUnsavedMediaChange ? (
+                        <div className="inline-flex items-center rounded-full border border-gold/60 bg-gold/20 px-3 py-1.5 font-sans text-xs font-semibold text-black-blue shadow-glass">
+                          ● Unsaved image change
+                        </div>
+                      ) : null}
                       <Button
                         type="button"
                         variant="outline"
@@ -444,17 +441,7 @@ export function OrganizerProfilePage() {
           </div>
         ) : null}
 
-        {!isLoading && errorMessage ? (
-          <div className="rounded-panel border border-peach bg-peach/20 p-6 font-sans text-sm text-black-blue">
-            {errorMessage}
-          </div>
-        ) : null}
 
-        {!isLoading && successMessage ? (
-          <div className="rounded-panel border border-aqua bg-aqua/20 p-6 font-sans text-sm text-black-blue">
-            {successMessage}
-          </div>
-        ) : null}
 
         {!isLoading && isMissingOrganization ? (
           <div className="rounded-panel border border-aqua bg-white/70 p-6 font-sans text-sm text-black-blue shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
