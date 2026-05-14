@@ -72,7 +72,7 @@ class MerchServiceTest {
 
     @Test
     void createMerch_activeOrg_noCategory_succeeds() {
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
         when(merchItemRepository.save(any())).thenReturn(savedItem());
 
         CreateMerchRequest req = new CreateMerchRequest();
@@ -80,7 +80,7 @@ class MerchServiceTest {
         req.setPrice(BigDecimal.valueOf(75_000));
         req.setStock(10);
 
-        MerchResponse response = merchService.createMerch(ownerId, req);
+        MerchResponse response = merchService.createMerch(ownerId, orgId, req);
 
         assertThat(response.getOrgId()).isEqualTo(orgId);
         verify(merchItemRepository).save(any());
@@ -94,7 +94,7 @@ class MerchServiceTest {
             .name("Shirt")
             .build();
 
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
         when(categoryRepository.findBySlug("shirt")).thenReturn(Optional.of(cat));
         when(merchItemRepository.save(any())).thenReturn(savedItem());
 
@@ -104,7 +104,7 @@ class MerchServiceTest {
         req.setStock(10);
         req.setCategorySlug("shirt");
 
-        MerchResponse response = merchService.createMerch(ownerId, req);
+        MerchResponse response = merchService.createMerch(ownerId, orgId, req);
 
         assertThat(response).isNotNull();
         verify(categoryRepository).findBySlug("shirt");
@@ -112,21 +112,21 @@ class MerchServiceTest {
 
     @Test
     void createMerch_inactiveOrg_throwsValidation() {
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(pendingOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(pendingOrg());
 
         CreateMerchRequest req = new CreateMerchRequest();
         req.setName("Test Merch");
         req.setPrice(BigDecimal.valueOf(75_000));
         req.setStock(10);
 
-        assertThatThrownBy(() -> merchService.createMerch(ownerId, req))
+        assertThatThrownBy(() -> merchService.createMerch(ownerId, orgId, req))
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("ACTIVE");
     }
 
     @Test
     void createMerch_invalidCategorySlug_throwsResourceNotFound() {
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
         when(categoryRepository.findBySlug("unknown")).thenReturn(Optional.empty());
 
         CreateMerchRequest req = new CreateMerchRequest();
@@ -135,7 +135,7 @@ class MerchServiceTest {
         req.setStock(10);
         req.setCategorySlug("unknown");
 
-        assertThatThrownBy(() -> merchService.createMerch(ownerId, req))
+        assertThatThrownBy(() -> merchService.createMerch(ownerId, orgId, req))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -143,13 +143,13 @@ class MerchServiceTest {
 
     @Test
     void updateMerch_publishWithInactiveOrg_throwsValidation() {
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(pendingOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(pendingOrg());
         when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(savedItem()));
 
         UpdateMerchRequest req = new UpdateMerchRequest();
         req.setStatus(MerchItemStatus.PUBLISHED);
 
-        assertThatThrownBy(() -> merchService.updateMerch(ownerId, merchId, req))
+        assertThatThrownBy(() -> merchService.updateMerch(ownerId, orgId, merchId, req))
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("ACTIVE");
     }
@@ -157,7 +157,7 @@ class MerchServiceTest {
     @Test
     void updateMerch_publishWithActiveOrg_succeeds() {
         MerchItem item = savedItem();
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
         when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(item));
         when(merchItemRepository.save(any())).thenReturn(item);
         when(merchImageRepository.findByMerchIdOrderByPosition(any())).thenReturn(Collections.emptyList());
@@ -165,7 +165,7 @@ class MerchServiceTest {
         UpdateMerchRequest req = new UpdateMerchRequest();
         req.setStatus(MerchItemStatus.PUBLISHED);
 
-        MerchResponse response = merchService.updateMerch(ownerId, merchId, req);
+        MerchResponse response = merchService.updateMerch(ownerId, orgId, merchId, req);
 
         assertThat(response).isNotNull();
         verify(merchItemRepository).save(item);
@@ -174,7 +174,7 @@ class MerchServiceTest {
     @Test
     void updateMerch_partialUpdate_onlyModifiesProvidedFields() {
         MerchItem item = savedItem();
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
         when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(item));
         when(merchItemRepository.save(any())).thenReturn(item);
         when(merchImageRepository.findByMerchIdOrderByPosition(any())).thenReturn(Collections.emptyList());
@@ -183,7 +183,7 @@ class MerchServiceTest {
         req.setName("New Name");
         // price and stock not set — should remain unchanged
 
-        merchService.updateMerch(ownerId, merchId, req);
+        merchService.updateMerch(ownerId, orgId, merchId, req);
 
         assertThat(item.getName()).isEqualTo("New Name");
         assertThat(item.getPrice()).isEqualTo(BigDecimal.valueOf(75_000));
@@ -191,13 +191,13 @@ class MerchServiceTest {
 
     @Test
     void updateMerch_itemNotOwned_throwsResourceNotFound() {
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
         when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.empty());
 
         UpdateMerchRequest req = new UpdateMerchRequest();
         req.setName("New Name");
 
-        assertThatThrownBy(() -> merchService.updateMerch(ownerId, merchId, req))
+        assertThatThrownBy(() -> merchService.updateMerch(ownerId, orgId, merchId, req))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -206,11 +206,11 @@ class MerchServiceTest {
     @Test
     void deleteMerch_success_archivesItem() {
         MerchItem item = savedItem();
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
         when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(item));
         when(merchItemRepository.save(any())).thenReturn(item);
 
-        merchService.deleteMerch(ownerId, merchId);
+        merchService.deleteMerch(ownerId, orgId, merchId);
 
         assertThat(item.getStatus()).isEqualTo(MerchItemStatus.ARCHIVED);
         verify(merchItemRepository).save(item);
@@ -218,10 +218,10 @@ class MerchServiceTest {
 
     @Test
     void deleteMerch_itemNotOwned_throwsResourceNotFound() {
-        when(organizationService.getOwnOrganizationEntity(ownerId)).thenReturn(activeOrg());
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
         when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> merchService.deleteMerch(ownerId, merchId))
+        assertThatThrownBy(() -> merchService.deleteMerch(ownerId, orgId, merchId))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 

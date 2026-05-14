@@ -1,6 +1,5 @@
 package com.uitmerch.backend.organization.service;
 
-import com.uitmerch.backend.common.exception.ConflictException;
 import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.model.MerchItemStatus;
 import com.uitmerch.backend.common.model.OrganizationStatus;
@@ -30,10 +29,6 @@ public class OrganizationService {
 
     @Transactional
     public OrganizationResponse createOrganization(UUID ownerId, CreateOrganizationRequest request) {
-        if (organizationRepository.existsByOwnerId(ownerId)) {
-            throw new ConflictException("You already have an organization.");
-        }
-
         Organization org = Organization.builder()
             .ownerId(ownerId)
             .name(request.getName())
@@ -43,14 +38,16 @@ public class OrganizationService {
         return OrganizationResponse.from(organizationRepository.save(org), 0L);
     }
 
-    public OrganizationResponse getOwnOrganization(UUID ownerId) {
-        Organization org = findByOwnerOrThrow(ownerId);
-        return OrganizationResponse.from(org, countPublishedMerch(org.getId()));
+    public Page<OrganizationResponse> getOwnOrganizations(UUID ownerId, Pageable pageable) {
+        Page<Organization> page = organizationRepository.findByOwnerId(ownerId, pageable);
+        Map<UUID, Long> counts = batchCountPublishedMerch(page.getContent().stream().map(Organization::getId).toList());
+        return page.map(org -> OrganizationResponse.from(org, counts.getOrDefault(org.getId(), 0L)));
     }
 
     @Transactional
-    public OrganizationResponse updateOrganization(UUID ownerId, UpdateOrganizationRequest request) {
-        Organization org = findByOwnerOrThrow(ownerId);
+    public OrganizationResponse updateOrganization(UUID ownerId, UUID orgId, UpdateOrganizationRequest request) {
+        Organization org = organizationRepository.findByIdAndOwnerId(orgId, ownerId)
+            .orElseThrow(() -> new ResourceNotFoundException("Organization not found for this account."));
 
         if (request.getName() != null && !request.getName().isBlank()) {
             org.setName(request.getName());
@@ -81,13 +78,9 @@ public class OrganizationService {
         return page.map(org -> OrganizationResponse.from(org, counts.getOrDefault(org.getId(), 0L)));
     }
 
-    // Used by other modules (merch, order) to verify org exists and is ACTIVE
-    public Organization getOwnOrganizationEntity(UUID ownerId) {
-        return findByOwnerOrThrow(ownerId);
-    }
-
-    private Organization findByOwnerOrThrow(UUID ownerId) {
-        return organizationRepository.findByOwnerId(ownerId)
+    // Used by other modules (merch, event, order) to verify ownership and org exists
+    public Organization getOwnOrganizationEntity(UUID ownerId, UUID orgId) {
+        return organizationRepository.findByIdAndOwnerId(orgId, ownerId)
             .orElseThrow(() -> new ResourceNotFoundException("Organization not found for this account."));
     }
 
