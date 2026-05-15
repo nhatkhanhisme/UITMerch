@@ -17,6 +17,7 @@ import com.uitmerch.backend.common.service.TokenBlacklistService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -234,5 +235,13 @@ public class AuthService {
         SecureRandom random = new SecureRandom();
         int code = 100_000 + random.nextInt(900_000);
         return String.valueOf(code);
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 * * * *")
+    public void purgeExpiredOtps() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(1);
+        otpTokenRepository.deleteExpiredBefore(cutoff);
+        log.debug("Purged OTP tokens expired before {}", cutoff);
     }
 }
