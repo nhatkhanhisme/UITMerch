@@ -86,9 +86,12 @@ public class OrderService {
                     .subtotal(subtotal)
                     .build());
 
-                // Deduct stock
-                merch.setStock(merch.getStock() - cartItem.getQuantity());
-                merchItemRepository.save(merch);
+                // Atomically deduct stock; 0 rows updated means a concurrent order beat us
+                if (merchItemRepository.deductStock(merch.getId(), cartItem.getQuantity()) == 0) {
+                    throw new ValidationException(
+                        "\"" + merch.getName() + "\" just sold out — please update your cart."
+                    );
+                }
             }
 
             Order order = Order.builder()
@@ -132,6 +135,13 @@ public class OrderService {
 
         BigDecimal subtotal = merch.getPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
 
+        // Deduct stock atomically before creating the order
+        if (merchItemRepository.deductStock(merch.getId(), request.getQuantity()) == 0) {
+            throw new ValidationException(
+                "\"" + merch.getName() + "\" just sold out — please try again."
+            );
+        }
+
         Order order = Order.builder()
             .userId(userId)
             .orgId(merch.getOrgId())
@@ -149,10 +159,6 @@ public class OrderService {
             .subtotal(subtotal)
             .build();
         orderItem = orderItemRepository.save(orderItem);
-
-        // Deduct stock
-        merch.setStock(merch.getStock() - request.getQuantity());
-        merchItemRepository.save(merch);
 
         return OrderResponse.from(order, List.of(orderItem));
     }
@@ -208,9 +214,11 @@ public class OrderService {
                     .subtotal(subtotal)
                     .build());
 
-                // Deduct stock
-                merch.setStock(merch.getStock() - item.getQuantity());
-                merchItemRepository.save(merch);
+                if (merchItemRepository.deductStock(merch.getId(), item.getQuantity()) == 0) {
+                    throw new ValidationException(
+                        "\"" + merch.getName() + "\" just sold out — please try again."
+                    );
+                }
             }
 
             Order order = Order.builder()
