@@ -29,6 +29,9 @@ public class JwtTokenProvider {
     private static final String USER_ID_CLAIM = "userId";
     private static final String EMAIL_CLAIM = "email";
     private static final String ROLE_CLAIM = "role";
+    private static final String TOKEN_TYPE_CLAIM = "type";
+    private static final String ACCESS_TOKEN_TYPE = "access";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
 
     @Value("${app.jwt.secret}")
     private String secretKey;
@@ -44,14 +47,18 @@ public class JwtTokenProvider {
             Map.of(
                 USER_ID_CLAIM, userId,
                 EMAIL_CLAIM, email,
-                ROLE_CLAIM, role
+                ROLE_CLAIM, role,
+                TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE
             ),
             accessTokenExpiration
         );
     }
 
     public String generateRefreshToken(String userId) {
-        return generateToken(Map.of(USER_ID_CLAIM, userId), refreshTokenExpiration);
+        return generateToken(
+            Map.of(USER_ID_CLAIM, userId, TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE),
+            refreshTokenExpiration
+        );
     }
 
     public boolean validateToken(String token) {
@@ -77,6 +84,11 @@ public class JwtTokenProvider {
             logger.warn("JWT token is empty: {}", e.getMessage());
             return false;
         }
+    }
+
+    public boolean validateAsRefreshToken(String token) {
+        if (!validateToken(token)) return false;
+        return REFRESH_TOKEN_TYPE.equals(getClaim(token, TOKEN_TYPE_CLAIM, String.class));
     }
 
     public String getUserIdFromToken(String token) {
