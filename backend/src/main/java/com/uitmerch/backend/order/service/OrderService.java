@@ -1,11 +1,13 @@
 package com.uitmerch.backend.order.service;
 
+import com.uitmerch.backend.auth.repository.UserRepository;
 import com.uitmerch.backend.cart.entity.Cart;
 import com.uitmerch.backend.cart.entity.CartItem;
 import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.MerchItemStatus;
 import com.uitmerch.backend.common.model.OrderStatus;
+import com.uitmerch.backend.common.service.EmailService;
 import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.order.dto.*;
@@ -16,6 +18,7 @@ import com.uitmerch.backend.order.repository.OrderRepository;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -33,6 +37,8 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final MerchItemRepository merchItemRepository;
     private final OrganizationService organizationService;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
     // ------------------------------------------------------------------ //
     //  CART CHECKOUT
@@ -325,6 +331,8 @@ public class OrderService {
             restoreStockForItems(items);
         }
 
+        notifyCustomer(order, newStatus);
+
         return OrderResponse.from(order, items);
     }
 
@@ -352,6 +360,7 @@ public class OrderService {
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
         restoreStockForItems(items);
+        notifyCustomer(order, OrderStatus.CANCELLED);
 
         return OrderResponse.from(order, items);
     }
@@ -382,6 +391,23 @@ public class OrderService {
      * CONFIRMED → READY_FOR_PICKUP, CONFIRMED → CANCELLED
      * READY_FOR_PICKUP → SUCCESS
      */
+    private void notifyCustomer(Order order, OrderStatus newStatus) {
+        try {
+            String email = null;
+            if (order.getUserId() != null) {
+                email = userRepository.findById(order.getUserId())
+                    .map(u -> u.getEmail()).orElse(null);
+            } else if (order.getGuestEmail() != null && !order.getGuestEmail().isBlank()) {
+                email = order.getGuestEmail();
+            }
+            if (email != null) {
+                emailService.sendOrderStatusUpdate(email, order.getId().toString(), newStatus.name());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send order status email for order {}: {}", order.getId(), e.getMessage());
+        }
+    }
+
     private void restoreStockForItems(List<OrderItem> items) {
         items.forEach(item -> merchItemRepository.restoreStock(item.getMerchId(), item.getQuantity()));
     }
