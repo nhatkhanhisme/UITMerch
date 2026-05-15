@@ -218,17 +218,6 @@ public class MerchService {
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
     }
 
-    @Transactional
-    public void deductStock(UUID merchId, int quantity) {
-        MerchItem item = merchItemRepository.findById(merchId)
-            .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
-        if (item.getStock() < quantity) {
-            throw new ValidationException("Insufficient stock for: " + item.getName());
-        }
-        item.setStock(item.getStock() - quantity);
-        merchItemRepository.save(item);
-    }
-
     // ------------------------------------------------------------------ //
     //  PRIVATE HELPERS
     // ------------------------------------------------------------------ //
