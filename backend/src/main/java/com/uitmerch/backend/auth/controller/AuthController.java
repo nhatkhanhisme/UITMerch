@@ -1,8 +1,10 @@
 package com.uitmerch.backend.auth.controller;
 
 import com.uitmerch.backend.auth.dto.*;
+import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.ApiResponse;
 import com.uitmerch.backend.auth.service.AuthService;
+import com.uitmerch.backend.common.service.RateLimiterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -21,6 +25,19 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final RateLimiterService rateLimiterService;
+
+    private static final int LOGIN_MAX_ATTEMPTS    = 10;
+    private static final Duration LOGIN_WINDOW     = Duration.ofMinutes(15);
+    private static final int REGISTER_MAX_ATTEMPTS = 5;
+    private static final Duration REGISTER_WINDOW  = Duration.ofHours(1);
+
+    private static String clientIp(HttpServletRequest req) {
+        String forwarded = req.getHeader("X-Forwarded-For");
+        return (forwarded != null && !forwarded.isBlank())
+            ? forwarded.split(",")[0].trim()
+            : req.getRemoteAddr();
+    }
 
     @PostMapping("/register")
     @Operation(summary = "Register customer account")
@@ -31,8 +48,12 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<Void>> register(
-            @Valid @RequestBody RegisterRequest request
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest
     ) {
+        if (!rateLimiterService.isAllowed("register:" + clientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+            throw new ValidationException("Too many registration attempts. Please try again later.");
+        }
         authService.register(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -48,8 +69,12 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<Void>> registerOrganizer(
-            @Valid @RequestBody RegisterOrganizerRequest request
+            @Valid @RequestBody RegisterOrganizerRequest request,
+            HttpServletRequest httpRequest
     ) {
+        if (!rateLimiterService.isAllowed("register:" + clientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+            throw new ValidationException("Too many registration attempts. Please try again later.");
+        }
         authService.registerOrganizer(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -81,8 +106,12 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<AuthResponse>> login(
-            @Valid @RequestBody LoginRequest request
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
     ) {
+        if (!rateLimiterService.isAllowed("login:" + clientIp(httpRequest), LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW)) {
+            throw new ValidationException("Too many login attempts. Please try again in 15 minutes.");
+        }
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful.", response));
     }
