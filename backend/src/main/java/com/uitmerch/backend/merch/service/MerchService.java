@@ -17,8 +17,11 @@ import com.uitmerch.backend.order.repository.OrderItemRepository;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +48,7 @@ public class MerchService {
     //  ORGANIZER
     // ------------------------------------------------------------------ //
 
+    @org.springframework.cache.annotation.CacheEvict(value = "popular-merch", allEntries = true)
     @Transactional
     public MerchResponse createMerch(UUID ownerId, UUID orgId, CreateMerchRequest request) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
@@ -86,6 +90,7 @@ public class MerchService {
         return MerchResponse.from(item, category, images);
     }
 
+    @org.springframework.cache.annotation.CacheEvict(value = "popular-merch", allEntries = true)
     @Transactional
     public MerchResponse updateMerch(UUID ownerId, UUID orgId, UUID merchId, UpdateMerchRequest request) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
@@ -177,9 +182,12 @@ public class MerchService {
         return MerchResponse.from(item, category, images);
     }
 
+    @Cacheable("popular-merch")
     @Transactional(readOnly = true)
     public List<MerchResponse> getPopularMerch() {
-        List<MerchItem> published = merchItemRepository.findAllByStatus(MerchItemStatus.PUBLISHED);
+        // Cap candidates at 500 most-recent items to avoid a full-table scan
+        Pageable candidates = PageRequest.of(0, 500, Sort.by("createdAt").descending());
+        List<MerchItem> published = merchItemRepository.findAllByStatus(MerchItemStatus.PUBLISHED, candidates).getContent();
         if (published.isEmpty()) return List.of();
 
         List<UUID> ids = published.stream().map(MerchItem::getId).toList();

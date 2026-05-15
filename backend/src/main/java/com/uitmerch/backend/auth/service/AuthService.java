@@ -1,8 +1,6 @@
 package com.uitmerch.backend.auth.service;
 
 import com.uitmerch.backend.auth.dto.*;
-import com.uitmerch.backend.auth.dto.ForgotPasswordRequest;
-import com.uitmerch.backend.auth.dto.ResetPasswordRequest;
 import com.uitmerch.backend.auth.entity.OtpToken;
 import com.uitmerch.backend.auth.entity.User;
 import com.uitmerch.backend.auth.repository.OtpTokenRepository;

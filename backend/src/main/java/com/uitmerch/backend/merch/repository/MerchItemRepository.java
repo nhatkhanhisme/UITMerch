@@ -21,6 +21,8 @@ public interface MerchItemRepository extends JpaRepository<MerchItem, UUID> {
 
     List<MerchItem> findAllByStatus(MerchItemStatus status);
 
+    Page<MerchItem> findAllByStatus(MerchItemStatus status, Pageable pageable);
+
     Page<MerchItem> findByStatusAndNameContainingIgnoreCase(MerchItemStatus status, String name, Pageable pageable);
 
     Page<MerchItem> findByStatusAndCategoryId(MerchItemStatus status, UUID categoryId, Pageable pageable);
