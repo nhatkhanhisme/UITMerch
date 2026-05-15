@@ -1,6 +1,8 @@
 package com.uitmerch.backend.merch.repository;
 
 import com.uitmerch.backend.merch.entity.Category;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +16,12 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     Optional<Category> findBySlug(String slug);
 
     List<Category> findAllByOrderByDisplayOrderAsc();
+
+    @Override
+    @Cacheable("categories")
+    List<Category> findAll();
+
+    @Override
+    @CacheEvict(value = "categories", allEntries = true)
+    <S extends Category> S save(S entity);
 }
