@@ -5,6 +5,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,7 +25,8 @@ public class UpdateMerchRequest {
     @Min(value = 0, message = "Stock must be 0 or more")
     private Integer stock;
 
-    private List<String> imageUrls;
+    @Size(max = 10, message = "A merch item may have at most 10 images")
+    private List<@URL(message = "Each image must be a valid URL") String> imageUrls;
     private MerchItemStatus status;
     private String categorySlug;
 }
