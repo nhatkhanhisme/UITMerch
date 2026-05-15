@@ -150,12 +150,10 @@ export function HomeItem() {
 
           .home-item-enter {
             animation: homeItemEnterRight 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
-            grid-area: 1 / 1;
           }
 
           .home-item-exit {
             animation: homeItemExitLeft 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
-            grid-area: 1 / 1;
             pointer-events: none;
           }
         `}
@@ -190,25 +188,29 @@ export function HomeItem() {
           <>
             <div
               className="
-                grid items-center gap-10
-                lg:grid-cols-[0.95fr_1.05fr] lg:gap-10
-                xl:gap-14
+                grid items-center gap-8
+                lg:grid-cols-[1fr_420px] lg:gap-10
+                xl:grid-cols-[1fr_480px] xl:gap-14
               "
             >
-              <div className="mx-auto w-full max-w-[760px] text-center">
-                <div className="grid">
+              {/* Text panel — fixed height so it never resizes on transition */}
+              <div className="mx-auto w-full max-w-[680px] text-center lg:text-left">
+                <div
+                  className="relative overflow-hidden"
+                  style={{ minHeight: "220px" }}
+                >
                   {previousProduct && (
-                    <div className="home-item-exit">
+                    <div className="home-item-exit absolute inset-0">
                       <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
                         Vật phẩm nổi bật
                       </p>
-                      <h2 className="mt-5 whitespace-nowrap font-fredoka text-[36px] font-bold leading-[1.06] tracking-[0.01em] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
+                      <h2 className="mt-4 font-fredoka text-[30px] font-bold leading-tight tracking-[0.01em] text-peach line-clamp-2 sm:text-[40px] lg:text-[46px] xl:text-[52px]">
                         {previousProduct.title}
                       </h2>
-                      <p className="mt-1 font-sans text-xl font-semibold text-gold sm:text-2xl">
+                      <p className="mt-1 font-sans text-lg font-semibold text-gold sm:text-xl">
                         {previousProduct.subtitle}
                       </p>
-                      <p className="mx-auto mt-10 max-w-[430px] font-sans text-sm font-normal leading-6 text-gray">
+                      <p className="mx-auto mt-4 max-w-[420px] font-sans text-sm font-normal leading-6 text-gray line-clamp-3 lg:mx-0">
                         {previousProduct.description}
                       </p>
                     </div>
@@ -219,13 +221,13 @@ export function HomeItem() {
                       <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
                         Vật phẩm nổi bật
                       </p>
-                      <h2 className="mt-5 whitespace-nowrap font-fredoka text-[36px] font-bold leading-[1.06] tracking-[0.01em] text-peach sm:text-[48px] lg:text-[54px] xl:text-[60px]">
+                      <h2 className="mt-4 font-fredoka text-[30px] font-bold leading-tight tracking-[0.01em] text-peach line-clamp-2 sm:text-[40px] lg:text-[46px] xl:text-[52px]">
                         {activeProduct.title}
                       </h2>
-                      <p className="mt-1 font-sans text-xl font-semibold text-gold sm:text-2xl">
+                      <p className="mt-1 font-sans text-lg font-semibold text-gold sm:text-xl">
                         {activeProduct.subtitle}
                       </p>
-                      <p className="mx-auto mt-10 max-w-[430px] font-sans text-sm font-normal leading-6 text-gray">
+                      <p className="mx-auto mt-4 max-w-[420px] font-sans text-sm font-normal leading-6 text-gray line-clamp-3 lg:mx-0">
                         {activeProduct.description}
                       </p>
                     </div>
@@ -233,44 +235,53 @@ export function HomeItem() {
                 </div>
               </div>
 
-              <div className="relative mx-auto w-full max-w-[460px]">
+              {/* Image panel — fixed square, always same size */}
+              <div className="relative mx-auto w-full max-w-[380px] sm:max-w-[420px] lg:max-w-none">
                 <div className="absolute inset-6 rounded-[42px] bg-white/35 blur-2xl" />
                 <div
                   className="
-                    relative aspect-square overflow-hidden rounded-[34px]
-                    border border-white/80 bg-white/30 p-8
+                    relative aspect-square w-full overflow-hidden rounded-[34px]
+                    border border-white/80 bg-white/30 p-6
                     shadow-[20px_28px_70px_rgba(82,128,145,0.22),inset_2px_2px_14px_rgba(255,255,255,0.95)]
                     backdrop-blur-md
                   "
                 >
-                  <div className="absolute left-7 top-7 z-20 grid">
-                    {previousProduct && (
-                      <div className="home-item-exit rounded-full bg-white/70 px-4 py-2 font-sans text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]">
-                        {previousProduct.badge}
-                      </div>
-                    )}
-                    {activeProduct && (
-                      <div
-                        className="home-item-enter rounded-full bg-white/70 px-4 py-2 font-sans text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)]"
-                        key={`badge-${activeSlide}`}
-                      >
-                        {activeProduct.badge}
-                      </div>
-                    )}
+                  {/* Badge — entering badge sets height; exiting badge overlays absolutely */}
+                  <div className="absolute left-5 top-5 z-20">
+                    <div className="relative">
+                      {previousProduct && (
+                        <div className="home-item-exit absolute inset-0">
+                          <span className="rounded-full bg-white/70 px-3 py-1.5 font-sans text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)] whitespace-nowrap">
+                            {previousProduct.badge}
+                          </span>
+                        </div>
+                      )}
+                      {activeProduct && (
+                        <div
+                          className="home-item-enter"
+                          key={`badge-${activeSlide}`}
+                        >
+                          <span className="rounded-full bg-white/70 px-3 py-1.5 font-sans text-xs font-semibold text-slate shadow-[0_12px_30px_rgba(82,128,145,0.14)] whitespace-nowrap">
+                            {activeProduct.badge}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
+                  {/* Images — overlay in same absolute cell */}
                   <div className="absolute inset-0 grid place-items-center">
                     {previousProduct && (
                       <img
                         alt={previousProduct.title}
-                        className="home-item-exit h-[72%] w-[72%] object-contain drop-shadow-[0_28px_35px_rgba(82,128,145,0.24)]"
+                        className="home-item-exit absolute h-[72%] w-[72%] object-contain drop-shadow-[0_28px_35px_rgba(82,128,145,0.24)]"
                         src={previousProduct.image}
                       />
                     )}
                     {activeProduct && (
                       <img
                         alt={activeProduct.title}
-                        className="home-item-enter h-[72%] w-[72%] object-contain drop-shadow-[0_28px_35px_rgba(82,128,145,0.24)]"
+                        className="home-item-enter absolute h-[72%] w-[72%] object-contain drop-shadow-[0_28px_35px_rgba(82,128,145,0.24)]"
                         key={`image-${activeSlide}`}
                         src={activeProduct.image}
                       />
