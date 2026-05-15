@@ -369,6 +369,44 @@ class AuthServiceTest {
             .hasMessageContaining("deactivated");
     }
 
+    // ── resendOtp ────────────────────────────────────────────────────────────
+
+    @Test
+    void resendOtp_unverifiedActiveUser_issuesOtp() {
+        User user = User.builder()
+            .id(UUID.randomUUID()).email("u@uit.edu.vn").passwordHash("h")
+            .fullName("U").role(UserRole.CUSTOMER).isVerified(false).isActive(true).build();
+
+        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        authService.resendOtp("u@uit.edu.vn");
+
+        verify(emailService).sendOtp(eq("u@uit.edu.vn"), any());
+    }
+
+    @Test
+    void resendOtp_alreadyVerifiedUser_silentNoOp() {
+        User user = User.builder()
+            .id(UUID.randomUUID()).email("v@uit.edu.vn").passwordHash("h")
+            .fullName("V").role(UserRole.CUSTOMER).isVerified(true).isActive(true).build();
+
+        when(userRepository.findByEmail("v@uit.edu.vn")).thenReturn(Optional.of(user));
+
+        authService.resendOtp("v@uit.edu.vn");
+
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    void resendOtp_unknownEmail_silentNoOp() {
+        when(userRepository.findByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
+
+        authService.resendOtp("ghost@uit.edu.vn");
+
+        verifyNoInteractions(emailService);
+    }
+
     // ── refreshToken ────────────────────────────────────────────────────────
 
     @Test
