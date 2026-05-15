@@ -58,6 +58,15 @@ public class AdminService {
         return UserSummaryResponse.from(userRepository.save(user));
     }
 
+    @Transactional
+    public UserSummaryResponse setUserActive(UUID userId, boolean active) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User", userId.toString()));
+        user.setActive(active);
+        log.info("User {} {} by admin", userId, active ? "activated" : "deactivated");
+        return UserSummaryResponse.from(userRepository.save(user));
+    }
+
     public Page<OrganizationResponse> listOrganizations(String statusFilter, Pageable pageable) {
         Page<Organization> page;
         if (statusFilter != null) {

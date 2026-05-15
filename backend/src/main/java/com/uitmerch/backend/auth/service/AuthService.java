@@ -115,6 +115,10 @@ public class AuthService {
             throw new AuthenticationException("Invalid email or password");
         }
 
+        if (!user.isActive()) {
+            throw new AuthenticationException("This account has been deactivated. Please contact support.");
+        }
+
         if (!user.isVerified()) {
             throw new UnverifiedEmailException("Email is not verified yet. Please check your email for the OTP.");
         }
