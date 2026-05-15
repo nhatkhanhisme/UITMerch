@@ -326,8 +326,6 @@ export function OrganizationDetailPage() {
                 activeFilter={activeFilter}
                 filterOptions={FILTER_OPTIONS}
                 onFilterChange={handleFilterChange}
-                onQueryChange={handleQueryChange}
-                query={query}
               />
 
               <div className={isLoading ? "opacity-50 transition-opacity" : ""}>

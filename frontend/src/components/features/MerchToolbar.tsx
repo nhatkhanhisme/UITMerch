@@ -7,10 +7,10 @@ export interface FilterOption {
 }
 
 interface MerchToolbarProps {
-  query: string;
+  query?: string;
   activeFilter: string | null;
   filterOptions: FilterOption[];
-  onQueryChange: (value: string) => void;
+  onQueryChange?: (value: string) => void;
   onFilterChange: (value: string | null) => void;
   // Optional category filter
   activeCategory?: string | null;
@@ -79,35 +79,37 @@ export function MerchToolbar({
 
   return (
     <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-      {/* ── Search ── */}
-      <label
-        className={[
-          "flex flex-1 cursor-text items-center gap-3",
-          "rounded-full border border-white/60 bg-white/50 backdrop-blur-md",
-          "px-4 py-3 shadow-sm transition",
-          "focus-within:border-aqua focus-within:ring-2 focus-within:ring-aqua/25",
-        ].join(" ")}
-      >
-        <SearchIcon />
-        <input
-          className="flex-1 bg-transparent text-sm text-black-blue placeholder:text-ink/40 outline-none"
-          id="merch-search"
-          onChange={(e) => onQueryChange(e.target.value)}
-          placeholder="Tìm kiếm..."
-          type="search"
-          value={query}
-        />
-        {query.length > 0 && (
-          <button
-            aria-label="Xóa tìm kiếm"
-            className="shrink-0 text-ink/30 transition hover:text-ink/70"
-            onClick={() => onQueryChange("")}
-            type="button"
-          >
-            ✕
-          </button>
-        )}
-      </label>
+      {/* ── Search — only shown if onQueryChange is provided ── */}
+      {onQueryChange && (
+        <label
+          className={[
+            "flex flex-1 cursor-text items-center gap-3",
+            "rounded-full border border-white/60 bg-white/50 backdrop-blur-md",
+            "px-4 py-3 shadow-sm transition",
+            "focus-within:border-aqua focus-within:ring-2 focus-within:ring-aqua/25",
+          ].join(" ")}
+        >
+          <SearchIcon />
+          <input
+            className="flex-1 bg-transparent text-sm text-black-blue placeholder:text-ink/40 outline-none"
+            id="merch-search"
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder="Tìm kiếm..."
+            type="text"
+            value={query ?? ""}
+          />
+          {(query?.length ?? 0) > 0 && (
+            <button
+              aria-label="Xóa tìm kiếm"
+              className="shrink-0 text-ink/30 transition hover:text-ink/70"
+              onClick={() => onQueryChange("")}
+              type="button"
+            >
+              ✕
+            </button>
+          )}
+        </label>
+      )}
 
       {/* ── Category Dropdown ── */}
       {categoryOptions && onCategoryChange && (

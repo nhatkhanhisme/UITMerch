@@ -52,19 +52,7 @@ export function OrganizationPage() {
           });
 
           if (isActive && res?.data) {
-            let mapped = res.data.map(mapOrgToMockOrganization);
-
-            // Client-side keyword filter (backend doesn't support keyword search on this endpoint)
-            if (query) {
-              const q = query.toLowerCase();
-              mapped = mapped.filter(
-                (o) =>
-                  o.name.toLowerCase().includes(q) ||
-                  o.shortName.toLowerCase().includes(q) ||
-                  o.category.toLowerCase().includes(q),
-              );
-            }
-
+            const mapped = res.data.map(mapOrgToMockOrganization);
             setLiveOrgs(mapped);
             setApiError(null);
 
@@ -94,10 +82,15 @@ export function OrganizationPage() {
       isActive = false;
       window.clearTimeout(timer);
     };
-  }, [page, activeFilter, query]);
+  }, [page, activeFilter]);
+
+  // Client-side filter by name
+  const displayedOrgs = query.trim()
+    ? liveOrgs.filter((o) => o.name.toLowerCase().includes(query.toLowerCase()))
+    : liveOrgs;
 
   const pagesDisplay = serverTotalPages ?? (Math.ceil(liveOrgs.length / PAGE_SIZE) || 1);
-  const countDisplay = totalItems ?? liveOrgs.length;
+  const countDisplay = query.trim() ? displayedOrgs.length : (totalItems ?? liveOrgs.length);
 
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
@@ -119,7 +112,7 @@ export function OrganizationPage() {
               ) : apiError ? (
                 <span className="text-red-500">{apiError}</span>
               ) : (
-                <span>
+              <span>
                   {countDisplay} tổ chức
                   {query ? ` phù hợp với "${query}"` : ""}
                 </span>
@@ -131,7 +124,7 @@ export function OrganizationPage() {
             activeFilter={activeFilter}
             filterOptions={FILTER_OPTIONS}
             onFilterChange={(v) => { setActiveFilter(v); setPage(1); }}
-            onQueryChange={(v) => { setQuery(v); setPage(1); }}
+            onQueryChange={(v) => { setQuery(v); }}
             query={query}
           />
 
@@ -140,9 +133,9 @@ export function OrganizationPage() {
               <div className="flex flex-col items-center justify-center py-24 text-red-400">
                 <p className="font-sans text-base">{apiError}</p>
               </div>
-            ) : liveOrgs.length > 0 ? (
+            ) : displayedOrgs.length > 0 ? (
               <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-10 md:grid-cols-4">
-                {liveOrgs.map((org) => (
+                {displayedOrgs.map((org) => (
                   <OrgCard key={org.id} org={org} />
                 ))}
               </div>

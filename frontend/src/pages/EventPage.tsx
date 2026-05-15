@@ -135,17 +135,6 @@ export function EventPage() {
               status: ev.status || "UPCOMING",
             }));
 
-            if (query) {
-              const q = query.toLowerCase();
-              mapped = mapped.filter(
-                (ev) =>
-                  ev.name.toLowerCase().includes(q) ||
-                  ev.description.toLowerCase().includes(q) ||
-                  ev.location.toLowerCase().includes(q) ||
-                  ev.orgName.toLowerCase().includes(q),
-              );
-            }
-
             setLiveEvents(mapped);
             setApiError(null);
 
@@ -175,10 +164,15 @@ export function EventPage() {
       isActive = false;
       window.clearTimeout(timer);
     };
-  }, [page, activeFilter, query]);
+  }, [page, activeFilter]);
+
+  // Client-side filter by name — no API call on each keystroke
+  const displayedEvents = query.trim()
+    ? liveEvents.filter((ev) => ev.name.toLowerCase().includes(query.toLowerCase()))
+    : liveEvents;
 
   const pagesDisplay = serverTotalPages ?? (Math.ceil(liveEvents.length / PAGE_SIZE) || 1);
-  const countDisplay = totalItems ?? liveEvents.length;
+  const countDisplay = query.trim() ? displayedEvents.length : (totalItems ?? liveEvents.length);
 
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
@@ -212,7 +206,7 @@ export function EventPage() {
             activeFilter={activeFilter}
             filterOptions={FILTER_OPTIONS}
             onFilterChange={(v) => { setActiveFilter(v); setPage(1); }}
-            onQueryChange={(v) => { setQuery(v); setPage(1); }}
+            onQueryChange={(v) => { setQuery(v); }}
             query={query}
           />
 
@@ -221,9 +215,9 @@ export function EventPage() {
               <div className="flex flex-col items-center justify-center py-24 text-red-400">
                 <p className="font-sans text-base">{apiError}</p>
               </div>
-            ) : liveEvents.length > 0 ? (
+            ) : displayedEvents.length > 0 ? (
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {liveEvents.map((ev) => (
+                {displayedEvents.map((ev) => (
                   <Link
                     to={`/event/${ev.id}`}
                     className="group flex flex-col overflow-hidden rounded-[32px] border border-white/60 bg-white/40 shadow-glass backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-aqua hover:shadow-glass-inset focus-visible:outline-aqua focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
