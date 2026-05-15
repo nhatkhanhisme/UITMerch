@@ -172,7 +172,7 @@ class AdminServiceTest {
         when(merchItemRepository.archivePublishedByOrgId(orgId)).thenReturn(3);
         when(merchItemRepository.countByOrgIdAndStatus(orgId, MerchItemStatus.PUBLISHED)).thenReturn(0L);
 
-        OrganizationResponse response = adminService.updateOrganizationStatus(orgId, OrganizationStatus.SUSPENDED);
+        OrganizationResponse response = adminService.updateOrganizationStatus(orgId, OrganizationStatus.INACTIVE);
 
         assertThat(response).isNotNull();
         verify(merchItemRepository).archivePublishedByOrgId(orgId);
@@ -194,7 +194,7 @@ class AdminServiceTest {
     void updateOrganizationStatus_orgNotFound_throwsResourceNotFound() {
         when(organizationRepository.findById(orgId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adminService.updateOrganizationStatus(orgId, OrganizationStatus.SUSPENDED))
+        assertThatThrownBy(() -> adminService.updateOrganizationStatus(orgId, OrganizationStatus.INACTIVE))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 }

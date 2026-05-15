@@ -100,7 +100,6 @@ class OrderServiceTest {
         when(merchItemRepository.deductStock(eq(merchId), eq(2))).thenReturn(1);
         when(orderRepository.save(any())).thenReturn(savedOrder);
         when(orderItemRepository.save(any())).thenReturn(savedItem);
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         InstantOrderRequest req = new InstantOrderRequest();
         req.setMerchId(merchId);

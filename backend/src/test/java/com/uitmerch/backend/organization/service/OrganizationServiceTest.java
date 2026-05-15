@@ -51,7 +51,6 @@ class OrganizationServiceTest {
         Organization saved = Organization.builder().id(orgId).ownerId(ownerId)
             .name("New Org").status(OrganizationStatus.PENDING).build();
         when(organizationRepository.save(any())).thenReturn(saved);
-        when(merchItemRepository.countByOrgIdAndStatus(orgId, MerchItemStatus.PUBLISHED)).thenReturn(0L);
 
         CreateOrganizationRequest req = new CreateOrganizationRequest();
         req.setName("New Org");
@@ -102,7 +101,7 @@ class OrganizationServiceTest {
         OrganizationResponse response = organizationService.getOrganization(orgId);
 
         assertThat(response.getId()).isEqualTo(orgId);
-        assertThat(response.getMerchCount()).isEqualTo(5L);
+        assertThat(response.getTotalMerch()).isEqualTo(5L);
     }
 
     @Test

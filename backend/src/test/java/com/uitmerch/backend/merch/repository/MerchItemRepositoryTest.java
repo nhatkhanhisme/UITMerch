@@ -13,6 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -30,6 +34,7 @@ class MerchItemRepositoryTest {
     @Autowired private MerchItemRepository merchItemRepository;
     @Autowired private OrganizationRepository organizationRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private PlatformTransactionManager txManager;
 
     private UUID orgId;
 
@@ -84,8 +89,13 @@ class MerchItemRepositoryTest {
     }
 
     @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     void deductStock_concurrent_neverGoesNegative() throws InterruptedException {
-        MerchItem item = savedMerch(5, MerchItemStatus.PUBLISHED);
+        TransactionTemplate tx = new TransactionTemplate(txManager);
+
+        // Commit the merch item in its own transaction so concurrent threads can see it
+        UUID itemId = tx.execute(status -> savedMerch(5, MerchItemStatus.PUBLISHED).getId());
+
         int threads = 10;
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger successes = new AtomicInteger();
@@ -95,7 +105,9 @@ class MerchItemRepositoryTest {
             pool.submit(() -> {
                 try {
                     latch.await();
-                    if (merchItemRepository.deductStock(item.getId(), 1) == 1) {
+                    // Each thread uses TransactionTemplate so each deduction is its own committed tx
+                    Integer result = tx.execute(s -> merchItemRepository.deductStock(itemId, 1));
+                    if (result != null && result == 1) {
                         successes.incrementAndGet();
                     }
                 } catch (InterruptedException e) {
@@ -108,9 +120,12 @@ class MerchItemRepositoryTest {
         pool.shutdown();
         pool.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS);
 
-        int remaining = merchItemRepository.findById(item.getId()).get().getStock();
+        int remaining = tx.execute(s -> merchItemRepository.findById(itemId).get().getStock());
         assertThat(successes.get()).isEqualTo(5);
         assertThat(remaining).isEqualTo(0);
+
+        // Manual cleanup — test ran outside the rollback transaction
+        tx.execute(s -> { merchItemRepository.deleteById(itemId); return null; });
     }
 
     // ── restoreStock ─────────────────────────────────────────────────────

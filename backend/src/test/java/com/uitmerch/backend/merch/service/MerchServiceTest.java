@@ -20,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -30,6 +32,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -260,7 +263,8 @@ class MerchServiceTest {
 
     @Test
     void getPopularMerch_noPublishedItems_returnsEmptyList() {
-        when(merchItemRepository.findAllByStatus(MerchItemStatus.PUBLISHED)).thenReturn(Collections.emptyList());
+        when(merchItemRepository.findAllByStatus(eq(MerchItemStatus.PUBLISHED), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(Collections.emptyList()));
 
         List<MerchResponse> result = merchService.getPopularMerch();
 
@@ -279,12 +283,12 @@ class MerchServiceTest {
                 .stock(5)
                 .status(MerchItemStatus.PUBLISHED)
                 .build();
-            // createdAt must be non-null for the popularity score calculation
             m.setCreatedAt(java.time.LocalDateTime.now().minusDays(i));
             items.add(m);
         }
 
-        when(merchItemRepository.findAllByStatus(MerchItemStatus.PUBLISHED)).thenReturn(items);
+        when(merchItemRepository.findAllByStatus(eq(MerchItemStatus.PUBLISHED), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(items));
         when(orderItemRepository.sumQuantityByMerchIds(any())).thenReturn(Collections.emptyList());
         when(orderItemRepository.sumQuantityByMerchIdsSince(any(), any())).thenReturn(Collections.emptyList());
         when(categoryRepository.findAll()).thenReturn(Collections.emptyList());

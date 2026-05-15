@@ -257,7 +257,16 @@ public class AuthService {
         // Use a generic response to avoid revealing whether an email is registered
         userRepository.findByEmail(email).ifPresent(user -> {
             if (user.isActive() && user.isVerified()) {
-                issueOtp(user);
+                otpTokenRepository.deleteAllByUser(user);
+                String code = generateOtpCode();
+                OtpToken otp = OtpToken.builder()
+                    .user(user)
+                    .otpCode(code)
+                    .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES))
+                    .isUsed(false)
+                    .build();
+                otpTokenRepository.save(otp);
+                emailService.sendPasswordReset(user.getEmail(), code);
                 log.info("Password-reset OTP issued for {}", email);
             }
         });

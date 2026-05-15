@@ -164,6 +164,21 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Pass dotenv tolerance flags as JVM system properties so they are
+                             available to DotenvEnvironmentPostProcessor before any Spring
+                             context is loaded. This prevents failures when .env contains
+                             base64-encoded values that the dotenv parser considers malformed. -->
+                        <dotenv.ignoreIfMalformed>true</dotenv.ignoreIfMalformed>
+                        <dotenv.ignoreIfMissing>true</dotenv.ignoreIfMissing>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
