@@ -2,6 +2,7 @@ package com.uitmerch.backend.common.service;
 
 import com.uitmerch.backend.common.exception.StorageException;
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -22,11 +24,16 @@ public class JavaMailEmailService implements EmailService {
     @Value("${spring.mail.username}")
     private String fromAddress;
 
+    @Value("${app.mail.from-name:UITMerch}")
+    private String fromName;
+
+    @Async
     @Override
     public void sendOtp(String toEmail, String otpCode) {
         sendMail(toEmail, "Your UITMerch verification code", buildHtml(otpCode));
     }
 
+    @Async
     @Override
     public void sendPasswordReset(String toEmail, String otpCode) {
         sendMail(toEmail, "Reset your UITMerch password", buildOtpHtml(
@@ -37,6 +44,7 @@ public class JavaMailEmailService implements EmailService {
         ));
     }
 
+    @Async
     @Override
     public void sendOrderStatusUpdate(String toEmail, String orderId, String newStatus) {
         String subject = "Your UITMerch order has been updated";
@@ -61,13 +69,13 @@ public class JavaMailEmailService implements EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromAddress);
+            helper.setFrom(new InternetAddress(fromAddress, fromName));
             helper.setTo(toEmail);
             helper.setSubject(subject);
             helper.setText(html, true);
             mailSender.send(message);
             log.info("Email '{}' sent to {}", subject, toEmail);
-        } catch (MessagingException e) {
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             log.error("Failed to send email '{}' to {}: {}", subject, toEmail, e.getMessage());
             throw new StorageException("Failed to send email. Please try again.", e);
         }
