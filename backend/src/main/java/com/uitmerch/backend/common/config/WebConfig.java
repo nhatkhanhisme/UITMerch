@@ -12,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final TraceIdInterceptor traceIdInterceptor;
+    private final RequestLoggingInterceptor requestLoggingInterceptor;
 
     @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
     private String allowedOrigins;
@@ -21,8 +22,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedOrigins(allowedOrigins.split(","))
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .exposedHeaders("Authorization")
+                .allowedHeaders("Content-Type", "Authorization", "X-Requested-With")
+                .exposedHeaders("Authorization", "X-Trace-Id")
                 .allowCredentials(true)
                 .maxAge(3600);
     }
@@ -30,6 +31,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(traceIdInterceptor)
+            .addPathPatterns("/api/**");
+        registry.addInterceptor(requestLoggingInterceptor)
             .addPathPatterns("/api/**");
     }
 }
