@@ -88,4 +88,22 @@ public class CustomerOrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success("Order placed successfully.", order));
     }
+
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @Operation(summary = "Cancel a pending order", description = "Customers may cancel their own PENDING orders. Stock is restored automatically.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order cancelled and stock restored"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Order is not in PENDING status"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Order belongs to another customer"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found")
+    })
+    public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(
+        @PathVariable UUID id,
+        @RequestAttribute("userId") String userId
+    ) {
+        OrderResponse order = orderService.cancelCustomerOrder(UUID.fromString(userId), id);
+        return ResponseEntity.ok(ApiResponse.success("Order cancelled successfully.", order));
+    }
 }

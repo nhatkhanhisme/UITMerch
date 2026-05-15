@@ -24,4 +24,20 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     @Override
     @CacheEvict(value = "categories", allEntries = true)
     <S extends Category> S save(S entity);
+
+    @Override
+    @CacheEvict(value = "categories", allEntries = true)
+    <S extends Category> List<S> saveAll(Iterable<S> entities);
+
+    @Override
+    @CacheEvict(value = "categories", allEntries = true)
+    void delete(Category entity);
+
+    @Override
+    @CacheEvict(value = "categories", allEntries = true)
+    void deleteById(UUID id);
+
+    @Override
+    @CacheEvict(value = "categories", allEntries = true)
+    void deleteAll();
 }

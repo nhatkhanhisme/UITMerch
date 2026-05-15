@@ -13,4 +13,14 @@ public class DevEmailService implements EmailService {
     public void sendOtp(String toEmail, String otpCode) {
         log.info("===== [DEV] OTP for {} → {} =====", toEmail, otpCode);
     }
+
+    @Override
+    public void sendPasswordReset(String toEmail, String otpCode) {
+        log.info("===== [DEV] Password-reset OTP for {} → {} =====", toEmail, otpCode);
+    }
+
+    @Override
+    public void sendOrderStatusUpdate(String toEmail, String orderId, String newStatus) {
+        log.info("===== [DEV] Order {} status → {} (to: {}) =====", orderId, newStatus, toEmail);
+    }
 }

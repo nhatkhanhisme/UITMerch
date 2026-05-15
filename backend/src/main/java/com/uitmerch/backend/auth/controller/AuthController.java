@@ -1,8 +1,11 @@
 package com.uitmerch.backend.auth.controller;
 
 import com.uitmerch.backend.auth.dto.*;
+import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.ApiResponse;
 import com.uitmerch.backend.auth.service.AuthService;
+import com.uitmerch.backend.common.service.RateLimiterService;
+import com.uitmerch.backend.common.util.IpUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -21,6 +26,13 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final RateLimiterService rateLimiterService;
+    private final IpUtil ipUtil;
+
+    private static final int LOGIN_MAX_ATTEMPTS    = 10;
+    private static final Duration LOGIN_WINDOW     = Duration.ofMinutes(15);
+    private static final int REGISTER_MAX_ATTEMPTS = 5;
+    private static final Duration REGISTER_WINDOW  = Duration.ofHours(1);
 
     @PostMapping("/register")
     @Operation(summary = "Register customer account")
@@ -31,8 +43,12 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<Void>> register(
-            @Valid @RequestBody RegisterRequest request
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest
     ) {
+        if (!rateLimiterService.isAllowed("register:" + ipUtil.extractClientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+            throw new ValidationException("Too many registration attempts. Please try again later.");
+        }
         authService.register(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -48,8 +64,12 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<Void>> registerOrganizer(
-            @Valid @RequestBody RegisterOrganizerRequest request
+            @Valid @RequestBody RegisterOrganizerRequest request,
+            HttpServletRequest httpRequest
     ) {
+        if (!rateLimiterService.isAllowed("register:" + ipUtil.extractClientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+            throw new ValidationException("Too many registration attempts. Please try again later.");
+        }
         authService.registerOrganizer(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -81,8 +101,12 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<AuthResponse>> login(
-            @Valid @RequestBody LoginRequest request
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
     ) {
+        if (!rateLimiterService.isAllowed("login:" + ipUtil.extractClientIp(httpRequest), LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW)) {
+            throw new ValidationException("Too many login attempts. Please try again in 15 minutes.");
+        }
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful.", response));
     }
@@ -100,6 +124,53 @@ public class AuthController {
     ) {
         AuthResponse response = authService.refreshToken(request.getRefreshToken());
         return ResponseEntity.ok(ApiResponse.success("Tokens refreshed successfully.", response));
+    }
+
+    @PostMapping("/resend-otp")
+    @Operation(summary = "Resend email verification OTP", description = "Issues a new OTP if the account is unverified and active. Always returns 200 to prevent enumeration.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "If the account is pending verification, a new OTP has been sent"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
+    })
+    public ResponseEntity<ApiResponse<Void>> resendOtp(
+            @Valid @RequestBody ResendOtpRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        if (!rateLimiterService.isAllowed("resend-otp:" + ipUtil.extractClientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+            throw new ValidationException("Too many OTP requests. Please try again later.");
+        }
+        authService.resendOtp(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("If your account is pending verification, a new code has been sent.", null));
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Request a password-reset OTP", description = "Sends a reset OTP to the email if the account exists and is active. Always returns 200 to prevent user enumeration.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "If the account exists, an OTP has been sent"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
+    })
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        if (!rateLimiterService.isAllowed("pwd-reset:" + ipUtil.extractClientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+            throw new ValidationException("Too many password-reset attempts. Please try again later.");
+        }
+        authService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("If the account exists, a reset code has been sent.", null));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Reset password using OTP")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password reset successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid or expired OTP, or weak password")
+    })
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request
+    ) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Password reset successfully. You can now log in.", null));
     }
 
     @PostMapping("/logout")

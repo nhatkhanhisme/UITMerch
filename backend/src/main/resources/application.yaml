@@ -12,9 +12,17 @@ app:
     expiration: ${APP_JWT_EXPIRATION:86400000}  # 24 hours in milliseconds
     refresh-expiration: ${APP_JWT_REFRESH_EXPIRATION:604800000}  # 7 days in milliseconds
 
+  mail:
+    from-name: ${APP_MAIL_FROM_NAME:UITMerch}
+
   # CORS: comma-separated list of allowed origins
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+
+  # Trusted reverse-proxy IPs — only these remoteAddrs are allowed to set X-Forwarded-For.
+  # Leave blank (default) when running without a proxy; set to your load-balancer IP in production.
+  proxy:
+    trusted-ips: ${APP_TRUSTED_PROXY_IPS:}
 
   # Supabase Storage Configuration
   # NFR03: Supabase Storage used for images; Base64/BLOB persistence in DB is strictly prohibited
@@ -65,8 +73,10 @@ spring:
         format_sql: true
         use_sql_comments: true
         jdbc:
-          batch_size: 20
+          batch_size: 50
           fetch_size: 50
+        order_inserts: true
+        order_updates: true
   
   # Flyway Configuration - Strict Schema Versioning
   flyway:

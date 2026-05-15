@@ -73,6 +73,25 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success("User role updated.", response));
     }
 
+    @PatchMapping("/users/{id}/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Activate or deactivate a user account")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User status updated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "ADMIN role required"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    })
+    public ResponseEntity<ApiResponse<UserSummaryResponse>> setUserActive(
+        @PathVariable UUID id,
+        @RequestParam boolean active
+    ) {
+        UserSummaryResponse response = adminService.setUserActive(id, active);
+        return ResponseEntity.ok(ApiResponse.success(
+            active ? "User activated." : "User deactivated.", response
+        ));
+    }
+
     @GetMapping("/organizations")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "List all organizations", description = "Supports optional status filter. Paginated.")

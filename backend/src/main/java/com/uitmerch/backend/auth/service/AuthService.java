@@ -17,6 +17,7 @@ import com.uitmerch.backend.common.service.TokenBlacklistService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,6 +113,10 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new AuthenticationException("Invalid email or password");
+        }
+
+        if (!user.isActive()) {
+            throw new AuthenticationException("This account has been deactivated. Please contact support.");
         }
 
         if (!user.isVerified()) {
@@ -234,5 +239,83 @@ public class AuthService {
         SecureRandom random = new SecureRandom();
         int code = 100_000 + random.nextInt(900_000);
         return String.valueOf(code);
+    }
+
+    @Transactional
+    public void resendOtp(String email) {
+        // Silent no-op for unknown, already-verified, or inactive accounts — prevents enumeration
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.isActive() && !user.isVerified()) {
+                issueOtp(user);
+                log.info("OTP re-issued for unverified user {}", email);
+            }
+        });
+    }
+
+    @Transactional
+    public void forgotPassword(String email) {
+        // Use a generic response to avoid revealing whether an email is registered
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.isActive() && user.isVerified()) {
+                otpTokenRepository.deleteAllByUser(user);
+                String code = generateOtpCode();
+                OtpToken otp = OtpToken.builder()
+                    .user(user)
+                    .otpCode(code)
+                    .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES))
+                    .isUsed(false)
+                    .build();
+                otpTokenRepository.save(otp);
+                emailService.sendPasswordReset(user.getEmail(), code);
+                log.info("Password-reset OTP issued for {}", email);
+            }
+        });
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        final InvalidOtpException genericError = new InvalidOtpException("Invalid email or OTP code");
+
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> genericError);
+
+        OtpToken otp = otpTokenRepository
+            .findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)
+            .orElseThrow(() -> genericError);
+
+        if (otp.getLockedUntil() != null && otp.getLockedUntil().isAfter(LocalDateTime.now())) {
+            long minutesLeft = ChronoUnit.MINUTES.between(LocalDateTime.now(), otp.getLockedUntil()) + 1;
+            throw new InvalidOtpException("Too many failed attempts. Please try again in " + minutesLeft + " minute(s).");
+        }
+
+        if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw genericError;
+        }
+
+        if (!otp.getOtpCode().equals(request.getOtpCode())) {
+            otp.setAttemptCount(otp.getAttemptCount() + 1);
+            if (otp.getAttemptCount() >= OTP_MAX_ATTEMPTS) {
+                otp.setLockedUntil(LocalDateTime.now().plusMinutes(OTP_LOCK_MINUTES));
+            }
+            otpTokenRepository.save(otp);
+            throw genericError;
+        }
+
+        validatePassword(request.getNewPassword());
+
+        otp.setUsed(true);
+        otpTokenRepository.save(otp);
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        log.info("Password reset successfully for {}", user.getEmail());
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 * * * *")
+    public void purgeExpiredOtps() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(1);
+        otpTokenRepository.deleteExpiredBefore(cutoff);
+        log.debug("Purged OTP tokens expired before {}", cutoff);
     }
 }

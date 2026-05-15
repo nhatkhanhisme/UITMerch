@@ -21,12 +21,15 @@ public class RegisterOrganizerRequest {
     private String password;
 
     @NotBlank(message = "Full name is required")
+    @Size(max = 100, message = "Full name must not exceed 100 characters")
     @Schema(example = "Tran Thi B")
     private String fullName;
 
+    @Size(max = 20, message = "Phone number must not exceed 20 characters")
     @Schema(example = "0907654321")
     private String phone;
 
+    @Size(max = 255, message = "Address must not exceed 255 characters")
     @Schema(example = "UIT Campus, Thu Duc, TP.HCM")
     private String address;
 }

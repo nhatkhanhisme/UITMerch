@@ -45,7 +45,7 @@ OTPs are not emailed — fetch them directly:
 GET http://localhost:8080/api/v1/dev/otps?email=<email>
 ```
 
-H2 console (for DB inspection / admin seeding):
+H2 console (for DB inspection):
 ```
 http://localhost:8080/h2-console
 JDBC URL: jdbc:h2:mem:uitmerch  |  User: sa  |  Password: (empty)
@@ -67,11 +67,16 @@ cp .env.example .env
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 3.3.5, Java 21 |
-| Database | PostgreSQL 16, Flyway (V1–V15 migrations) |
-| Auth | JWT via JJWT 0.12.x — stateless, role embedded in token |
+| Database | PostgreSQL 16, Flyway (V1–V24 migrations) |
+| Auth | JWT via JJWT 0.12.x — stateless, access + refresh tokens, type-checked |
+| Token blacklist | PostgreSQL-backed `invalidated_tokens` table — survives restarts |
+| Rate limiting | In-memory sliding-window (`RateLimiterService`) — login, register, OTP, guest checkout |
 | Storage | Supabase Storage (S3-compatible via AWS SDK) |
-| API Docs | springdoc-openapi 2.6 — Swagger UI at `/swagger-ui.html` |
-| Tests | Spring Boot Test with H2 (`@ActiveProfiles("dev")`) |
+| Email | JavaMail (SMTP) with `@Async` dispatch — OTP, password reset, order status |
+| Cache | Spring `ConcurrentMapCache` — categories, popular merch |
+| API Docs | springdoc-openapi 2.6 — Swagger UI at `/swagger-ui.html` (disabled by default in prod) |
+| Tests | 172 tests across 14 test classes — unit (Mockito) + `@DataJpaTest` integration |
+| Logging | Logback — human-readable (dev/docker), structured JSON via logstash-logback-encoder (prod) |
 
 ---
 
@@ -83,13 +88,13 @@ Each domain follows the pattern: `entity/ → repository/ → dto/ → service/ 
 |---|---|---|---|
 | **auth** | — | — | `POST /api/v1/auth/**` |
 | **user** | — | `GET/PATCH /api/v1/customer/profile` | — |
-| **organization** | `GET/POST/PATCH /api/v1/organizations/me` | — | `GET /api/v1/public/organizations/**` |
-| **merch** | `CRUD /api/v1/organizations/merchs/**` | — | `GET /api/v1/public/merch/**` |
+| **organization** | `GET/POST/PATCH /api/v1/organizations/**` | — | `GET /api/v1/public/organizations/**` |
+| **merch** | `CRUD /api/v1/organizations/{orgId}/merchs/**` | — | `GET /api/v1/public/merch/**` |
 | **categories** | — | — | `GET /api/v1/categories` |
 | **cart** | — | `GET/POST/PATCH/DELETE /api/v1/customer/cart/**` | — |
-| **order** | `GET/PATCH /api/v1/organizations/orders/**` | `GET/POST /api/v1/customer/orders/**` | `POST /api/v1/public/orders` |
+| **order** | `GET/PATCH /api/v1/organizations/{orgId}/orders/**` | `GET/POST/PATCH /api/v1/customer/orders/**` | `GET/POST /api/v1/public/orders/**` |
 | **wishlist** | — | `GET/POST/DELETE /api/v1/customer/wishlist/**` | — |
-| **event** | `CRUD /api/v1/organizations/events/**` | — | `GET /api/v1/public/events/**` |
+| **event** | `CRUD /api/v1/organizations/{orgId}/events/**` | — | `GET /api/v1/public/events/**` |
 | **admin** | — | — | `GET/PATCH /api/v1/admin/**` |
 
 Role enforcement is via `@PreAuthorize` at method level (not in `SecurityConfig`).
@@ -100,28 +105,34 @@ Role enforcement is via `@PreAuthorize` at method level (not in `SecurityConfig`
 
 ### Auth — `/api/v1/auth`
 
-| Method | Path | Description |
-|---|---|---|
-| POST | `/register` | Register a customer account |
-| POST | `/register/organizer` | Register an organizer account |
-| POST | `/verify-email` | Verify email with OTP (locked for 15 min after 5 failed attempts) |
-| POST | `/login` | Login and receive JWT tokens |
-| POST | `/logout` | Invalidate the current JWT (requires Bearer token) |
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/register` | None | Register a customer account — sends OTP |
+| POST | `/register/organizer` | None | Register an organizer account — sends OTP |
+| POST | `/verify-email` | None | Verify email with OTP (5 attempts max; 15-min lockout) |
+| POST | `/resend-otp` | None | Re-issue OTP for unverified accounts (silent no-op if email unknown) |
+| POST | `/login` | None | Login — returns `token` (access) + `refreshToken` |
+| POST | `/refresh` | None | Exchange refresh token for new access + refresh token pair (rotated) |
+| POST | `/logout` | Bearer | Blacklist the current JWT — persisted across restarts |
+| POST | `/forgot-password` | None | Send password-reset OTP (silent no-op if email unknown) |
+| POST | `/reset-password` | None | Reset password using OTP |
+
+**Rate limits (per IP):** login 10/15 min · register & resend-otp & forgot-password 5/hr · guest checkout 20/hr
 
 ### User — `/api/v1/customer` *(CUSTOMER)*
 
 | Method | Path | Description |
 |---|---|---|
 | GET | `/profile` | Get own profile |
-| PATCH | `/profile` | Update own profile (partial) |
+| PATCH | `/profile` | Update own profile — fullName, phone, address, avatarUrl (partial) |
 
 ### Organization — `/api/v1/organizations` *(ORGANIZER)*
 
 | Method | Path | Description |
 |---|---|---|
-| POST | `/me` | Create organization (PENDING, one per organizer) |
-| GET | `/me` | Get own organization |
-| PATCH | `/me` | Update name, description, logo, cover |
+| POST | `/` | Create an organization (starts as PENDING, awaiting admin approval) |
+| GET | `/` | List own organizations (paginated) |
+| PATCH | `/{orgId}` | Update name, description, logoUrl, coverUrl |
 
 ### Public Organizations — `/api/v1/public/organizations`
 
@@ -130,16 +141,16 @@ Role enforcement is via `@PreAuthorize` at method level (not in `SecurityConfig`
 | GET | `/` | List ACTIVE organizations (paginated) |
 | GET | `/{id}` | Get organization by ID |
 | GET | `/{id}/merch` | List published merch for an organization |
-| GET | `/{id}/events` | List published events for an organization |
+| GET | `/{id}/events` | List published/ended events for an organization |
 
-### Merch — `/api/v1/organizations/merchs` *(ORGANIZER)*
+### Merch — `/api/v1/organizations/{orgId}/merchs` *(ORGANIZER)*
 
 | Method | Path | Description |
 |---|---|---|
-| POST | `/` | Create merch item (org must be ACTIVE) |
-| GET | `/` | List own merch items (all statuses, paginated) |
+| POST | `/` | Create merch item (org must be ACTIVE; max 10 images per item) |
+| GET | `/` | List own merch items — all statuses, paginated |
 | GET | `/{id}` | Get own merch item by ID |
-| PATCH | `/{id}` | Partial update (name, description, price, stock, imageUrl, status, categorySlug) |
+| PATCH | `/{id}` | Partial update — name, description, price, stock, imageUrls, status, categorySlug |
 | DELETE | `/{id}` | Soft-delete — sets status to ARCHIVED |
 
 ### Public Merch — `/api/v1/public/merch`
@@ -147,14 +158,14 @@ Role enforcement is via `@PreAuthorize` at method level (not in `SecurityConfig`
 | Method | Path | Query params | Description |
 |---|---|---|---|
 | GET | `/` | `?keyword=`, `?category=<slug>`, pagination | List published merch |
-| GET | `/popular` | — | Up to 10 recently published items |
+| GET | `/popular` | — | Top 10 items by popularity score (cached; evicted on write) |
 | GET | `/{id}` | — | Get published merch item by ID |
 
 ### Categories — `/api/v1/categories`
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/` | List all 7 categories ordered by display order |
+| GET | `/` | List all 7 categories ordered by display order (cached) |
 
 Categories seeded:
 
@@ -172,11 +183,11 @@ Categories seeded:
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/` | Get active cart with all items |
+| GET | `/` | Get active cart with full merch details and subtotals |
 | POST | `/items` | Add merch item to cart (409 if already exists) |
 | PATCH | `/items/{itemId}` | Update cart item quantity |
 | DELETE | `/items/{itemId}` | Remove item from cart |
-| POST | `/checkout` | Checkout cart — creates orders grouped by organization |
+| POST | `/checkout` | Checkout — creates orders grouped by organization; stock deducted atomically |
 
 ### Orders — Customer `/api/v1/customer/orders` *(CUSTOMER)*
 
@@ -184,56 +195,71 @@ Categories seeded:
 |---|---|---|
 | GET | `/` | List own orders (`?status=` filter, paginated) |
 | GET | `/{id}` | Get order by ID |
-| POST | `/instant` | Instant order — single item without cart |
+| POST | `/instant` | Instant order — single item without going through cart |
+| PATCH | `/{id}/cancel` | Cancel a PENDING order — stock is restored automatically |
 
-### Orders — Organizer `/api/v1/organizations/orders` *(ORGANIZER)*
+### Orders — Organizer `/api/v1/organizations/{orgId}/orders` *(ORGANIZER)*
 
 | Method | Path | Description |
 |---|---|---|
 | GET | `/` | List org orders (`?status=` filter, paginated) |
 | GET | `/{id}` | Get order by ID |
-| PATCH | `/{id}/status` | Advance order status |
+| PATCH | `/{id}/status` | Advance order status (transitions below) |
+
+**Order status transitions:**
+
+```
+PENDING → CONFIRMED → READY_FOR_PICKUP → SUCCESS
+PENDING → CANCELLED        (stock restored)
+CONFIRMED → CANCELLED      (stock restored)
+```
+
+An email notification is sent to the customer on every transition.
 
 ### Orders — Public `/api/v1/public/orders`
 
 | Method | Path | Description |
 |---|---|---|
-| POST | `/` | Guest checkout — no account required |
+| POST | `/` | Guest checkout — no account required; rate-limited at 20/hr per IP |
+| GET | `/{orderId}?email={guestEmail}` | Track a guest order — email must match the one used at checkout |
 
 ### Wishlist — `/api/v1/customer/wishlist` *(CUSTOMER)*
 
 | Method | Path | Description |
 |---|---|---|
 | GET | `/` | Get wishlist with full merch details |
-| POST | `/{merchId}` | Add merch item to wishlist |
+| POST | `/{merchId}` | Add merch item to wishlist (409 if already exists) |
 | DELETE | `/{merchId}` | Remove merch item from wishlist |
 
-### Events — `/api/v1/organizations/events` *(ORGANIZER)*
+### Events — `/api/v1/organizations/{orgId}/events` *(ORGANIZER)*
 
 | Method | Path | Description |
 |---|---|---|
-| POST | `/` | Create event |
-| GET | `/` | List own events |
-| GET | `/{id}` | Get own event by ID |
-| PATCH | `/{id}` | Update event |
-| POST | `/{id}/merch` | Attach a merch item to an event |
-| DELETE | `/{id}/merch/{merchId}` | Detach a merch item from an event |
+| POST | `/` | Create event (starts as DRAFT) |
+| GET | `/` | List own events (paginated) |
+| GET | `/{id}` | Get own event by ID (includes attached merch) |
+| PATCH | `/{id}` | Update title, description, coverUrl, dates, or status |
+| POST | `/{id}/merch/{merchId}` | Attach a merch item (must belong to same org) |
+| DELETE | `/{id}/merch/{merchId}` | Detach a merch item |
+
+**Event status transitions:** `DRAFT → PUBLISHED → ENDED`
 
 ### Public Events — `/api/v1/public/events`
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/` | List published events |
-| GET | `/{id}` | Get published event by ID |
+| GET | `/` | List PUBLISHED and ENDED events (paginated) |
+| GET | `/{id}` | Get event by ID (PUBLISHED or ENDED only) |
 
 ### Admin — `/api/v1/admin` *(ADMIN)*
 
 | Method | Path | Description |
 |---|---|---|
 | GET | `/users` | List all users (`?role=` filter, paginated) |
-| PATCH | `/users/{id}/role` | Update a user's role |
+| PATCH | `/users/{id}/role` | Change a user's role |
+| PATCH | `/users/{id}/active?active=false` | Ban / deactivate a user (login is blocked immediately) |
 | GET | `/organizations` | List all organizations (`?status=` filter, paginated) |
-| PATCH | `/organizations/{id}/status` | Approve/reject/deactivate an organization |
+| PATCH | `/organizations/{id}/status` | Approve / reject / deactivate an organization — sets to ACTIVE/PENDING/INACTIVE; deactivating also archives all its PUBLISHED merch |
 | GET | `/orders` | List all orders (`?status=` filter, paginated) |
 
 ---
@@ -241,8 +267,10 @@ Categories seeded:
 ## API Authentication
 
 1. `POST /api/v1/auth/login` → copy `data.token`
-2. In Swagger UI → click **Authorize** → paste token → **Authorize**
+2. Swagger UI → click **Authorize** → paste token → **Authorize**
 3. All protected endpoints now work
+
+> Swagger is disabled in production by default. Enable it with `SWAGGER_ENABLED=true`.
 
 All responses follow this envelope:
 ```json
@@ -278,7 +306,7 @@ Auto-seeded on startup. Skipped if data already exists.
 | `cust1@uit.edu.vn` | `Cust1234` | CUSTOMER | Active cart · wishlist · 2 orders |
 | `cust2@uit.edu.vn` | `Cust1234` | CUSTOMER | 1 order READY\_FOR\_PICKUP |
 
-### PostgreSQL real seed (V12–V15 migrations)
+### PostgreSQL real seed (V12–V16 migrations)
 
 14 real UIT clubs and organizations with 35 merch items across all 7 categories.
 All seeded accounts use password `UIT@2025`.
@@ -290,14 +318,14 @@ All seeded accounts use password `UIT@2025`.
 | `uitstore@uit.edu.vn` | ORGANIZER | UIT Store — ACTIVE org |
 | `handmade.xtn@uit.edu.vn` | ORGANIZER | Đội hình Handmade — ACTIVE org |
 | *(11 more organizers)* | ORGANIZER | See V12 migration for full list |
-| `nguyen.van.an@student.uit.edu.vn` | CUSTOMER | Has active cart + wishlist + 2 orders |
-| `tran.thi.bich@student.uit.edu.vn` | CUSTOMER | Has active cart + wishlist + 1 order |
-| `le.minh.cuong@student.uit.edu.vn` | CUSTOMER | Has active cart + wishlist + 1 order |
+| `nguyen.van.an@student.uit.edu.vn` | CUSTOMER | Active cart + wishlist + 2 orders |
+| `tran.thi.bich@student.uit.edu.vn` | CUSTOMER | Active cart + wishlist + 1 order |
+| `le.minh.cuong@student.uit.edu.vn` | CUSTOMER | Active cart + wishlist + 1 order |
 | `pham.hong.duc@gmail.com` | CUSTOMER | 1 order READY\_FOR\_PICKUP |
 | `hoang.thu.em@gmail.com` | CUSTOMER | 1 order SUCCESS |
 
 5 events seeded (PUBLISHED, DRAFT, ENDED) with event–merch links.
-8 orders seeded covering all status values (PENDING → SUCCESS → CANCELLED, including 2 guest orders).
+8 orders seeded covering all status values including 2 guest orders.
 
 ---
 
@@ -310,10 +338,12 @@ Required only for the **production** profile. Docker and dev profiles have built
 | Variable | Default | Description |
 |---|---|---|
 | `SERVER_PORT` | `8080` | HTTP port |
-| `APP_JWT_SECRET` | *(required for production; docker has a built-in default)* | JWT signing secret — min 32 chars |
+| `APP_JWT_SECRET` | *(required)* | JWT signing secret — **minimum 32 characters**; validated at startup |
 | `APP_JWT_EXPIRATION` | `86400000` | Access token TTL (ms) — 24 h |
 | `APP_JWT_REFRESH_EXPIRATION` | `604800000` | Refresh token TTL (ms) — 7 days |
-| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:5173` | Comma-separated list of allowed CORS origins |
+| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:5173` | Comma-separated allowed CORS origins |
+| `APP_TRUSTED_PROXY_IPS` | *(empty)* | Comma-separated IPs whose `X-Forwarded-For` is trusted for rate limiting — set to your load-balancer IP |
+| `SWAGGER_ENABLED` | `false` | Set to `true` to enable Swagger UI and OpenAPI schema in production |
 
 ### Database
 
@@ -323,17 +353,18 @@ Required only for the **production** profile. Docker and dev profiles have built
 | `SPRING_DATASOURCE_USERNAME` | `postgres` | DB username |
 | `SPRING_DATASOURCE_PASSWORD` | `postgres` | DB password |
 
-### Mail (production profile only)
+### Mail
 
-| Variable | Description |
-|---|---|
-| `MAIL_USERNAME` | Gmail address used as SMTP sender |
-| `MAIL_PASSWORD` | Gmail App Password (not your account password) |
-| `MAIL_SMTP_AUTH` | `true` (default) |
+| Variable | Default | Description |
+|---|---|---|
+| `MAIL_USERNAME` | — | Gmail address used as SMTP sender |
+| `MAIL_PASSWORD` | — | Gmail App Password (not your account password) |
+| `APP_MAIL_FROM_NAME` | `UITMerch` | Display name shown in email `From:` header |
+| `MAIL_SMTP_AUTH` | `true` | — |
 
-> Email is inactive in `dev` and `docker` profiles — `DevEmailService` is a no-op. OTPs are readable at `GET /api/v1/dev/otps?email=<email>`.
+> Email is inactive in `dev` and `docker` profiles — `DevEmailService` logs OTPs instead of sending them. OTPs are also readable at `GET /api/v1/dev/otps?email=<email>`. All email methods are `@Async` so they never block the request thread.
 
-### Supabase Storage (production profile only)
+### Supabase Storage
 
 | Variable | Description |
 |---|---|
@@ -343,7 +374,7 @@ Required only for the **production** profile. Docker and dev profiles have built
 | `SUPABASE_STORAGE_S3_SECRET_KEY` | S3 secret key |
 | `SUPABASE_PROJECT_URL` | Public base URL, e.g. `https://<project>.supabase.co` |
 
-> Storage is inactive in `dev` and `docker` profiles — `DevStorageService` returns placeholder URLs instead.
+> Storage is inactive in `dev` and `docker` profiles — `DevStorageService` returns placeholder URLs.
 
 Generate a secure JWT secret:
 ```bash
@@ -354,11 +385,13 @@ openssl rand -base64 48
 
 ## Database Migrations
 
-Flyway manages schema versions in `src/main/resources/db/migration/`:
+Flyway manages schema versions in `src/main/resources/db/migration/`.
+Flyway is **disabled** in the `dev` profile (Hibernate generates schema from entities via `create-drop`).
+Never modify existing migration files — add a new `VN+1__description.sql` instead.
 
 | Migration | Contents |
 |---|---|
-| V1 | PostgreSQL ENUMs (user\_role, order\_status, etc.) |
+| V1 | PostgreSQL ENUMs (`user_role`, `order_status`, `event_status`, etc.) |
 | V2 | `users`, `otp_tokens` |
 | V3 | `organizations` |
 | V4 | `merch_items` |
@@ -369,13 +402,17 @@ Flyway manages schema versions in `src/main/resources/db/migration/`:
 | V9 | Indexes on all FK + frequently queried columns |
 | V10 | `users.full_name` NOT NULL |
 | V11 | `merch_items.stock >= 0` check constraint |
-| V12 | Seed 14 real UIT organizations with 35 merch items |
+| V12 | Seed 14 real UIT organizations + 35 merch items |
 | V13 | `categories` table + 7 seeded categories + `merch_items.category_id` FK |
-| V14 | Seed 1 admin + 5 customers, 5 events + event–merch links, 8 orders, 3 carts, 3 wishlists |
+| V14 | Seed admin, customers, events, orders, carts, wishlists |
 | V15 | `otp_tokens.attempt_count` + `locked_until` for brute-force protection |
-
-Flyway is **disabled** in the `dev` profile (Hibernate generates schema from entities).
-Never modify existing migration files — add a new `VN__description.sql` instead.
+| V16 | Seed 5 real events |
+| V17 | `merch_images` table (multiple images per item, ordered by position) |
+| V18 | Drop `merch_items.image_url` (replaced by `merch_images`) |
+| V19 | Allow multiple organizations per owner |
+| V20–V22 | Seed real organization logo URLs |
+| V23 | `invalidated_tokens` table (persistent JWT blacklist — SHA-256 hash, expires_at) |
+| V24 | `users.is_active` column (default `true`) for account ban/deactivation |
 
 ---
 
@@ -387,6 +424,24 @@ Never modify existing migration files — add a new `VN__description.sql` instea
 ```
 
 Tests use `@ActiveProfiles("dev")` — H2 in-memory, no PostgreSQL or env vars required.
+**172 tests across 14 test classes**, 0 failures.
+
+| Suite | Tests | Notes |
+|---|---|---|
+| `AuthServiceTest` | 35 | register, verify, login, resend-OTP, forgot/reset password, refresh, logout |
+| `OrderServiceTest` | 36 | all order paths + status transitions (parameterized) + cancellation + stock restore |
+| `MerchServiceTest` | 15 | create, update, delete, list, popular |
+| `CartServiceTest` | 13 | add, update, remove, checkout |
+| `AdminServiceTest` | 13 | users, orgs, orders, ban/activate |
+| `EventServiceTest` | 14 | create, status transitions, attach/detach merch, public access |
+| `WishlistServiceTest` | 7 | get, add, remove |
+| `OrganizationServiceTest` | 8 | CRUD + ownership |
+| `UserServiceTest` | 5 | profile get/update |
+| `JwtTokenProviderTest` | 10 | access/refresh token type discrimination + tamper detection |
+| `TokenBlacklistServiceTest` | 5 | add, isBlacklisted, expiry eviction, DB persistence |
+| `RateLimiterServiceTest` | 5 | within limit, at limit, window expiry |
+| `MerchItemRepositoryTest` | 5 | `@DataJpaTest` — deductStock (incl. 10-thread concurrent), restoreStock, archivePublished |
+| `BackendApplicationTests` | 1 | Spring context loads with dev profile |
 
 ---
 

@@ -1,5 +1,6 @@
 package com.uitmerch.backend.common.security;
 
+import jakarta.annotation.PostConstruct;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -41,6 +42,16 @@ public class JwtTokenProvider {
 
     @Value("${app.jwt.refresh-expiration:604800000}")
     private long refreshTokenExpiration;
+
+    @PostConstruct
+    void validateSecretKey() {
+        if (secretKey == null || secretKey.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                "APP_JWT_SECRET must be at least 32 characters (256 bits). " +
+                "Current length: " + (secretKey == null ? 0 : secretKey.length()) + " chars."
+            );
+        }
+    }
 
     public String generateAccessToken(String userId, String email, String role) {
         return generateToken(

@@ -47,6 +47,9 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
     private String allowedOrigins;
 
+    @Value("${springdoc.swagger-ui.enabled:false}")
+    private boolean swaggerEnabled;
+
     public SecurityConfig(
         JwtAuthenticationFilter jwtAuthenticationFilter,
         JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint
@@ -70,7 +73,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
@@ -116,11 +119,15 @@ public class SecurityConfig {
                 authz.requestMatchers("/").permitAll()
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/v1/public/**").permitAll()
-                    .requestMatchers("/api/v1/categories/**").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
+                    .requestMatchers("/api/v1/categories/**").permitAll();
 
-                // Dev-only OTP inspection endpoint — only opened when running under the dev profile
-                if (environment.acceptsProfiles(Profiles.of("dev"))) {
+                // Swagger UI — only opened when explicitly enabled (SWAGGER_ENABLED=true)
+                if (swaggerEnabled) {
+                    authz.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
+                }
+
+                // Dev OTP endpoint — only opened on dev or docker profiles
+                if (environment.acceptsProfiles(Profiles.of("dev", "docker"))) {
                     authz.requestMatchers("/api/v1/dev/**").permitAll();
                 }
 

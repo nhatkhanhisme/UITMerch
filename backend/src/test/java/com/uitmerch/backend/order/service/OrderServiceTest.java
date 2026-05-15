@@ -1,11 +1,20 @@
 package com.uitmerch.backend.order.service;
 
+import com.uitmerch.backend.auth.entity.User;
+import com.uitmerch.backend.auth.repository.UserRepository;
+import com.uitmerch.backend.cart.entity.Cart;
+import com.uitmerch.backend.cart.entity.CartItem;
 import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.exception.ValidationException;
+import com.uitmerch.backend.common.model.CartStatus;
 import com.uitmerch.backend.common.model.MerchItemStatus;
 import com.uitmerch.backend.common.model.OrderStatus;
+import com.uitmerch.backend.common.model.UserRole;
+import com.uitmerch.backend.common.service.EmailService;
 import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
+import com.uitmerch.backend.order.dto.GuestOrderItemRequest;
+import com.uitmerch.backend.order.dto.GuestOrderRequest;
 import com.uitmerch.backend.order.dto.InstantOrderRequest;
 import com.uitmerch.backend.order.dto.OrderResponse;
 import com.uitmerch.backend.order.entity.Order;
@@ -25,12 +34,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +54,8 @@ class OrderServiceTest {
     @Mock private OrderItemRepository orderItemRepository;
     @Mock private MerchItemRepository merchItemRepository;
     @Mock private OrganizationService organizationService;
+    @Mock private UserRepository userRepository;
+    @Mock private EmailService emailService;
 
     @InjectMocks private OrderService orderService;
 
@@ -72,23 +88,18 @@ class OrderServiceTest {
     // ── createInstantOrder ───────────────────────────────────────────────────
 
     @Test
-    void createInstantOrder_success_deductsStock() {
+    void createInstantOrder_success_callsAtomicDeduction() {
         MerchItem merch = publishedMerch(5);
         Order savedOrder = orderWithStatus(OrderStatus.PENDING);
         OrderItem savedItem = OrderItem.builder()
-            .id(UUID.randomUUID())
-            .orderId(orderId)
-            .merchId(merchId)
-            .merchName("Test Merch")
-            .unitPrice(BigDecimal.valueOf(100_000))
-            .quantity(2)
-            .subtotal(BigDecimal.valueOf(200_000))
-            .build();
+            .id(UUID.randomUUID()).orderId(orderId).merchId(merchId)
+            .merchName("Test Merch").unitPrice(BigDecimal.valueOf(100_000))
+            .quantity(2).subtotal(BigDecimal.valueOf(200_000)).build();
 
         when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(merch));
+        when(merchItemRepository.deductStock(eq(merchId), eq(2))).thenReturn(1);
         when(orderRepository.save(any())).thenReturn(savedOrder);
         when(orderItemRepository.save(any())).thenReturn(savedItem);
-        when(merchItemRepository.save(any())).thenReturn(merch);
 
         InstantOrderRequest req = new InstantOrderRequest();
         req.setMerchId(merchId);
@@ -97,7 +108,22 @@ class OrderServiceTest {
         OrderResponse response = orderService.createInstantOrder(userId, req);
 
         assertThat(response.getOrgId()).isEqualTo(orgId);
-        assertThat(merch.getStock()).isEqualTo(3); // 5 - 2
+        verify(merchItemRepository).deductStock(merchId, 2);
+    }
+
+    @Test
+    void createInstantOrder_concurrentSellout_throwsValidation() {
+        MerchItem merch = publishedMerch(1);
+        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(merch));
+        when(merchItemRepository.deductStock(eq(merchId), eq(1))).thenReturn(0); // another thread won
+
+        InstantOrderRequest req = new InstantOrderRequest();
+        req.setMerchId(merchId);
+        req.setQuantity(1);
+
+        assertThatThrownBy(() -> orderService.createInstantOrder(userId, req))
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining("sold out");
     }
 
     @Test
@@ -166,6 +192,7 @@ class OrderServiceTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(orderRepository.save(any())).thenReturn(updatedOrder);
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         OrderResponse response = orderService.updateOrderStatus(userId, orgId, orderId, to);
 
@@ -241,6 +268,163 @@ class OrderServiceTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> orderService.getCustomerOrder(userId, orderId))
+            .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    // ── updateOrderStatus: cancellation restores stock ───────────────────────
+
+    @Test
+    void updateOrderStatus_cancelledOrder_restoresStock() {
+        Organization org = Organization.builder().id(orgId).ownerId(userId).build();
+        Order order = orderWithStatus(OrderStatus.PENDING);
+        Order cancelled = orderWithStatus(OrderStatus.CANCELLED);
+        OrderItem item = OrderItem.builder().id(UUID.randomUUID()).orderId(orderId)
+            .merchId(merchId).quantity(3).unitPrice(BigDecimal.valueOf(100_000))
+            .subtotal(BigDecimal.valueOf(300_000)).build();
+
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any())).thenReturn(cancelled);
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        orderService.updateOrderStatus(userId, orgId, orderId, OrderStatus.CANCELLED);
+
+        verify(merchItemRepository).restoreStock(merchId, 3);
+    }
+
+    // ── cancelCustomerOrder ──────────────────────────────────────────────────
+
+    @Test
+    void cancelCustomerOrder_pendingOrder_cancelsAndRestoresStock() {
+        Order order = orderWithStatus(OrderStatus.PENDING);
+        OrderItem item = OrderItem.builder().id(UUID.randomUUID()).orderId(orderId)
+            .merchId(merchId).quantity(2).unitPrice(BigDecimal.valueOf(100_000))
+            .subtotal(BigDecimal.valueOf(200_000)).build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any())).thenReturn(orderWithStatus(OrderStatus.CANCELLED));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        orderService.cancelCustomerOrder(userId, orderId);
+
+        verify(merchItemRepository).restoreStock(merchId, 2);
+    }
+
+    @Test
+    void cancelCustomerOrder_confirmedOrder_throwsValidation() {
+        Order order = orderWithStatus(OrderStatus.CONFIRMED);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        assertThatThrownBy(() -> orderService.cancelCustomerOrder(userId, orderId))
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining("PENDING");
+        verify(merchItemRepository, never()).restoreStock(any(), anyInt());
+    }
+
+    @Test
+    void cancelCustomerOrder_wrongUser_throwsResourceNotFound() {
+        UUID otherUser = UUID.randomUUID();
+        Order order = orderWithStatus(OrderStatus.PENDING); // belongs to userId
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+        assertThatThrownBy(() -> orderService.cancelCustomerOrder(otherUser, orderId))
+            .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    // ── createOrdersFromCart ─────────────────────────────────────────────────
+
+    @Test
+    void createOrdersFromCart_unavailableItem_throwsBeforeDeduction() {
+        Cart cart = Cart.builder().id(UUID.randomUUID()).userId(userId).status(CartStatus.ACTIVE).build();
+        CartItem cartItem = CartItem.builder().id(UUID.randomUUID())
+            .cartId(cart.getId()).merchId(merchId).quantity(1).build();
+
+        MerchItem draft = MerchItem.builder().id(merchId).orgId(orgId).name("Draft")
+            .price(BigDecimal.valueOf(10_000)).stock(5).status(MerchItemStatus.DRAFT).build();
+
+        when(merchItemRepository.findAllById(any())).thenReturn(List.of(draft));
+
+        assertThatThrownBy(() -> orderService.createOrdersFromCart(userId, cart, List.of(cartItem), null))
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining("no longer available");
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void createOrdersFromCart_insufficientStock_throwsBeforeDeduction() {
+        Cart cart = Cart.builder().id(UUID.randomUUID()).userId(userId).status(CartStatus.ACTIVE).build();
+        CartItem cartItem = CartItem.builder().id(UUID.randomUUID())
+            .cartId(cart.getId()).merchId(merchId).quantity(10).build();
+
+        MerchItem merch = publishedMerch(2); // only 2 in stock
+        when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
+
+        assertThatThrownBy(() -> orderService.createOrdersFromCart(userId, cart, List.of(cartItem), null))
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining("Insufficient stock");
+        verify(orderRepository, never()).save(any());
+    }
+
+    // ── createGuestOrder ─────────────────────────────────────────────────────
+
+    @Test
+    void createGuestOrder_insufficientStock_throwsBeforeCreatingOrder() {
+        GuestOrderItemRequest item = new GuestOrderItemRequest();
+        item.setMerchId(merchId);
+        item.setQuantity(99);
+
+        GuestOrderRequest req = new GuestOrderRequest();
+        req.setItems(List.of(item));
+        req.setGuestName("Guest");
+        req.setGuestPhone("0901");
+        req.setGuestAddress("Addr");
+
+        MerchItem merch = publishedMerch(1);
+        when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
+
+        assertThatThrownBy(() -> orderService.createGuestOrder(req))
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining("Insufficient stock");
+        verify(orderRepository, never()).save(any());
+    }
+
+    // ── getGuestOrderByEmail ─────────────────────────────────────────────────
+
+    @Test
+    void getGuestOrderByEmail_matchingEmail_returnsOrder() {
+        Order guestOrder = Order.builder().id(orderId).orgId(orgId)
+            .guestEmail("guest@test.com").totalAmount(BigDecimal.ZERO)
+            .status(OrderStatus.PENDING).build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(guestOrder));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+
+        OrderResponse response = orderService.getGuestOrderByEmail(orderId, "guest@test.com");
+
+        assertThat(response.getId()).isEqualTo(orderId);
+    }
+
+    @Test
+    void getGuestOrderByEmail_wrongEmail_throwsResourceNotFound() {
+        Order guestOrder = Order.builder().id(orderId).orgId(orgId)
+            .guestEmail("real@test.com").totalAmount(BigDecimal.ZERO)
+            .status(OrderStatus.PENDING).build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(guestOrder));
+
+        assertThatThrownBy(() -> orderService.getGuestOrderByEmail(orderId, "wrong@test.com"))
+            .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void getGuestOrderByEmail_authenticatedOrder_throwsResourceNotFound() {
+        Order authOrder = orderWithStatus(OrderStatus.PENDING); // has userId set, no guestEmail
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(authOrder));
+
+        assertThatThrownBy(() -> orderService.getGuestOrderByEmail(orderId, "any@test.com"))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 }

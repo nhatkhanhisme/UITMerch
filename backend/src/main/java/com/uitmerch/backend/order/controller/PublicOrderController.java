@@ -1,19 +1,25 @@
 package com.uitmerch.backend.order.controller;
 
+import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.ApiResponse;
+import com.uitmerch.backend.common.service.RateLimiterService;
+import com.uitmerch.backend.common.util.IpUtil;
 import com.uitmerch.backend.order.dto.GuestOrderRequest;
 import com.uitmerch.backend.order.dto.OrderResponse;
 import com.uitmerch.backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/public/orders")
@@ -22,6 +28,11 @@ import java.util.List;
 public class PublicOrderController {
 
     private final OrderService orderService;
+    private final RateLimiterService rateLimiterService;
+    private final IpUtil ipUtil;
+
+    private static final int GUEST_ORDER_MAX  = 20;
+    private static final Duration GUEST_ORDER_WINDOW = Duration.ofHours(1);
 
     @PostMapping
     @Operation(summary = "Guest checkout", description = "Places orders as a guest without requiring an account. Items are grouped by organization.")
@@ -32,10 +43,31 @@ public class PublicOrderController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<List<OrderResponse>>> guestCheckout(
-        @Valid @RequestBody GuestOrderRequest request
+        @Valid @RequestBody GuestOrderRequest request,
+        HttpServletRequest httpRequest
     ) {
+        if (!rateLimiterService.isAllowed("guest-order:" + ipUtil.extractClientIp(httpRequest), GUEST_ORDER_MAX, GUEST_ORDER_WINDOW)) {
+            throw new ValidationException("Too many orders from this IP. Please try again later.");
+        }
         List<OrderResponse> orders = orderService.createGuestOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success("Guest order placed successfully. " + orders.size() + " order(s) created.", orders));
+    }
+
+    @GetMapping("/{orderId}")
+    @Operation(
+        summary = "Track a guest order",
+        description = "Returns order details for a guest order. Requires the guest email used at checkout for verification."
+    )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found or email does not match")
+    })
+    public ResponseEntity<ApiResponse<OrderResponse>> trackGuestOrder(
+        @PathVariable UUID orderId,
+        @RequestParam String email
+    ) {
+        OrderResponse order = orderService.getGuestOrderByEmail(orderId, email);
+        return ResponseEntity.ok(ApiResponse.success("Order retrieved.", order));
     }
 }

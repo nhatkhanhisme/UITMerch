@@ -59,12 +59,14 @@ public class EventService {
         return EventResponse.from(eventRepository.save(event));
     }
 
+    @Transactional(readOnly = true)
     public Page<EventResponse> getOwnEvents(UUID ownerId, UUID orgId, Pageable pageable) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         return eventRepository.findByOrgId(org.getId(), pageable)
             .map(EventResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public EventResponse getOwnEvent(UUID ownerId, UUID orgId, UUID eventId) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         Event event = eventRepository.findByIdAndOrgId(eventId, org.getId())
@@ -143,16 +145,19 @@ public class EventService {
 
     private static final Set<EventStatus> PUBLIC_STATUSES = Set.of(EventStatus.PUBLISHED, EventStatus.ENDED);
 
+    @Transactional(readOnly = true)
     public Page<EventResponse> getPublicEvents(Pageable pageable) {
         return eventRepository.findByStatusIn(PUBLIC_STATUSES, pageable)
             .map(EventResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public Page<EventResponse> getPublicEventsByOrg(UUID orgId, Pageable pageable) {
         return eventRepository.findByOrgIdAndStatusIn(orgId, PUBLIC_STATUSES, pageable)
             .map(EventResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public EventResponse getPublicEvent(UUID eventId) {
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
@@ -177,14 +182,15 @@ public class EventService {
 
         List<MerchItem> items = merchItemRepository.findAllById(merchIds);
 
-        List<UUID> categoryIds = items.stream()
+        // Use the cached findAll() instead of findAllById() to hit the 'categories' cache
+        Set<UUID> neededIds = items.stream()
             .map(MerchItem::getCategoryId)
             .filter(id -> id != null)
-            .distinct()
-            .toList();
+            .collect(Collectors.toSet());
 
-        Map<UUID, Category> categoryMap = categoryRepository.findAllById(categoryIds)
+        Map<UUID, Category> categoryMap = categoryRepository.findAll()
             .stream()
+            .filter(c -> neededIds.contains(c.getId()))
             .collect(Collectors.toMap(Category::getId, c -> c));
 
         Map<UUID, List<String>> imageMap = merchImageRepository.findByMerchIdInOrderByPosition(merchIds)

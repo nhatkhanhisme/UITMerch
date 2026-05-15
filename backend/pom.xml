@@ -140,6 +140,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Structured JSON logging (production profile) -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.4</version>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -155,6 +162,21 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Pass dotenv tolerance flags as JVM system properties so they are
+                             available to DotenvEnvironmentPostProcessor before any Spring
+                             context is loaded. This prevents failures when .env contains
+                             base64-encoded values that the dotenv parser considers malformed. -->
+                        <dotenv.ignoreIfMalformed>true</dotenv.ignoreIfMalformed>
+                        <dotenv.ignoreIfMissing>true</dotenv.ignoreIfMissing>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
 
         </plugins>

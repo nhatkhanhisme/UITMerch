@@ -18,6 +18,7 @@ public class UserSummaryResponse {
     private String phone;
     private UserRole role;
     private boolean isVerified;
+    private boolean isActive;
     private LocalDateTime createdAt;
 
     public static UserSummaryResponse from(User user) {
@@ -28,6 +29,7 @@ public class UserSummaryResponse {
             .phone(user.getPhone())
             .role(user.getRole())
             .isVerified(user.isVerified())
+            .isActive(user.isActive())
             .createdAt(user.getCreatedAt())
             .build();
     }

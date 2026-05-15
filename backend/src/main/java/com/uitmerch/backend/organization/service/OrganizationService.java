@@ -38,6 +38,7 @@ public class OrganizationService {
         return OrganizationResponse.from(organizationRepository.save(org), 0L);
     }
 
+    @Transactional(readOnly = true)
     public Page<OrganizationResponse> getOwnOrganizations(UUID ownerId, Pageable pageable) {
         Page<Organization> page = organizationRepository.findByOwnerId(ownerId, pageable);
         Map<UUID, Long> counts = batchCountPublishedMerch(page.getContent().stream().map(Organization::getId).toList());
@@ -66,12 +67,14 @@ public class OrganizationService {
         return OrganizationResponse.from(saved, countPublishedMerch(saved.getId()));
     }
 
+    @Transactional(readOnly = true)
     public OrganizationResponse getOrganization(UUID orgId) {
         Organization org = organizationRepository.findById(orgId)
             .orElseThrow(() -> new ResourceNotFoundException("Organization", orgId.toString()));
         return OrganizationResponse.from(org, countPublishedMerch(org.getId()));
     }
 
+    @Transactional(readOnly = true)
     public Page<OrganizationResponse> listActiveOrganizations(Pageable pageable) {
         Page<Organization> page = organizationRepository.findByStatus(OrganizationStatus.ACTIVE, pageable);
         Map<UUID, Long> counts = batchCountPublishedMerch(page.getContent().stream().map(Organization::getId).toList());
@@ -79,6 +82,7 @@ public class OrganizationService {
     }
 
     // Used by other modules (merch, event, order) to verify ownership and org exists
+    @Transactional(readOnly = true)
     public Organization getOwnOrganizationEntity(UUID ownerId, UUID orgId) {
         return organizationRepository.findByIdAndOwnerId(orgId, ownerId)
             .orElseThrow(() -> new ResourceNotFoundException("Organization not found for this account."));
