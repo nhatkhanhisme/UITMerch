@@ -6,11 +6,10 @@
   A platform for discovering and collecting merchandise from the University of Information Technology (UIT) — built for students, clubs, and departments.
 </p>
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-uitmerch--fe.vercel.app-brightgreen?style=for-the-badge&logo=vercel)](https://uitmerch-fe.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-uitmerch.vercel.app-brightgreen?style=for-the-badge&logo=vercel)](https://uitmerch.vercel.app)
 [![Java](https://img.shields.io/badge/Java-21-blue.svg?style=for-the-badge&logo=java)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3-green.svg?style=for-the-badge&logo=spring)](https://spring.io/projects/spring-boot)
 [![React](https://img.shields.io/badge/React-18-cyan.svg?style=for-the-badge&logo=react)](https://reactjs.org)
-[![Vercel](https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel)](https://uitmerch-fe.vercel.app)
 
 </div>
 
@@ -38,9 +37,7 @@ If you have concerns about specific content or data used in this project, please
 
 ## 🌐 Live Demo
 
-**Frontend:** [https://uitmerch-fe.vercel.app](https://uitmerch-fe.vercel.app)
-
-> The frontend is deployed on **Vercel**. The backend (Spring Boot) is self-hosted and may require a separate running instance for full API functionality.
+**Frontend:** [https://uitmerch.vercel.app](https://uitmerch.vercel.app)
 
 ---
 
@@ -270,7 +267,7 @@ npm run build
 
 ## Deployment
 
-**Frontend** is deployed on **Vercel**: [https://uitmerch-fe.vercel.app](https://uitmerch-fe.vercel.app)
+**Frontend** is deployed on **Vercel**: [https://uitmerch.vercel.app](https://uitmerch.vercel.app)
 
 - The `frontend/vercel.json` catch-all rewrite ensures React Router handles all client-side routes correctly on page refresh.
 - No additional build configuration is needed — Vite outputs to `dist/` and Vercel serves it automatically.
