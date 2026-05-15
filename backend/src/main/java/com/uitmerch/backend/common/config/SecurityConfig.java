@@ -107,6 +107,7 @@ public class SecurityConfig {
             
             // Define authorization rules
             .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/public/**").permitAll()
                 .requestMatchers("/api/v1/categories/**").permitAll()
