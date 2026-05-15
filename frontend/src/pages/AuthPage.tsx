@@ -15,14 +15,14 @@ import type { UserRole } from "../types/auth";
 
 const accountTypes = [
   {
-    label: "Customer",
+    label: "Khách hàng",
     value: "CUSTOMER",
-    description: "Browse, shop, and track orders.",
+    description: "Khám phá, mua sắm và theo dõi đơn hàng.",
   },
   {
-    label: "Organizer",
+    label: "Tổ chức",
     value: "ORGANIZER",
-    description: "Publish merch and manage events.",
+    description: "Đăng bán vật phẩm và quản lý sự kiện.",
   },
 ] as const;
 
@@ -52,22 +52,22 @@ export function AuthPage() {
   const isVerifyMode = mode === "verify";
   const modeLabel =
     mode === "signin"
-      ? "Sign in"
+      ? "Đăng nhập"
       : mode === "register"
-        ? "Register"
-        : "Verify email";
+        ? "Đăng ký"
+        : "Xác thực email";
   const modeTitle =
     mode === "signin"
-      ? "Access your account"
+      ? "Truy cập tài khoản của bạn"
       : mode === "register"
-        ? "Create an account"
-        : "Confirm your email";
+        ? "Tạo tài khoản mới"
+        : "Xác nhận email của bạn";
   const submitLabel =
     mode === "signin"
-      ? "Sign in"
+      ? "Đăng nhập"
       : mode === "register"
-        ? "Register"
-        : "Verify email";
+        ? "Đăng ký"
+        : "Xác thực email";
 
   const handleModeChange = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -103,7 +103,7 @@ export function AuthPage() {
         });
 
         setSuccessMessage(
-          response.message || "Email verified. You can sign in now.",
+          response.message || "Email đã xác thực. Bạn có thể đăng nhập ngay.",
         );
         setFormState((current) => ({
           ...current,
@@ -121,7 +121,7 @@ export function AuthPage() {
         });
 
         if (!response.data) {
-          throw new Error("Login failed. Please try again.");
+          throw new Error("Đăng nhập thất bại. Vui lòng thử lại.");
         }
 
         const session = toAuthSession(response.data);
@@ -151,7 +151,7 @@ export function AuthPage() {
 
       setSuccessMessage(
         response.message ||
-          "Registration successful. Check your email for the OTP.",
+          "Đăng ký thành công. Vui lòng kiểm tra email để lấy mã OTP.",
       );
       setFormState((current) => ({
         ...current,
@@ -177,25 +177,23 @@ export function AuthPage() {
               UITMerch Account
             </p>
             <h1 className="mt-4 font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
-              Welcome back to the merch studio.
+              Chào mừng trở lại UITMerch.
             </h1>
             <p className="mt-4 max-w-lg font-sans text-sm text-gray">
-              Sign in to keep shopping or register as an organizer to prepare
-              your next drop. Organizer dashboards will be available soon.
+              Đăng nhập để tiếp tục mua sắm hoặc đăng ký với tư cách ban tổ chức
+              để chuẩn bị vật phẩm cho sự kiện tiếp theo.
             </p>
             <div className="mt-6">
               <p className="font-sans text-sm text-gray">
-                Create an account to start shopping. Choose your role during
-                registration — customers can browse and buy, organizers can
-                publish merch.
+                Tạo tài khoản để bắt đầu mua sắm. Chọn vai trò trong quá trình
+                đăng ký — khách hàng có thể xem và mua, ban tổ chức có thể đăng bán vật phẩm.
               </p>
             </div>
           </div>
 
           <div className="rounded-panel border border-white/60 bg-white/40 p-5 text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)] backdrop-blur">
             <p className="font-sans">
-              After registration, check your email for the OTP to verify your
-              account.
+              Sau khi đăng ký, kiểm tra email để lấy mã OTP xác thực tài khoản.
             </p>
           </div>
         </section>
@@ -222,7 +220,7 @@ export function AuthPage() {
                   onClick={() => handleModeChange("signin")}
                   type="button"
                 >
-                  Sign in
+                  Đăng nhập
                 </button>
                 <button
                   className={[
@@ -234,7 +232,7 @@ export function AuthPage() {
                   onClick={() => handleModeChange("register")}
                   type="button"
                 >
-                  Register
+                  Đăng ký
                 </button>
                 <button
                   className={[
@@ -246,7 +244,7 @@ export function AuthPage() {
                   onClick={() => handleModeChange("verify")}
                   type="button"
                 >
-                  Verify
+                  Xác thực
                 </button>
               </div>
             </div>
@@ -254,7 +252,7 @@ export function AuthPage() {
             {mode === "register" ? (
               <div className="mt-6">
                 <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
-                  Account type
+                  Loại tài khoản
                 </p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {accountTypes.map((type) => {
@@ -300,10 +298,10 @@ export function AuthPage() {
             <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
               {mode === "register" ? (
                 <Input
-                  label="Full name"
+                  label="Họ và tên"
                   name="fullName"
                   onChange={handleInputChange}
-                  placeholder="Your full name"
+                  placeholder="Nhập họ và tên của bạn"
                   required
                   value={formState.fullName}
                 />
@@ -321,10 +319,10 @@ export function AuthPage() {
 
               {!isVerifyMode ? (
                 <Input
-                  label="Password"
+                  label="Mật khẩu"
                   name="password"
                   onChange={handleInputChange}
-                  placeholder="Password"
+                  placeholder="Mật khẩu"
                   required
                   type="password"
                   value={formState.password}
@@ -333,10 +331,10 @@ export function AuthPage() {
 
               {isVerifyMode ? (
                 <Input
-                  label="OTP code"
+                  label="Mã OTP"
                   name="otpCode"
                   onChange={handleInputChange}
-                  placeholder="6-digit code"
+                  placeholder="Mã 6 chữ số"
                   required
                   value={formState.otpCode}
                 />

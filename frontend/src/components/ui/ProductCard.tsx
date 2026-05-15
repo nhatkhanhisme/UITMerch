@@ -8,6 +8,8 @@ export interface ProductCardProps extends HTMLAttributes<HTMLElement> {
   description?: string;
   price?: number;
   detailPath?: string;
+  category?: string;
+  layout?: "vertical" | "horizontal";
 }
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
@@ -23,19 +25,29 @@ export function ProductCard({
   name,
   orgName,
   price,
+  category,
+  layout = "vertical",
   ...props
 }: ProductCardProps) {
+  const isHorizontal = layout === "horizontal";
+
   const content = (
     <article
       className={[
-        "group flex h-full flex-col overflow-hidden rounded-panel border border-white/40 bg-white/20 p-4",
+        "group flex h-full overflow-hidden rounded-panel border border-white/40 bg-white/20 p-4",
         "shadow-glass transition duration-300",
         "hover:-translate-y-1 hover:border-aqua hover:bg-white/30 hover:shadow-glass-inset",
+        isHorizontal ? "flex-row items-center gap-4" : "flex-col",
         className,
       ].join(" ")}
       {...props}
     >
-      <div className="relative aspect-square overflow-hidden rounded-[28px] border border-white/20 bg-white/5">
+      <div 
+        className={[
+          "relative overflow-hidden rounded-[28px] border border-white/20 bg-white/5 shrink-0",
+          isHorizontal ? "size-24 sm:size-28" : "aspect-square w-full"
+        ].join(" ")}
+      >
         {image ? (
           <img
             alt={name}
@@ -47,9 +59,14 @@ export function ProductCard({
             {name.charAt(0)}
           </div>
         )}
+        {category && !isHorizontal && (
+          <div className="absolute top-2 right-2 rounded-full bg-white/70 backdrop-blur-md px-2 py-0.5 border border-white/40 shadow-sm">
+            <span className="text-[10px] font-bold text-black-blue/80 uppercase tracking-wider">{category}</span>
+          </div>
+        )}
       </div>
 
-      <div className="mt-4 flex flex-1 flex-col gap-1">
+      <div className={`flex flex-1 flex-col gap-1 ${isHorizontal ? "justify-center" : "mt-4"}`}>
         <span className="font-sans text-xs font-medium text-ink/50 transition-colors group-hover:text-black-blue">
           {orgName}
         </span>

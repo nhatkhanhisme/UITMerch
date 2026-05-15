@@ -7,11 +7,15 @@ export interface FilterOption {
 }
 
 interface MerchToolbarProps {
-  query: string;
+  query?: string;
   activeFilter: string | null;
   filterOptions: FilterOption[];
-  onQueryChange: (value: string) => void;
+  onQueryChange?: (value: string) => void;
   onFilterChange: (value: string | null) => void;
+  // Optional category filter
+  activeCategory?: string | null;
+  categoryOptions?: FilterOption[];
+  onCategoryChange?: (value: string | null) => void;
 }
 
 // ─── Icons ─────────────────────────────────────────────────────────────────────
@@ -53,68 +57,157 @@ export function MerchToolbar({
   onFilterChange,
   onQueryChange,
   query,
+  activeCategory,
+  categoryOptions,
+  onCategoryChange,
 }: MerchToolbarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const activeLabel = filterOptions.find((o) => o.value === activeFilter)?.label ?? "Lọc";
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isCatOpen, setIsCatOpen] = useState(false);
+  
+  const activeSortLabel = filterOptions.find((o) => o.value === activeFilter)?.label ?? "Sắp xếp";
+  const activeCatLabel = categoryOptions?.find((o) => o.value === activeCategory)?.label ?? "Tất cả danh mục";
 
-  const handleOptionClick = (value: string) => {
+  const handleSortClick = (value: string) => {
     onFilterChange(activeFilter === value ? null : value);
-    setIsOpen(false);
+    setIsSortOpen(false);
+  };
+
+  const handleCatClick = (value: string) => {
+    onCategoryChange?.(activeCategory === value ? null : value);
+    setIsCatOpen(false);
   };
 
   return (
     <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-      {/* ── Search ── */}
-      <label
-        className={[
-          "flex flex-1 cursor-text items-center gap-3",
-          "rounded-full border border-white/60 bg-white/50 backdrop-blur-md",
-          "px-4 py-3 shadow-sm transition",
-          "focus-within:border-aqua focus-within:ring-2 focus-within:ring-aqua/25",
-        ].join(" ")}
-      >
-        <SearchIcon />
-        <input
-          className="flex-1 bg-transparent text-sm text-black-blue placeholder:text-ink/40 outline-none"
-          id="merch-search"
-          onChange={(e) => onQueryChange(e.target.value)}
-          placeholder="Tìm kiếm..."
-          type="search"
-          value={query}
-        />
-        {query.length > 0 && (
+      {/* ── Search — only shown if onQueryChange is provided ── */}
+      {onQueryChange && (
+        <label
+          className={[
+            "flex flex-1 cursor-text items-center gap-3",
+            "rounded-full border border-white/60 bg-white/50 backdrop-blur-md",
+            "px-4 py-3 shadow-sm transition",
+            "focus-within:border-aqua focus-within:ring-2 focus-within:ring-aqua/25",
+          ].join(" ")}
+        >
+          <SearchIcon />
+          <input
+            className="flex-1 bg-transparent text-sm text-black-blue placeholder:text-ink/40 outline-none"
+            id="merch-search"
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder="Tìm kiếm..."
+            type="text"
+            value={query ?? ""}
+          />
+          {(query?.length ?? 0) > 0 && (
+            <button
+              aria-label="Xóa tìm kiếm"
+              className="shrink-0 text-ink/30 transition hover:text-ink/70"
+              onClick={() => onQueryChange("")}
+              type="button"
+            >
+              ✕
+            </button>
+          )}
+        </label>
+      )}
+
+      {/* ── Category Dropdown ── */}
+      {categoryOptions && onCategoryChange && (
+        <div
+          className="group relative z-40"
+          onMouseEnter={() => setIsCatOpen(true)}
+          onMouseLeave={() => setIsCatOpen(false)}
+        >
           <button
-            aria-label="Xóa tìm kiếm"
-            className="shrink-0 text-ink/30 transition hover:text-ink/70"
-            onClick={() => onQueryChange("")}
+            aria-expanded={isCatOpen}
+            aria-haspopup="menu"
+            className={[
+              "flex items-center gap-2 rounded-full border px-5 py-3",
+              "text-sm font-semibold backdrop-blur-md transition whitespace-nowrap",
+              activeCategory
+                ? "border-aqua bg-aqua/20 text-black-blue shadow-inner"
+                : "border-white/60 bg-white/50 text-ink hover:bg-white/75",
+            ].join(" ")}
             type="button"
           >
-            ✕
+            <span>{activeCatLabel}</span>
+            <ChevronDownIcon />
           </button>
-        )}
-      </label>
 
-      {/* ── Filter Dropdown ── */}
+          <div className="absolute top-full right-0 h-2 w-full bg-transparent" />
+
+          {isCatOpen && (
+            <div
+              className={[
+                "absolute right-0 top-[calc(100%+8px)] min-w-[200px] max-h-[300px] overflow-y-auto",
+                "rounded-[20px] border border-white/60 bg-white/80 backdrop-blur-2xl",
+                "shadow-[0_8px_32px_rgba(82,128,145,0.15)]",
+                "animate-in fade-in slide-in-from-top-2 duration-200 scrollbar-hide"
+              ].join(" ")}
+              role="menu"
+            >
+              {/* Reset category option */}
+              <button
+                className={[
+                  "flex w-full items-center justify-between px-5 py-3",
+                  "font-sans text-sm transition",
+                  !activeCategory
+                    ? "bg-aqua/30 font-semibold text-black-blue"
+                    : "text-ink hover:bg-white/60",
+                ].join(" ")}
+                onClick={() => handleCatClick("")}
+                role="menuitem"
+                type="button"
+              >
+                <span>Tất cả danh mục</span>
+                {!activeCategory && <span aria-hidden="true" className="text-xs">✓</span>}
+              </button>
+
+              {categoryOptions.map((option) => (
+                <button
+                  className={[
+                    "flex w-full items-center justify-between px-5 py-3",
+                    "font-sans text-sm transition",
+                    option.value === activeCategory
+                      ? "bg-aqua/30 font-semibold text-black-blue"
+                      : "text-ink hover:bg-white/60",
+                  ].join(" ")}
+                  key={option.value}
+                  onClick={() => handleCatClick(option.value)}
+                  role="menuitem"
+                  type="button"
+                >
+                  <span>{option.label}</span>
+                  {option.value === activeCategory && (
+                    <span aria-hidden="true" className="text-xs">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Sort Dropdown ── */}
       <div
         className="group relative z-50"
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
+        onMouseEnter={() => setIsSortOpen(true)}
+        onMouseLeave={() => setIsSortOpen(false)}
       >
         <button
-          aria-expanded={isOpen}
+          aria-expanded={isSortOpen}
           aria-haspopup="menu"
           className={[
             "flex items-center gap-2 rounded-full border px-5 py-3",
-            "text-sm font-semibold backdrop-blur-md transition",
+            "text-sm font-semibold backdrop-blur-md transition whitespace-nowrap",
             activeFilter
               ? "border-aqua bg-aqua/20 text-black-blue shadow-inner"
               : "border-white/60 bg-white/50 text-ink hover:bg-white/75",
           ].join(" ")}
-          id="merch-filter-trigger"
-          onClick={() => setIsOpen((open) => !open)}
+          onClick={() => setIsSortOpen((open) => !open)}
           type="button"
         >
-          <span>{activeLabel}</span>
+          <span>{activeSortLabel}</span>
           <ChevronDownIcon />
         </button>
 
@@ -122,7 +215,7 @@ export function MerchToolbar({
         <div className="absolute top-full right-0 h-2 w-full bg-transparent" />
 
         {/* Dropdown panel */}
-        {isOpen && (
+        {isSortOpen && (
           <div
             className={[
               "absolute right-0 top-[calc(100%+8px)] min-w-[160px]",
@@ -143,7 +236,7 @@ export function MerchToolbar({
                 ].join(" ")}
                 id={`filter-option-${option.value}`}
                 key={option.value}
-                onClick={() => handleOptionClick(option.value)}
+                onClick={() => handleSortClick(option.value)}
                 role="menuitem"
                 type="button"
               >

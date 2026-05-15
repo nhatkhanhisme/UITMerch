@@ -15,6 +15,7 @@ export function OrgCard({ org }: OrgCardProps) {
       aria-label={`Xem chi tiết ${org.name}`}
       className="flex flex-col items-center gap-4 rounded-panel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-aqua"
       id={`org-${org.id}`}
+      state={{ org }}
       to={`/organization/${org.id}`}
     >
       {/* Liquid glass circle strictly aspect-square and rounded-full */}
@@ -41,7 +42,7 @@ export function OrgCard({ org }: OrgCardProps) {
 
       {/* Org name below */}
       <p className="text-center font-fredoka text-base font-bold leading-tight text-black-blue">
-        {org.shortName}
+        {org.name}
       </p>
     </Link>
   );

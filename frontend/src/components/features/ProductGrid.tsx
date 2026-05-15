@@ -44,6 +44,7 @@ export function ProductGrid({
           name={product.name}
           orgName={product.orgName}
           price={product.price}
+          category={product.category}
         />
       ))}
     </div>

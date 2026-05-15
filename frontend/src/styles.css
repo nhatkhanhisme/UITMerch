@@ -4,6 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 :root {
   background: #e7f5fa;
 }
@@ -16,11 +26,37 @@ body {
   font-family: "Noto Sans", "Inter", "Roboto", Arial, sans-serif;
   font-weight: 400;
   overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
 }
 
 #root {
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/*
+ * Hide the blinking text caret on all non-editable elements.
+ * Text selection and accessibility remain fully intact.
+ * Editable fields (input, textarea, contenteditable) restore their
+ * native caret via the rule below.
+ */
+*:not(input):not(textarea):not([contenteditable]):not([contenteditable="true"]) {
+  caret-color: transparent;
+}
+
+input,
+textarea,
+[contenteditable],
+[contenteditable="true"] {
+  caret-color: auto;
 }
 
 html.home-hide-native-scrollbar,

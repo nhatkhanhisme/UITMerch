@@ -35,9 +35,15 @@ export function FeaturedSlider({ items, autoPlayInterval = 4000 }: FeaturedSlide
         className="flex transition-transform duration-700 ease-in-out h-64 sm:h-80"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
-        {items.map((item) => (
-          <div key={item.id} className="w-full flex-shrink-0 flex items-center p-6 sm:p-10 gap-8">
-            <div className="w-1/3 sm:w-1/2 h-full flex justify-center items-center bg-transparent">
+        {items.map((item) => {
+          const ContentWrapper = item.link ? Link : 'div';
+          return (
+            <ContentWrapper
+              key={item.id}
+              to={item.link || '#'}
+              className="w-full flex-shrink-0 flex items-center p-6 sm:p-10 gap-8 hover:opacity-95 transition-opacity"
+            >
+              <div className="w-1/3 sm:w-1/2 h-full flex justify-center items-center bg-transparent">
               {item.image ? (
                 <img
                   src={item.image}
@@ -60,8 +66,9 @@ export function FeaturedSlider({ items, autoPlayInterval = 4000 }: FeaturedSlide
                 <p className="mb-4 line-clamp-3 font-sans text-sm font-normal text-black-blue/70 sm:text-base">{item.desc}</p>
               )}
             </div>
-          </div>
-        ))}
+            </ContentWrapper>
+          );
+        })}
       </div>
 
       <div className="absolute bottom-5 left-0 right-0 flex justify-center items-center gap-2.5">
