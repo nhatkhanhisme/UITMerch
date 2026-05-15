@@ -55,4 +55,11 @@ public interface MerchItemRepository extends JpaRepository<MerchItem, UUID> {
     @Modifying
     @Query("UPDATE MerchItem m SET m.status = com.uitmerch.backend.common.model.MerchItemStatus.ARCHIVED WHERE m.orgId = :orgId AND m.status = com.uitmerch.backend.common.model.MerchItemStatus.PUBLISHED")
     int archivePublishedByOrgId(@Param("orgId") UUID orgId);
+
+    /**
+     * Restores stock after an order is cancelled.
+     */
+    @Modifying
+    @Query("UPDATE MerchItem m SET m.stock = m.stock + :qty WHERE m.id = :id")
+    void restoreStock(@Param("id") UUID id, @Param("qty") int qty);
 }

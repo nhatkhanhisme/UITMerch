@@ -320,6 +320,39 @@ public class OrderService {
         order = orderRepository.save(order);
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+
+        if (newStatus == OrderStatus.CANCELLED) {
+            restoreStockForItems(items);
+        }
+
+        return OrderResponse.from(order, items);
+    }
+
+    // ------------------------------------------------------------------ //
+    //  CUSTOMER CANCELLATION
+    // ------------------------------------------------------------------ //
+
+    @Transactional
+    public OrderResponse cancelCustomerOrder(UUID userId, UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+
+        if (!userId.equals(order.getUserId())) {
+            throw new ResourceNotFoundException("Order", orderId.toString());
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new ValidationException(
+                "Only PENDING orders can be cancelled. Current status: " + order.getStatus()
+            );
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        order = orderRepository.save(order);
+
+        List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+        restoreStockForItems(items);
+
         return OrderResponse.from(order, items);
     }
 
@@ -349,6 +382,10 @@ public class OrderService {
      * CONFIRMED → READY_FOR_PICKUP, CONFIRMED → CANCELLED
      * READY_FOR_PICKUP → SUCCESS
      */
+    private void restoreStockForItems(List<OrderItem> items) {
+        items.forEach(item -> merchItemRepository.restoreStock(item.getMerchId(), item.getQuantity()));
+    }
+
     private void validateStatusTransition(OrderStatus current, OrderStatus next) {
         boolean valid = switch (current) {
             case PENDING -> next == OrderStatus.CONFIRMED || next == OrderStatus.CANCELLED;
