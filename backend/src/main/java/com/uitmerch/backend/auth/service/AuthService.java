@@ -1,6 +1,8 @@
 package com.uitmerch.backend.auth.service;
 
 import com.uitmerch.backend.auth.dto.*;
+import com.uitmerch.backend.auth.dto.ForgotPasswordRequest;
+import com.uitmerch.backend.auth.dto.ResetPasswordRequest;
 import com.uitmerch.backend.auth.entity.OtpToken;
 import com.uitmerch.backend.auth.entity.User;
 import com.uitmerch.backend.auth.repository.OtpTokenRepository;
@@ -239,6 +241,56 @@ public class AuthService {
         SecureRandom random = new SecureRandom();
         int code = 100_000 + random.nextInt(900_000);
         return String.valueOf(code);
+    }
+
+    @Transactional
+    public void forgotPassword(String email) {
+        // Use a generic response to avoid revealing whether an email is registered
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.isActive() && user.isVerified()) {
+                issueOtp(user);
+                log.info("Password-reset OTP issued for {}", email);
+            }
+        });
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        final InvalidOtpException genericError = new InvalidOtpException("Invalid email or OTP code");
+
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> genericError);
+
+        OtpToken otp = otpTokenRepository
+            .findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)
+            .orElseThrow(() -> genericError);
+
+        if (otp.getLockedUntil() != null && otp.getLockedUntil().isAfter(LocalDateTime.now())) {
+            long minutesLeft = ChronoUnit.MINUTES.between(LocalDateTime.now(), otp.getLockedUntil()) + 1;
+            throw new InvalidOtpException("Too many failed attempts. Please try again in " + minutesLeft + " minute(s).");
+        }
+
+        if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw genericError;
+        }
+
+        if (!otp.getOtpCode().equals(request.getOtpCode())) {
+            otp.setAttemptCount(otp.getAttemptCount() + 1);
+            if (otp.getAttemptCount() >= OTP_MAX_ATTEMPTS) {
+                otp.setLockedUntil(LocalDateTime.now().plusMinutes(OTP_LOCK_MINUTES));
+            }
+            otpTokenRepository.save(otp);
+            throw genericError;
+        }
+
+        validatePassword(request.getNewPassword());
+
+        otp.setUsed(true);
+        otpTokenRepository.save(otp);
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        log.info("Password reset successfully for {}", user.getEmail());
     }
 
     @Transactional

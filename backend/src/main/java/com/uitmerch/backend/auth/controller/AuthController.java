@@ -126,6 +126,36 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Tokens refreshed successfully.", response));
     }
 
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Request a password-reset OTP", description = "Sends a reset OTP to the email if the account exists and is active. Always returns 200 to prevent user enumeration.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "If the account exists, an OTP has been sent"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
+    })
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        if (!rateLimiterService.isAllowed("pwd-reset:" + ipUtil.extractClientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+            throw new ValidationException("Too many password-reset attempts. Please try again later.");
+        }
+        authService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("If the account exists, a reset code has been sent.", null));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Reset password using OTP")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password reset successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid or expired OTP, or weak password")
+    })
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request
+    ) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Password reset successfully. You can now log in.", null));
+    }
+
     @PostMapping("/logout")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Logout and invalidate the current JWT")
