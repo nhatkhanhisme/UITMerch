@@ -27,7 +27,7 @@ public class Organization {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "owner_id", unique = true, nullable = false, updatable = false)
+    @Column(name = "owner_id", nullable = false, updatable = false)
     private UUID ownerId;
 
     @Column(nullable = false)

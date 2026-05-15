@@ -162,12 +162,12 @@ class OrderServiceTest {
         Order order = orderWithStatus(from);
         Order updatedOrder = orderWithStatus(to);
 
-        when(organizationService.getOwnOrganizationEntity(userId)).thenReturn(org);
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(orderRepository.save(any())).thenReturn(updatedOrder);
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        OrderResponse response = orderService.updateOrderStatus(userId, orderId, to);
+        OrderResponse response = orderService.updateOrderStatus(userId, orgId, orderId, to);
 
         assertThat(response).isNotNull();
     }
@@ -191,10 +191,10 @@ class OrderServiceTest {
         Organization org = Organization.builder().id(orgId).ownerId(userId).build();
         Order order = orderWithStatus(from);
 
-        when(organizationService.getOwnOrganizationEntity(userId)).thenReturn(org);
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        assertThatThrownBy(() -> orderService.updateOrderStatus(userId, orderId, to))
+        assertThatThrownBy(() -> orderService.updateOrderStatus(userId, orgId, orderId, to))
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("Cannot transition");
     }
@@ -205,10 +205,10 @@ class OrderServiceTest {
         Organization org = Organization.builder().id(otherOrgId).ownerId(userId).build();
         Order order = orderWithStatus(OrderStatus.PENDING); // orgId != otherOrgId
 
-        when(organizationService.getOwnOrganizationEntity(userId)).thenReturn(org);
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        assertThatThrownBy(() -> orderService.updateOrderStatus(userId, orderId, OrderStatus.CONFIRMED))
+        assertThatThrownBy(() -> orderService.updateOrderStatus(userId, orgId, orderId, OrderStatus.CONFIRMED))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 

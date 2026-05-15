@@ -1,0 +1,1 @@
+ALTER TABLE organizations DROP CONSTRAINT organizations_owner_id_key;

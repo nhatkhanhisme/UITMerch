@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/organizations/merchs")
+@RequestMapping("/api/v1/organizations/{orgId}/merchs")
 @RequiredArgsConstructor
 @Tag(name = "Organizer", description = "Manage merch catalog for own organization")
 @SecurityRequirement(name = "bearerAuth")
@@ -45,10 +45,11 @@ public class MerchController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<MerchResponse>> createMerch(
+        @PathVariable UUID orgId,
         @Valid @RequestBody CreateMerchRequest request,
         @RequestAttribute("userId") String userId
     ) {
-        MerchResponse response = merchService.createMerch(UUID.fromString(userId), request);
+        MerchResponse response = merchService.createMerch(UUID.fromString(userId), orgId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success("Merch item created.", response));
     }
@@ -63,10 +64,11 @@ public class MerchController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<java.util.List<MerchResponse>>> getOwnMerch(
+        @PathVariable UUID orgId,
         @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @RequestAttribute("userId") String userId
     ) {
-        Page<MerchResponse> page = merchService.getOwnMerch(UUID.fromString(userId), pageable);
+        Page<MerchResponse> page = merchService.getOwnMerch(UUID.fromString(userId), orgId, pageable);
         return ResponseEntity.ok(ApiResponse.success("Merch items retrieved.", page.getContent(), PaginationMeta.from(page)));
     }
 
@@ -81,10 +83,11 @@ public class MerchController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<MerchResponse>> getOwnMerchItem(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @RequestAttribute("userId") String userId
     ) {
-        MerchResponse response = merchService.getOwnMerchItem(UUID.fromString(userId), id);
+        MerchResponse response = merchService.getOwnMerchItem(UUID.fromString(userId), orgId, id);
         return ResponseEntity.ok(ApiResponse.success("Merch item retrieved.", response));
     }
 
@@ -100,11 +103,12 @@ public class MerchController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<MerchResponse>> updateMerch(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @Valid @RequestBody UpdateMerchRequest request,
         @RequestAttribute("userId") String userId
     ) {
-        MerchResponse response = merchService.updateMerch(UUID.fromString(userId), id, request);
+        MerchResponse response = merchService.updateMerch(UUID.fromString(userId), orgId, id, request);
         return ResponseEntity.ok(ApiResponse.success("Merch item updated.", response));
     }
 
@@ -119,10 +123,11 @@ public class MerchController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<Void>> deleteMerch(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @RequestAttribute("userId") String userId
     ) {
-        merchService.deleteMerch(UUID.fromString(userId), id);
+        merchService.deleteMerch(UUID.fromString(userId), orgId, id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

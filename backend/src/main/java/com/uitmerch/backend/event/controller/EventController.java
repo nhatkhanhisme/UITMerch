@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/organizations/events")
+@RequestMapping("/api/v1/organizations/{orgId}/events")
 @RequiredArgsConstructor
 @Tag(name = "Organizer", description = "Manage own organization events")
 @SecurityRequirement(name = "bearerAuth")
@@ -47,10 +47,11 @@ public class EventController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<EventResponse>> createEvent(
+        @PathVariable UUID orgId,
         @Valid @RequestBody CreateEventRequest request,
         @RequestAttribute("userId") String userId
     ) {
-        EventResponse response = eventService.createEvent(UUID.fromString(userId), request);
+        EventResponse response = eventService.createEvent(UUID.fromString(userId), orgId, request);
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(ApiResponse.success("Event created.", response));
@@ -66,10 +67,11 @@ public class EventController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<List<EventResponse>>> getOwnEvents(
+        @PathVariable UUID orgId,
         @ParameterObject @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @RequestAttribute("userId") String userId
     ) {
-        Page<EventResponse> page = eventService.getOwnEvents(UUID.fromString(userId), pageable);
+        Page<EventResponse> page = eventService.getOwnEvents(UUID.fromString(userId), orgId, pageable);
         return ResponseEntity.ok(
             ApiResponse.success("Events retrieved.", page.getContent(), PaginationMeta.from(page))
         );
@@ -86,10 +88,11 @@ public class EventController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<EventResponse>> getOwnEvent(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @RequestAttribute("userId") String userId
     ) {
-        EventResponse response = eventService.getOwnEvent(UUID.fromString(userId), id);
+        EventResponse response = eventService.getOwnEvent(UUID.fromString(userId), orgId, id);
         return ResponseEntity.ok(ApiResponse.success("Event retrieved.", response));
     }
 
@@ -105,11 +108,12 @@ public class EventController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<EventResponse>> updateEvent(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @RequestBody UpdateEventRequest request,
         @RequestAttribute("userId") String userId
     ) {
-        EventResponse response = eventService.updateEvent(UUID.fromString(userId), id, request);
+        EventResponse response = eventService.updateEvent(UUID.fromString(userId), orgId, id, request);
         return ResponseEntity.ok(ApiResponse.success("Event updated.", response));
     }
 
@@ -126,11 +130,12 @@ public class EventController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<EventResponse>> attachMerch(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @Valid @RequestBody AttachMerchRequest request,
         @RequestAttribute("userId") String userId
     ) {
-        EventResponse response = eventService.attachMerch(UUID.fromString(userId), id, request.getMerchId());
+        EventResponse response = eventService.attachMerch(UUID.fromString(userId), orgId, id, request.getMerchId());
         return ResponseEntity.ok(ApiResponse.success("Merch attached to event.", response));
     }
 
@@ -145,11 +150,12 @@ public class EventController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<Void> detachMerch(
+        @PathVariable UUID orgId,
         @PathVariable UUID id,
         @PathVariable UUID merchId,
         @RequestAttribute("userId") String userId
     ) {
-        eventService.detachMerch(UUID.fromString(userId), id, merchId);
+        eventService.detachMerch(UUID.fromString(userId), orgId, id, merchId);
         return ResponseEntity.noContent().build();
     }
 }
