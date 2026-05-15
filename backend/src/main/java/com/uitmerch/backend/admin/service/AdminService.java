@@ -16,6 +16,7 @@ import com.uitmerch.backend.organization.dto.OrganizationResponse;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -79,6 +81,15 @@ public class AdminService {
             .orElseThrow(() -> new ResourceNotFoundException("Organization", orgId.toString()));
         org.setStatus(newStatus);
         Organization saved = organizationRepository.save(org);
+
+        // When an org loses ACTIVE status, its published merch must be taken off sale
+        if (newStatus != OrganizationStatus.ACTIVE) {
+            int archived = merchItemRepository.archivePublishedByOrgId(saved.getId());
+            if (archived > 0) {
+                log.info("Archived {} published merch items for suspended org {}", archived, saved.getId());
+            }
+        }
+
         long count = merchItemRepository.countByOrgIdAndStatus(saved.getId(), MerchItemStatus.PUBLISHED);
         return OrganizationResponse.from(saved, count);
     }
