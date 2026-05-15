@@ -366,6 +366,26 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
+    //  GUEST ORDER TRACKING
+    // ------------------------------------------------------------------ //
+
+    @Transactional(readOnly = true)
+    public OrderResponse getGuestOrderByEmail(UUID orderId, String guestEmail) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+
+        if (order.getUserId() != null
+                || order.getGuestEmail() == null
+                || !order.getGuestEmail().equalsIgnoreCase(guestEmail.trim())) {
+            // Respond with 404 to avoid confirming the order exists
+            throw new ResourceNotFoundException("Order", orderId.toString());
+        }
+
+        List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+        return OrderResponse.from(order, items);
+    }
+
+    // ------------------------------------------------------------------ //
     //  ADMIN
     // ------------------------------------------------------------------ //
 

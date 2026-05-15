@@ -52,4 +52,21 @@ public class PublicOrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success("Guest order placed successfully. " + orders.size() + " order(s) created.", orders));
     }
+
+    @GetMapping("/{orderId}")
+    @Operation(
+        summary = "Track a guest order",
+        description = "Returns order details for a guest order. Requires the guest email used at checkout for verification."
+    )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Order not found or email does not match")
+    })
+    public ResponseEntity<ApiResponse<OrderResponse>> trackGuestOrder(
+        @PathVariable UUID orderId,
+        @RequestParam String email
+    ) {
+        OrderResponse order = orderService.getGuestOrderByEmail(orderId, email);
+        return ResponseEntity.ok(ApiResponse.success("Order retrieved.", order));
+    }
 }
