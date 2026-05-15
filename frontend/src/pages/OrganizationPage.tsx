@@ -15,7 +15,7 @@ const ShaderBackground = lazy(() =>
   })),
 );
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 16;
 
 // Map UI filter values → Spring Pageable sort params
 const SORT_MAP: Record<string, string> = {
@@ -33,25 +33,23 @@ export function OrganizationPage() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  const [liveOrgs, setLiveOrgs] = useState<MockOrganization[]>([]);
-  const [totalItems, setTotalItems] = useState<number | null>(null);
-  const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
+  // allOrgs holds the FULL list (not just current page) — enables search-all
+  const [allOrgs, setAllOrgs] = useState<MockOrganization[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
+  // Fetch the full list for the active sort — cached per sort key
   useEffect(() => {
     let isActive = true;
     setIsLoading(true);
 
     const timer = window.setTimeout(() => {
-      async function fetchOrgs() {
-        const ck = cacheKey("orgs", { page, sort: activeFilter ? SORT_MAP[activeFilter] : undefined });
-        const cached = cacheGet<{ orgs: MockOrganization[]; total: number; pages: number }>(ck);
+      async function fetchAllOrgs() {
+        const ck = cacheKey("all_orgs", { sort: activeFilter ? SORT_MAP[activeFilter] : undefined });
+        const cached = cacheGet<MockOrganization[]>(ck);
         if (cached) {
           if (isActive) {
-            setLiveOrgs(cached.orgs);
-            setTotalItems(cached.total);
-            setServerTotalPages(cached.pages);
+            setAllOrgs(cached);
             setApiError(null);
             setIsLoading(false);
           }
@@ -60,21 +58,16 @@ export function OrganizationPage() {
 
         try {
           const res = await getPublicOrganizations({
-            page: page - 1,
-            size: PAGE_SIZE,
+            page: 0,
+            size: 200, // fetch entire dataset in one shot
             sort: activeFilter ? SORT_MAP[activeFilter] : undefined,
           });
 
           if (isActive && res?.data) {
             const mapped = res.data.map(mapOrgToMockOrganization);
-            const total = res.meta?.totalElements ?? mapped.length;
-            const pages = res.meta?.totalPages ?? Math.ceil(mapped.length / PAGE_SIZE);
-
-            setLiveOrgs(mapped);
-            setTotalItems(total);
-            setServerTotalPages(pages);
+            setAllOrgs(mapped);
             setApiError(null);
-            cacheSet(ck, { orgs: mapped, total, pages });
+            cacheSet(ck, mapped, 5 * 60 * 1000);
           }
         } catch {
           if (isActive) {
@@ -87,22 +80,27 @@ export function OrganizationPage() {
         }
       }
 
-      void fetchOrgs();
+      void fetchAllOrgs();
     }, 300);
 
     return () => {
       isActive = false;
       window.clearTimeout(timer);
     };
-  }, [page, activeFilter]);
+  }, [activeFilter]);
 
-  // Client-side filter by name
-  const displayedOrgs = query.trim()
-    ? liveOrgs.filter((o) => o.name.toLowerCase().includes(query.toLowerCase()))
-    : liveOrgs;
+  // Reset to page 1 when query or sort changes
+  useEffect(() => { setPage(1); }, [query, activeFilter]);
 
-  const pagesDisplay = serverTotalPages ?? (Math.ceil(liveOrgs.length / PAGE_SIZE) || 1);
-  const countDisplay = query.trim() ? displayedOrgs.length : (totalItems ?? liveOrgs.length);
+  // Search across ALL orgs (entire dataset, not just current page)
+  const filteredOrgs = query.trim()
+    ? allOrgs.filter((o) => o.name.toLowerCase().includes(query.toLowerCase()))
+    : allOrgs;
+
+  // Client-side pagination over the filtered result
+  const totalPages = Math.ceil(filteredOrgs.length / PAGE_SIZE) || 1;
+  const pageOrgs = filteredOrgs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const countDisplay = filteredOrgs.length;
 
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
@@ -124,7 +122,7 @@ export function OrganizationPage() {
               ) : apiError ? (
                 <span className="text-red-500">{apiError}</span>
               ) : (
-              <span>
+                <span>
                   {countDisplay} tổ chức
                   {query ? ` phù hợp với "${query}"` : ""}
                 </span>
@@ -135,7 +133,7 @@ export function OrganizationPage() {
           <MerchToolbar
             activeFilter={activeFilter}
             filterOptions={FILTER_OPTIONS}
-            onFilterChange={(v) => { setActiveFilter(v); setPage(1); }}
+            onFilterChange={(v) => { setActiveFilter(v); }}
             onQueryChange={(v) => { setQuery(v); }}
             query={query}
           />
@@ -145,9 +143,9 @@ export function OrganizationPage() {
               <div className="flex flex-col items-center justify-center py-24 text-red-400">
                 <p className="font-sans text-base">{apiError}</p>
               </div>
-            ) : displayedOrgs.length > 0 ? (
+            ) : pageOrgs.length > 0 ? (
               <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-10 md:grid-cols-4">
-                {displayedOrgs.map((org) => (
+                {pageOrgs.map((org) => (
                   <OrgCard key={org.id} org={org} />
                 ))}
               </div>
@@ -175,7 +173,7 @@ export function OrganizationPage() {
           <Pagination
             currentPage={page}
             onPageChange={setPage}
-            totalPages={pagesDisplay}
+            totalPages={totalPages}
           />
         </GlassContainer>
       </div>

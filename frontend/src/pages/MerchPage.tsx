@@ -18,7 +18,7 @@ const ShaderBackground = lazy(() =>
   })),
 );
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 16;
 
 // Map UI filter labels → Spring Pageable sort param format
 const SORT_MAP: Record<string, string> = {

@@ -16,7 +16,7 @@ const ShaderBackground = lazy(() =>
   })),
 );
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 16;
 
 // "newest" → default sort by createdAt,desc (no param needed)
 // "upcoming" → status filter, NOT a sort param
@@ -89,9 +89,8 @@ export function EventPage() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  const [liveEvents, setLiveEvents] = useState<UIEventItem[]>([]);
-  const [totalItems, setTotalItems] = useState<number | null>(null);
-  const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
+  // allEvents holds the FULL list — enables search-all
+  const [allEvents, setAllEvents] = useState<UIEventItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -100,14 +99,12 @@ export function EventPage() {
     setIsLoading(true);
 
     const timer = window.setTimeout(() => {
-      async function fetchEvents() {
-        const ck = cacheKey("events", { page, filter: activeFilter ?? "newest" });
-        const cachedEvents = cacheGet<{ events: UIEventItem[]; total: number; pages: number }>(ck);
-        if (cachedEvents) {
+      async function fetchAllEvents() {
+        const ck = cacheKey("all_events", { filter: activeFilter ?? "newest" });
+        const cached = cacheGet<UIEventItem[]>(ck);
+        if (cached) {
           if (isActive) {
-            setLiveEvents(cachedEvents.events);
-            setTotalItems(cachedEvents.total);
-            setServerTotalPages(cachedEvents.pages);
+            setAllEvents(cached);
             setApiError(null);
             setIsLoading(false);
           }
@@ -128,8 +125,8 @@ export function EventPage() {
 
           const isStatusFilter = activeFilter === "upcoming";
           const res = await getPublicEvents({
-            page: page - 1,
-            size: PAGE_SIZE,
+            page: 0,
+            size: 200, // fetch entire dataset in one shot
             sort: (!activeFilter || activeFilter === "newest") ? "createdAt,desc" : undefined,
             status: isStatusFilter ? "UPCOMING" : undefined,
           });
@@ -148,15 +145,9 @@ export function EventPage() {
               startDate: ev.startsAt,
               status: ev.status || "UPCOMING",
             }));
-
-            const total = res.meta?.totalElements ?? mapped.length;
-            const pages = res.meta?.totalPages ?? Math.ceil(mapped.length / PAGE_SIZE);
-
-            setLiveEvents(mapped);
-            setTotalItems(total);
-            setServerTotalPages(pages);
+            setAllEvents(mapped);
             setApiError(null);
-            cacheSet(ck, { events: mapped, total, pages });
+            cacheSet(ck, mapped, 5 * 60 * 1000);
           }
         } catch {
           if (isActive) {
@@ -169,22 +160,27 @@ export function EventPage() {
         }
       }
 
-      void fetchEvents();
+      void fetchAllEvents();
     }, 300);
 
     return () => {
       isActive = false;
       window.clearTimeout(timer);
     };
-  }, [page, activeFilter]);
+  }, [activeFilter]);
 
-  // Client-side filter by name — no API call on each keystroke
-  const displayedEvents = query.trim()
-    ? liveEvents.filter((ev) => ev.name.toLowerCase().includes(query.toLowerCase()))
-    : liveEvents;
+  // Reset to page 1 when query or filter changes
+  useEffect(() => { setPage(1); }, [query, activeFilter]);
 
-  const pagesDisplay = serverTotalPages ?? (Math.ceil(liveEvents.length / PAGE_SIZE) || 1);
-  const countDisplay = query.trim() ? displayedEvents.length : (totalItems ?? liveEvents.length);
+  // Search across ALL events (entire dataset)
+  const filteredEvents = query.trim()
+    ? allEvents.filter((ev) => ev.name.toLowerCase().includes(query.toLowerCase()))
+    : allEvents;
+
+  // Client-side pagination
+  const totalPages = Math.ceil(filteredEvents.length / PAGE_SIZE) || 1;
+  const pageEvents = filteredEvents.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const countDisplay = filteredEvents.length;
 
   return (
     <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
@@ -217,7 +213,7 @@ export function EventPage() {
           <MerchToolbar
             activeFilter={activeFilter}
             filterOptions={FILTER_OPTIONS}
-            onFilterChange={(v) => { setActiveFilter(v); setPage(1); }}
+            onFilterChange={(v) => { setActiveFilter(v); }}
             onQueryChange={(v) => { setQuery(v); }}
             query={query}
           />
@@ -227,9 +223,9 @@ export function EventPage() {
               <div className="flex flex-col items-center justify-center py-24 text-red-400">
                 <p className="font-sans text-base">{apiError}</p>
               </div>
-            ) : displayedEvents.length > 0 ? (
+            ) : pageEvents.length > 0 ? (
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {displayedEvents.map((ev) => (
+                {pageEvents.map((ev) => (
                   <Link
                     to={`/event/${ev.id}`}
                     className="group flex flex-col overflow-hidden rounded-[32px] border border-white/60 bg-white/40 shadow-glass backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-aqua hover:shadow-glass-inset focus-visible:outline-aqua focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
@@ -283,7 +279,7 @@ export function EventPage() {
           <Pagination
             currentPage={page}
             onPageChange={setPage}
-            totalPages={pagesDisplay}
+            totalPages={totalPages}
           />
         </GlassContainer>
       </div>
