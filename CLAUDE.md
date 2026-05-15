@@ -55,15 +55,19 @@ Each follows: `entity/ → repository/ → dto/ → service/ → controller/`
 Both swap automatically via `@Profile`:
 
 - **`StorageService`** — `DevStorageService` (dev/docker, no-op) vs `SupabaseStorageServiceImpl` (production S3-compatible). Never store images as Base64/BLOB in the DB.
-- **`EmailService`** — `DevEmailService` (dev/docker, no-op) vs `JavaMailEmailService` (production SMTP).
+- **`EmailService`** — `DevEmailService` (dev/docker, logs OTP to console) vs `JavaMailEmailService` (production SMTP, all methods `@Async`). Three methods: `sendOtp`, `sendPasswordReset`, `sendOrderStatusUpdate`.
 
 ### Security
 
 `JwtAuthenticationFilter` validates the `Authorization: Bearer <token>` header on every request, sets Spring Security context, and stores `userId`, `email`, `role` as request attributes — controllers read these via `@RequestAttribute`.
 
-`TokenBlacklistService` is an in-memory blacklist (ConcurrentHashMap) for logout. It is not cluster-safe — replace with Redis for multi-instance deployments.
+`TokenBlacklistService` persists blacklisted tokens to the `invalidated_tokens` PostgreSQL table (SHA-256 hash) so logout state survives server restarts. An in-memory cache provides O(1) lookup on every request; the cache is pre-populated from DB at startup via `@PostConstruct`.
 
-URL-level rules in `SecurityConfig`: `/api/v1/auth/**`, `/api/v1/public/**`, `/api/v1/categories/**` are open; everything else requires authentication. Role enforcement is done with `@PreAuthorize` at method level.
+JWT tokens carry a `type` claim (`"access"` or `"refresh"`). `JwtTokenProvider.validateAsRefreshToken()` checks both signature and type — always use it when accepting a refresh token. The JWT secret is validated at startup (`@PostConstruct`) and must be ≥ 32 characters.
+
+URL-level rules in `SecurityConfig`: `/api/v1/auth/**`, `/api/v1/public/**`, `/api/v1/categories/**` are open; `/api/v1/dev/**` is open only when the `dev` or `docker` profile is active; Swagger paths are open only when `SWAGGER_ENABLED=true`. Everything else requires authentication. Role enforcement is done with `@PreAuthorize` at method level.
+
+`RateLimiterService` provides per-IP sliding-window rate limiting (no external dependencies). `IpUtil` extracts the real client IP and only trusts `X-Forwarded-For` when the connecting IP is in `APP_TRUSTED_PROXY_IPS`.
 
 ## Frontend architecture
 
