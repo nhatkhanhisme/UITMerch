@@ -121,7 +121,7 @@ public class EventController {
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Attach a merch item to an event")
     @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Merch attached to event"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Merch attached to event"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — ORGANIZER role required or resource belongs to another organization"),
@@ -136,7 +136,7 @@ public class EventController {
         @RequestAttribute("userId") String userId
     ) {
         EventResponse response = eventService.attachMerch(UUID.fromString(userId), orgId, id, request.getMerchId());
-        return ResponseEntity.ok(ApiResponse.success("Merch attached to event.", response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Merch attached to event.", response));
     }
 
     @DeleteMapping("/{id}/merch/{merchId}")
