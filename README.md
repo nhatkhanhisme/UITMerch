@@ -12,9 +12,31 @@
 
 </div>
 
+---
+
+## ⚠️ DISCLAIMER
+
+> **This project is developed strictly for academic study and research purposes.**
+
+All data, content, merchandise information, pricing, images, organization names, event details, and any other information displayed or used within this project — including data stored in databases, seed files, and API responses — are **fictional, illustrative, or sourced solely for educational demonstration**.
+
+**The following restrictions apply without exception:**
+
+- This project is **NOT** intended for commercial use, resale, market deployment, or any form of real-world transaction.
+- No actual products are being sold, advertised, or offered for purchase through this platform.
+- No real financial transactions are processed. Any payment flows present are mock/simulated implementations for learning purposes only.
+- Organization names, logos, and institutional references (e.g., University of Information Technology — UIT) are used **solely to provide realistic academic context** and do not represent official endorsement, affiliation, or authorization by those institutions.
+- Any resemblance to real products, pricing, or commercial offerings is coincidental and unintentional.
+
+**Authorized use:** This codebase may be reviewed, studied, forked, and modified for non-commercial educational purposes only, in accordance with the repository license.
+
+If you have concerns about specific content or data used in this project, please contact the project team via the repository's issue tracker.
+
+---
+
 ## Overview
 
-UITMerch is a modular monolith MVP for selling university merchandise and managing events.
+UITMerch is a website that provides information about merchandise at UIT, allowing students to explore and discover their favorite and meaningful merchandise that has existed throughout UIT’s history.
 
 ## Audience
 
