@@ -138,7 +138,7 @@ public class AuthService {
 
     public AuthResponse refreshToken(String refreshToken) {
         if (refreshToken == null
-                || !jwtTokenProvider.validateToken(refreshToken)
+                || !jwtTokenProvider.validateAsRefreshToken(refreshToken)
                 || tokenBlacklistService.isBlacklisted(refreshToken)) {
             throw new AuthenticationException("Invalid or expired refresh token");
         }

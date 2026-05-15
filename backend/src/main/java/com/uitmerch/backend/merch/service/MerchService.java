@@ -68,6 +68,7 @@ public class MerchService {
         return MerchResponse.from(saved, category, images);
     }
 
+    @Transactional(readOnly = true)
     public Page<MerchResponse> getOwnMerch(UUID ownerId, UUID orgId, Pageable pageable) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         Map<UUID, Category> categoryMap = buildCategoryMap();
@@ -76,6 +77,7 @@ public class MerchService {
         return page.map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId()), imageMap.get(item.getId())));
     }
 
+    @Transactional(readOnly = true)
     public MerchResponse getOwnMerchItem(UUID ownerId, UUID orgId, UUID merchId) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         MerchItem item = findOwnItemOrThrow(org.getId(), merchId);
@@ -142,6 +144,7 @@ public class MerchService {
     //  PUBLIC
     // ------------------------------------------------------------------ //
 
+    @Transactional(readOnly = true)
     public Page<MerchResponse> listPublished(String keyword, String categorySlug, Pageable pageable) {
         Map<UUID, Category> categoryMap = buildCategoryMap();
         Page<MerchItem> page;
@@ -164,6 +167,7 @@ public class MerchService {
         return page.map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId()), imageMap.get(item.getId())));
     }
 
+    @Transactional(readOnly = true)
     public MerchResponse getPublishedMerch(UUID merchId) {
         MerchItem item = merchItemRepository.findById(merchId)
             .filter(m -> m.getStatus() == MerchItemStatus.PUBLISHED)
@@ -173,6 +177,7 @@ public class MerchService {
         return MerchResponse.from(item, category, images);
     }
 
+    @Transactional(readOnly = true)
     public List<MerchResponse> getPopularMerch() {
         List<MerchItem> published = merchItemRepository.findAllByStatus(MerchItemStatus.PUBLISHED);
         if (published.isEmpty()) return List.of();
@@ -194,6 +199,7 @@ public class MerchService {
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public Page<MerchResponse> listByOrganization(UUID orgId, Pageable pageable) {
         Map<UUID, Category> categoryMap = buildCategoryMap();
         Page<MerchItem> page = merchItemRepository.findByOrgIdAndStatus(orgId, MerchItemStatus.PUBLISHED, pageable);
@@ -205,21 +211,11 @@ public class MerchService {
     //  PACKAGE-INTERNAL
     // ------------------------------------------------------------------ //
 
+    @Transactional(readOnly = true)
     public MerchItem getMerchEntityForOrder(UUID merchId) {
         return merchItemRepository.findById(merchId)
             .filter(m -> m.getStatus() == MerchItemStatus.PUBLISHED)
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
-    }
-
-    @Transactional
-    public void deductStock(UUID merchId, int quantity) {
-        MerchItem item = merchItemRepository.findById(merchId)
-            .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
-        if (item.getStock() < quantity) {
-            throw new ValidationException("Insufficient stock for: " + item.getName());
-        }
-        item.setStock(item.getStock() - quantity);
-        merchItemRepository.save(item);
     }
 
     // ------------------------------------------------------------------ //
