@@ -77,7 +77,7 @@ export function MerchPage() {
               name: item.name,
               orgName: orgMap[item.orgId] || "Tổ chức UIT",
               desc: item.description,
-              image: item.imageUrl || null,
+              image: item.images?.[0] || null,
               link: `/merch/${item.id}`,
             }))
           );

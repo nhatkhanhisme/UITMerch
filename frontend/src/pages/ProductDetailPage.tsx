@@ -55,21 +55,60 @@ function ProductNotFound() {
 }
 
 function Gallery({
-  image,
+  images,
   name,
 }: {
-  image: string;
+  images: string[];
   name: string;
 }) {
+  const [selected, setSelected] = useState(0);
+  const safeImages = images.length > 0 ? images : ["https://placehold.co/900x900/e9feff/1a3a4a?font=montserrat&text=MERCH"];
+  const activeImage = safeImages[Math.min(selected, safeImages.length - 1)];
+
   return (
-    <div className="relative overflow-hidden rounded-[32px] bg-white/25 p-4 shadow-glass-inset">
-      <div className="aspect-square overflow-hidden rounded-[32px] bg-white/40">
-        <img
-          alt={name}
-          className="size-full object-cover mix-blend-multiply"
-          src={image}
-        />
+    <div className="flex flex-col gap-4">
+      {/* Main image */}
+      <div className="relative overflow-hidden rounded-[32px] bg-white/25 p-4 shadow-glass-inset">
+        <div className="aspect-square overflow-hidden rounded-[32px] bg-white/40">
+          <img
+            alt={name}
+            className="size-full object-cover mix-blend-multiply transition duration-300"
+            key={activeImage}
+            src={activeImage}
+          />
+        </div>
+        {safeImages.length > 1 && (
+          <div className="absolute bottom-6 right-6 rounded-full border border-white/50 bg-white/60 px-3 py-1 text-xs font-semibold text-black-blue/60 backdrop-blur-sm shadow-sm">
+            {selected + 1} / {safeImages.length}
+          </div>
+        )}
       </div>
+
+      {/* Thumbnail strip — only rendered when there are multiple images */}
+      {safeImages.length > 1 && (
+        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          {safeImages.map((img, idx) => (
+            <button
+              key={idx}
+              aria-label={`Ảnh ${idx + 1}`}
+              className={[
+                "h-20 w-20 flex-none overflow-hidden rounded-[18px] border-2 bg-white/30 transition duration-200",
+                idx === selected
+                  ? "border-aqua shadow-[0_0_0_2px_rgba(146,251,255,0.4)]"
+                  : "border-white/40 opacity-60 hover:opacity-100 hover:border-white/80",
+              ].join(" ")}
+              onClick={() => setSelected(idx)}
+              type="button"
+            >
+              <img
+                alt={`${name} - ${idx + 1}`}
+                className="size-full object-cover mix-blend-multiply"
+                src={img}
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -450,7 +489,7 @@ export function ProductDetailPage() {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_430px] xl:grid-cols-[minmax(0,1fr)_480px]">
             <section className="overflow-hidden rounded-panel border border-white/50 bg-white/30 p-4 shadow-glass backdrop-blur-xl sm:p-5">
               <Gallery
-                image={product.image}
+                images={product.gallery}
                 name={product.name}
               />
 

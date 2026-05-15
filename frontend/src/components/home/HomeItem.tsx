@@ -53,7 +53,7 @@ export function HomeItem() {
                   item.description ||
                   `Vật phẩm chính thức từ ${orgName}. Thiết kế độc đáo mang đậm phong cách sinh viên trường Đại học Công nghệ Thông tin.`,
                 image:
-                  item.imageUrl ||
+                  item.images?.[0] ||
                   "https://placehold.co/900x900/e9feff/1a3a4a?font=montserrat&text=MERCH",
                 subtitle:
                   item.price !== undefined && item.price > 0

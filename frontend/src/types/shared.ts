@@ -91,7 +91,7 @@ export type MerchResponse = {
   description?: string;
   price?: number;
   stock: number;
-  imageUrl?: string;
+  images?: string[];
   status: string;
   categoryId?: string;
   categorySlug?: string;
@@ -178,10 +178,20 @@ export function mapMerchToMockProduct(
 ): MockProduct {
   const existingMock = findProductById(item.id);
 
-  const fallbackImage =
-    item.imageUrl ||
-    existingMock?.image ||
-    "https://placehold.co/900x900/e9feff/1a3a4a?font=montserrat&text=MERCH";
+  const PLACEHOLDER = "https://placehold.co/900x900/e9feff/1a3a4a?font=montserrat&text=MERCH";
+
+  // Use the new images[] array from backend
+  const backendImages = item.images?.filter(Boolean) ?? [];
+  const primaryImage = backendImages[0] || existingMock?.image || PLACEHOLDER;
+
+  // Build gallery: prefer full backend images, fall back to mock gallery, then single placeholder
+  const gallery =
+    backendImages.length > 0
+      ? backendImages
+      : existingMock?.gallery?.length
+        ? existingMock.gallery
+        : [primaryImage];
+
   const fallbackOrgName =
     orgMap?.[item.orgId] || existingMock?.orgName || "UIT Organization";
 
@@ -191,16 +201,14 @@ export function mapMerchToMockProduct(
     orgName: fallbackOrgName,
     category: item.categoryName || existingMock?.category || "Vật phẩm",
     price: item.price ?? existingMock?.price ?? 0,
-    image: fallbackImage,
-    gallery: existingMock?.gallery?.length
-      ? existingMock.gallery
-      : [fallbackImage],
+    image: primaryImage,
+    gallery,
     description:
       item.description || existingMock?.description || "Chưa có mô tả chi tiết.",
     featured: existingMock?.featured ?? false,
     colors: existingMock?.colors?.length
       ? existingMock.colors
-      : [{ name: "Mặc định", value: "#92FBFF", image: fallbackImage }],
+      : [{ name: "Mặc định", value: "#92FBFF", image: primaryImage }],
     sizeLabel: existingMock?.sizeLabel || "Phân loại",
     sizeOptions: existingMock?.sizeOptions?.length
       ? existingMock.sizeOptions
