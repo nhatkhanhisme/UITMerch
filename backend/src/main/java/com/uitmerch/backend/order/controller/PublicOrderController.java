@@ -3,6 +3,7 @@ package com.uitmerch.backend.order.controller;
 import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.ApiResponse;
 import com.uitmerch.backend.common.service.RateLimiterService;
+import com.uitmerch.backend.common.util.IpUtil;
 import com.uitmerch.backend.order.dto.GuestOrderRequest;
 import com.uitmerch.backend.order.dto.OrderResponse;
 import com.uitmerch.backend.order.service.OrderService;
@@ -27,16 +28,10 @@ public class PublicOrderController {
 
     private final OrderService orderService;
     private final RateLimiterService rateLimiterService;
+    private final IpUtil ipUtil;
 
     private static final int GUEST_ORDER_MAX  = 20;
     private static final Duration GUEST_ORDER_WINDOW = Duration.ofHours(1);
-
-    private static String clientIp(HttpServletRequest req) {
-        String forwarded = req.getHeader("X-Forwarded-For");
-        return (forwarded != null && !forwarded.isBlank())
-            ? forwarded.split(",")[0].trim()
-            : req.getRemoteAddr();
-    }
 
     @PostMapping
     @Operation(summary = "Guest checkout", description = "Places orders as a guest without requiring an account. Items are grouped by organization.")
@@ -50,7 +45,7 @@ public class PublicOrderController {
         @Valid @RequestBody GuestOrderRequest request,
         HttpServletRequest httpRequest
     ) {
-        if (!rateLimiterService.isAllowed("guest-order:" + clientIp(httpRequest), GUEST_ORDER_MAX, GUEST_ORDER_WINDOW)) {
+        if (!rateLimiterService.isAllowed("guest-order:" + ipUtil.extractClientIp(httpRequest), GUEST_ORDER_MAX, GUEST_ORDER_WINDOW)) {
             throw new ValidationException("Too many orders from this IP. Please try again later.");
         }
         List<OrderResponse> orders = orderService.createGuestOrder(request);

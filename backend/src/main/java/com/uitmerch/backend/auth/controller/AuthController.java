@@ -5,6 +5,7 @@ import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.ApiResponse;
 import com.uitmerch.backend.auth.service.AuthService;
 import com.uitmerch.backend.common.service.RateLimiterService;
+import com.uitmerch.backend.common.util.IpUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -26,18 +27,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final RateLimiterService rateLimiterService;
+    private final IpUtil ipUtil;
 
     private static final int LOGIN_MAX_ATTEMPTS    = 10;
     private static final Duration LOGIN_WINDOW     = Duration.ofMinutes(15);
     private static final int REGISTER_MAX_ATTEMPTS = 5;
     private static final Duration REGISTER_WINDOW  = Duration.ofHours(1);
-
-    private static String clientIp(HttpServletRequest req) {
-        String forwarded = req.getHeader("X-Forwarded-For");
-        return (forwarded != null && !forwarded.isBlank())
-            ? forwarded.split(",")[0].trim()
-            : req.getRemoteAddr();
-    }
 
     @PostMapping("/register")
     @Operation(summary = "Register customer account")
@@ -51,7 +46,7 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest request,
             HttpServletRequest httpRequest
     ) {
-        if (!rateLimiterService.isAllowed("register:" + clientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+        if (!rateLimiterService.isAllowed("register:" + ipUtil.extractClientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
             throw new ValidationException("Too many registration attempts. Please try again later.");
         }
         authService.register(request);
@@ -72,7 +67,7 @@ public class AuthController {
             @Valid @RequestBody RegisterOrganizerRequest request,
             HttpServletRequest httpRequest
     ) {
-        if (!rateLimiterService.isAllowed("register:" + clientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+        if (!rateLimiterService.isAllowed("register:" + ipUtil.extractClientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
             throw new ValidationException("Too many registration attempts. Please try again later.");
         }
         authService.registerOrganizer(request);
@@ -109,7 +104,7 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest
     ) {
-        if (!rateLimiterService.isAllowed("login:" + clientIp(httpRequest), LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW)) {
+        if (!rateLimiterService.isAllowed("login:" + ipUtil.extractClientIp(httpRequest), LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW)) {
             throw new ValidationException("Too many login attempts. Please try again in 15 minutes.");
         }
         AuthResponse response = authService.login(request);
