@@ -1,7 +1,9 @@
 package com.uitmerch.backend.auth.service;
 
 import com.uitmerch.backend.auth.dto.LoginRequest;
+import com.uitmerch.backend.auth.dto.ForgotPasswordRequest;
 import com.uitmerch.backend.auth.dto.RegisterRequest;
+import com.uitmerch.backend.auth.dto.ResetPasswordRequest;
 import com.uitmerch.backend.auth.dto.VerifyEmailRequest;
 import com.uitmerch.backend.auth.entity.OtpToken;
 import com.uitmerch.backend.auth.entity.User;
@@ -27,6 +29,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import java.time.Instant;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,6 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -341,5 +346,239 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.login(req))
             .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    void login_inactiveUser_throwsAuthentication() {
+        User user = User.builder()
+            .email("user@uit.edu.vn")
+            .passwordHash("hashed")
+            .isVerified(true)
+            .isActive(false)
+            .build();
+
+        when(userRepository.findByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
+
+        LoginRequest req = new LoginRequest();
+        req.setEmail("user@uit.edu.vn");
+        req.setPassword("Password1");
+
+        assertThatThrownBy(() -> authService.login(req))
+            .isInstanceOf(AuthenticationException.class)
+            .hasMessageContaining("deactivated");
+    }
+
+    // ── refreshToken ────────────────────────────────────────────────────────
+
+    @Test
+    void refreshToken_validRefreshToken_returnsNewTokens() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+            .id(userId).email("user@uit.edu.vn")
+            .passwordHash("h").fullName("U").role(UserRole.CUSTOMER)
+            .isVerified(true).isActive(true).build();
+
+        when(jwtTokenProvider.validateAsRefreshToken("refresh.token")).thenReturn(true);
+        when(tokenBlacklistService.isBlacklisted("refresh.token")).thenReturn(false);
+        when(jwtTokenProvider.getUserIdFromToken("refresh.token")).thenReturn(userId.toString());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(jwtTokenProvider.getExpiryFromToken("refresh.token")).thenReturn(Instant.now().plusSeconds(60));
+        when(jwtTokenProvider.generateAccessToken(any(), any(), any())).thenReturn("new.access");
+        when(jwtTokenProvider.generateRefreshToken(any())).thenReturn("new.refresh");
+
+        var response = authService.refreshToken("refresh.token");
+
+        assertThat(response.getToken()).isEqualTo("new.access");
+        assertThat(response.getRefreshToken()).isEqualTo("new.refresh");
+        verify(tokenBlacklistService).add(eq("refresh.token"), any());
+    }
+
+    @Test
+    void refreshToken_accessTokenPassedAsRefresh_throws() {
+        when(jwtTokenProvider.validateAsRefreshToken("access.token")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.refreshToken("access.token"))
+            .isInstanceOf(AuthenticationException.class);
+        verify(userRepository, never()).findById(any());
+    }
+
+    @Test
+    void refreshToken_blacklistedToken_throws() {
+        when(jwtTokenProvider.validateAsRefreshToken("old.refresh")).thenReturn(true);
+        when(tokenBlacklistService.isBlacklisted("old.refresh")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.refreshToken("old.refresh"))
+            .isInstanceOf(AuthenticationException.class);
+    }
+
+    @Test
+    void refreshToken_nullToken_throws() {
+        assertThatThrownBy(() -> authService.refreshToken(null))
+            .isInstanceOf(AuthenticationException.class);
+    }
+
+    // ── logout ──────────────────────────────────────────────────────────────
+
+    @Test
+    void logout_validToken_blacklistsIt() {
+        when(jwtTokenProvider.validateToken("valid.token")).thenReturn(true);
+        when(jwtTokenProvider.getExpiryFromToken("valid.token")).thenReturn(Instant.now().plusSeconds(3600));
+
+        authService.logout("valid.token");
+
+        verify(tokenBlacklistService).add(eq("valid.token"), any());
+    }
+
+    @Test
+    void logout_invalidToken_doesNotBlacklist() {
+        when(jwtTokenProvider.validateToken("bad.token")).thenReturn(false);
+
+        authService.logout("bad.token");
+
+        verify(tokenBlacklistService, never()).add(any(), any());
+    }
+
+    @Test
+    void logout_nullToken_doesNothing() {
+        authService.logout(null);
+        verifyNoInteractions(tokenBlacklistService);
+    }
+
+    // ── forgotPassword ──────────────────────────────────────────────────────
+
+    @Test
+    void forgotPassword_verifiedActiveUser_issuesOtp() {
+        User user = User.builder()
+            .id(UUID.randomUUID()).email("user@uit.edu.vn")
+            .passwordHash("h").fullName("U").role(UserRole.CUSTOMER)
+            .isVerified(true).isActive(true).build();
+
+        when(userRepository.findByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        authService.forgotPassword("user@uit.edu.vn");
+
+        verify(emailService).sendPasswordReset(eq("user@uit.edu.vn"), any());
+    }
+
+    @Test
+    void forgotPassword_unknownEmail_silentNoOp() {
+        when(userRepository.findByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
+
+        assertThatNoException().isThrownBy(() -> authService.forgotPassword("ghost@uit.edu.vn"));
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    void forgotPassword_unverifiedUser_silentNoOp() {
+        User user = User.builder()
+            .id(UUID.randomUUID()).email("u@uit.edu.vn")
+            .isVerified(false).isActive(true).build();
+
+        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+
+        authService.forgotPassword("u@uit.edu.vn");
+
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
+    void forgotPassword_inactiveUser_silentNoOp() {
+        User user = User.builder()
+            .id(UUID.randomUUID()).email("u@uit.edu.vn")
+            .isVerified(true).isActive(false).build();
+
+        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+
+        authService.forgotPassword("u@uit.edu.vn");
+
+        verifyNoInteractions(emailService);
+    }
+
+    // ── resetPassword ───────────────────────────────────────────────────────
+
+    @Test
+    void resetPassword_validOtp_updatesPasswordHash() {
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
+        OtpToken otp = OtpToken.builder()
+            .otpCode("123456").expiresAt(LocalDateTime.now().plusMinutes(10))
+            .isUsed(false).attemptCount(0).build();
+
+        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
+        when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(passwordEncoder.encode("NewPass1")).thenReturn("new-hash");
+
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setEmail("u@uit.edu.vn");
+        req.setOtpCode("123456");
+        req.setNewPassword("NewPass1");
+
+        assertThatNoException().isThrownBy(() -> authService.resetPassword(req));
+        assertThat(otp.isUsed()).isTrue();
+        verify(passwordEncoder).encode("NewPass1");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void resetPassword_weakPassword_throwsValidation() {
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
+        OtpToken otp = OtpToken.builder()
+            .otpCode("123456").expiresAt(LocalDateTime.now().plusMinutes(10))
+            .isUsed(false).attemptCount(0).build();
+
+        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
+
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setEmail("u@uit.edu.vn");
+        req.setOtpCode("123456");
+        req.setNewPassword("weak");
+
+        assertThatThrownBy(() -> authService.resetPassword(req))
+            .isInstanceOf(ValidationException.class);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void resetPassword_wrongOtp_throwsInvalidOtp() {
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
+        OtpToken otp = OtpToken.builder()
+            .otpCode("111111").expiresAt(LocalDateTime.now().plusMinutes(10))
+            .isUsed(false).attemptCount(0).build();
+
+        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
+        when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setEmail("u@uit.edu.vn");
+        req.setOtpCode("999999");
+        req.setNewPassword("NewPass1");
+
+        assertThatThrownBy(() -> authService.resetPassword(req))
+            .isInstanceOf(InvalidOtpException.class);
+        assertThat(otp.getAttemptCount()).isEqualTo(1);
+    }
+
+    @Test
+    void resetPassword_expiredOtp_throws() {
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
+        OtpToken otp = OtpToken.builder()
+            .otpCode("123456").expiresAt(LocalDateTime.now().minusMinutes(1))
+            .isUsed(false).build();
+
+        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
+
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setEmail("u@uit.edu.vn");
+        req.setOtpCode("123456");
+        req.setNewPassword("NewPass1");
+
+        assertThatThrownBy(() -> authService.resetPassword(req))
+            .isInstanceOf(InvalidOtpException.class);
     }
 }
