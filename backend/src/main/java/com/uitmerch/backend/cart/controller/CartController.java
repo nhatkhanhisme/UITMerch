@@ -47,8 +47,8 @@ public class CartController {
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "Add item to cart", description = "Adds a merch item to the cart. Returns 409 if item already exists — use PATCH to update quantity.")
     @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Item added to cart"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Item added to cart"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — item is out of stock"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — CUSTOMER role required"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Merch item not found"),
@@ -60,7 +60,7 @@ public class CartController {
         @RequestAttribute("userId") String userId
     ) {
         CartResponse cart = cartService.addItem(UUID.fromString(userId), request);
-        return ResponseEntity.ok(ApiResponse.success("Item added to cart.", cart));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Item added to cart.", cart));
     }
 
     @PatchMapping("/items/{itemId}")
@@ -68,7 +68,7 @@ public class CartController {
     @Operation(summary = "Update cart item quantity")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Cart item updated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors or insufficient stock"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized — missing or invalid JWT"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden — CUSTOMER role required"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Cart item not found"),

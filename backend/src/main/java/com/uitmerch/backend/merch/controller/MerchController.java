@@ -122,12 +122,12 @@ public class MerchController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Merch item not found"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
-    public ResponseEntity<ApiResponse<Void>> deleteMerch(
+    public ResponseEntity<Void> deleteMerch(
         @PathVariable UUID orgId,
         @PathVariable UUID id,
         @RequestAttribute("userId") String userId
     ) {
         merchService.deleteMerch(UUID.fromString(userId), orgId, id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 }
