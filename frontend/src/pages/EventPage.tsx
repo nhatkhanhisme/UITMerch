@@ -8,6 +8,7 @@ import { getPublicOrganizations } from "../api/organization";
 import type { EventResponse } from "../types/shared";
 import { Calendar, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cacheGet, cacheSet, cacheKey } from "../lib/sessionCache";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -100,19 +101,32 @@ export function EventPage() {
 
     const timer = window.setTimeout(() => {
       async function fetchEvents() {
+        const ck = cacheKey("events", { page, filter: activeFilter ?? "newest" });
+        const cachedEvents = cacheGet<{ events: UIEventItem[]; total: number; pages: number }>(ck);
+        if (cachedEvents) {
+          if (isActive) {
+            setLiveEvents(cachedEvents.events);
+            setTotalItems(cachedEvents.total);
+            setServerTotalPages(cachedEvents.pages);
+            setApiError(null);
+            setIsLoading(false);
+          }
+          return;
+        }
+
         try {
-          const orgsRes = await getPublicOrganizations({ size: 50 });
-          const orgMap: Record<string, string> = {};
-          if (orgsRes?.data) {
-            orgsRes.data.forEach((o) => {
-              orgMap[o.id] = o.name;
-            });
+          // Reuse shared org map from session cache
+          const ORG_KEY = "org_map";
+          let orgMap: Record<string, string> = cacheGet<Record<string, string>>(ORG_KEY) ?? {};
+          if (Object.keys(orgMap).length === 0) {
+            const orgsRes = await getPublicOrganizations({ size: 50 });
+            if (orgsRes?.data) {
+              orgsRes.data.forEach((o) => { orgMap[o.id] = o.name; });
+              cacheSet(ORG_KEY, orgMap, 10 * 60 * 1000);
+            }
           }
 
-          // "newest" → default (createdAt,desc), no sort param needed
-          // "upcoming" → filter by status=UPCOMING, not a sort
           const isStatusFilter = activeFilter === "upcoming";
-
           const res = await getPublicEvents({
             page: page - 1,
             size: PAGE_SIZE,
@@ -121,7 +135,7 @@ export function EventPage() {
           });
 
           if (isActive && res?.data) {
-            let mapped: UIEventItem[] = res.data.map((ev: EventResponse) => ({
+            const mapped: UIEventItem[] = res.data.map((ev: EventResponse) => ({
               bannerUrl:
                 ev.coverUrl ||
                 "https://placehold.co/800x400/e9feff/1a3a4a?font=montserrat&text=EVENT",
@@ -135,16 +149,14 @@ export function EventPage() {
               status: ev.status || "UPCOMING",
             }));
 
-            setLiveEvents(mapped);
-            setApiError(null);
+            const total = res.meta?.totalElements ?? mapped.length;
+            const pages = res.meta?.totalPages ?? Math.ceil(mapped.length / PAGE_SIZE);
 
-            if (res.meta) {
-              setTotalItems(res.meta.totalElements);
-              setServerTotalPages(res.meta.totalPages);
-            } else {
-              setTotalItems(mapped.length);
-              setServerTotalPages(Math.ceil(mapped.length / PAGE_SIZE));
-            }
+            setLiveEvents(mapped);
+            setTotalItems(total);
+            setServerTotalPages(pages);
+            setApiError(null);
+            cacheSet(ck, { events: mapped, total, pages });
           }
         } catch {
           if (isActive) {

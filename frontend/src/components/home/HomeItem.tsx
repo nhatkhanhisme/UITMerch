@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { HomeMoreLink } from "./HomeMoreLink";
 import { getPopularMerch } from "../../api/merch";
 import { getPublicOrganizations } from "../../api/organization";
+import { cacheGet, cacheSet } from "../../lib/sessionCache";
 
 const slideDuration = 5000;
 
@@ -32,14 +33,25 @@ export function HomeItem() {
     setError(null);
 
     async function loadPopular() {
+      // Check cache first
+      const SLIDE_KEY = "popular_merch_slides";
+      const cached = cacheGet<SlideItem[]>(SLIDE_KEY);
+      if (cached) {
+        setSlides(cached);
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        // Fetch orgs to map orgName if available
-        const orgsRes = await getPublicOrganizations({ size: 50 });
-        const orgMap: Record<string, string> = {};
-        if (orgsRes?.data) {
-          orgsRes.data.forEach((o) => {
-            orgMap[o.id] = o.name;
-          });
+        // Reuse shared org map
+        const ORG_KEY = "org_map";
+        let orgMap: Record<string, string> = cacheGet<Record<string, string>>(ORG_KEY) ?? {};
+        if (Object.keys(orgMap).length === 0) {
+          const orgsRes = await getPublicOrganizations({ size: 50 });
+          if (orgsRes?.data) {
+            orgsRes.data.forEach((o) => { orgMap[o.id] = o.name; });
+            cacheSet(ORG_KEY, orgMap, 10 * 60 * 1000);
+          }
         }
 
         const res = await getPopularMerch();
@@ -63,6 +75,7 @@ export function HomeItem() {
               };
             });
             setSlides(loadedSlides);
+            cacheSet(SLIDE_KEY, loadedSlides, 5 * 60 * 1000);
           } else {
             setError("Hiện tại chưa có vật phẩm nổi bật nào được đăng tải.");
           }

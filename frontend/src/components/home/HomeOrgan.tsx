@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { HomeMoreLink } from "./HomeMoreLink";
 import { getPublicOrganizations } from "../../api/organization";
 import type { OrganizationResponse } from "../../types/shared";
+import { cacheGet, cacheSet } from "../../lib/sessionCache";
 
 function initials(name: string) {
   return name
@@ -26,21 +27,42 @@ export function HomeOrgan() {
 
   useEffect(() => {
     let isActive = true;
-    setIsLoading(true);
-    setError(null);
 
     async function loadOrgs() {
+      // Show cached data immediately — no loading spinner on repeat visits
+      const CACHE_KEY = "home_orgs";
+      const cached = cacheGet<OrgItem[]>(CACHE_KEY);
+      if (cached) {
+        if (isActive) {
+          setOrgs(cached);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
       try {
         const res = await getPublicOrganizations({ size: 7 });
         if (isActive) {
           if (res?.data && res.data.length > 0) {
-            setOrgs(
-              res.data.map((o: OrganizationResponse) => ({
-                id: o.id,
-                logoUrl: o.logoUrl,
-                name: o.name,
-              })),
-            );
+            const items = res.data.map((o: OrganizationResponse) => ({
+              id: o.id,
+              logoUrl: o.logoUrl,
+              name: o.name,
+            }));
+            setOrgs(items);
+            cacheSet(CACHE_KEY, items, 10 * 60 * 1000); // 10 min
+
+            // Also seed the shared org_map cache so other pages benefit
+            const ORG_KEY = "org_map";
+            if (!cacheGet(ORG_KEY)) {
+              const orgMap: Record<string, string> = {};
+              res.data.forEach((o: OrganizationResponse) => { orgMap[o.id] = o.name; });
+              // Note: this only covers size=7, but better than nothing for the home page
+              cacheSet(ORG_KEY, orgMap, 10 * 60 * 1000);
+            }
           } else {
             setError("Hiện tại chưa có tổ chức hay câu lạc bộ nào được đăng tải.");
           }

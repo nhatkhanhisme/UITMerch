@@ -10,6 +10,7 @@ import type { MockProduct } from "../mocks/merchData";
 import { getPublicMerchList, getPopularMerch, getCategories } from "../api/merch";
 import { getPublicOrganizations } from "../api/organization";
 import { mapMerchToMockProduct } from "../types/shared";
+import { cacheGet, cacheSet, cacheKey } from "../lib/sessionCache";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -48,41 +49,57 @@ export function MerchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // One-time: load popular merch + categories
+  // One-time: load popular merch + categories (cached per session)
   useEffect(() => {
     let isActive = true;
     async function fetchMeta() {
       try {
-        const orgsRes = await getPublicOrganizations({ size: 50 });
-        const orgMap: Record<string, string> = {};
-        if (orgsRes?.data) {
-          orgsRes.data.forEach((o) => { orgMap[o.id] = o.name; });
+        // --- Org map (shared across pages) ---
+        const ORG_KEY = "org_map";
+        let orgMap: Record<string, string> = cacheGet<Record<string, string>>(ORG_KEY) ?? {};
+        if (Object.keys(orgMap).length === 0) {
+          const orgsRes = await getPublicOrganizations({ size: 50 });
+          if (orgsRes?.data) {
+            orgsRes.data.forEach((o) => { orgMap[o.id] = o.name; });
+            cacheSet(ORG_KEY, orgMap, 10 * 60 * 1000); // 10 min
+          }
         }
 
-        const [catRes, popRes] = await Promise.allSettled([
-          getCategories(),
-          getPopularMerch(),
-        ]);
-
-        if (isActive && catRes.status === "fulfilled" && catRes.value?.data) {
-          setCategoryOptions(
-            catRes.value.data.map((cat) => ({ label: cat.name, value: cat.slug ?? cat.id }))
-          );
+        // --- Categories ---
+        const CAT_KEY = "categories";
+        const cachedCats = cacheGet<FilterOption[]>(CAT_KEY);
+        if (cachedCats) {
+          if (isActive) setCategoryOptions(cachedCats);
+        } else {
+          const catRes = await getCategories();
+          if (isActive && catRes?.data) {
+            const opts = catRes.data.map((cat) => ({ label: cat.name, value: cat.slug ?? cat.id }));
+            setCategoryOptions(opts);
+            cacheSet(CAT_KEY, opts, 15 * 60 * 1000); // 15 min
+          }
         }
 
-        if (isActive && popRes.status === "fulfilled" && popRes.value?.data?.length) {
-          setPopularProducts(
-            popRes.value.data.slice(0, 5).map((item) => ({
+        // --- Popular merch slider ---
+        const POP_KEY = "popular_merch";
+        const cachedPop = cacheGet<FeaturedItem[]>(POP_KEY);
+        if (cachedPop) {
+          if (isActive) setPopularProducts(cachedPop);
+        } else {
+          const popRes = await getPopularMerch();
+          if (isActive && popRes?.data?.length) {
+            const items: FeaturedItem[] = popRes.data.slice(0, 5).map((item) => ({
               id: item.id,
               name: item.name,
               orgName: orgMap[item.orgId] || "Tổ chức UIT",
               desc: item.description,
               image: item.images?.[0] || null,
               link: `/merch/${item.id}`,
-            }))
-          );
-        } else if (isActive) {
-          setPopularProducts([]);
+            }));
+            setPopularProducts(items);
+            cacheSet(POP_KEY, items, 5 * 60 * 1000);
+          } else if (isActive) {
+            setPopularProducts([]);
+          }
         }
       } catch {
         if (isActive) setPopularProducts([]);
@@ -92,14 +109,47 @@ export function MerchPage() {
     return () => { isActive = false; };
   }, []);
 
-  // Paginated merch list — re-fetched on filter/search/page change
+  // Paginated merch list — re-fetched on filter/search/page change, results cached per key
   useEffect(() => {
     let isActive = true;
     setIsLoading(true);
 
     const timer = window.setTimeout(() => {
       async function fetchList() {
+        const ck = cacheKey("merch", {
+          page,
+          sort: activeFilter ? SORT_MAP[activeFilter] : undefined,
+          category: activeCategory,
+          keyword: query,
+        });
+
+        // Try cache first (only when no keyword — live search always goes to backend)
+        if (!query) {
+          const cached = cacheGet<{ products: MockProduct[]; total: number; pages: number }>(ck);
+          if (cached) {
+            if (isActive) {
+              setLiveProducts(cached.products);
+              setTotalItems(cached.total);
+              setServerTotalPages(cached.pages);
+              setApiError(null);
+              setIsLoading(false);
+            }
+            return;
+          }
+        }
+
         try {
+          // Org map (reuse session cache)
+          const ORG_KEY = "org_map";
+          let orgMap: Record<string, string> = cacheGet<Record<string, string>>(ORG_KEY) ?? {};
+          if (Object.keys(orgMap).length === 0) {
+            const orgsRes = await getPublicOrganizations({ size: 50 });
+            if (orgsRes?.data) {
+              orgsRes.data.forEach((o) => { orgMap[o.id] = o.name; });
+              cacheSet(ORG_KEY, orgMap, 10 * 60 * 1000);
+            }
+          }
+
           const res = await getPublicMerchList({
             keyword: query || undefined,
             category: activeCategory || undefined,
@@ -109,22 +159,18 @@ export function MerchPage() {
           });
 
           if (isActive && res?.data) {
-            const orgsRes = await getPublicOrganizations({ size: 50 });
-            const orgMap: Record<string, string> = {};
-            if (orgsRes?.data) {
-              orgsRes.data.forEach((o) => { orgMap[o.id] = o.name; });
-            }
-
             const mapped = res.data.map((item) => mapMerchToMockProduct(item, orgMap));
+            const total = res.meta?.totalElements ?? mapped.length;
+            const pages = res.meta?.totalPages ?? Math.ceil(mapped.length / PAGE_SIZE);
+
             setLiveProducts(mapped);
+            setTotalItems(total);
+            setServerTotalPages(pages);
             setApiError(null);
 
-            if (res.meta) {
-              setTotalItems(res.meta.totalElements);
-              setServerTotalPages(res.meta.totalPages);
-            } else {
-              setTotalItems(mapped.length);
-              setServerTotalPages(Math.ceil(mapped.length / PAGE_SIZE));
+            // Cache the result (skip for keyword searches to keep results fresh)
+            if (!query) {
+              cacheSet(ck, { products: mapped, total, pages });
             }
           }
         } catch {

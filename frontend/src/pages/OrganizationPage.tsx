@@ -7,6 +7,7 @@ import { OrgCard } from "../components/features/OrgCard";
 import type { MockOrganization } from "../mocks/orgData";
 import { getPublicOrganizations } from "../api/organization";
 import { mapOrgToMockOrganization } from "../types/shared";
+import { cacheGet, cacheSet, cacheKey } from "../lib/sessionCache";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -44,6 +45,19 @@ export function OrganizationPage() {
 
     const timer = window.setTimeout(() => {
       async function fetchOrgs() {
+        const ck = cacheKey("orgs", { page, sort: activeFilter ? SORT_MAP[activeFilter] : undefined });
+        const cached = cacheGet<{ orgs: MockOrganization[]; total: number; pages: number }>(ck);
+        if (cached) {
+          if (isActive) {
+            setLiveOrgs(cached.orgs);
+            setTotalItems(cached.total);
+            setServerTotalPages(cached.pages);
+            setApiError(null);
+            setIsLoading(false);
+          }
+          return;
+        }
+
         try {
           const res = await getPublicOrganizations({
             page: page - 1,
@@ -53,16 +67,14 @@ export function OrganizationPage() {
 
           if (isActive && res?.data) {
             const mapped = res.data.map(mapOrgToMockOrganization);
-            setLiveOrgs(mapped);
-            setApiError(null);
+            const total = res.meta?.totalElements ?? mapped.length;
+            const pages = res.meta?.totalPages ?? Math.ceil(mapped.length / PAGE_SIZE);
 
-            if (res.meta) {
-              setTotalItems(res.meta.totalElements);
-              setServerTotalPages(res.meta.totalPages);
-            } else {
-              setTotalItems(mapped.length);
-              setServerTotalPages(Math.ceil(mapped.length / PAGE_SIZE));
-            }
+            setLiveOrgs(mapped);
+            setTotalItems(total);
+            setServerTotalPages(pages);
+            setApiError(null);
+            cacheSet(ck, { orgs: mapped, total, pages });
           }
         } catch {
           if (isActive) {
