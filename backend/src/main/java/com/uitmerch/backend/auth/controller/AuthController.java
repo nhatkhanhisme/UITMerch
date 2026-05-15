@@ -126,6 +126,23 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Tokens refreshed successfully.", response));
     }
 
+    @PostMapping("/resend-otp")
+    @Operation(summary = "Resend email verification OTP", description = "Issues a new OTP if the account is unverified and active. Always returns 200 to prevent enumeration.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "If the account is pending verification, a new OTP has been sent"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed")
+    })
+    public ResponseEntity<ApiResponse<Void>> resendOtp(
+            @Valid @RequestBody ResendOtpRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        if (!rateLimiterService.isAllowed("resend-otp:" + ipUtil.extractClientIp(httpRequest), REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW)) {
+            throw new ValidationException("Too many OTP requests. Please try again later.");
+        }
+        authService.resendOtp(request.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("If your account is pending verification, a new code has been sent.", null));
+    }
+
     @PostMapping("/forgot-password")
     @Operation(summary = "Request a password-reset OTP", description = "Sends a reset OTP to the email if the account exists and is active. Always returns 200 to prevent user enumeration.")
     @ApiResponses({

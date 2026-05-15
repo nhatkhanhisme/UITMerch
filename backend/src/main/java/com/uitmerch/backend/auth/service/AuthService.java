@@ -244,6 +244,17 @@ public class AuthService {
     }
 
     @Transactional
+    public void resendOtp(String email) {
+        // Silent no-op for unknown, already-verified, or inactive accounts — prevents enumeration
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.isActive() && !user.isVerified()) {
+                issueOtp(user);
+                log.info("OTP re-issued for unverified user {}", email);
+            }
+        });
+    }
+
+    @Transactional
     public void forgotPassword(String email) {
         // Use a generic response to avoid revealing whether an email is registered
         userRepository.findByEmail(email).ifPresent(user -> {
