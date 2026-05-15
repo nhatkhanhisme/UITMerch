@@ -29,6 +29,7 @@ public class WishlistService {
     private final WishlistItemRepository wishlistItemRepository;
     private final MerchItemRepository merchItemRepository;
 
+    @Transactional(readOnly = true)
     public WishlistResponse getWishlist(UUID userId) {
         Wishlist wishlist = findOrCreate(userId);
         List<WishlistItem> items = wishlistItemRepository.findByWishlistId(wishlist.getId());
