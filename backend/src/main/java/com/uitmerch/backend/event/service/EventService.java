@@ -182,14 +182,15 @@ public class EventService {
 
         List<MerchItem> items = merchItemRepository.findAllById(merchIds);
 
-        List<UUID> categoryIds = items.stream()
+        // Use the cached findAll() instead of findAllById() to hit the 'categories' cache
+        Set<UUID> neededIds = items.stream()
             .map(MerchItem::getCategoryId)
             .filter(id -> id != null)
-            .distinct()
-            .toList();
+            .collect(Collectors.toSet());
 
-        Map<UUID, Category> categoryMap = categoryRepository.findAllById(categoryIds)
+        Map<UUID, Category> categoryMap = categoryRepository.findAll()
             .stream()
+            .filter(c -> neededIds.contains(c.getId()))
             .collect(Collectors.toMap(Category::getId, c -> c));
 
         Map<UUID, List<String>> imageMap = merchImageRepository.findByMerchIdInOrderByPosition(merchIds)
