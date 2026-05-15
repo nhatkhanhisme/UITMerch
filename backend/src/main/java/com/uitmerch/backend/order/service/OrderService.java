@@ -103,11 +103,8 @@ public class OrderService {
             order = orderRepository.save(order);
 
             final UUID orderId = order.getId();
-            List<OrderItem> savedItems = new ArrayList<>();
-            for (OrderItem item : orderItems) {
-                item.setOrderId(orderId);
-                savedItems.add(orderItemRepository.save(item));
-            }
+            orderItems.forEach(item -> item.setOrderId(orderId));
+            List<OrderItem> savedItems = orderItemRepository.saveAll(orderItems);
 
             results.add(OrderResponse.from(order, savedItems));
         }
@@ -234,11 +231,8 @@ public class OrderService {
             order = orderRepository.save(order);
 
             final UUID orderId = order.getId();
-            List<OrderItem> savedItems = new ArrayList<>();
-            for (OrderItem item : orderItems) {
-                item.setOrderId(orderId);
-                savedItems.add(orderItemRepository.save(item));
-            }
+            orderItems.forEach(item -> item.setOrderId(orderId));
+            List<OrderItem> savedItems = orderItemRepository.saveAll(orderItems);
 
             results.add(OrderResponse.from(order, savedItems));
         }
