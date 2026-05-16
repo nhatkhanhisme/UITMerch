@@ -125,6 +125,13 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
             <version>2.27.21</version>
+            <exclusions>
+                <!-- httpclient pulls commons-logging which conflicts with spring-jcl -->
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Mail -->
