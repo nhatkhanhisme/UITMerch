@@ -137,6 +137,7 @@ public class CartService {
 
         List<OrderResponse> orders = orderService.createOrdersFromCart(userId, cart, cartItems, request.getNote());
 
+        cartItemRepository.deleteAll(cartItems);
         cart.setStatus(CartStatus.CHECKED_OUT);
         cartRepository.save(cart);
 

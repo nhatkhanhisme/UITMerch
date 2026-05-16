@@ -85,7 +85,7 @@ public class OrganizationController {
     })
     public ResponseEntity<ApiResponse<OrganizationResponse>> updateOrganization(
         @PathVariable UUID id,
-        @RequestBody UpdateOrganizationRequest request,
+        @Valid @RequestBody UpdateOrganizationRequest request,
         @RequestAttribute("userId") String userId
     ) {
         OrganizationResponse response = organizationService.updateOrganization(

@@ -20,18 +20,8 @@
   <springProfile name="!dev &amp; !docker">
     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
       <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-        <providers>
-          <timestamp />
-          <logLevel />
-          <threadName />
-          <loggerName>
-            <shortenedLoggerNameLength>36</shortenedLoggerNameLength>
-          </loggerName>
-          <mdc />               <!-- includes traceId from MDC -->
-          <message />
-          <stackTrace />
-        </providers>
         <customFields>{"app":"uitmerch-backend"}</customFields>
+        <shortenedLoggerNameLength>36</shortenedLoggerNameLength>
       </encoder>
     </appender>
 

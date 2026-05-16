@@ -40,6 +40,7 @@ public class WishlistService {
             .stream().collect(Collectors.toMap(MerchItem::getId, Function.identity()));
 
         List<WishlistItemResponse> itemResponses = items.stream()
+            .filter(item -> merchById.containsKey(item.getMerchId()))
             .map(item -> WishlistItemResponse.builder()
                 .id(item.getId())
                 .merch(MerchResponse.from(merchById.get(item.getMerchId())))
