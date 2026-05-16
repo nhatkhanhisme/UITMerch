@@ -110,7 +110,7 @@ public class EventController {
     public ResponseEntity<ApiResponse<EventResponse>> updateEvent(
         @PathVariable UUID orgId,
         @PathVariable UUID id,
-        @RequestBody UpdateEventRequest request,
+        @Valid @RequestBody UpdateEventRequest request,
         @RequestAttribute("userId") String userId
     ) {
         EventResponse response = eventService.updateEvent(UUID.fromString(userId), orgId, id, request);
