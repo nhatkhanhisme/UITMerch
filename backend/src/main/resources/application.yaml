@@ -36,6 +36,8 @@ app:
 spring:
   application:
     name: uitmerch-backend
+  main:
+    lazy-initialization: true
 
   mail:
     host: smtp.gmail.com
@@ -102,4 +104,9 @@ logging:
   level:
     root: INFO
     com.uitmerch: INFO
-    org.flywaydb: INFO
+    org.flywaydb: WARN
+    org.hibernate.Version: WARN
+    org.hibernate.jpa.internal.util.LogHelper: WARN
+    org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator: ERROR
+    org.springframework.data.repository.config.RepositoryConfigurationDelegate: WARN
+    com.zaxxer.hikari.HikariDataSource: WARN
