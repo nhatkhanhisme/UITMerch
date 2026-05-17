@@ -66,3 +66,13 @@ export async function uploadOrganizerImage(
   const folder = `organizations/${organizationId}/${variant}`;
   return uploadImage(file, ORG_BUCKET, buildFilePath(folder, file));
 }
+
+export async function uploadMerchImage(file: File, orgId: string) {
+  const folder = `organizations/${orgId}/merch`;
+  return uploadImage(file, ORG_BUCKET, buildFilePath(folder, file));
+}
+
+export async function uploadEventImage(file: File, orgId: string) {
+  const folder = `organizations/${orgId}/events`;
+  return uploadImage(file, ORG_BUCKET, buildFilePath(folder, file));
+}

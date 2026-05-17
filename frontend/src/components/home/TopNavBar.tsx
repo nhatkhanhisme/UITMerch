@@ -237,6 +237,59 @@ export function TopNavBar() {
                     Hồ sơ
                     <span className="text-xs text-gray">Xem</span>
                   </Link>
+                  {user.role === "CUSTOMER" && (
+                    <>
+                      <Link
+                        className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        role="menuitem"
+                        to="/cart"
+                      >
+                        Giỏ hàng
+                        <span className="text-xs text-gray">🛒</span>
+                      </Link>
+                      <Link
+                        className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        role="menuitem"
+                        to="/orders"
+                      >
+                        Đơn hàng
+                        <span className="text-xs text-gray">📦</span>
+                      </Link>
+                      <Link
+                        className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        role="menuitem"
+                        to="/wishlist"
+                      >
+                        Yêu thích
+                        <span className="text-xs text-gray">♡</span>
+                      </Link>
+                    </>
+                  )}
+                  {user.role === "ORGANIZER" && (
+                    <Link
+                      className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      role="menuitem"
+                      to="/organizer"
+                    >
+                      Quản lý BTC
+                      <span className="text-xs text-gray">Dashboard</span>
+                    </Link>
+                  )}
+                  {user.role === "ADMIN" && (
+                    <Link
+                      className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      role="menuitem"
+                      to="/admin"
+                    >
+                      Quản trị
+                      <span className="text-xs text-gray">Admin</span>
+                    </Link>
+                  )}
                   <button
                     className="mt-1 flex w-full items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
                     onClick={handleLogout}
@@ -312,6 +365,29 @@ export function TopNavBar() {
               >
                 Hồ sơ
               </Link>
+              {user.role === "CUSTOMER" && (
+                <>
+                  <Link className={linkClassName("/cart")} onClick={() => setIsMenuOpen(false)} to="/cart">
+                    Giỏ hàng
+                  </Link>
+                  <Link className={linkClassName("/orders")} onClick={() => setIsMenuOpen(false)} to="/orders">
+                    Đơn hàng
+                  </Link>
+                  <Link className={linkClassName("/wishlist")} onClick={() => setIsMenuOpen(false)} to="/wishlist">
+                    Yêu thích
+                  </Link>
+                </>
+              )}
+              {user.role === "ORGANIZER" && (
+                <Link className={linkClassName("/organizer")} onClick={() => setIsMenuOpen(false)} to="/organizer">
+                  Quản lý BTC
+                </Link>
+              )}
+              {user.role === "ADMIN" && (
+                <Link className={linkClassName("/admin")} onClick={() => setIsMenuOpen(false)} to="/admin">
+                  Quản trị
+                </Link>
+              )}
               <button
                 className={`${linkClassName("/logout")} w-full text-left`}
                 onClick={handleLogout}

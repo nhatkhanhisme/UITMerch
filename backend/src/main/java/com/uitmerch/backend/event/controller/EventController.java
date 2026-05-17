@@ -117,6 +117,24 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.success("Event updated.", response));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @Operation(summary = "Delete an event")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Event deleted"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Event not found")
+    })
+    public ResponseEntity<Void> deleteEvent(
+        @PathVariable UUID orgId,
+        @PathVariable UUID id,
+        @RequestAttribute("userId") String userId
+    ) {
+        eventService.deleteEvent(UUID.fromString(userId), orgId, id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/merch")
     @PreAuthorize("hasRole('ORGANIZER')")
     @Operation(summary = "Attach a merch item to an event")

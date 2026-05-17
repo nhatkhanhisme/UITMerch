@@ -98,6 +98,43 @@ export function setAuthHeader(token: string | null) {
   delete apiClient.defaults.headers.common.Authorization;
 }
 
+export async function resendOtp(email: string) {
+  const { data } = await apiClient.post<ApiResponse<null>>(
+    "/api/v1/auth/resend-otp",
+    { email },
+  );
+  return data;
+}
+
+export async function forgotPassword(email: string) {
+  const { data } = await apiClient.post<ApiResponse<null>>(
+    "/api/v1/auth/forgot-password",
+    { email },
+  );
+  return data;
+}
+
+export async function resetPassword(request: {
+  email: string;
+  otpCode: string;
+  newPassword: string;
+}) {
+  const { data } = await apiClient.post<ApiResponse<null>>(
+    "/api/v1/auth/reset-password",
+    request,
+  );
+  return data;
+}
+
+export async function logout(token: string) {
+  const { data } = await apiClient.post<ApiResponse<null>>(
+    "/api/v1/auth/logout",
+    null,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return data;
+}
+
 export function getApiErrorMessage(
   error: unknown,
   fallbackMessage = "Something went wrong. Please try again.",

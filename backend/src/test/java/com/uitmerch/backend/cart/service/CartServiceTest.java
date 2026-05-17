@@ -255,7 +255,7 @@ class CartServiceTest {
         CartItem item = CartItem.builder().id(itemId).cartId(cartId).merchId(merchId).quantity(2).build();
         when(cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartId(cartId)).thenReturn(List.of(item));
-        when(orderService.createOrdersFromCart(any(), any(), any(), any())).thenReturn(Collections.emptyList());
+        when(orderService.createOrdersFromCart(any(), any(), any(), any(), any(), any(), any())).thenReturn(Collections.emptyList());
         when(cartRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         CheckoutRequest req = new CheckoutRequest();

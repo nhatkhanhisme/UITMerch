@@ -346,7 +346,7 @@ class OrderServiceTest {
 
         when(merchItemRepository.findAllById(any())).thenReturn(List.of(draft));
 
-        assertThatThrownBy(() -> orderService.createOrdersFromCart(userId, cart, List.of(cartItem), null))
+        assertThatThrownBy(() -> orderService.createOrdersFromCart(userId, cart, List.of(cartItem), null, null, null, null))
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("no longer available");
         verify(orderRepository, never()).save(any());
@@ -361,7 +361,7 @@ class OrderServiceTest {
         MerchItem merch = publishedMerch(2); // only 2 in stock
         when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
 
-        assertThatThrownBy(() -> orderService.createOrdersFromCart(userId, cart, List.of(cartItem), null))
+        assertThatThrownBy(() -> orderService.createOrdersFromCart(userId, cart, List.of(cartItem), null, null, null, null))
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("Insufficient stock");
         verify(orderRepository, never()).save(any());

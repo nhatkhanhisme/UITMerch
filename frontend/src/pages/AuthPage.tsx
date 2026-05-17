@@ -7,6 +7,7 @@ import {
   login,
   registerCustomer,
   registerOrganizer,
+  resendOtp,
   toAuthSession,
   verifyEmail,
 } from "../api/auth";
@@ -26,12 +27,13 @@ const accountTypes = [
   },
 ] as const;
 
-type AuthMode = "signin" | "register" | "verify";
+type AuthMode = "signin" | "register";
 type AccountType = Extract<UserRole, "CUSTOMER" | "ORGANIZER">;
 
 const initialFormState = {
   email: "",
   password: "",
+  confirmPassword: "",
   fullName: "",
   phone: "",
   address: "",
@@ -45,29 +47,23 @@ export function AuthPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpSuccess, setOtpSuccess] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const setSession = useAuthStore((state) => state.setSession);
   const returnTo = (location.state as { from?: string } | null)?.from ?? "/";
-  const isVerifyMode = mode === "verify";
-  const modeLabel =
-    mode === "signin"
-      ? "Đăng nhập"
-      : mode === "register"
-        ? "Đăng ký"
-        : "Xác thực email";
+  const modeLabel = mode === "signin" ? "Đăng nhập" : "Đăng ký";
   const modeTitle =
     mode === "signin"
       ? "Truy cập tài khoản của bạn"
-      : mode === "register"
-        ? "Tạo tài khoản mới"
-        : "Xác nhận email của bạn";
-  const submitLabel =
-    mode === "signin"
-      ? "Đăng nhập"
-      : mode === "register"
-        ? "Đăng ký"
-        : "Xác thực email";
+      : "Tạo tài khoản mới";
+  const submitLabel = mode === "signin" ? "Đăng nhập" : "Đăng ký";
 
   const handleModeChange = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -96,24 +92,6 @@ export function AuthPage() {
     setIsSubmitting(true);
 
     try {
-      if (mode === "verify") {
-        const response = await verifyEmail({
-          email: formState.email,
-          otpCode: formState.otpCode,
-        });
-
-        setSuccessMessage(
-          response.message || "Email đã xác thực. Bạn có thể đăng nhập ngay.",
-        );
-        setFormState((current) => ({
-          ...current,
-          password: "",
-          otpCode: "",
-        }));
-        setMode("signin");
-        return;
-      }
-
       if (mode === "signin") {
         const response = await login({
           email: formState.email,
@@ -136,6 +114,12 @@ export function AuthPage() {
         return;
       }
 
+      if (formState.password !== formState.confirmPassword) {
+        setErrorMessage("Mật khẩu xác nhận không khớp.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const registerPayload = {
         email: formState.email,
         password: formState.password,
@@ -149,16 +133,12 @@ export function AuthPage() {
           ? await registerOrganizer(registerPayload)
           : await registerCustomer(registerPayload);
 
-      setSuccessMessage(
-        response.message ||
-          "Đăng ký thành công. Vui lòng kiểm tra email để lấy mã OTP.",
-      );
-      setFormState((current) => ({
-        ...current,
-        password: "",
-        otpCode: "",
-      }));
-      setMode("verify");
+      setOtpEmail(formState.email);
+      setOtpCode("");
+      setOtpError(null);
+      setOtpSuccess(response.message || "Vui lòng kiểm tra email để lấy mã OTP.");
+      setShowOtpModal(true);
+      setFormState((current) => ({ ...current, password: "" }));
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error));
     } finally {
@@ -234,18 +214,6 @@ export function AuthPage() {
                 >
                   Đăng ký
                 </button>
-                <button
-                  className={[
-                    "rounded-full px-4 py-2 text-sm font-sans font-semibold transition",
-                    mode === "verify"
-                      ? "bg-brand-gradient text-black-blue shadow-[0_8px_20px_rgba(82,128,145,0.2)]"
-                      : "text-gray",
-                  ].join(" ")}
-                  onClick={() => handleModeChange("verify")}
-                  type="button"
-                >
-                  Xác thực
-                </button>
               </div>
             </div>
 
@@ -317,32 +285,45 @@ export function AuthPage() {
                 value={formState.email}
               />
 
-              {!isVerifyMode ? (
-                <Input
-                  label="Mật khẩu"
-                  name="password"
-                  onChange={handleInputChange}
-                  placeholder="Mật khẩu"
-                  required
-                  type="password"
-                  value={formState.password}
-                />
-              ) : null}
-
-              {isVerifyMode ? (
-                <Input
-                  label="Mã OTP"
-                  name="otpCode"
-                  onChange={handleInputChange}
-                  placeholder="Mã 6 chữ số"
-                  required
-                  value={formState.otpCode}
-                />
-              ) : null}
+              <Input
+                label="Mật khẩu"
+                name="password"
+                onChange={handleInputChange}
+                placeholder="Mật khẩu"
+                required
+                type="password"
+                value={formState.password}
+              />
 
               {mode === "register" ? (
+                <Input
+                  label="Xác nhận mật khẩu"
+                  name="confirmPassword"
+                  onChange={handleInputChange}
+                  placeholder="Nhập lại mật khẩu"
+                  required
+                  type="password"
+                  value={formState.confirmPassword}
+                />
+              ) : null}
+
+              {mode === "register" && accountType === "CUSTOMER" ? (
                 <>
-                  {/* Keep registration minimal: only full name and email/password by default */}
+                  <Input
+                    label="Số điện thoại"
+                    name="phone"
+                    onChange={handleInputChange}
+                    placeholder="Nhập số điện thoại (dùng cho giao hàng)"
+                    type="tel"
+                    value={formState.phone}
+                  />
+                  <Input
+                    label="Địa chỉ giao hàng"
+                    name="address"
+                    onChange={handleInputChange}
+                    placeholder="Số nhà, đường, phường/xã, quận/huyện..."
+                    value={formState.address}
+                  />
                 </>
               ) : null}
 
@@ -357,6 +338,101 @@ export function AuthPage() {
           </div>
         </section>
       </div>
+
+      {showOtpModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-panel border border-white/70 bg-white/95 p-6 shadow-2xl backdrop-blur">
+            <div className="text-center mb-5">
+              <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-aqua/20 text-2xl">
+                ✉
+              </div>
+              <h2 className="font-fredoka text-2xl font-bold text-black-blue">Xác thực email</h2>
+              <p className="mt-1 text-sm text-gray">
+                Mã OTP đã được gửi đến <strong>{otpEmail}</strong>
+              </p>
+            </div>
+
+            {otpError ? (
+              <div className="mb-4 rounded-xl border border-peach bg-peach/20 px-3 py-2 text-sm text-black-blue">
+                {otpError}
+              </div>
+            ) : null}
+
+            {otpSuccess ? (
+              <div className="mb-4 rounded-xl border border-aqua bg-aqua/20 px-3 py-2 text-sm text-black-blue">
+                {otpSuccess}
+              </div>
+            ) : null}
+
+            <div className="grid gap-3">
+              <div>
+                <label className="mb-1 block font-sans text-xs font-semibold text-slate/70">
+                  Mã OTP (6 chữ số)
+                </label>
+                <input
+                  autoFocus
+                  className="w-full rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-center text-2xl font-bold tracking-[0.5em] text-black-blue shadow-sm focus:outline-none focus:ring-2 focus:ring-aqua"
+                  maxLength={6}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                  placeholder="______"
+                  type="text"
+                  value={otpCode}
+                />
+              </div>
+
+              <Button
+                className="w-full"
+                loading={isVerifying}
+                onClick={async () => {
+                  if (otpCode.length !== 6) {
+                    setOtpError("Vui lòng nhập đủ 6 chữ số.");
+                    return;
+                  }
+                  setOtpError(null);
+                  setOtpSuccess(null);
+                  setIsVerifying(true);
+                  try {
+                    const res = await verifyEmail({ email: otpEmail, otpCode });
+                    setOtpSuccess(res.message || "Xác thực thành công!");
+                    setTimeout(() => {
+                      setShowOtpModal(false);
+                      setMode("signin");
+                      setSuccessMessage("Email đã xác thực. Bạn có thể đăng nhập ngay.");
+                    }, 800);
+                  } catch (err) {
+                    setOtpError(getApiErrorMessage(err, "Mã OTP không đúng. Vui lòng thử lại."));
+                  } finally {
+                    setIsVerifying(false);
+                  }
+                }}
+                type="button"
+              >
+                Xác thực
+              </Button>
+
+              <button
+                className="font-sans text-sm text-gray transition hover:text-black-blue disabled:opacity-50"
+                disabled={isResending}
+                onClick={async () => {
+                  setIsResending(true);
+                  setOtpError(null);
+                  try {
+                    await resendOtp(otpEmail);
+                    setOtpSuccess("Đã gửi lại mã OTP. Kiểm tra hộp thư của bạn.");
+                  } catch (err) {
+                    setOtpError(getApiErrorMessage(err, "Không thể gửi lại OTP. Thử lại sau."));
+                  } finally {
+                    setIsResending(false);
+                  }
+                }}
+                type="button"
+              >
+                {isResending ? "Đang gửi..." : "Gửi lại mã OTP"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

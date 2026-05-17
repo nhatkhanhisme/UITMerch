@@ -118,10 +118,13 @@ export function OrganizerProfilePage() {
         });
         updateUser({ avatarUrl: profile.logoUrl ?? null });
       } catch (error) {
-        if (!isActive) {
-          return;
+        if (!isActive) return;
+        const msg = getApiErrorMessage(error);
+        if (msg === "Chưa có tổ chức nào.") {
+          setIsMissingOrganization(true);
+        } else {
+          toast.error(msg);
         }
-        toast.error(getApiErrorMessage(error));
       } finally {
         if (isActive) {
           setIsLoading(false);
@@ -285,7 +288,8 @@ export function OrganizerProfilePage() {
     setIsSaving(true);
 
     try {
-      const response = await updateOrganizerProfile({
+      if (!organizerProfile?.id) throw new Error("Organization ID not found.");
+      const response = await updateOrganizerProfile(organizerProfile.id, {
         name,
         description: toOptionalValue(organizerForm.description),
         logoUrl: isLogoRemoved ? "" : toOptionalValue(organizerForm.logoUrl),

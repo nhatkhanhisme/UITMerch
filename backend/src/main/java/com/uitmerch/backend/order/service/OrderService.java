@@ -45,7 +45,8 @@ public class OrderService {
     // ------------------------------------------------------------------ //
 
     @Transactional
-    public List<OrderResponse> createOrdersFromCart(UUID userId, Cart cart, List<CartItem> cartItems, String note) {
+    public List<OrderResponse> createOrdersFromCart(UUID userId, Cart cart, List<CartItem> cartItems, String note,
+            String shippingName, String shippingPhone, String shippingAddress) {
         // Batch-fetch all merch items
         List<UUID> merchIds = cartItems.stream().map(CartItem::getMerchId).toList();
         Map<UUID, MerchItem> merchMap = merchItemRepository.findAllById(merchIds)
@@ -105,6 +106,9 @@ public class OrderService {
                 .orgId(orgId)
                 .totalAmount(total)
                 .note(note)
+                .guestName(shippingName)
+                .guestPhone(shippingPhone)
+                .guestAddress(shippingAddress)
                 .build();
             order = orderRepository.save(order);
 
