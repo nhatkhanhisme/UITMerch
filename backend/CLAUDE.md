@@ -128,7 +128,14 @@ Flyway runs on startup (default/docker profiles). Migration files: `src/main/res
 
 Never edit existing migration files. Always add a new `VN+1__description.sql` for schema changes.
 
-Current highest: **V24** (`users.is_active`).
+Current highest: **V28** (`notifications` table).
+
+| Migration | Contents |
+|---|---|
+| V25 | Rename `order_status` enum values: `READY_FOR_PICKUP → READY`, `SUCCESS → COMPLETED` |
+| V26 | Add cancel fields to `orders`: `cancelled_by`, `cancel_reason`, `cancel_reason_note`, `cancelled_at` |
+| V27 | `pickup_schedules` table + FK from `orders.pickup_schedule_id` |
+| V28 | `notifications` table for in-app CUSTOMER notifications |
 
 ## Storage
 

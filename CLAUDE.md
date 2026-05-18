@@ -46,7 +46,7 @@ See `backend/CLAUDE.md` for the authoritative backend conventions.
 
 ### Domain modules
 
-`auth` · `user` · `organization` · `merch` · `cart` · `order` · `wishlist` · `event` · `admin` · `common`
+`auth` · `user` · `organization` · `merch` · `cart` · `order` · `wishlist` · `event` · `notification` · `admin` · `common`
 
 Each follows: `entity/ → repository/ → dto/ → service/ → controller/`
 
@@ -56,6 +56,7 @@ Both swap automatically via `@Profile`:
 
 - **`StorageService`** — `DevStorageService` (dev/docker, no-op) vs `SupabaseStorageServiceImpl` (production S3-compatible). Never store images as Base64/BLOB in the DB.
 - **`EmailService`** — `DevEmailService` (dev/docker, logs OTP to console) vs `JavaMailEmailService` (production SMTP, all methods `@Async`). Three methods: `sendOtp`, `sendPasswordReset`, `sendOrderStatusUpdate`.
+- **`NotificationService`** — creates in-app `Notification` records for CUSTOMER users (e.g., order moved to `READY`). Queried via `GET /api/v1/customer/notifications`; supports mark-read and unread-count.
 
 ### Security
 
