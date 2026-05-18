@@ -97,6 +97,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
             return authHeader.substring(BEARER_PREFIX.length());
         }
+        // EventSource cannot set custom headers, so SSE endpoints accept token as a query param.
+        String path = request.getServletPath();
+        if ("/api/v1/customer/notifications/stream".equals(path)
+                || "/api/v1/organizer/notifications/stream".equals(path)) {
+            String queryToken = request.getParameter("token");
+            if (queryToken != null && !queryToken.isBlank()) {
+                return queryToken;
+            }
+        }
         return null;
     }
 }

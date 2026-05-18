@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
 import { cacheDelete, cacheKey } from "../lib/sessionCache";
@@ -35,6 +35,7 @@ import {
 import { uploadEventImage, uploadMerchImage, uploadOrganizerImage } from "../api/storage";
 import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
+import { useNotificationStream } from "../hooks/useNotificationStream";
 import type {
   CancelOrderRequest,
   CategoryResponse,
@@ -1139,7 +1140,7 @@ function OrgCancelModal({
 
 // ─── Orders Tab ────────────────────────────────────────────────────────────────
 
-function OrgOrdersTab({ orgId }: { orgId: string }) {
+function OrgOrdersTab({ orgId, refreshTrigger }: { orgId: string; refreshTrigger?: number }) {
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
@@ -1155,7 +1156,7 @@ function OrgOrdersTab({ orgId }: { orgId: string }) {
       .finally(() => setIsLoading(false));
   };
 
-  useEffect(() => { load(); }, [orgId, filterStatus]);
+  useEffect(() => { load(); }, [orgId, filterStatus, refreshTrigger]);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdatingId(orderId);
@@ -1838,6 +1839,21 @@ export function OrganizerDashboardPage() {
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("merch");
   const [showCreateOrg, setShowCreateOrg] = useState(false);
+  const [orderRefreshTrigger, setOrderRefreshTrigger] = useState(0);
+
+  const handleOrgOrderEvent = useCallback((data: unknown) => {
+    const event = data as { type?: string };
+    if (event?.type === "NEW_ORDER") {
+      toast.info("Có đơn hàng mới!");
+    }
+    setOrderRefreshTrigger((t) => t + 1);
+  }, []);
+
+  useNotificationStream({
+    path: "/api/v1/organizer/notifications/stream",
+    enabled: !!user && user.role === "ORGANIZER",
+    onMessage: handleOrgOrderEvent,
+  });
 
   useEffect(() => {
     if (!user || user.role !== "ORGANIZER") return;
@@ -1969,7 +1985,7 @@ export function OrganizerDashboardPage() {
                 {/* Tab Content */}
                 {activeTab === "merch" && <MerchTab orgId={selectedOrgId} />}
                 {activeTab === "events" && <EventsTab orgId={selectedOrgId} />}
-                {activeTab === "orders" && <OrgOrdersTab orgId={selectedOrgId} />}
+                {activeTab === "orders" && <OrgOrdersTab orgId={selectedOrgId} refreshTrigger={orderRefreshTrigger} />}
                 {activeTab === "pickup" && <PickupTab orgId={selectedOrgId} />}
                 {activeTab === "profile" && (
                   <ProfileTab

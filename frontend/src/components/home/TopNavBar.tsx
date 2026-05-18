@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthStore } from "../../stores/authStore";
 import { logout } from "../../api/auth";
 import { getCustomerProfile, getOrganizerProfile } from "../../api/profile";
 import { getNotifications, getUnreadCount, markAllNotificationsRead, markNotificationRead } from "../../api/notifications";
 import type { NotificationResponse } from "../../types/shared";
+import { useNotificationStream } from "../../hooks/useNotificationStream";
 
 const logoHeaderUrl = "/assets/figma/logo-header.svg";
 const accountIconUrl = "/assets/figma/account-icon.svg";
@@ -125,17 +126,26 @@ export function TopNavBar() {
     setIsNotifOpen(false);
   }, [location.pathname, location.search, location.hash]);
 
-  // Poll unread count every 60 s for CUSTOMER role
+  // Load initial unread count for CUSTOMER role
   useEffect(() => {
     if (!user || user.role !== "CUSTOMER") return;
-    const load = () =>
-      getUnreadCount()
-        .then((r) => setUnreadCount(r.data?.unreadCount ?? 0))
-        .catch(() => {});
-    load();
-    const id = window.setInterval(load, 60_000);
-    return () => window.clearInterval(id);
+    getUnreadCount()
+      .then((r) => setUnreadCount(r.data?.unreadCount ?? 0))
+      .catch(() => {});
   }, [user]);
+
+  const handleIncomingNotification = useCallback((data: unknown) => {
+    const n = data as NotificationResponse;
+    setUnreadCount((c) => c + 1);
+    setNotifications((prev) => [n, ...prev]);
+    window.dispatchEvent(new CustomEvent("order-status-changed"));
+  }, []);
+
+  useNotificationStream({
+    path: "/api/v1/customer/notifications/stream",
+    enabled: !!user && user.role === "CUSTOMER",
+    onMessage: handleIncomingNotification,
+  });
 
   // Close notif panel on outside click
   useEffect(() => {

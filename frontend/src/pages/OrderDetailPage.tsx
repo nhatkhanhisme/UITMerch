@@ -226,6 +226,13 @@ export function OrderDetailPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    const handler = () => setRefreshTrigger((t) => t + 1);
+    window.addEventListener("order-status-changed", handler);
+    return () => window.removeEventListener("order-status-changed", handler);
+  }, []);
 
   useEffect(() => {
     if (!id || !user || user.role !== "CUSTOMER") return;
@@ -247,7 +254,7 @@ export function OrderDetailPage() {
     return () => {
       active = false;
     };
-  }, [id, user]);
+  }, [id, user, refreshTrigger]);
 
   if (!user) {
     return <Navigate replace state={{ from: `/orders/${id}` }} to="/auth" />;
