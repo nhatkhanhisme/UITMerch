@@ -4,6 +4,7 @@ import com.uitmerch.backend.common.model.ApiResponse;
 import com.uitmerch.backend.common.model.PaginationMeta;
 import com.uitmerch.backend.notification.dto.NotificationResponse;
 import com.uitmerch.backend.notification.service.NotificationService;
+import com.uitmerch.backend.notification.service.SseEmitterManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,9 +14,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +31,14 @@ import java.util.UUID;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final SseEmitterManager sseEmitterManager;
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @Operation(summary = "SSE stream — real-time notification push for the authenticated customer")
+    public SseEmitter stream(@RequestAttribute("userId") String userId) {
+        return sseEmitterManager.add(UUID.fromString(userId));
+    }
 
     @GetMapping
     @PreAuthorize("hasRole('CUSTOMER')")

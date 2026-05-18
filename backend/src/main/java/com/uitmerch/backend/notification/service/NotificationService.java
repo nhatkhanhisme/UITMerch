@@ -18,16 +18,18 @@ import java.util.UUID;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final SseEmitterManager sseEmitterManager;
 
     @Transactional
     public void push(UUID userId, String title, String message, NotificationType type, UUID relatedOrderId) {
-        notificationRepository.save(Notification.builder()
+        Notification saved = notificationRepository.save(Notification.builder()
             .userId(userId)
             .title(title)
             .message(message)
             .type(type)
             .relatedOrderId(relatedOrderId)
             .build());
+        sseEmitterManager.send(userId, NotificationResponse.from(saved));
     }
 
     @Transactional(readOnly = true)

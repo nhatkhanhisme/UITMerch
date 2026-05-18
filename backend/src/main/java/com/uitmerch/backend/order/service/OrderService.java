@@ -12,6 +12,7 @@ import com.uitmerch.backend.common.service.EmailService;
 import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.notification.service.NotificationService;
+import com.uitmerch.backend.notification.service.SseEmitterManager;
 import com.uitmerch.backend.order.dto.*;
 import com.uitmerch.backend.order.entity.Order;
 import com.uitmerch.backend.order.entity.OrderItem;
@@ -46,6 +47,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
+    private final SseEmitterManager sseEmitterManager;
     private final PickupScheduleRepository pickupScheduleRepository;
 
     // ------------------------------------------------------------------ //
@@ -118,6 +120,7 @@ public class OrderService {
             orderItems.forEach(item -> item.setOrderId(orderId));
             List<OrderItem> savedItems = orderItemRepository.saveAll(orderItems);
 
+            notifyOrganizer(orgId, order, "NEW_ORDER");
             results.add(OrderResponse.from(order, savedItems));
         }
 
@@ -168,6 +171,7 @@ public class OrderService {
             .build();
         orderItem = orderItemRepository.save(orderItem);
 
+        notifyOrganizer(merch.getOrgId(), order, "NEW_ORDER");
         return OrderResponse.from(order, List.of(orderItem));
     }
 
@@ -242,6 +246,7 @@ public class OrderService {
             orderItems.forEach(item -> item.setOrderId(orderId));
             List<OrderItem> savedItems = orderItemRepository.saveAll(orderItems);
 
+            notifyOrganizer(orgId, order, "NEW_ORDER");
             results.add(OrderResponse.from(order, savedItems));
         }
 
@@ -339,6 +344,7 @@ public class OrderService {
         PickupSchedule schedule = loadPickupSchedule(order);
 
         notifyCustomerInApp(order, newStatus);
+        notifyOrganizer(order.getOrgId(), order, "ORDER_STATUS_CHANGED");
 
         return OrderResponse.from(order, items, schedule);
     }
@@ -371,6 +377,7 @@ public class OrderService {
         PickupSchedule schedule = loadPickupSchedule(order);
 
         notifyCustomerInApp(order, OrderStatus.COMPLETED);
+        notifyOrganizer(order.getOrgId(), order, "ORDER_STATUS_CHANGED");
 
         return OrderResponse.from(order, items, schedule);
     }
@@ -470,16 +477,17 @@ public class OrderService {
         }
 
         applyCancel(order, "customer", request.getCancelReason(), request.getCancelReasonNote());
-        order = orderRepository.save(order);
+        // saveAndFlush ensures the UPDATE is sent to DB before restoreStockForItems() calls
+        // @Modifying(clearAutomatically = true), which would otherwise evict the pending
+        // order UPDATE from Hibernate's action queue via session.clear().
+        order = orderRepository.saveAndFlush(order);
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
         restoreStockForItems(items);
 
-        // Notify customer (confirmation)
         sendCancelEmail(order, "customer");
-
-        // Notify org owner
         notifyOrgOwnerOfCancel(order);
+        notifyOrganizer(order.getOrgId(), order, "ORDER_CANCELLED");
 
         return OrderResponse.from(order, items);
     }
@@ -506,14 +514,14 @@ public class OrderService {
         }
 
         applyCancel(order, "organizer", request.getCancelReason(), request.getCancelReasonNote());
-        order = orderRepository.save(order);
+        order = orderRepository.saveAndFlush(order);
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
         restoreStockForItems(items);
 
-        // Notify customer
         sendCancelEmail(order, "organizer");
         notifyCustomerInApp(order, OrderStatus.CANCELLED);
+        notifyOrganizer(order.getOrgId(), order, "ORDER_CANCELLED");
 
         return OrderResponse.from(order, items);
     }
@@ -594,6 +602,22 @@ public class OrderService {
     private PickupSchedule loadPickupSchedule(Order order) {
         if (order.getPickupScheduleId() == null) return null;
         return pickupScheduleRepository.findById(order.getPickupScheduleId()).orElse(null);
+    }
+
+    private void notifyOrganizer(UUID orgId, Order order, String eventType) {
+        try {
+            Organization org = organizationService.getOrganizationEntityById(orgId);
+            String shortId = order.getId().toString().substring(0, 8).toUpperCase();
+            Map<String, Object> event = new LinkedHashMap<>();
+            event.put("type", eventType);
+            event.put("orgId", orgId.toString());
+            event.put("orderId", order.getId().toString());
+            event.put("shortId", shortId);
+            event.put("totalAmount", order.getTotalAmount());
+            sseEmitterManager.send(org.getOwnerId(), event);
+        } catch (Exception e) {
+            log.warn("Failed to send SSE {} event to organizer for org {}: {}", eventType, orgId, e.getMessage());
+        }
     }
 
     private void notifyCustomerInApp(Order order, OrderStatus status) {
