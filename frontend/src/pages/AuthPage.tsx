@@ -3,11 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
 import { Button, Input } from "../components/ui";
 import {
+  forgotPassword,
   getApiErrorMessage,
   login,
   registerCustomer,
   registerOrganizer,
   resendOtp,
+  resetPassword,
   toAuthSession,
   verifyEmail,
 } from "../api/auth";
@@ -36,7 +38,6 @@ const initialFormState = {
   confirmPassword: "",
   fullName: "",
   phone: "",
-  address: "",
   otpCode: "",
 };
 
@@ -54,6 +55,16 @@ export function AuthPage() {
   const [otpSuccess, setOtpSuccess] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"email" | "reset">("email");
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [resetOtpCode, setResetOtpCode] = useState("");
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
+  const [isSendingForgot, setIsSendingForgot] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [forgotError, setForgotError] = useState<string | null>(null);
+  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const setSession = useAuthStore((state) => state.setSession);
@@ -125,7 +136,6 @@ export function AuthPage() {
         password: formState.password,
         fullName: formState.fullName,
         phone: formState.phone || undefined,
-        address: formState.address || undefined,
       };
 
       const response =
@@ -295,6 +305,24 @@ export function AuthPage() {
                 value={formState.password}
               />
 
+              {mode === "signin" ? (
+                <div className="-mt-2 text-right">
+                  <button
+                    className="font-sans text-xs text-gray transition hover:text-black-blue"
+                    onClick={() => {
+                      setForgotEmail("");
+                      setForgotStep("email");
+                      setForgotError(null);
+                      setForgotSuccess(null);
+                      setShowForgotModal(true);
+                    }}
+                    type="button"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
+              ) : null}
+
               {mode === "register" ? (
                 <Input
                   label="Xác nhận mật khẩu"
@@ -308,23 +336,14 @@ export function AuthPage() {
               ) : null}
 
               {mode === "register" && accountType === "CUSTOMER" ? (
-                <>
-                  <Input
-                    label="Số điện thoại"
-                    name="phone"
-                    onChange={handleInputChange}
-                    placeholder="Nhập số điện thoại (dùng cho giao hàng)"
-                    type="tel"
-                    value={formState.phone}
-                  />
-                  <Input
-                    label="Địa chỉ giao hàng"
-                    name="address"
-                    onChange={handleInputChange}
-                    placeholder="Số nhà, đường, phường/xã, quận/huyện..."
-                    value={formState.address}
-                  />
-                </>
+                <Input
+                  label="Số điện thoại"
+                  name="phone"
+                  onChange={handleInputChange}
+                  placeholder="Nhập số điện thoại của bạn"
+                  type="tel"
+                  value={formState.phone}
+                />
               ) : null}
 
               <Button
@@ -338,6 +357,175 @@ export function AuthPage() {
           </div>
         </section>
       </div>
+
+      {showForgotModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-panel border border-white/70 bg-white/95 p-6 shadow-2xl backdrop-blur">
+            <div className="mb-5 text-center">
+              <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-aqua/20 text-2xl">
+                🔑
+              </div>
+              <h2 className="font-fredoka text-2xl font-bold text-black-blue">Đặt lại mật khẩu</h2>
+              <p className="mt-1 text-sm text-gray">
+                {forgotStep === "email"
+                  ? "Nhập email để nhận mã OTP khôi phục."
+                  : <>Mã OTP đã được gửi đến <strong>{forgotEmail}</strong></>}
+              </p>
+            </div>
+
+            {forgotError ? (
+              <div className="mb-4 rounded-xl border border-peach bg-peach/20 px-3 py-2 text-sm text-black-blue">
+                {forgotError}
+              </div>
+            ) : null}
+
+            {forgotSuccess ? (
+              <div className="mb-4 rounded-xl border border-aqua bg-aqua/20 px-3 py-2 text-sm text-black-blue">
+                {forgotSuccess}
+              </div>
+            ) : null}
+
+            {forgotStep === "email" ? (
+              <div className="grid gap-3">
+                <div>
+                  <label className="mb-1 block font-sans text-xs font-semibold text-slate/70">
+                    Email
+                  </label>
+                  <input
+                    autoFocus
+                    className="w-full rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-black-blue shadow-sm focus:outline-none focus:ring-2 focus:ring-aqua"
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="you@uit.edu.vn"
+                    type="email"
+                    value={forgotEmail}
+                  />
+                </div>
+                <Button
+                  className="w-full"
+                  loading={isSendingForgot}
+                  onClick={async () => {
+                    if (!forgotEmail.trim()) {
+                      setForgotError("Vui lòng nhập email.");
+                      return;
+                    }
+                    setForgotError(null);
+                    setForgotSuccess(null);
+                    setIsSendingForgot(true);
+                    try {
+                      await forgotPassword(forgotEmail.trim());
+                      setResetOtpCode("");
+                      setResetNewPassword("");
+                      setResetConfirmPassword("");
+                      setForgotSuccess("Mã OTP đã được gửi. Kiểm tra hộp thư của bạn.");
+                      setForgotStep("reset");
+                    } catch (err) {
+                      setForgotError(getApiErrorMessage(err, "Không thể gửi mã OTP. Thử lại sau."));
+                    } finally {
+                      setIsSendingForgot(false);
+                    }
+                  }}
+                  type="button"
+                >
+                  Gửi mã OTP
+                </Button>
+                <button
+                  className="font-sans text-sm text-gray transition hover:text-black-blue"
+                  onClick={() => setShowForgotModal(false)}
+                  type="button"
+                >
+                  Hủy
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                <div>
+                  <label className="mb-1 block font-sans text-xs font-semibold text-slate/70">
+                    Mã OTP (6 chữ số)
+                  </label>
+                  <input
+                    autoFocus
+                    className="w-full rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-center text-2xl font-bold tracking-[0.5em] text-black-blue shadow-sm focus:outline-none focus:ring-2 focus:ring-aqua"
+                    maxLength={6}
+                    onChange={(e) => setResetOtpCode(e.target.value.replace(/\D/g, ""))}
+                    placeholder="______"
+                    type="text"
+                    value={resetOtpCode}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-sans text-xs font-semibold text-slate/70">
+                    Mật khẩu mới
+                  </label>
+                  <input
+                    className="w-full rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-black-blue shadow-sm focus:outline-none focus:ring-2 focus:ring-aqua"
+                    onChange={(e) => setResetNewPassword(e.target.value)}
+                    placeholder="Mật khẩu mới"
+                    type="password"
+                    value={resetNewPassword}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block font-sans text-xs font-semibold text-slate/70">
+                    Xác nhận mật khẩu mới
+                  </label>
+                  <input
+                    className="w-full rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-black-blue shadow-sm focus:outline-none focus:ring-2 focus:ring-aqua"
+                    onChange={(e) => setResetConfirmPassword(e.target.value)}
+                    placeholder="Nhập lại mật khẩu mới"
+                    type="password"
+                    value={resetConfirmPassword}
+                  />
+                </div>
+                <Button
+                  className="w-full"
+                  loading={isResettingPassword}
+                  onClick={async () => {
+                    if (resetOtpCode.length !== 6) {
+                      setForgotError("Vui lòng nhập đủ 6 chữ số OTP.");
+                      return;
+                    }
+                    if (!resetNewPassword || resetNewPassword.length < 6) {
+                      setForgotError("Mật khẩu mới phải có ít nhất 6 ký tự.");
+                      return;
+                    }
+                    if (resetNewPassword !== resetConfirmPassword) {
+                      setForgotError("Mật khẩu xác nhận không khớp.");
+                      return;
+                    }
+                    setForgotError(null);
+                    setForgotSuccess(null);
+                    setIsResettingPassword(true);
+                    try {
+                      await resetPassword({ email: forgotEmail, otpCode: resetOtpCode, newPassword: resetNewPassword });
+                      setShowForgotModal(false);
+                      setMode("signin");
+                      setSuccessMessage("Mật khẩu đã được đặt lại. Bạn có thể đăng nhập ngay.");
+                    } catch (err) {
+                      setForgotError(getApiErrorMessage(err, "Không thể đặt lại mật khẩu. Kiểm tra mã OTP và thử lại."));
+                    } finally {
+                      setIsResettingPassword(false);
+                    }
+                  }}
+                  type="button"
+                >
+                  Đổi mật khẩu
+                </Button>
+                <button
+                  className="font-sans text-sm text-gray transition hover:text-black-blue"
+                  onClick={() => {
+                    setForgotStep("email");
+                    setForgotError(null);
+                    setForgotSuccess(null);
+                  }}
+                  type="button"
+                >
+                  ← Dùng email khác
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {showOtpModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">

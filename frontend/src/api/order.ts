@@ -1,9 +1,12 @@
 import { apiClient } from "./client";
 import type {
   ApiResponse,
+  CancelOrderRequest,
   GuestOrderRequest,
   InstantOrderRequest,
   OrderResponse,
+  PickupScheduleRequest,
+  PickupScheduleResponse,
   UpdateOrderStatusRequest,
 } from "../types/shared";
 
@@ -46,9 +49,10 @@ export async function createInstantOrder(request: InstantOrderRequest) {
   return data;
 }
 
-export async function cancelCustomerOrder(id: string) {
+export async function cancelCustomerOrder(id: string, request: CancelOrderRequest) {
   const { data } = await apiClient.patch<ApiResponse<OrderResponse>>(
     `/api/v1/customer/orders/${id}/cancel`,
+    request,
   );
   return data;
 }
@@ -84,6 +88,48 @@ export async function updateOrgOrderStatus(
   const { data } = await apiClient.patch<ApiResponse<OrderResponse>>(
     `/api/v1/organizations/${orgId}/orders/${orderId}/status`,
     request,
+  );
+  return data;
+}
+
+export async function cancelOrgOrder(
+  orgId: string,
+  orderId: string,
+  request: CancelOrderRequest,
+) {
+  const { data } = await apiClient.patch<ApiResponse<OrderResponse>>(
+    `/api/v1/organizations/${orgId}/orders/${orderId}/cancel`,
+    request,
+  );
+  return data;
+}
+
+export async function checkInOrder(orgId: string, orderId: string) {
+  const { data } = await apiClient.patch<ApiResponse<OrderResponse>>(
+    `/api/v1/organizations/${orgId}/orders/${orderId}/checkin`,
+  );
+  return data;
+}
+
+export async function createPickupSchedule(orgId: string, request: PickupScheduleRequest) {
+  const { data } = await apiClient.post<ApiResponse<PickupScheduleResponse>>(
+    `/api/v1/organizations/${orgId}/pickup-schedules`,
+    request,
+  );
+  return data;
+}
+
+export async function getPickupSchedules(orgId: string, params?: { page?: number; size?: number }) {
+  const { data } = await apiClient.get<ApiResponse<PickupScheduleResponse[]>>(
+    `/api/v1/organizations/${orgId}/pickup-schedules`,
+    { params },
+  );
+  return data;
+}
+
+export async function getPickupScheduleOrders(orgId: string, scheduleId: string) {
+  const { data } = await apiClient.get<ApiResponse<OrderResponse[]>>(
+    `/api/v1/organizations/${orgId}/pickup-schedules/${scheduleId}/orders`,
   );
   return data;
 }

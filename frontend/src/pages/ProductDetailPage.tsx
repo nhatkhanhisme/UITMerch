@@ -1,10 +1,10 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { findProductById, MOCK_PRODUCTS } from "../mocks/merchData";
 import type { MockProduct } from "../mocks/merchData";
 import { getPublicMerchDetail } from "../api/merch";
 import { getPublicOrganizationDetail } from "../api/organization";
-import { createGuestCheckoutOrder } from "../api/order";
+import { createGuestCheckoutOrder, createInstantOrder } from "../api/order";
 import { addCartItem } from "../api/cart";
 import { addToWishlist, getWishlist, removeFromWishlist } from "../api/wishlist";
 import { getCustomerProfile } from "../api/profile";
@@ -158,9 +158,11 @@ function PurchasePanel({
   product: MockProduct;
 }) {
   const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
   const isCustomer = user?.role === "CUSTOMER";
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -183,7 +185,6 @@ function PurchasePanel({
   const [showCheckout, setShowCheckout] = useState(false);
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
-  const [guestAddress, setGuestAddress] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -196,16 +197,12 @@ function PurchasePanel({
     getCustomerProfile()
       .then((res) => {
         if (!active || !res.data) return;
-        const { fullName, phone, address, email } = res.data as { fullName?: string; phone?: string | null; address?: string | null; email?: string };
-        if (phone && address) {
-          setGuestName(fullName ?? user?.fullName ?? "");
+        const { fullName, phone, email } = res.data as { fullName?: string; phone?: string | null; email?: string };
+        setGuestName(fullName ?? user?.fullName ?? "");
+        setGuestEmail(email ?? user?.email ?? "");
+        if (phone) {
           setGuestPhone(phone);
-          setGuestAddress(address);
-          setGuestEmail(email ?? user?.email ?? "");
           setShippingPrefilled(true);
-        } else {
-          setGuestName(user?.fullName ?? "");
-          setGuestEmail(user?.email ?? "");
         }
       })
       .catch(() => {
@@ -214,6 +211,19 @@ function PurchasePanel({
       });
     return () => { active = false; };
   }, [isCustomer, user?.fullName, user?.email]);
+
+  const handleBuyNow = async () => {
+    setIsBuyingNow(true);
+    try {
+      await createInstantOrder({ merchId: product.id, quantity });
+      toast.success("Đặt hàng thành công!");
+      navigate("/orders");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Không thể đặt hàng. Vui lòng thử lại."));
+    } finally {
+      setIsBuyingNow(false);
+    }
+  };
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -257,33 +267,25 @@ function PurchasePanel({
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!guestName.trim() || !guestPhone.trim() || !guestAddress.trim()) {
-      toast.error("Vui lòng điền đầy đủ Tên, Số điện thoại và Địa chỉ giao hàng.");
+    if (!guestName.trim() || !guestPhone.trim()) {
+      toast.error("Vui lòng điền đầy đủ Họ tên và Số điện thoại.");
       return;
     }
 
     setIsSubmitting(true);
     try {
       await createGuestCheckoutOrder({
-        guestAddress,
         guestEmail: guestEmail.trim() || undefined,
-        guestName,
-        guestPhone,
-        items: [
-          {
-            merchId: product.id,
-            quantity,
-          },
-        ],
+        guestName: guestName.trim(),
+        guestPhone: guestPhone.trim(),
+        items: [{ merchId: product.id, quantity }],
         note: note.trim() || undefined,
       });
 
       setOrderPlaced(true);
-      toast.success("Đặt hàng thành công! Đơn hàng sẽ được thanh toán COD.");
-    } catch {
-      toast.error(
-        "Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại sau giây lát.",
-      );
+      toast.success("Đặt trước thành công!");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Không thể tạo đơn hàng. Vui lòng thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -297,7 +299,7 @@ function PurchasePanel({
             ✓
           </div>
           <h2 className="font-fredoka text-3xl font-bold text-black-blue">
-            Đặt hàng thành công!
+            Đặt trước thành công!
           </h2>
           <p className="mt-3 text-sm leading-6 text-ink/70">
             Cảm ơn <strong>{guestName}</strong> đã ủng hộ sản phẩm của{" "}
@@ -306,7 +308,7 @@ function PurchasePanel({
 
           <div className="mt-6 rounded-2xl bg-white/50 p-4 text-left border border-white/60 space-y-2 text-xs">
             <p className="font-semibold text-black-blue border-b pb-2 text-sm">
-              Thông tin đơn hàng (COD)
+              Thông tin đặt trước
             </p>
             <p>
               <span className="text-ink/60">Vật phẩm:</span> {product.name}
@@ -319,9 +321,6 @@ function PurchasePanel({
             </p>
             <p>
               <span className="text-ink/60">SĐT:</span> {guestPhone}
-            </p>
-            <p>
-              <span className="text-ink/60">Giao đến:</span> {guestAddress}
             </p>
             <p className="pt-2 font-bold text-black-blue border-t mt-2 flex justify-between text-sm">
               <span>Tổng thanh toán:</span>
@@ -388,7 +387,7 @@ function PurchasePanel({
                 onClick={() => setShowCheckout(true)}
                 type="button"
               >
-                Mua ngay COD
+                Đặt trước
               </button>
             </div>
             {isCustomer && (
@@ -414,7 +413,7 @@ function PurchasePanel({
           >
             <div className="flex items-center justify-between border-b pb-2">
               <p className="font-fredoka font-bold text-black-blue">
-                Xác nhận đặt hàng (COD)
+                Xác nhận đặt trước
               </p>
               <button
                 className="text-xs text-ink/50 hover:text-black-blue"
@@ -425,11 +424,10 @@ function PurchasePanel({
               </button>
             </div>
 
-            <div className="rounded-xl bg-white/50 border border-white/70 p-3 space-y-1.5 text-sm">
-              <p className="text-xs font-semibold text-ink/50 uppercase mb-2">Thông tin giao hàng đã lưu</p>
+            <div className="rounded-xl bg-white/50 border border-white/70 p-3 space-y-1 text-sm">
+              <p className="text-xs font-semibold text-ink/50 uppercase mb-2">Thông tin nhận hàng</p>
               <p className="text-black-blue font-semibold">{guestName}</p>
               <p className="text-ink/70">{guestPhone}</p>
-              <p className="text-ink/70">{guestAddress}</p>
             </div>
 
             <div>
@@ -444,20 +442,13 @@ function PurchasePanel({
               />
             </div>
 
-            <div className="pt-1 space-y-2">
+            <div className="pt-1">
               <button
                 className="w-full rounded-full bg-aqua py-3 text-sm font-bold text-black-blue transition hover:bg-white hover:shadow-glass"
                 disabled={isSubmitting}
                 type="submit"
               >
-                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt hàng COD"}
-              </button>
-              <button
-                className="w-full text-xs text-ink/50 hover:text-black-blue transition"
-                onClick={() => setShippingPrefilled(false)}
-                type="button"
-              >
-                Dùng địa chỉ khác
+                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt trước"}
               </button>
             </div>
           </form>
@@ -468,7 +459,7 @@ function PurchasePanel({
           >
             <div className="flex items-center justify-between border-b pb-2">
               <p className="font-fredoka font-bold text-black-blue">
-                Thông tin nhận hàng (COD)
+                Thông tin đặt trước
               </p>
               <button
                 className="text-xs text-ink/50 hover:text-black-blue"
@@ -508,19 +499,6 @@ function PurchasePanel({
 
             <div>
               <label className="block text-xs font-semibold text-ink/70 mb-1">
-                Địa chỉ giao hàng *
-              </label>
-              <textarea
-                className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua h-16 resize-none"
-                onChange={(e) => setGuestAddress(e.target.value)}
-                placeholder="Số nhà, đường, phường/xã, quận/huyện..."
-                required
-                value={guestAddress}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-ink/70 mb-1">
                 Email (Tùy chọn)
               </label>
               <input
@@ -550,7 +528,7 @@ function PurchasePanel({
                 disabled={isSubmitting}
                 type="submit"
               >
-                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt hàng COD"}
+                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt trước"}
               </button>
             </div>
           </form>

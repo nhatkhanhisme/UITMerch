@@ -57,30 +57,20 @@ function formatDate(isoString?: string) {
 
 function getStatusBadge(status?: string) {
   switch (status?.toUpperCase()) {
-    case "UPCOMING":
+    case "PUBLISHED":
       return (
-        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 border border-blue-300">
-          Sắp diễn ra
-        </span>
-      );
-    case "ONGOING":
-      return (
-        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 border border-green-300 animate-pulse">
+        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 border border-green-300">
           Đang diễn ra
         </span>
       );
-    case "COMPLETED":
+    case "ENDED":
       return (
         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-600 border border-gray-300">
           Đã kết thúc
         </span>
       );
     default:
-      return (
-        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-300">
-          {status || "Thông tin"}
-        </span>
-      );
+      return null;
   }
 }
 

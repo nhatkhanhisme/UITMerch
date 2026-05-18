@@ -61,7 +61,7 @@ function OrderSuccess({
         ✓
       </div>
       <h2 className="mt-6 font-fredoka text-4xl font-bold text-black-blue">
-        Đặt hàng thành công!
+        Đặt trước thành công!
       </h2>
       <p className="mt-3 text-sm leading-7 text-ink/70">
         {orders.length === 1
@@ -100,7 +100,6 @@ export function CartPage() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [shippingName, setShippingName] = useState("");
   const [shippingPhone, setShippingPhone] = useState("");
-  const [shippingAddress, setShippingAddress] = useState("");
 
   useEffect(() => {
     if (!user || user.role !== "CUSTOMER") return;
@@ -166,13 +165,12 @@ export function CartPage() {
   };
 
   const openAddressForm = async () => {
-    if (!shippingName && !shippingPhone && !shippingAddress) {
+    if (!shippingName && !shippingPhone) {
       try {
         const res = await getCustomerProfile();
         if (res.data) {
           setShippingName(res.data.fullName ?? user?.fullName ?? "");
           setShippingPhone(res.data.phone ?? "");
-          setShippingAddress(res.data.address ?? "");
         }
       } catch {
         setShippingName(user?.fullName ?? "");
@@ -183,8 +181,8 @@ export function CartPage() {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!shippingName.trim() || !shippingPhone.trim() || !shippingAddress.trim()) {
-      toast.error("Vui lòng điền đầy đủ tên, số điện thoại và địa chỉ nhận hàng.");
+    if (!shippingName.trim() || !shippingPhone.trim()) {
+      toast.error("Vui lòng điền đầy đủ Họ tên và Số điện thoại.");
       return;
     }
     setIsCheckingOut(true);
@@ -194,7 +192,6 @@ export function CartPage() {
         note: checkoutNote.trim() || undefined,
         shippingName: shippingName.trim(),
         shippingPhone: shippingPhone.trim(),
-        shippingAddress: shippingAddress.trim(),
       });
       setPlacedOrders(res.data);
       toast.success("Đặt hàng thành công!");
@@ -363,18 +360,18 @@ export function CartPage() {
                       onClick={openAddressForm}
                       type="button"
                     >
-                      {isCheckingOut ? "Đang xử lý..." : "Đặt hàng (COD)"}
+                      {isCheckingOut ? "Đang xử lý..." : "Đặt trước"}
                     </button>
 
                     <p className="mt-3 text-center text-xs text-ink/45">
-                      Thanh toán khi nhận hàng (COD)
+                      Nhận hàng tại trường
                     </p>
                   </>
                 ) : (
                   <form className="mt-4 space-y-3" onSubmit={handleCheckout}>
                     <div className="flex items-center justify-between border-b border-ink/10 pb-3 mb-1">
                       <p className="font-fredoka font-bold text-black-blue text-base">
-                        Thông tin nhận hàng (COD)
+                        Thông tin đặt trước
                       </p>
                       <button
                         className="text-xs text-ink/50 hover:text-black-blue"
@@ -408,16 +405,6 @@ export function CartPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink/70 mb-1">Địa chỉ giao hàng *</label>
-                      <textarea
-                        className="w-full resize-none rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua h-14"
-                        onChange={e => setShippingAddress(e.target.value)}
-                        placeholder="Số nhà, đường, phường/xã..."
-                        required
-                        value={shippingAddress}
-                      />
-                    </div>
-                    <div>
                       <label className="block text-xs font-semibold text-ink/70 mb-1">Ghi chú (tùy chọn)</label>
                       <input
                         className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua"
@@ -432,7 +419,7 @@ export function CartPage() {
                       disabled={isCheckingOut}
                       type="submit"
                     >
-                      {isCheckingOut ? "Đang xử lý..." : "Xác nhận đặt hàng COD"}
+                      {isCheckingOut ? "Đang xử lý..." : "Xác nhận đặt trước"}
                     </button>
                   </form>
                 )}

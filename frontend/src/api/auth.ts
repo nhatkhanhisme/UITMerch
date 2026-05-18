@@ -135,19 +135,45 @@ export async function logout(token: string) {
   return data;
 }
 
+// Maps known technical/English backend messages to user-friendly Vietnamese text.
+// Checked as case-insensitive substrings so partial matches still translate.
+const BACKEND_MESSAGE_MAP: Array<[string, string]> = [
+  ["already in your cart", "Sản phẩm đã có trong giỏ hàng. Bạn có thể thay đổi số lượng ngay trong giỏ."],
+  ["insufficient stock", "Số lượng tồn kho không đủ. Vui lòng chọn số lượng ít hơn."],
+  ["out of stock", "Sản phẩm đã hết hàng."],
+  ["not found", "Không tìm thấy thông tin yêu cầu. Vui lòng thử lại."],
+  ["unauthorized", "Bạn cần đăng nhập để thực hiện thao tác này."],
+  ["forbidden", "Bạn không có quyền thực hiện thao tác này."],
+  ["already exists", "Dữ liệu này đã tồn tại trong hệ thống."],
+  ["invalid otp", "Mã OTP không đúng hoặc đã hết hạn. Vui lòng thử lại."],
+  ["otp expired", "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới."],
+  ["email already", "Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác."],
+  ["password", "Mật khẩu không đúng. Vui lòng kiểm tra lại."],
+  ["network error", "Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng và thử lại."],
+];
+
+function translateBackendMessage(raw: string): string {
+  const lower = raw.toLowerCase();
+  for (const [pattern, friendly] of BACKEND_MESSAGE_MAP) {
+    if (lower.includes(pattern)) return friendly;
+  }
+  // Return the original if no translation matches — it may already be in Vietnamese.
+  return raw;
+}
+
 export function getApiErrorMessage(
   error: unknown,
-  fallbackMessage = "Something went wrong. Please try again.",
+  fallbackMessage = "Đã xảy ra lỗi. Vui lòng thử lại.",
 ) {
   if (axios.isAxiosError(error)) {
     const message = error.response?.data?.message;
     if (typeof message === "string" && message.trim().length > 0) {
-      return message;
+      return translateBackendMessage(message.trim());
     }
   }
 
   if (error instanceof Error && error.message.trim().length > 0) {
-    return error.message;
+    return translateBackendMessage(error.message.trim());
   }
 
   return fallbackMessage;

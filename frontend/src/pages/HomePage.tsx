@@ -63,13 +63,14 @@ export function HomePage() {
       updateHash(targetSection.id);
       targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
 
+      // Base lock: 800 ms. Subsequent momentum events extend it (see onWheel).
       if (snapTimeoutRef.current !== null) {
         window.clearTimeout(snapTimeoutRef.current);
       }
-
       snapTimeoutRef.current = window.setTimeout(() => {
         isSnappingRef.current = false;
-      }, 750);
+        snapTimeoutRef.current = null;
+      }, 800);
     };
 
     const observer = new IntersectionObserver(
@@ -98,9 +99,26 @@ export function HomePage() {
     });
 
     const onWheel = (event: WheelEvent) => {
+      // Ignore pinch-to-zoom and primarily horizontal gestures (e.g. trackpad
+      // swipe-left/right, which would otherwise be misread as "scroll up").
+      if (event.ctrlKey) return;
+      if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
+      // Ignore zero-delta events (pure horizontal or neutral).
+      if (event.deltaY === 0) return;
+
       event.preventDefault();
 
       if (isSnappingRef.current) {
+        // Snap in progress — extend the lock with each momentum event;
+        // release 400 ms after the last one so the gesture always lands on
+        // exactly one section.
+        if (snapTimeoutRef.current !== null) {
+          window.clearTimeout(snapTimeoutRef.current);
+        }
+        snapTimeoutRef.current = window.setTimeout(() => {
+          isSnappingRef.current = false;
+          snapTimeoutRef.current = null;
+        }, 400);
         return;
       }
 

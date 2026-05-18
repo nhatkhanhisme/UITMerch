@@ -1,12 +1,14 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
+import { cacheDelete, cacheKey } from "../lib/sessionCache";
 import {
   attachMerchToEvent,
   createEvent,
   deleteEvent,
   detachMerchFromEvent,
   getOwnEvents,
+  getPublicEvent,
   updateEvent,
 } from "../api/event";
 import {
@@ -21,16 +23,26 @@ import {
   getOwnOrganizations,
   updateOrganization,
 } from "../api/organization";
-import { getOrgOrders, updateOrgOrderStatus } from "../api/order";
+import {
+  cancelOrgOrder,
+  checkInOrder,
+  createPickupSchedule,
+  getOrgOrders,
+  getPickupScheduleOrders,
+  getPickupSchedules,
+  updateOrgOrderStatus,
+} from "../api/order";
 import { uploadEventImage, uploadMerchImage, uploadOrganizerImage } from "../api/storage";
 import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
-import type { CategoryResponse } from "../types/shared";
 import type {
+  CancelOrderRequest,
+  CategoryResponse,
   EventResponse,
   MerchResponse,
   OrderResponse,
   OrganizationResponse,
+  PickupScheduleResponse,
 } from "../types/shared";
 
 const ShaderBackground = lazy(() =>
@@ -52,28 +64,28 @@ function formatDate(d?: string) {
   return new Date(d).toLocaleDateString("vi-VN");
 }
 
-type Tab = "merch" | "events" | "orders" | "profile";
+type Tab = "merch" | "events" | "orders" | "pickup" | "profile";
 
+// Only non-cancel transitions here; cancel uses dedicated modal
 const ORDER_STATUS_TRANSITIONS: Record<string, string[]> = {
-  PENDING: ["CONFIRMED", "CANCELLED"],
-  CONFIRMED: ["READY_FOR_PICKUP", "CANCELLED"],
-  READY_FOR_PICKUP: ["SUCCESS"],
-  SUCCESS: [],
+  PENDING: ["CONFIRMED"],
+  CONFIRMED: ["READY"],
+  READY: ["COMPLETED"],
+  COMPLETED: [],
   CANCELLED: [],
 };
 
 const ORDER_NEXT_LABELS: Record<string, string> = {
   CONFIRMED: "Xác nhận đơn",
-  READY_FOR_PICKUP: "Sẵn sàng lấy hàng",
-  SUCCESS: "Hoàn thành đơn",
-  CANCELLED: "Huỷ đơn",
+  READY: "Sẵn sàng lấy hàng",
+  COMPLETED: "Hoàn thành đơn",
 };
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
-  READY_FOR_PICKUP: "Sẵn sàng",
-  SUCCESS: "Hoàn thành",
+  READY: "Sẵn sàng nhận",
+  COMPLETED: "Hoàn thành",
   CANCELLED: "Đã huỷ",
   DRAFT: "Nháp",
   PUBLISHED: "Công bố",
@@ -222,6 +234,10 @@ function MerchTab({ orgId }: { orgId: string }) {
     e.preventDefault();
     if (!form.name.trim()) return;
     setIsSubmitting(true);
+    // The select stores the category UUID; backend expects the slug.
+    const categorySlug = form.categoryId
+      ? (categories.find(c => c.id === form.categoryId)?.slug || undefined)
+      : undefined;
     try {
       if (editingItem) {
         await updateMerch(orgId, editingItem.id, {
@@ -230,7 +246,7 @@ function MerchTab({ orgId }: { orgId: string }) {
           price: form.price ? parseFloat(form.price) : undefined,
           stock: parseInt(form.stock, 10),
           status: form.status,
-          categoryId: form.categoryId || undefined,
+          categorySlug,
           imageUrls: form.imageUrls.length > 0 ? form.imageUrls : undefined,
         });
         toast.success("Đã cập nhật vật phẩm.");
@@ -240,7 +256,7 @@ function MerchTab({ orgId }: { orgId: string }) {
           description: form.description.trim() || undefined,
           price: form.price ? parseFloat(form.price) : undefined,
           stock: parseInt(form.stock, 10),
-          categoryId: form.categoryId || undefined,
+          categorySlug,
           imageUrls: form.imageUrls.length > 0 ? form.imageUrls : undefined,
         });
         toast.success("Đã tạo vật phẩm.");
@@ -534,6 +550,8 @@ function EventsTab({ orgId }: { orgId: string }) {
   const [attachingId, setAttachingId] = useState<string | null>(null);
   const [confirmDeleteEventId, setConfirmDeleteEventId] = useState<string | null>(null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
+  // Merch pre-selected while the create form is open (before the event exists)
+  const [pendingMerchIds, setPendingMerchIds] = useState<Set<string>>(new Set());
 
   const load = () => {
     setIsLoading(true);
@@ -551,13 +569,22 @@ function EventsTab({ orgId }: { orgId: string }) {
 
   useEffect(() => { load(); }, [orgId]);
 
+  // Invalidate EventPage session cache so new/updated events appear immediately.
+  const bustEventsCache = () => {
+    cacheDelete(cacheKey("all_events", { filter: "newest" }));
+    cacheDelete(cacheKey("all_events", { filter: "upcoming" }));
+    cacheDelete("all_events");
+  };
+
   const openCreate = () => {
     setEditingEvent(null);
     setForm({ title: "", description: "", status: "DRAFT", startsAt: "", endsAt: "", coverUrl: "" });
+    setPendingMerchIds(new Set());
     setShowForm(true);
   };
 
-  const openEdit = (event: EventResponse) => {
+  const openEdit = async (event: EventResponse) => {
+    // Set immediately with what we have so the form opens right away
     setEditingEvent(event);
     setForm({
       title: event.title,
@@ -568,6 +595,13 @@ function EventsTab({ orgId }: { orgId: string }) {
       coverUrl: event.coverUrl ?? "",
     });
     setShowForm(true);
+    // Fetch full event to get the merch array (list endpoint omits it)
+    try {
+      const full = await getPublicEvent(event.id);
+      setEditingEvent(full.data);
+    } catch {
+      // Non-critical — proceed with partial data
+    }
   };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -589,6 +623,7 @@ function EventsTab({ orgId }: { orgId: string }) {
     setDeletingEventId(eventId);
     try {
       await deleteEvent(orgId, eventId);
+      bustEventsCache();
       setEvents(prev => prev.filter(e => e.id !== eventId));
       if (editingEvent?.id === eventId) { setShowForm(false); setEditingEvent(null); }
       setConfirmDeleteEventId(null);
@@ -614,21 +649,50 @@ function EventsTab({ orgId }: { orgId: string }) {
           endsAt: form.endsAt || undefined,
           coverUrl: form.coverUrl || undefined,
         });
+        bustEventsCache();
         // Preserve local merch state — server response may not include it
         const merged = { ...updated.data, merch: editingEvent.merch ?? updated.data.merch };
         setEvents(prev => prev.map(e => e.id === editingEvent.id ? merged : e));
         setEditingEvent(merged);
         toast.success("Đã cập nhật sự kiện.");
       } else {
-        await createEvent(orgId, {
+        const res = await createEvent(orgId, {
           title: form.title.trim(),
           description: form.description.trim() || undefined,
           startsAt: form.startsAt || undefined,
           endsAt: form.endsAt || undefined,
         });
-        toast.success("Đã tạo sự kiện.");
-        setShowForm(false);
-        load();
+
+        // Bulk-attach any merch pre-selected in the creation form
+        let attachedMerch: MerchResponse[] = [];
+        if (pendingMerchIds.size > 0) {
+          const results = await Promise.allSettled(
+            [...pendingMerchIds].map(id => attachMerchToEvent(orgId, res.data.id, id))
+          );
+          attachedMerch = [...pendingMerchIds]
+            .filter((_, i) => results[i].status === "fulfilled")
+            .map(id => orgMerch.find(m => m.id === id)!)
+            .filter(Boolean);
+        }
+        bustEventsCache();
+        setPendingMerchIds(new Set());
+
+        const newEvent = { ...res.data, merch: attachedMerch };
+        setEvents(prev => [newEvent, ...prev]);
+        setEditingEvent(newEvent);
+        setForm({
+          title: newEvent.title,
+          description: newEvent.description ?? "",
+          status: newEvent.status,
+          startsAt: newEvent.startsAt ? newEvent.startsAt.slice(0, 16) : "",
+          endsAt: newEvent.endsAt ? newEvent.endsAt.slice(0, 16) : "",
+          coverUrl: newEvent.coverUrl ?? "",
+        });
+        toast.success(
+          attachedMerch.length > 0
+            ? `Đã tạo sự kiện và thêm ${attachedMerch.length} vật phẩm.`
+            : "Đã tạo sự kiện. Thêm vật phẩm bên dưới nếu cần."
+        );
       }
     } catch (err) {
       toast.error(getApiErrorMessage(err));
@@ -766,6 +830,43 @@ function EventsTab({ orgId }: { orgId: string }) {
                 <input accept="image/*" className="hidden" disabled={isUploadingCover} onChange={handleCoverUpload} type="file" />
               </label>
             </div>
+
+            {/* Merch pre-selection — only for new events (no event ID yet) */}
+            {!editingEvent && orgMerch.length > 0 && (
+              <div className="rounded-xl border border-white/60 bg-white/30 p-4 space-y-2">
+                <p className="text-xs font-semibold text-ink/60 uppercase">
+                  Chọn vật phẩm cho sự kiện{pendingMerchIds.size > 0 ? ` (${pendingMerchIds.size} đã chọn)` : " (tuỳ chọn)"}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {orgMerch.map(m => {
+                    const selected = pendingMerchIds.has(m.id);
+                    return (
+                      <button
+                        className={[
+                          "flex items-center gap-2 rounded-full border pl-2 pr-3 py-1 text-xs font-semibold transition",
+                          selected
+                            ? "border-aqua bg-aqua/20 text-black-blue"
+                            : "border-white/60 bg-white/50 text-black-blue hover:border-aqua/50 hover:bg-aqua/10",
+                        ].join(" ")}
+                        key={m.id}
+                        onClick={() => setPendingMerchIds(prev => {
+                          const next = new Set(prev);
+                          if (next.has(m.id)) next.delete(m.id); else next.add(m.id);
+                          return next;
+                        })}
+                        type="button"
+                      >
+                        {m.images?.[0] && (
+                          <img alt="" className="size-5 rounded-full object-cover" src={m.images[0]} />
+                        )}
+                        {m.name}
+                        {selected && <span className="text-aqua">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <button
@@ -928,6 +1029,114 @@ function EventsTab({ orgId }: { orgId: string }) {
   );
 }
 
+// ─── Org Cancel Modal ──────────────────────────────────────────────────────────
+
+const ORG_CANCEL_REASONS = [
+  "Sản phẩm đã hết hàng",
+  "Sản phẩm không còn được phân phối",
+  "Thông tin đơn hàng không hợp lệ",
+  "Khách hàng không phản hồi sau nhiều lần liên hệ",
+  "Lý do khác",
+] as const;
+
+function OrgCancelModal({
+  onConfirm,
+  onClose,
+  isLoading,
+}: {
+  onConfirm: (req: CancelOrderRequest) => void;
+  onClose: () => void;
+  isLoading: boolean;
+}) {
+  const [selectedReason, setSelectedReason] = useState("");
+  const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const isOther = selectedReason === "Lý do khác";
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!selectedReason) { setError("Vui lòng chọn lý do huỷ đơn."); return; }
+    if (isOther && note.trim().length < 10) { setError("Lý do khác phải có ít nhất 10 ký tự."); return; }
+    onConfirm({
+      cancelReason: selectedReason,
+      cancelReasonNote: isOther ? note.trim() : undefined,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-panel border border-white/70 bg-white/95 p-6 shadow-2xl backdrop-blur">
+        <h2 className="font-fredoka text-xl font-bold text-black-blue">Huỷ đơn hàng</h2>
+        <p className="mt-1 text-sm text-ink/60">Khách hàng sẽ nhận được thông báo kèm lý do.</p>
+
+        <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            {ORG_CANCEL_REASONS.map((reason) => (
+              <label
+                key={reason}
+                className={[
+                  "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-2.5 text-sm transition",
+                  selectedReason === reason
+                    ? "border-aqua bg-aqua/10 font-semibold text-black-blue"
+                    : "border-white/60 bg-white/50 text-black-blue hover:border-aqua/50",
+                ].join(" ")}
+              >
+                <input
+                  checked={selectedReason === reason}
+                  className="sr-only"
+                  name="reason"
+                  onChange={() => { setSelectedReason(reason); if (reason !== "Lý do khác") setNote(""); setError(null); }}
+                  type="radio"
+                  value={reason}
+                />
+                {reason}
+              </label>
+            ))}
+          </div>
+
+          {isOther && (
+            <div>
+              <textarea
+                autoFocus
+                className="mt-1 h-20 w-full resize-none rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-none focus:ring-2 focus:ring-aqua"
+                maxLength={1000}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Nhập lý do (tối thiểu 10 ký tự)..."
+                value={note}
+              />
+              <p className="mt-1 text-right text-xs text-ink/40">{note.length}/1000</p>
+            </div>
+          )}
+
+          {error && (
+            <p className="rounded-xl border border-peach/50 bg-peach/10 px-3 py-2 text-sm text-black-blue">{error}</p>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <button
+              className="flex-1 rounded-full border border-peach/60 bg-peach/20 py-2.5 text-sm font-bold text-black-blue transition hover:bg-peach/40 disabled:opacity-50"
+              disabled={isLoading}
+              type="submit"
+            >
+              {isLoading ? "Đang huỷ..." : "Xác nhận huỷ"}
+            </button>
+            <button
+              className="flex-1 rounded-full border border-white/60 bg-white/60 py-2.5 text-sm font-semibold text-black-blue transition hover:bg-white"
+              disabled={isLoading}
+              onClick={onClose}
+              type="button"
+            >
+              Quay lại
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ─── Orders Tab ────────────────────────────────────────────────────────────────
 
 function OrgOrdersTab({ orgId }: { orgId: string }) {
@@ -935,6 +1144,8 @@ function OrgOrdersTab({ orgId }: { orgId: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const load = () => {
     setIsLoading(true);
@@ -949,9 +1160,9 @@ function OrgOrdersTab({ orgId }: { orgId: string }) {
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdatingId(orderId);
     try {
-      const res = await updateOrgOrderStatus(orgId, orderId, { status: newStatus });
-      setOrders(prev => prev.map(o => o.id === orderId ? res.data : o));
+      await updateOrgOrderStatus(orgId, orderId, { status: newStatus });
       toast.success("Đã cập nhật trạng thái đơn hàng.");
+      load();
     } catch (err) {
       toast.error(getApiErrorMessage(err));
     } finally {
@@ -959,107 +1170,112 @@ function OrgOrdersTab({ orgId }: { orgId: string }) {
     }
   };
 
+  const handleCancel = async (req: CancelOrderRequest) => {
+    if (!cancelTarget) return;
+    setIsCancelling(true);
+    try {
+      await cancelOrgOrder(orgId, cancelTarget, req);
+      setCancelTarget(null);
+      toast.success("Đã huỷ đơn hàng.");
+      load();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const ORG_STATUS_TABS = [
     { label: "Tất cả", value: "" },
     { label: "Chờ xác nhận", value: "PENDING" },
     { label: "Đã xác nhận", value: "CONFIRMED" },
-    { label: "Sẵn sàng", value: "READY_FOR_PICKUP" },
-    { label: "Hoàn thành", value: "SUCCESS" },
+    { label: "Sẵn sàng nhận", value: "READY" },
+    { label: "Hoàn thành", value: "COMPLETED" },
     { label: "Đã huỷ", value: "CANCELLED" },
   ];
 
   const STATUS_COLORS: Record<string, string> = {
     PENDING: "border-gold/50 bg-gold/15 text-black-blue",
     CONFIRMED: "border-aqua/50 bg-aqua/15 text-black-blue",
-    READY_FOR_PICKUP: "border-aqua/70 bg-aqua/25 text-black-blue",
-    SUCCESS: "border-green-400/50 bg-green-50 text-green-900",
+    READY: "border-aqua/70 bg-aqua/25 text-black-blue",
+    COMPLETED: "border-green-400/50 bg-green-50 text-green-900",
     CANCELLED: "border-peach/50 bg-peach/15 text-black-blue",
   };
 
   return (
-    <div className="space-y-5">
-      <h2 className="font-fredoka text-2xl font-bold text-black-blue">Đơn hàng đến</h2>
+    <>
+      <div className="space-y-5">
+        <h2 className="font-fredoka text-2xl font-bold text-black-blue">Đơn hàng đến</h2>
 
-      <div className="flex flex-wrap gap-2">
-        {ORG_STATUS_TABS.map(tab => (
-          <button
-            className={[
-              "rounded-full border px-4 py-1.5 text-xs font-semibold transition",
-              filterStatus === tab.value
-                ? "border-black-blue bg-black-blue text-white"
-                : "border-white/60 bg-white/50 text-black-blue hover:border-black-blue",
-            ].join(" ")}
-            key={tab.value}
-            onClick={() => setFilterStatus(tab.value)}
-            type="button"
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {isLoading ? (
-        <div className="py-12 text-center text-sm text-ink/60">Đang tải...</div>
-      ) : orders.length === 0 ? (
-        <div className="py-12 text-center rounded-panel border border-white/40 bg-white/30">
-          <p className="text-sm text-ink/60">Không có đơn hàng nào.</p>
+        <div className="flex flex-wrap gap-2">
+          {ORG_STATUS_TABS.map(tab => (
+            <button
+              className={[
+                "rounded-full border px-4 py-1.5 text-xs font-semibold transition",
+                filterStatus === tab.value
+                  ? "border-black-blue bg-black-blue text-white"
+                  : "border-white/60 bg-white/50 text-black-blue hover:border-black-blue",
+              ].join(" ")}
+              key={tab.value}
+              onClick={() => setFilterStatus(tab.value)}
+              type="button"
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {orders.map(order => {
-            const nextStatuses = ORDER_STATUS_TRANSITIONS[order.status] ?? [];
-            return (
-              <div className="rounded-panel border border-white/50 bg-white/40 p-5 shadow-glass backdrop-blur-xl" key={order.id}>
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-semibold text-ink/50">#{order.id.slice(0, 8).toUpperCase()}</p>
-                    <p className="text-xs text-ink/40">{formatDate(order.createdAt)}</p>
-                    {order.guestName && (
-                      <p className="text-sm font-bold text-black-blue">{order.guestName}</p>
-                    )}
-                    {order.guestPhone && (
-                      <p className="text-xs text-ink/60">{order.guestPhone}</p>
-                    )}
-                    {order.guestAddress && (
-                      <p className="text-xs text-ink/60 max-w-xs">{order.guestAddress}</p>
-                    )}
-                    {order.note && (
-                      <p className="text-xs italic text-ink/50">Ghi chú: {order.note}</p>
-                    )}
-                  </div>
-                  <span className={[
-                    "rounded-full border px-3 py-0.5 text-xs font-semibold shrink-0",
-                    STATUS_COLORS[order.status] ?? "border-white/60 bg-white/50 text-black-blue",
-                  ].join(" ")}>
-                    {STATUS_LABELS[order.status] ?? order.status}
-                  </span>
-                </div>
 
-                {order.items && order.items.length > 0 && (
-                  <div className="mt-3 space-y-1 border-t border-white/30 pt-3">
-                    {order.items.map(item => (
-                      <div className="flex justify-between text-xs text-ink/65" key={item.id}>
-                        <span>{item.merchName} × {item.quantity}</span>
-                        <span>{currencyFormatter.format(item.subtotal)}</span>
-                      </div>
-                    ))}
+        {isLoading ? (
+          <div className="py-12 text-center text-sm text-ink/60">Đang tải...</div>
+        ) : orders.length === 0 ? (
+          <div className="py-12 text-center rounded-panel border border-white/40 bg-white/30">
+            <p className="text-sm text-ink/60">Không có đơn hàng nào.</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {orders.map(order => {
+              const nextStatuses = ORDER_STATUS_TRANSITIONS[order.status] ?? [];
+              const canCancel = order.status === "PENDING" || order.status === "CONFIRMED";
+              return (
+                <div className="rounded-panel border border-white/50 bg-white/40 p-5 shadow-glass backdrop-blur-xl" key={order.id}>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <p className="font-mono text-xs font-semibold text-ink/50">#{order.id.slice(0, 8).toUpperCase()}</p>
+                      <p className="text-xs text-ink/40">{formatDate(order.createdAt)}</p>
+                      {order.guestName && <p className="text-sm font-bold text-black-blue">{order.guestName}</p>}
+                      {order.guestPhone && <p className="text-xs text-ink/60">{order.guestPhone}</p>}
+                      {order.note && <p className="text-xs italic text-ink/50">Ghi chú: {order.note}</p>}
+                      {order.status === "CANCELLED" && order.cancelReason && (
+                        <p className="text-xs text-peach-600 font-medium">Huỷ: {order.cancelReason}</p>
+                      )}
+                    </div>
+                    <span className={[
+                      "rounded-full border px-3 py-0.5 text-xs font-semibold shrink-0",
+                      STATUS_COLORS[order.status] ?? "border-white/60 bg-white/50 text-black-blue",
+                    ].join(" ")}>
+                      {STATUS_LABELS[order.status] ?? order.status}
+                    </span>
                   </div>
-                )}
 
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/30 pt-3">
-                  <p className="font-fredoka font-bold text-black-blue">
-                    {currencyFormatter.format(order.totalAmount)}
-                  </p>
-                  {nextStatuses.length > 0 && (
+                  {order.items && order.items.length > 0 && (
+                    <div className="mt-3 space-y-1 border-t border-white/30 pt-3">
+                      {order.items.map(item => (
+                        <div className="flex justify-between text-xs text-ink/65" key={item.id}>
+                          <span>{item.merchName} × {item.quantity}</span>
+                          <span>{currencyFormatter.format(item.subtotal)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/30 pt-3">
+                    <p className="font-fredoka font-bold text-black-blue">
+                      {currencyFormatter.format(order.totalAmount)}
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {nextStatuses.map(nextStatus => (
                         <button
-                          className={[
-                            "rounded-full border px-4 py-1.5 text-xs font-bold transition disabled:opacity-50",
-                            nextStatus === "CANCELLED"
-                              ? "border-peach/60 bg-peach/20 text-black-blue hover:bg-peach/40"
-                              : "border-aqua/60 bg-aqua/20 text-black-blue hover:bg-aqua/40",
-                          ].join(" ")}
+                          className="rounded-full border border-aqua/60 bg-aqua/20 px-4 py-1.5 text-xs font-bold text-black-blue transition hover:bg-aqua/40 disabled:opacity-50"
                           disabled={updatingId === order.id}
                           key={nextStatus}
                           onClick={() => handleStatusUpdate(order.id, nextStatus)}
@@ -1068,9 +1284,347 @@ function OrgOrdersTab({ orgId }: { orgId: string }) {
                           {ORDER_NEXT_LABELS[nextStatus] ?? nextStatus}
                         </button>
                       ))}
+                      {canCancel && (
+                        <button
+                          className="rounded-full border border-peach/60 bg-peach/20 px-4 py-1.5 text-xs font-bold text-black-blue transition hover:bg-peach/40 disabled:opacity-50"
+                          disabled={updatingId === order.id}
+                          onClick={() => setCancelTarget(order.id)}
+                          type="button"
+                        >
+                          Huỷ đơn
+                        </button>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {cancelTarget && (
+        <OrgCancelModal
+          isLoading={isCancelling}
+          onClose={() => setCancelTarget(null)}
+          onConfirm={handleCancel}
+        />
+      )}
+    </>
+  );
+}
+
+// ─── Pickup Tab ────────────────────────────────────────────────────────────────
+
+function PickupTab({ orgId }: { orgId: string }) {
+  const [schedules, setSchedules] = useState<PickupScheduleResponse[]>([]);
+  const [confirmedOrders, setConfirmedOrders] = useState<OrderResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
+  const [form, setForm] = useState({ pickupDate: "", pickupTimeSlot: "", location: "", notes: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expandedSchedule, setExpandedSchedule] = useState<string | null>(null);
+  const [scheduleOrders, setScheduleOrders] = useState<Record<string, OrderResponse[]>>({});
+  const [checkingInId, setCheckingInId] = useState<string | null>(null);
+
+  const load = () => {
+    setIsLoading(true);
+    Promise.all([
+      getPickupSchedules(orgId, { size: 50 }),
+      getOrgOrders(orgId, { status: "CONFIRMED", size: 100 }),
+    ])
+      .then(([schedRes, ordRes]) => {
+        setSchedules(schedRes.data ?? []);
+        setConfirmedOrders(ordRes.data ?? []);
+      })
+      .catch(() => toast.error("Không thể tải dữ liệu lịch nhận hàng."))
+      .finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => { load(); }, [orgId]);
+
+  const toggleOrderSelection = (id: string) => {
+    setSelectedOrderIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedOrderIds.size === 0) { toast.error("Chọn ít nhất 1 đơn hàng để tạo lịch nhận."); return; }
+    if (!form.pickupDate || !form.pickupTimeSlot || !form.location) {
+      toast.error("Vui lòng điền đầy đủ ngày, khung giờ và địa điểm.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await createPickupSchedule(orgId, {
+        pickupDate: form.pickupDate,
+        pickupTimeSlot: form.pickupTimeSlot,
+        location: form.location,
+        notes: form.notes || undefined,
+        orderIds: Array.from(selectedOrderIds),
+      });
+      toast.success(`Đã tạo lịch nhận hàng cho ${res.data.orderCount} đơn.`);
+      setShowForm(false);
+      setSelectedOrderIds(new Set());
+      setForm({ pickupDate: "", pickupTimeSlot: "", location: "", notes: "" });
+      load();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const loadScheduleOrders = async (scheduleId: string) => {
+    if (scheduleOrders[scheduleId]) {
+      setExpandedSchedule(expandedSchedule === scheduleId ? null : scheduleId);
+      return;
+    }
+    try {
+      const res = await getPickupScheduleOrders(orgId, scheduleId);
+      setScheduleOrders(prev => ({ ...prev, [scheduleId]: res.data ?? [] }));
+      setExpandedSchedule(scheduleId);
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
+    }
+  };
+
+  const handleCheckIn = async (orderId: string, scheduleId: string) => {
+    setCheckingInId(orderId);
+    try {
+      const res = await checkInOrder(orgId, orderId);
+      setScheduleOrders(prev => ({
+        ...prev,
+        [scheduleId]: (prev[scheduleId] ?? []).map(o => o.id === orderId ? res.data : o),
+      }));
+      toast.success("Đã check-in đơn hàng.");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err));
+    } finally {
+      setCheckingInId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <h2 className="font-fredoka text-2xl font-bold text-black-blue">Lịch nhận hàng</h2>
+        <button
+          className="rounded-full bg-black-blue px-5 py-2 text-sm font-bold text-white transition hover:bg-ink"
+          onClick={() => setShowForm(v => !v)}
+          type="button"
+        >
+          {showForm ? "Đóng" : "+ Tạo lịch nhận"}
+        </button>
+      </div>
+
+      {showForm && (
+        <form className="rounded-panel border border-aqua/50 bg-white/60 p-6 shadow-glass backdrop-blur-xl space-y-4" onSubmit={handleCreate}>
+          <h3 className="font-fredoka text-lg font-bold text-black-blue">Tạo lịch nhận hàng mới</h3>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs font-semibold text-ink/70 mb-1">Ngày nhận *</label>
+              <input
+                className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua"
+                min={new Date().toISOString().slice(0, 10)}
+                onChange={e => setForm(f => ({ ...f, pickupDate: e.target.value }))}
+                required
+                type="date"
+                value={form.pickupDate}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-ink/70 mb-1">Khung giờ *</label>
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {["07:00–09:00", "09:00–11:00", "11:00–13:00", "13:00–15:00", "15:00–17:00", "17:00–19:00"].map(slot => (
+                  <button
+                    className={[
+                      "rounded-full border px-3 py-1 text-xs font-semibold transition",
+                      form.pickupTimeSlot === slot
+                        ? "border-aqua bg-aqua/25 text-black-blue"
+                        : "border-white/60 bg-white/50 text-black-blue hover:border-aqua/50 hover:bg-aqua/10",
+                    ].join(" ")}
+                    key={slot}
+                    onClick={() => setForm(f => ({ ...f, pickupTimeSlot: slot }))}
+                    type="button"
+                  >
+                    {slot}
+                  </button>
+                ))}
+              </div>
+              <input
+                className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua"
+                onChange={e => setForm(f => ({ ...f, pickupTimeSlot: e.target.value }))}
+                placeholder="Hoặc nhập tuỳ chỉnh..."
+                value={form.pickupTimeSlot}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-ink/70 mb-1">Địa điểm *</label>
+              <input
+                className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua"
+                onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                placeholder="Phòng, khu vực, toà nhà trong trường..."
+                required
+                value={form.location}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-ink/70 mb-1">Ghi chú thêm</label>
+              <textarea
+                className="h-16 w-full resize-none rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua"
+                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                placeholder="Hướng dẫn thêm cho sinh viên..."
+                value={form.notes}
+              />
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-semibold text-ink/70 mb-2">
+              Chọn đơn CONFIRMED để đưa vào lịch này ({selectedOrderIds.size} đã chọn)
+            </p>
+            {confirmedOrders.length === 0 ? (
+              <p className="text-xs text-ink/50 italic">Không có đơn hàng đã xác nhận nào.</p>
+            ) : (
+              <div className="max-h-48 overflow-y-auto space-y-1.5 rounded-xl border border-white/50 bg-white/30 p-3">
+                {confirmedOrders.map(order => (
+                  <label
+                    key={order.id}
+                    className={[
+                      "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-xs transition",
+                      selectedOrderIds.has(order.id)
+                        ? "border-aqua bg-aqua/10 font-semibold"
+                        : "border-white/50 bg-white/40 hover:border-aqua/40",
+                    ].join(" ")}
+                  >
+                    <input
+                      checked={selectedOrderIds.has(order.id)}
+                      className="sr-only"
+                      onChange={() => toggleOrderSelection(order.id)}
+                      type="checkbox"
+                    />
+                    <span className="font-mono font-bold text-black-blue">#{order.id.slice(0, 8).toUpperCase()}</span>
+                    <span className="text-ink/60">{order.guestName ?? "Khách hàng"}</span>
+                    <span className="ml-auto font-semibold text-black-blue">{currencyFormatter.format(order.totalAmount)}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              className="rounded-full bg-black-blue px-5 py-2 text-sm font-bold text-white transition hover:bg-ink disabled:opacity-50"
+              disabled={isSubmitting}
+              type="submit"
+            >
+              {isSubmitting ? "Đang tạo..." : "Tạo lịch & thông báo khách"}
+            </button>
+            <button
+              className="rounded-full border border-ink/20 bg-white/50 px-5 py-2 text-sm font-semibold text-black-blue transition hover:bg-white"
+              onClick={() => setShowForm(false)}
+              type="button"
+            >
+              Huỷ
+            </button>
+          </div>
+        </form>
+      )}
+
+      {isLoading ? (
+        <div className="py-12 text-center text-sm text-ink/60">Đang tải...</div>
+      ) : schedules.length === 0 ? (
+        <div className="py-12 text-center rounded-panel border border-white/40 bg-white/30">
+          <p className="text-sm text-ink/60">Chưa có lịch nhận hàng nào. Bấm "+ Tạo lịch nhận" để bắt đầu.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {schedules.map(schedule => {
+            const isExpanded = expandedSchedule === schedule.id;
+            const orders = scheduleOrders[schedule.id] ?? [];
+            return (
+              <div className="rounded-panel border border-white/50 bg-white/40 shadow-glass backdrop-blur-xl" key={schedule.id}>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-fredoka text-lg font-bold text-black-blue">
+                        {new Date(schedule.pickupDate).toLocaleDateString("vi-VN", {
+                          weekday: "long", year: "numeric", month: "long", day: "numeric",
+                        })}
+                      </p>
+                      <p className="mt-1 text-sm text-ink/60">🕐 {schedule.pickupTimeSlot}</p>
+                      <p className="text-sm text-ink/60">📍 {schedule.location}</p>
+                      {schedule.notes && <p className="text-xs text-ink/50 mt-1">📝 {schedule.notes}</p>}
+                    </div>
+                    <span className="rounded-full border border-aqua/50 bg-aqua/15 px-3 py-0.5 text-xs font-semibold text-black-blue shrink-0">
+                      {schedule.orderCount} đơn
+                    </span>
+                  </div>
+
+                  <button
+                    className="mt-3 text-xs font-semibold text-black-blue underline-offset-2 hover:underline"
+                    onClick={() => loadScheduleOrders(schedule.id)}
+                    type="button"
+                  >
+                    {isExpanded ? "▲ Ẩn danh sách check-in" : "▼ Xem danh sách check-in"}
+                  </button>
+                </div>
+
+                {isExpanded && (
+                  <div className="border-t border-white/40 p-5">
+                    <p className="text-xs font-semibold uppercase text-ink/50 mb-3">Danh sách check-in</p>
+                    {orders.length === 0 ? (
+                      <p className="text-xs text-ink/50">Không có đơn hàng trong lịch này.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {orders.map(order => (
+                          <div
+                            className={[
+                              "flex items-center justify-between rounded-xl border px-4 py-3 text-sm",
+                              order.status === "COMPLETED"
+                                ? "border-green-200 bg-green-50"
+                                : "border-white/50 bg-white/40",
+                            ].join(" ")}
+                            key={order.id}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono text-sm font-bold text-black-blue">
+                                #{order.id.slice(0, 8).toUpperCase()}
+                              </span>
+                              <div>
+                                <p className="text-xs font-semibold text-black-blue">{order.guestName ?? "Khách hàng"}</p>
+                                {order.guestPhone && <p className="text-xs text-ink/50">{order.guestPhone}</p>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {order.status === "COMPLETED" ? (
+                                <span className="rounded-full bg-green-100 border border-green-300 px-3 py-1 text-xs font-bold text-green-800">
+                                  ✓ Đã nhận
+                                </span>
+                              ) : (
+                                <button
+                                  className="rounded-full border border-aqua/60 bg-aqua/20 px-4 py-1.5 text-xs font-bold text-black-blue transition hover:bg-aqua/40 disabled:opacity-50"
+                                  disabled={checkingInId === order.id}
+                                  onClick={() => handleCheckIn(order.id, schedule.id)}
+                                  type="button"
+                                >
+                                  {checkingInId === order.id ? "..." : "Check-in"}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -1313,6 +1867,7 @@ export function OrganizerDashboardPage() {
     { id: "merch", label: "Vật phẩm" },
     { id: "events", label: "Sự kiện" },
     { id: "orders", label: "Đơn hàng" },
+    { id: "pickup", label: "Lịch nhận" },
     { id: "profile", label: "Hồ sơ" },
   ];
 
@@ -1415,6 +1970,7 @@ export function OrganizerDashboardPage() {
                 {activeTab === "merch" && <MerchTab orgId={selectedOrgId} />}
                 {activeTab === "events" && <EventsTab orgId={selectedOrgId} />}
                 {activeTab === "orders" && <OrgOrdersTab orgId={selectedOrgId} />}
+                {activeTab === "pickup" && <PickupTab orgId={selectedOrgId} />}
                 {activeTab === "profile" && (
                   <ProfileTab
                     key={selectedOrg.id}

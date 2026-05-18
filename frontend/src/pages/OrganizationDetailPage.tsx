@@ -12,12 +12,14 @@ import type { MockOrganization } from "../mocks/orgData";
 import {
   getPublicOrganizationDetail,
   getPublicOrganizations,
+  getPublicOrgEvents,
   getPublicOrgMerch,
 } from "../api/organization";
 import {
   mapMerchToMockProduct,
   mapOrgToMockOrganization,
 } from "../types/shared";
+import type { EventResponse } from "../types/shared";
 
 const ShaderBackground = lazy(() =>
   import("../components/ui/ShaderBackground").then((m) => ({
@@ -79,9 +81,12 @@ export function OrganizationDetailPage() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<"merch" | "events">("merch");
 
   // Live States
   const [liveOrg, setLiveOrg] = useState<MockOrganization | null>(locationOrg || null);
+  const [liveEvents, setLiveEvents] = useState<EventResponse[]>([]);
+  const [isEventsLoading, setIsEventsLoading] = useState(false);
   const [liveProducts, setLiveProducts] = useState<MockProduct[]>([]);
   const [totalItems, setTotalItems] = useState<number | null>(null);
   const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
@@ -175,6 +180,19 @@ export function OrganizationDetailPage() {
       isActive = false;
     };
   }, [id, page, activeFilter, query]);
+
+  useEffect(() => {
+    if (!id) return;
+    let isActive = true;
+    setIsEventsLoading(true);
+    getPublicOrgEvents(id, { size: 20 })
+      .then((res) => {
+        if (isActive) setLiveEvents(res?.data ?? []);
+      })
+      .catch(() => {})
+      .finally(() => { if (isActive) setIsEventsLoading(false); });
+    return () => { isActive = false; };
+  }, [id]);
 
   const organization = liveOrg || fallbackOrg;
 
@@ -300,46 +318,139 @@ export function OrganizationDetailPage() {
                       {countDisplay}
                     </p>
                   </div>
+                  <div className="min-w-[140px] rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
+                    <p className="text-xs font-semibold uppercase text-ink/45">
+                      Sự kiện
+                    </p>
+                    <p className="mt-2 font-fredoka text-2xl font-bold text-black-blue">
+                      {liveEvents.length}
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
 
             <section className="pt-9">
-              <header className="mb-6">
-                <h2 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
-                  Vật phẩm đang mở bán
-                </h2>
-                <p className="mt-2 font-sans text-sm text-ink/60">
-                  {isLoading ? (
-                    <span>Đang tải danh sách vật phẩm...</span>
-                  ) : (
-                    <span>
-                      {countDisplay} vật phẩm
-                      {query ? ` phù hợp với "${query}"` : ""} từ{" "}
-                      {organization.name}
-                    </span>
-                  )}
-                </p>
-              </header>
-
-              <MerchToolbar
-                activeFilter={activeFilter}
-                filterOptions={FILTER_OPTIONS}
-                onFilterChange={handleFilterChange}
-              />
-
-              <div className={isLoading ? "opacity-50 transition-opacity" : ""}>
-                <ProductGrid
-                  emptyMessage="Không tìm thấy vật phẩm nào của tổ chức này."
-                  products={displayedProducts}
-                />
+              {/* Tab selector */}
+              <div className="mb-6 flex gap-2">
+                {(["merch", "events"] as const).map((tab) => (
+                  <button
+                    className={[
+                      "rounded-full px-5 py-2 text-sm font-semibold transition",
+                      activeTab === tab
+                        ? "bg-black-blue text-white shadow-[0_8px_20px_rgba(82,128,145,0.2)]"
+                        : "border border-white/60 bg-white/50 text-gray hover:bg-white/80",
+                    ].join(" ")}
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    type="button"
+                  >
+                    {tab === "merch" ? "Vật phẩm" : "Sự kiện"}
+                  </button>
+                ))}
               </div>
 
-              <Pagination
-                currentPage={page}
-                onPageChange={setPage}
-                totalPages={pagesDisplay}
-              />
+              {activeTab === "merch" ? (
+                <>
+                  <header className="mb-6">
+                    <h2 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
+                      Vật phẩm đang mở bán
+                    </h2>
+                    <p className="mt-2 font-sans text-sm text-ink/60">
+                      {isLoading ? (
+                        <span>Đang tải danh sách vật phẩm...</span>
+                      ) : (
+                        <span>
+                          {countDisplay} vật phẩm
+                          {query ? ` phù hợp với "${query}"` : ""} từ{" "}
+                          {organization.name}
+                        </span>
+                      )}
+                    </p>
+                  </header>
+
+                  <MerchToolbar
+                    activeFilter={activeFilter}
+                    filterOptions={FILTER_OPTIONS}
+                    onFilterChange={handleFilterChange}
+                  />
+
+                  <div className={isLoading ? "opacity-50 transition-opacity" : ""}>
+                    <ProductGrid
+                      emptyMessage="Không tìm thấy vật phẩm nào của tổ chức này."
+                      products={displayedProducts}
+                    />
+                  </div>
+
+                  <Pagination
+                    currentPage={page}
+                    onPageChange={setPage}
+                    totalPages={pagesDisplay}
+                  />
+                </>
+              ) : (
+                <>
+                  <header className="mb-6">
+                    <h2 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
+                      Sự kiện
+                    </h2>
+                    <p className="mt-2 font-sans text-sm text-ink/60">
+                      {isEventsLoading ? "Đang tải sự kiện..." : `${liveEvents.length} sự kiện từ ${organization.name}`}
+                    </p>
+                  </header>
+
+                  {isEventsLoading ? (
+                    <div className="py-16 text-center text-sm text-ink/50">Đang tải...</div>
+                  ) : liveEvents.length === 0 ? (
+                    <div className="py-16 text-center text-sm text-ink/50">Tổ chức chưa có sự kiện nào.</div>
+                  ) : (
+                    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                      {liveEvents.map((event) => (
+                        <Link
+                          className="group rounded-[28px] border border-white/50 bg-white/35 p-4 shadow-glass backdrop-blur transition hover:-translate-y-1 hover:border-aqua hover:bg-white/60"
+                          key={event.id}
+                          to={`/events/${event.id}`}
+                        >
+                          <div className="aspect-video overflow-hidden rounded-[20px] bg-white/40">
+                            {event.coverUrl ? (
+                              <img
+                                alt={event.title}
+                                className="size-full object-cover transition group-hover:scale-105"
+                                src={event.coverUrl}
+                              />
+                            ) : (
+                              <div className="flex size-full items-center justify-center text-3xl text-ink/20">
+                                📅
+                              </div>
+                            )}
+                          </div>
+                          <div className="mt-3 px-1">
+                            {event.status === "PUBLISHED" && (
+                              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700 border border-green-300">
+                                Đang diễn ra
+                              </span>
+                            )}
+                            {event.status === "ENDED" && (
+                              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-gray-600 border border-gray-300">
+                                Đã kết thúc
+                              </span>
+                            )}
+                            <p className="mt-2 font-fredoka text-lg font-bold leading-tight text-black-blue line-clamp-2">
+                              {event.title}
+                            </p>
+                            {event.startsAt && (
+                              <p className="mt-1 text-xs text-ink/55">
+                                {new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(event.startsAt))}
+                                {event.endsAt ? ` – ${new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(event.endsAt))}` : ""}
+                              </p>
+                            )}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </section>
           </GlassContainer>
         ) : (

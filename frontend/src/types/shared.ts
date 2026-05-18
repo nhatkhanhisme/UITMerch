@@ -138,6 +138,14 @@ export type OrderItemResponse = {
   createdAt?: string;
 };
 
+export type PickupScheduleInfo = {
+  id: string;
+  pickupDate: string;
+  pickupTimeSlot: string;
+  location: string;
+  notes?: string;
+};
+
 export type OrderResponse = {
   id: string;
   userId?: string;
@@ -152,8 +160,47 @@ export type OrderResponse = {
   paymentStatus: string;
   note?: string;
   items?: OrderItemResponse[];
+  // cancel metadata
+  cancelledBy?: "customer" | "organizer";
+  cancelReason?: string;
+  cancelReasonNote?: string;
+  cancelledAt?: string;
+  // pickup schedule (embedded)
+  pickupScheduleId?: string;
+  pickupSchedule?: PickupScheduleInfo;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type PickupScheduleResponse = {
+  id: string;
+  orgId: string;
+  pickupDate: string;
+  pickupTimeSlot: string;
+  location: string;
+  notes?: string;
+  orderCount: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type PickupScheduleRequest = {
+  pickupDate: string;
+  pickupTimeSlot: string;
+  location: string;
+  notes?: string;
+  orderIds: string[];
+};
+
+export type NotificationResponse = {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  relatedOrderId?: string;
+  createdAt?: string;
 };
 
 export type GuestOrderItemRequest = {
@@ -165,7 +212,7 @@ export type GuestOrderRequest = {
   items: GuestOrderItemRequest[];
   guestName: string;
   guestPhone: string;
-  guestAddress: string;
+  guestAddress?: string;
   guestEmail?: string;
   note?: string;
 };
@@ -246,7 +293,7 @@ export type CreateMerchRequest = {
   description?: string;
   price?: number;
   stock: number;
-  categoryId?: string;
+  categorySlug?: string;
   imageUrls?: string[];
 };
 
@@ -255,7 +302,7 @@ export type UpdateMerchRequest = {
   description?: string;
   price?: number;
   stock?: number;
-  categoryId?: string;
+  categorySlug?: string;
   imageUrls?: string[];
   status?: string;
 };
@@ -283,6 +330,11 @@ export type UpdateEventRequest = {
 
 export type UpdateOrderStatusRequest = {
   status: string;
+};
+
+export type CancelOrderRequest = {
+  cancelReason: string;
+  cancelReasonNote?: string;
 };
 
 // ─── Organization Request Types ───────────────────────────────────────────────

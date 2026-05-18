@@ -13,6 +13,8 @@ import com.uitmerch.backend.common.model.UserRole;
 import com.uitmerch.backend.common.service.EmailService;
 import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
+import com.uitmerch.backend.notification.service.NotificationService;
+import com.uitmerch.backend.order.dto.CancelOrderRequest;
 import com.uitmerch.backend.order.dto.GuestOrderItemRequest;
 import com.uitmerch.backend.order.dto.GuestOrderRequest;
 import com.uitmerch.backend.order.dto.InstantOrderRequest;
@@ -21,6 +23,7 @@ import com.uitmerch.backend.order.entity.Order;
 import com.uitmerch.backend.order.entity.OrderItem;
 import com.uitmerch.backend.order.repository.OrderItemRepository;
 import com.uitmerch.backend.order.repository.OrderRepository;
+import com.uitmerch.backend.order.repository.PickupScheduleRepository;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.service.OrganizationService;
 import org.junit.jupiter.api.Test;
@@ -56,6 +59,8 @@ class OrderServiceTest {
     @Mock private OrganizationService organizationService;
     @Mock private UserRepository userRepository;
     @Mock private EmailService emailService;
+    @Mock private NotificationService notificationService;
+    @Mock private PickupScheduleRepository pickupScheduleRepository;
 
     @InjectMocks private OrderService orderService;
 
@@ -178,10 +183,8 @@ class OrderServiceTest {
     @ParameterizedTest(name = "{0} → {1}")
     @CsvSource({
         "PENDING,CONFIRMED",
-        "PENDING,CANCELLED",
-        "CONFIRMED,READY_FOR_PICKUP",
-        "CONFIRMED,CANCELLED",
-        "READY_FOR_PICKUP,SUCCESS"
+        "CONFIRMED,READY",
+        "READY,COMPLETED"
     })
     void updateOrderStatus_validTransition_succeeds(OrderStatus from, OrderStatus to) {
         Organization org = Organization.builder().id(orgId).ownerId(userId).build();
@@ -201,16 +204,16 @@ class OrderServiceTest {
 
     @ParameterizedTest(name = "{0} → {1}")
     @CsvSource({
-        "PENDING,READY_FOR_PICKUP",
-        "PENDING,SUCCESS",
+        "PENDING,READY",
+        "PENDING,COMPLETED",
         "CONFIRMED,PENDING",
-        "CONFIRMED,SUCCESS",
-        "READY_FOR_PICKUP,PENDING",
-        "READY_FOR_PICKUP,CONFIRMED",
-        "READY_FOR_PICKUP,CANCELLED",
-        "SUCCESS,PENDING",
-        "SUCCESS,CONFIRMED",
-        "SUCCESS,CANCELLED",
+        "CONFIRMED,COMPLETED",
+        "READY,PENDING",
+        "READY,CONFIRMED",
+        "READY,CANCELLED",
+        "COMPLETED,PENDING",
+        "COMPLETED,CONFIRMED",
+        "COMPLETED,CANCELLED",
         "CANCELLED,PENDING",
         "CANCELLED,CONFIRMED"
     })
@@ -271,29 +274,13 @@ class OrderServiceTest {
             .isInstanceOf(ResourceNotFoundException.class);
     }
 
-    // ── updateOrderStatus: cancellation restores stock ───────────────────────
-
-    @Test
-    void updateOrderStatus_cancelledOrder_restoresStock() {
-        Organization org = Organization.builder().id(orgId).ownerId(userId).build();
-        Order order = orderWithStatus(OrderStatus.PENDING);
-        Order cancelled = orderWithStatus(OrderStatus.CANCELLED);
-        OrderItem item = OrderItem.builder().id(UUID.randomUUID()).orderId(orderId)
-            .merchId(merchId).quantity(3).unitPrice(BigDecimal.valueOf(100_000))
-            .subtotal(BigDecimal.valueOf(300_000)).build();
-
-        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(orderRepository.save(any())).thenReturn(cancelled);
-        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item));
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        orderService.updateOrderStatus(userId, orgId, orderId, OrderStatus.CANCELLED);
-
-        verify(merchItemRepository).restoreStock(merchId, 3);
-    }
-
     // ── cancelCustomerOrder ──────────────────────────────────────────────────
+
+    private CancelOrderRequest cancelRequest() {
+        CancelOrderRequest req = new CancelOrderRequest();
+        req.setCancelReason("Tôi đặt nhầm sản phẩm / số lượng");
+        return req;
+    }
 
     @Test
     void cancelCustomerOrder_pendingOrder_cancelsAndRestoresStock() {
@@ -305,9 +292,11 @@ class OrderServiceTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(orderRepository.save(any())).thenReturn(orderWithStatus(OrderStatus.CANCELLED));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item));
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
+        when(organizationService.getOrganizationEntityById(any()))
+            .thenThrow(new RuntimeException("org not found"));
 
-        orderService.cancelCustomerOrder(userId, orderId);
+        orderService.cancelCustomerOrder(userId, orderId, cancelRequest());
 
         verify(merchItemRepository).restoreStock(merchId, 2);
     }
@@ -317,7 +306,7 @@ class OrderServiceTest {
         Order order = orderWithStatus(OrderStatus.CONFIRMED);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        assertThatThrownBy(() -> orderService.cancelCustomerOrder(userId, orderId))
+        assertThatThrownBy(() -> orderService.cancelCustomerOrder(userId, orderId, cancelRequest()))
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("PENDING");
         verify(merchItemRepository, never()).restoreStock(any(), anyInt());
@@ -326,10 +315,10 @@ class OrderServiceTest {
     @Test
     void cancelCustomerOrder_wrongUser_throwsResourceNotFound() {
         UUID otherUser = UUID.randomUUID();
-        Order order = orderWithStatus(OrderStatus.PENDING); // belongs to userId
+        Order order = orderWithStatus(OrderStatus.PENDING);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        assertThatThrownBy(() -> orderService.cancelCustomerOrder(otherUser, orderId))
+        assertThatThrownBy(() -> orderService.cancelCustomerOrder(otherUser, orderId, cancelRequest()))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 

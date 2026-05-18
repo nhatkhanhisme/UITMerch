@@ -1,13 +1,14 @@
 package com.uitmerch.backend.common.model;
 
 /**
- * Order lifecycle states as per SRS BR06.
- * Terminal states: SUCCESS, CANCELLED
+ * Campus-pickup order lifecycle. Terminal states: COMPLETED, CANCELLED.
+ * PENDING → CONFIRMED → READY → COMPLETED
+ *                              ↘ CANCELLED (customer: PENDING only; organizer: PENDING or CONFIRMED)
  */
 public enum OrderStatus {
-    PENDING,              // Initial state after COD checkout (FR07)
-    CONFIRMED,            // Organizer confirmed order (FR08)
-    READY_FOR_PICKUP,     // Order packaged and ready (FR08)
-    SUCCESS,              // Pickup completed → added to Collection (BR09, FR09)
-    CANCELLED             // Terminal state - order cancelled
+    PENDING,    // placed, awaiting organizer confirmation
+    CONFIRMED,  // organizer confirmed
+    READY,      // pickup schedule created — customer can come collect
+    COMPLETED,  // organizer checked in the order code
+    CANCELLED   // terminal — stock restored
 }

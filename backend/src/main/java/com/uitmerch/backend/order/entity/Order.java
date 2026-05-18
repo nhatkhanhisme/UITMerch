@@ -72,6 +72,25 @@ public class Order {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    // ── Cancel metadata ─────────────────────────────────────────────────────── //
+
+    @Column(name = "cancelled_by")
+    private String cancelledBy;
+
+    @Column(name = "cancel_reason", columnDefinition = "TEXT")
+    private String cancelReason;
+
+    @Column(name = "cancel_reason_note", columnDefinition = "TEXT")
+    private String cancelReasonNote;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    // ── Pickup schedule ──────────────────────────────────────────────────────── //
+
+    @Column(name = "pickup_schedule_id")
+    private UUID pickupScheduleId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

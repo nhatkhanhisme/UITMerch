@@ -1,7 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuthStore } from "../../stores/authStore";
+import { logout } from "../../api/auth";
 import { getCustomerProfile, getOrganizerProfile } from "../../api/profile";
+import { getNotifications, getUnreadCount, markAllNotificationsRead, markNotificationRead } from "../../api/notifications";
+import type { NotificationResponse } from "../../types/shared";
 
 const logoHeaderUrl = "/assets/figma/logo-header.svg";
 const accountIconUrl = "/assets/figma/account-icon.svg";
@@ -27,10 +30,15 @@ const getInitials = (fullName: string) => {
 export function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
+  const notifRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
+  const accessToken = useAuthStore((state) => state.accessToken);
   const clearSession = useAuthStore((state) => state.clearSession);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -114,13 +122,88 @@ export function TopNavBar() {
 
   useEffect(() => {
     setIsAccountMenuOpen(false);
+    setIsNotifOpen(false);
   }, [location.pathname, location.search, location.hash]);
 
-  const handleLogout = () => {
+  // Poll unread count every 60 s for CUSTOMER role
+  useEffect(() => {
+    if (!user || user.role !== "CUSTOMER") return;
+    const load = () =>
+      getUnreadCount()
+        .then((r) => setUnreadCount(r.data?.unreadCount ?? 0))
+        .catch(() => {});
+    load();
+    const id = window.setInterval(load, 60_000);
+    return () => window.clearInterval(id);
+  }, [user]);
+
+  // Close notif panel on outside click
+  useEffect(() => {
+    if (!isNotifOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isNotifOpen]);
+
+  const openNotifications = async () => {
+    setIsNotifOpen((v) => !v);
+    if (!isNotifOpen) {
+      try {
+        const res = await getNotifications({ size: 20 });
+        setNotifications(res.data ?? []);
+        setUnreadCount(0);
+        await markAllNotificationsRead();
+      } catch {
+        // ignore
+      }
+    }
+  };
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      await markNotificationRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+      );
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleLogout = async () => {
+    if (accessToken) {
+      try {
+        await logout(accessToken);
+      } catch {
+        // Clear session even if server-side logout fails
+      }
+    }
     clearSession();
     setIsAccountMenuOpen(false);
     setIsMenuOpen(false);
     navigate("/");
+  };
+
+  const scrollToTop = () => {
+    // Home page uses its own overflow container, not window scroll.
+    const homeContainer = document.querySelector(
+      ".home-scroll-snap-container",
+    ) as HTMLElement | null;
+    if (homeContainer) {
+      homeContainer.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleNavClick = () => {
+    setIsMenuOpen(false);
+    setIsAccountMenuOpen(false);
+    scrollToTop();
   };
 
   const linkClassName = (href: string) => {
@@ -144,12 +227,18 @@ export function TopNavBar() {
         data-node-id="17:4918"
         data-name="TopNavBar Component"
       >
-        <img
-          alt="UITMerch"
-          className="h-[26px] w-[126px] shrink-0 sm:h-[30px] sm:w-[145px]"
+        <Link
+          aria-label="UITMerch — về trang chủ"
           data-node-id="17:4151"
-          src={logoHeaderUrl}
-        />
+          onClick={handleNavClick}
+          to="/"
+        >
+          <img
+            alt="UITMerch"
+            className="h-[26px] w-[126px] shrink-0 sm:h-[30px] sm:w-[145px]"
+            src={logoHeaderUrl}
+          />
+        </Link>
 
         {/* RESPONSIVE */}
         <div
@@ -159,13 +248,70 @@ export function TopNavBar() {
           {navItems.map((item) => (
             <Link
               className={linkClassName(item.href)}
-              to={item.href}
               key={item.label}
+              onClick={handleNavClick}
+              to={item.href}
             >
               {item.label}
             </Link>
           ))}
         </div>
+
+        {/* Notification Bell — CUSTOMER only */}
+        {user?.role === "CUSTOMER" && (
+          <div className="relative mr-2 hidden md:block" ref={notifRef}>
+            <button
+              aria-label="Thông báo"
+              className="relative flex size-10 items-center justify-center rounded-full transition hover:bg-white/35"
+              onClick={openNotifications}
+              type="button"
+            >
+              <svg className="size-5 text-slate" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-peach text-[10px] font-bold text-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {isNotifOpen && (
+              <div className="absolute right-0 top-[calc(100%+10px)] z-20 w-80 rounded-[24px] border border-white/70 bg-white/90 shadow-[0_18px_45px_rgba(82,128,145,0.18)] backdrop-blur-xl">
+                <div className="flex items-center justify-between border-b border-white/40 px-4 py-3">
+                  <p className="font-fredoka text-base font-bold text-black-blue">Thông báo</p>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <p className="px-4 py-6 text-center text-sm text-ink/50">Chưa có thông báo nào.</p>
+                  ) : (
+                    notifications.map((n) => (
+                      <button
+                        className={[
+                          "w-full px-4 py-3 text-left transition hover:bg-white/60",
+                          n.isRead ? "opacity-70" : "bg-aqua/5",
+                        ].join(" ")}
+                        key={n.id}
+                        onClick={() => handleMarkRead(n.id)}
+                        type="button"
+                      >
+                        <p className={["text-xs font-semibold text-black-blue", !n.isRead ? "font-bold" : ""].join(" ")}>
+                          {n.title}
+                        </p>
+                        <p className="mt-0.5 text-xs text-ink/60 line-clamp-2">{n.message}</p>
+                        {n.createdAt && (
+                          <p className="mt-1 text-[10px] text-ink/40">
+                            {new Date(n.createdAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div
           className="hidden shrink-0 items-center pr-[1.01px] md:flex"
@@ -350,8 +496,8 @@ export function TopNavBar() {
             <Link
               className={linkClassName(item.href)}
               key={item.label}
+              onClick={handleNavClick}
               to={item.href}
-              onClick={() => setIsMenuOpen(false)}
             >
               {item.label}
             </Link>

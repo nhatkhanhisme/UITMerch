@@ -29,7 +29,7 @@ spring:
 
 app:
   jwt:
-    secret: dev-secret-key-minimum-32-characters-long-for-hs256
+    secret: WGztExvYOnA7IfKPe2E7bSBGL14wtjO9l+HQA2OCqgBUgOTMBzQcP2kKRV9RwNZmPLD7J4aDz+y4AY+xBALagg==
   storage:
     endpoint: http://localhost
     region: ap-southeast-2
