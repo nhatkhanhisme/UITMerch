@@ -10,6 +10,14 @@ import { useNotificationStream } from "../../hooks/useNotificationStream";
 const logoHeaderUrl = "/assets/figma/logo-header.svg";
 const accountIconUrl = "/assets/figma/account-icon.svg";
 
+type OrgNotif = {
+  type: string;
+  orderId: string;
+  shortId: string;
+  totalAmount: number;
+  createdAt: string;
+};
+
 const navItems = [
   { label: "Trang chủ", href: "/" },
   { label: "Vật phẩm", href: "/merch" },
@@ -35,6 +43,10 @@ export function TopNavBar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
   const notifRef = useRef<HTMLDivElement | null>(null);
+  const [orgNotifications, setOrgNotifications] = useState<OrgNotif[]>([]);
+  const [orgUnreadCount, setOrgUnreadCount] = useState(0);
+  const [isOrgNotifOpen, setIsOrgNotifOpen] = useState(false);
+  const orgNotifRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
@@ -124,6 +136,7 @@ export function TopNavBar() {
   useEffect(() => {
     setIsAccountMenuOpen(false);
     setIsNotifOpen(false);
+    setIsOrgNotifOpen(false);
   }, [location.pathname, location.search, location.hash]);
 
   // Load initial unread count for CUSTOMER role
@@ -147,6 +160,30 @@ export function TopNavBar() {
     onMessage: handleIncomingNotification,
   });
 
+  const handleOrgIncomingNotification = useCallback((data: unknown) => {
+    const event = data as { type?: string; orderId?: string; shortId?: string; totalAmount?: number };
+    if (event.type === "NEW_ORDER" || event.type === "ORDER_CANCELLED") {
+      setOrgNotifications((prev) => [
+        {
+          type: event.type!,
+          orderId: event.orderId ?? "",
+          shortId: event.shortId ?? "",
+          totalAmount: event.totalAmount ?? 0,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev.slice(0, 19),
+      ]);
+      setOrgUnreadCount((c) => c + 1);
+    }
+    window.dispatchEvent(new CustomEvent("org-order-event", { detail: event }));
+  }, []);
+
+  useNotificationStream({
+    path: "/api/v1/organizer/notifications/stream",
+    enabled: !!user && user.role === "ORGANIZER",
+    onMessage: handleOrgIncomingNotification,
+  });
+
   // Close notif panel on outside click
   useEffect(() => {
     if (!isNotifOpen) return;
@@ -159,6 +196,18 @@ export function TopNavBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isNotifOpen]);
 
+  // Close org notif panel on outside click
+  useEffect(() => {
+    if (!isOrgNotifOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (orgNotifRef.current && !orgNotifRef.current.contains(e.target as Node)) {
+        setIsOrgNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOrgNotifOpen]);
+
   const openNotifications = async () => {
     setIsNotifOpen((v) => !v);
     if (!isNotifOpen) {
@@ -170,6 +219,13 @@ export function TopNavBar() {
       } catch {
         // ignore
       }
+    }
+  };
+
+  const openOrgNotifications = () => {
+    setIsOrgNotifOpen((v) => !v);
+    if (!isOrgNotifOpen) {
+      setOrgUnreadCount(0);
     }
   };
 
@@ -269,7 +325,7 @@ export function TopNavBar() {
 
         {/* Notification Bell — CUSTOMER only */}
         {user?.role === "CUSTOMER" && (
-          <div className="relative mr-2 hidden md:block" ref={notifRef}>
+          <div className="relative mr-2" ref={notifRef}>
             <button
               aria-label="Thông báo"
               className="relative flex size-10 items-center justify-center rounded-full transition hover:bg-white/35"
@@ -287,7 +343,7 @@ export function TopNavBar() {
             </button>
 
             {isNotifOpen && (
-              <div className="absolute right-0 top-[calc(100%+10px)] z-20 w-80 rounded-[24px] border border-white/70 bg-white/90 shadow-[0_18px_45px_rgba(82,128,145,0.18)] backdrop-blur-xl">
+              <div className="absolute right-0 top-[calc(100%+10px)] z-20 w-[min(320px,calc(100vw-24px))] rounded-[24px] border border-white/70 bg-white/90 shadow-[0_18px_45px_rgba(82,128,145,0.18)] backdrop-blur-xl">
                 <div className="flex items-center justify-between border-b border-white/40 px-4 py-3">
                   <p className="font-fredoka text-base font-bold text-black-blue">Thông báo</p>
                 </div>
@@ -315,6 +371,56 @@ export function TopNavBar() {
                           </p>
                         )}
                       </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Notification Bell — ORGANIZER only */}
+        {user?.role === "ORGANIZER" && (
+          <div className="relative mr-2" ref={orgNotifRef}>
+            <button
+              aria-label="Thông báo BTC"
+              className="relative flex size-10 items-center justify-center rounded-full transition hover:bg-white/35"
+              onClick={openOrgNotifications}
+              type="button"
+            >
+              <svg className="size-5 text-slate" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {orgUnreadCount > 0 && (
+                <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-peach text-[10px] font-bold text-white">
+                  {orgUnreadCount > 9 ? "9+" : orgUnreadCount}
+                </span>
+              )}
+            </button>
+
+            {isOrgNotifOpen && (
+              <div className="absolute right-0 top-[calc(100%+10px)] z-20 w-[min(320px,calc(100vw-24px))] rounded-[24px] border border-white/70 bg-white/90 shadow-[0_18px_45px_rgba(82,128,145,0.18)] backdrop-blur-xl">
+                <div className="border-b border-white/40 px-4 py-3">
+                  <p className="font-fredoka text-base font-bold text-black-blue">Thông báo BTC</p>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {orgNotifications.length === 0 ? (
+                    <p className="px-4 py-6 text-center text-sm text-ink/50">Chưa có thông báo nào.</p>
+                  ) : (
+                    orgNotifications.map((n, i) => (
+                      <div className="w-full px-4 py-3" key={`${n.orderId}-${i}`}>
+                        <p className="text-xs font-bold text-black-blue">
+                          {n.type === "NEW_ORDER" ? "Đơn hàng mới" : "Đơn hàng bị huỷ"}
+                        </p>
+                        <p className="mt-0.5 text-xs text-ink/60">
+                          {n.type === "NEW_ORDER"
+                            ? `#${n.shortId} — ${n.totalAmount.toLocaleString("vi-VN")}đ`
+                            : `#${n.shortId} đã bị khách huỷ`}
+                        </p>
+                        <p className="mt-1 text-[10px] text-ink/40">
+                          {new Date(n.createdAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
                     ))
                   )}
                 </div>
