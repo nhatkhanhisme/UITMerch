@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
 import { cacheDelete, cacheKey } from "../lib/sessionCache";
@@ -35,7 +35,6 @@ import {
 import { uploadEventImage, uploadMerchImage, uploadOrganizerImage } from "../api/storage";
 import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
-import { useNotificationStream } from "../hooks/useNotificationStream";
 import type {
   CancelOrderRequest,
   CategoryResponse,
@@ -1841,19 +1840,17 @@ export function OrganizerDashboardPage() {
   const [showCreateOrg, setShowCreateOrg] = useState(false);
   const [orderRefreshTrigger, setOrderRefreshTrigger] = useState(0);
 
-  const handleOrgOrderEvent = useCallback((data: unknown) => {
-    const event = data as { type?: string };
-    if (event?.type === "NEW_ORDER") {
-      toast.info("Có đơn hàng mới!");
-    }
-    setOrderRefreshTrigger((t) => t + 1);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const event = (e as CustomEvent<{ type?: string }>).detail;
+      if (event?.type === "NEW_ORDER") {
+        toast.info("Có đơn hàng mới!");
+      }
+      setOrderRefreshTrigger((t) => t + 1);
+    };
+    window.addEventListener("org-order-event", handler);
+    return () => window.removeEventListener("org-order-event", handler);
   }, []);
-
-  useNotificationStream({
-    path: "/api/v1/organizer/notifications/stream",
-    enabled: !!user && user.role === "ORGANIZER",
-    onMessage: handleOrgOrderEvent,
-  });
 
   useEffect(() => {
     if (!user || user.role !== "ORGANIZER") return;
