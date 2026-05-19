@@ -1,6 +1,7 @@
 import { apiClient } from "./client";
 import type {
   ApiResponse,
+  CreateOrganizationRequest,
   EventResponse,
   MerchResponse,
   OrganizationResponse,
@@ -39,6 +40,35 @@ export async function getPublicOrgEvents(id: string, params?: PaginationParams) 
   const { data } = await apiClient.get<ApiResponse<EventResponse[]>>(
     `/api/v1/public/organizations/${id}/events`,
     { params },
+  );
+  return data;
+}
+
+// ─── Organizer Organization Management ────────────────────────────────────────
+
+export async function getOwnOrganizations(params?: PaginationParams) {
+  const { data } = await apiClient.get<ApiResponse<OrganizationResponse[]>>(
+    "/api/v1/organizations/mine",
+    { params },
+  );
+  return data;
+}
+
+export async function createOrganization(request: CreateOrganizationRequest) {
+  const { data } = await apiClient.post<ApiResponse<OrganizationResponse>>(
+    "/api/v1/organizations",
+    request,
+  );
+  return data;
+}
+
+export async function updateOrganization(
+  id: string,
+  request: Partial<CreateOrganizationRequest>,
+) {
+  const { data } = await apiClient.patch<ApiResponse<OrganizationResponse>>(
+    `/api/v1/organizations/${id}`,
+    request,
   );
   return data;
 }

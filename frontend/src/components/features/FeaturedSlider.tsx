@@ -13,9 +13,10 @@ export interface FeaturedItem {
 interface FeaturedSliderProps {
   items: FeaturedItem[];
   autoPlayInterval?: number;
+  isPaused?: boolean;
 }
 
-export function FeaturedSlider({ items, autoPlayInterval = 4000 }: FeaturedSliderProps) {
+export function FeaturedSlider({ items, autoPlayInterval = 4000, isPaused = false }: FeaturedSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextSlide = useCallback(() => {
@@ -23,9 +24,10 @@ export function FeaturedSlider({ items, autoPlayInterval = 4000 }: FeaturedSlide
   }, [items.length]);
 
   useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(nextSlide, autoPlayInterval);
     return () => clearInterval(timer);
-  }, [nextSlide, autoPlayInterval]);
+  }, [nextSlide, autoPlayInterval, isPaused]);
 
   if (!items?.length) return null;
 

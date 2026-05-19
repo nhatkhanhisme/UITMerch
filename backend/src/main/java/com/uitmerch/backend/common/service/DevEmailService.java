@@ -23,4 +23,19 @@ public class DevEmailService implements EmailService {
     public void sendOrderStatusUpdate(String toEmail, String orderId, String newStatus) {
         log.info("===== [DEV] Order {} status → {} (to: {}) =====", orderId, newStatus, toEmail);
     }
+
+    @Override
+    public void sendPickupScheduleNotification(String toEmail, String orderId,
+                                               String pickupDate, String pickupTimeSlot,
+                                               String location, String notes) {
+        log.info("===== [DEV] Pickup schedule for order {} — {}, {} @ {} (to: {}) =====",
+            orderId, pickupDate, pickupTimeSlot, location, toEmail);
+    }
+
+    @Override
+    public void sendOrderCancelledNotification(String toEmail, String orderId,
+                                               String cancelReason, String cancelledBy) {
+        log.info("===== [DEV] Order {} cancelled by {} — reason: {} (to: {}) =====",
+            orderId, cancelledBy, cancelReason, toEmail);
+    }
 }

@@ -221,7 +221,7 @@ export function MerchPage() {
               <div className="size-10 animate-spin rounded-full border-4 border-white/20 border-t-aqua"></div>
             </div>
           ) : popularProducts.length > 0 ? (
-            <FeaturedSlider items={popularProducts} />
+            <FeaturedSlider items={popularProducts} isPaused={!!(query || activeFilter || activeCategory)} />
           ) : null}
 
           <MerchToolbar

@@ -14,6 +14,11 @@ import { OrganizationDetailPage } from "./pages/OrganizationDetailPage";
 import { OrganizationPage } from "./pages/OrganizationPage";
 import { EventPage } from "./pages/EventPage";
 import { EventDetailPage } from "./pages/EventDetailPage";
+import { CartPage } from "./pages/CartPage";
+import { OrdersPage } from "./pages/OrdersPage";
+import { OrderDetailPage } from "./pages/OrderDetailPage";
+import { WishlistPage } from "./pages/WishlistPage";
+import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { ToastContainer } from "./components/ui";
 import "./styles.css";
 
@@ -121,6 +126,51 @@ function AppRouter() {
             </>
           }
           path="/organizer"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <CartPage />
+            </>
+          }
+          path="/cart"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <OrdersPage />
+            </>
+          }
+          path="/orders"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <OrderDetailPage />
+            </>
+          }
+          path="/orders/:id"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <WishlistPage />
+            </>
+          }
+          path="/wishlist"
+        />
+        <Route
+          element={
+            <>
+              <HomeFixedChrome showSlideBar={false} />
+              <AdminDashboardPage />
+            </>
+          }
+          path="/admin"
         />
         <Route element={<Navigate replace to="/" />} path="*" />
       </Routes>

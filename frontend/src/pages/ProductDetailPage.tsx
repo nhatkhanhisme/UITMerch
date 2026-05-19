@@ -1,11 +1,16 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { findProductById, MOCK_PRODUCTS } from "../mocks/merchData";
 import type { MockProduct } from "../mocks/merchData";
 import { getPublicMerchDetail } from "../api/merch";
 import { getPublicOrganizationDetail } from "../api/organization";
-import { createGuestCheckoutOrder } from "../api/order";
+import { createGuestCheckoutOrder, createInstantOrder } from "../api/order";
+import { addCartItem } from "../api/cart";
+import { addToWishlist, getWishlist, removeFromWishlist } from "../api/wishlist";
+import { getCustomerProfile } from "../api/profile";
+import { getApiErrorMessage } from "../api/auth";
 import { mapMerchToMockProduct } from "../types/shared";
+import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
 
 const ShaderBackground = lazy(() =>
@@ -152,48 +157,135 @@ function PurchasePanel({
 }: {
   product: MockProduct;
 }) {
+  const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
+  const isCustomer = user?.role === "CUSTOMER";
   const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  // Guest Checkout Flow States
+  useEffect(() => {
+    if (!isCustomer) return;
+    let active = true;
+    getWishlist()
+      .then((res) => {
+        if (active) {
+          setIsWishlisted(
+            (res.data?.items ?? []).some((i) => i.merch.id === product.id),
+          );
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [isCustomer, product.id]);
+
+  // Checkout Flow States
   const [showCheckout, setShowCheckout] = useState(false);
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
-  const [guestAddress, setGuestAddress] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [shippingPrefilled, setShippingPrefilled] = useState(false);
+
+  useEffect(() => {
+    if (!isCustomer) return;
+    let active = true;
+    getCustomerProfile()
+      .then((res) => {
+        if (!active || !res.data) return;
+        const { fullName, phone, email } = res.data as { fullName?: string; phone?: string | null; email?: string };
+        setGuestName(fullName ?? user?.fullName ?? "");
+        setGuestEmail(email ?? user?.email ?? "");
+        if (phone) {
+          setGuestPhone(phone);
+          setShippingPrefilled(true);
+        }
+      })
+      .catch(() => {
+        setGuestName(user?.fullName ?? "");
+        setGuestEmail(user?.email ?? "");
+      });
+    return () => { active = false; };
+  }, [isCustomer, user?.fullName, user?.email]);
+
+  const handleBuyNow = async () => {
+    setIsBuyingNow(true);
+    try {
+      await createInstantOrder({ merchId: product.id, quantity });
+      toast.success("Đặt hàng thành công!");
+      navigate("/orders");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Không thể đặt hàng. Vui lòng thử lại."));
+    } finally {
+      setIsBuyingNow(false);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.info("Vui lòng đăng nhập để thêm vào giỏ hàng.");
+      return;
+    }
+    setIsAddingToCart(true);
+    try {
+      await addCartItem({ merchId: product.id, quantity });
+      toast.success("Đã thêm vào giỏ hàng!");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Không thể thêm vào giỏ hàng."));
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!user) {
+      toast.info("Vui lòng đăng nhập để lưu yêu thích.");
+      return;
+    }
+    setIsWishlistLoading(true);
+    try {
+      if (isWishlisted) {
+        await removeFromWishlist(product.id);
+        setIsWishlisted(false);
+        toast.info("Đã xoá khỏi danh sách yêu thích.");
+      } else {
+        await addToWishlist(product.id);
+        setIsWishlisted(true);
+        toast.success("Đã thêm vào danh sách yêu thích!");
+      }
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Không thể cập nhật yêu thích."));
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  };
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!guestName.trim() || !guestPhone.trim() || !guestAddress.trim()) {
-      toast.error("Vui lòng điền đầy đủ Tên, Số điện thoại và Địa chỉ giao hàng.");
+    if (!guestName.trim() || !guestPhone.trim()) {
+      toast.error("Vui lòng điền đầy đủ Họ tên và Số điện thoại.");
       return;
     }
 
     setIsSubmitting(true);
     try {
       await createGuestCheckoutOrder({
-        guestAddress,
         guestEmail: guestEmail.trim() || undefined,
-        guestName,
-        guestPhone,
-        items: [
-          {
-            merchId: product.id,
-            quantity,
-          },
-        ],
+        guestName: guestName.trim(),
+        guestPhone: guestPhone.trim(),
+        items: [{ merchId: product.id, quantity }],
         note: note.trim() || undefined,
       });
 
       setOrderPlaced(true);
-      toast.success("Đặt hàng thành công! Đơn hàng sẽ được thanh toán COD.");
-    } catch {
-      toast.error(
-        "Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại sau giây lát.",
-      );
+      toast.success("Đặt trước thành công!");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Không thể tạo đơn hàng. Vui lòng thử lại."));
     } finally {
       setIsSubmitting(false);
     }
@@ -207,7 +299,7 @@ function PurchasePanel({
             ✓
           </div>
           <h2 className="font-fredoka text-3xl font-bold text-black-blue">
-            Đặt hàng thành công!
+            Đặt trước thành công!
           </h2>
           <p className="mt-3 text-sm leading-6 text-ink/70">
             Cảm ơn <strong>{guestName}</strong> đã ủng hộ sản phẩm của{" "}
@@ -216,7 +308,7 @@ function PurchasePanel({
 
           <div className="mt-6 rounded-2xl bg-white/50 p-4 text-left border border-white/60 space-y-2 text-xs">
             <p className="font-semibold text-black-blue border-b pb-2 text-sm">
-              Thông tin đơn hàng (COD)
+              Thông tin đặt trước
             </p>
             <p>
               <span className="text-ink/60">Vật phẩm:</span> {product.name}
@@ -229,9 +321,6 @@ function PurchasePanel({
             </p>
             <p>
               <span className="text-ink/60">SĐT:</span> {guestPhone}
-            </p>
-            <p>
-              <span className="text-ink/60">Giao đến:</span> {guestAddress}
             </p>
             <p className="pt-2 font-bold text-black-blue border-t mt-2 flex justify-between text-sm">
               <span>Tổng thanh toán:</span>
@@ -283,23 +372,86 @@ function PurchasePanel({
         </div>
 
         {!showCheckout ? (
-          <div className="flex flex-col gap-4 sm:flex-row lg:flex-col xl:flex-row">
-            <QuantityStepper
-              onChange={(nextQuantity) => {
-                setQuantity(nextQuantity);
-              }}
-              quantity={quantity}
-              stock={Math.max(product.stock, 1)}
-            />
-            <button
-              className="min-h-14 flex-1 rounded-full bg-black px-8 text-sm font-bold uppercase text-white transition hover:-translate-y-0.5 hover:bg-black-blue disabled:cursor-not-allowed disabled:opacity-45"
-              disabled={product.stock <= 0}
-              onClick={() => setShowCheckout(true)}
-              type="button"
-            >
-              Mua ngay COD
-            </button>
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-4 sm:flex-row lg:flex-col xl:flex-row">
+              <QuantityStepper
+                onChange={(nextQuantity) => {
+                  setQuantity(nextQuantity);
+                }}
+                quantity={quantity}
+                stock={Math.max(product.stock, 1)}
+              />
+              <button
+                className="min-h-14 flex-1 rounded-full bg-black px-8 text-sm font-bold uppercase text-white transition hover:-translate-y-0.5 hover:bg-black-blue disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={product.stock <= 0}
+                onClick={() => setShowCheckout(true)}
+                type="button"
+              >
+                Đặt trước
+              </button>
+            </div>
+            {isCustomer && (
+              <button
+                className="w-full rounded-full border border-aqua bg-aqua/20 py-3 text-sm font-bold text-black-blue transition hover:bg-aqua/40 disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={isAddingToCart || product.stock <= 0}
+                onClick={handleAddToCart}
+                type="button"
+              >
+                {isAddingToCart ? "Đang thêm..." : "Thêm vào giỏ hàng"}
+              </button>
+            )}
+            {product.stock <= 0 && (
+              <div className="rounded-xl border border-peach/40 bg-peach/10 px-4 py-3 text-sm text-black-blue/70">
+                Sản phẩm này hiện đã hết hàng và chưa có lịch nhập kho mới. Bạn có thể thêm vào danh sách yêu thích để theo dõi.
+              </div>
+            )}
           </div>
+        ) : shippingPrefilled ? (
+          <form
+            className="rounded-[28px] border border-white/80 bg-white/60 p-4 space-y-4 shadow-glass-inset animate-fadeIn"
+            onSubmit={handleCheckoutSubmit}
+          >
+            <div className="flex items-center justify-between border-b pb-2">
+              <p className="font-fredoka font-bold text-black-blue">
+                Xác nhận đặt trước
+              </p>
+              <button
+                className="text-xs text-ink/50 hover:text-black-blue"
+                onClick={() => setShowCheckout(false)}
+                type="button"
+              >
+                Hủy
+              </button>
+            </div>
+
+            <div className="rounded-xl bg-white/50 border border-white/70 p-3 space-y-1 text-sm">
+              <p className="text-xs font-semibold text-ink/50 uppercase mb-2">Thông tin nhận hàng</p>
+              <p className="text-black-blue font-semibold">{guestName}</p>
+              <p className="text-ink/70">{guestPhone}</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-ink/70 mb-1">
+                Ghi chú thêm
+              </label>
+              <input
+                className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua"
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Lời nhắn cho ban tổ chức..."
+                value={note}
+              />
+            </div>
+
+            <div className="pt-1">
+              <button
+                className="w-full rounded-full bg-aqua py-3 text-sm font-bold text-black-blue transition hover:bg-white hover:shadow-glass"
+                disabled={isSubmitting}
+                type="submit"
+              >
+                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt trước"}
+              </button>
+            </div>
+          </form>
         ) : (
           <form
             className="rounded-[28px] border border-white/80 bg-white/60 p-4 space-y-4 shadow-glass-inset animate-fadeIn"
@@ -307,7 +459,7 @@ function PurchasePanel({
           >
             <div className="flex items-center justify-between border-b pb-2">
               <p className="font-fredoka font-bold text-black-blue">
-                Thông tin nhận hàng (COD)
+                Thông tin đặt trước
               </p>
               <button
                 className="text-xs text-ink/50 hover:text-black-blue"
@@ -347,19 +499,6 @@ function PurchasePanel({
 
             <div>
               <label className="block text-xs font-semibold text-ink/70 mb-1">
-                Địa chỉ giao hàng *
-              </label>
-              <textarea
-                className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua h-16 resize-none"
-                onChange={(e) => setGuestAddress(e.target.value)}
-                placeholder="Số nhà, đường, phường/xã, quận/huyện..."
-                required
-                value={guestAddress}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-ink/70 mb-1">
                 Email (Tùy chọn)
               </label>
               <input
@@ -389,7 +528,7 @@ function PurchasePanel({
                 disabled={isSubmitting}
                 type="submit"
               >
-                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt hàng COD"}
+                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt trước"}
               </button>
             </div>
           </form>
@@ -398,13 +537,24 @@ function PurchasePanel({
 
       <div className="grid grid-cols-2 gap-3 border-t border-ink/10 pt-6">
         <button
-          className="rounded-full border border-ink/15 bg-white/35 px-4 py-3 text-sm font-semibold text-black-blue transition hover:border-aqua hover:bg-white/55"
+          className={[
+            "rounded-full border px-4 py-3 text-sm font-semibold transition disabled:opacity-50",
+            isWishlisted
+              ? "border-peach/60 bg-peach/20 text-black-blue hover:bg-peach/35"
+              : "border-ink/15 bg-white/35 text-black-blue hover:border-aqua hover:bg-white/55",
+          ].join(" ")}
+          disabled={isWishlistLoading}
+          onClick={handleWishlistToggle}
           type="button"
         >
-          ♡ Yêu thích
+          {isWishlistLoading ? "Đang xử lý..." : isWishlisted ? "♥ Đã yêu thích" : "♡ Yêu thích"}
         </button>
         <button
           className="rounded-full border border-ink/15 bg-white/35 px-4 py-3 text-sm font-semibold text-black-blue transition hover:border-aqua hover:bg-white/55"
+          onClick={() => {
+            navigator.clipboard?.writeText(window.location.href);
+            toast.info("Đã sao chép liên kết!");
+          }}
           type="button"
         >
           Chia sẻ

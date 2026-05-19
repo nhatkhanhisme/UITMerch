@@ -67,7 +67,7 @@ cp .env.example .env
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 3.3.5, Java 21 |
-| Database | PostgreSQL 16, Flyway (V1–V24 migrations) |
+| Database | PostgreSQL 16, Flyway (V1–V28 migrations) |
 | Auth | JWT via JJWT 0.12.x — stateless, access + refresh tokens, type-checked |
 | Token blacklist | PostgreSQL-backed `invalidated_tokens` table — survives restarts |
 | Rate limiting | In-memory sliding-window (`RateLimiterService`) — login, register, OTP, guest checkout |
@@ -75,7 +75,7 @@ cp .env.example .env
 | Email | JavaMail (SMTP) with `@Async` dispatch — OTP, password reset, order status |
 | Cache | Spring `ConcurrentMapCache` — categories, popular merch |
 | API Docs | springdoc-openapi 2.6 — Swagger UI at `/swagger-ui.html` (disabled by default in prod) |
-| Tests | 172 tests across 14 test classes — unit (Mockito) + `@DataJpaTest` integration |
+| Tests | 169 tests across 14 test classes — unit (Mockito) + `@DataJpaTest` integration |
 | Logging | Logback — human-readable (dev/docker), structured JSON via logstash-logback-encoder (prod) |
 
 ---
@@ -95,6 +95,7 @@ Each domain follows the pattern: `entity/ → repository/ → dto/ → service/ 
 | **order** | `GET/PATCH /api/v1/organizations/{orgId}/orders/**` | `GET/POST/PATCH /api/v1/customer/orders/**` | `GET/POST /api/v1/public/orders/**` |
 | **wishlist** | — | `GET/POST/DELETE /api/v1/customer/wishlist/**` | — |
 | **event** | `CRUD /api/v1/organizations/{orgId}/events/**` | — | `GET /api/v1/public/events/**` |
+| **notification** | — | `GET/PATCH /api/v1/customer/notifications/**` | — |
 | **admin** | — | — | `GET/PATCH /api/v1/admin/**` |
 
 Role enforcement is via `@PreAuthorize` at method level (not in `SecurityConfig`).
@@ -196,25 +197,30 @@ Categories seeded:
 | GET | `/` | List own orders (`?status=` filter, paginated) |
 | GET | `/{id}` | Get order by ID |
 | POST | `/instant` | Instant order — single item without going through cart |
-| PATCH | `/{id}/cancel` | Cancel a PENDING order — stock is restored automatically |
+| PATCH | `/{id}/cancel` | Cancel a PENDING order (body: `cancelReason`, optional `cancelReasonNote`) — stock restored |
 
 ### Orders — Organizer `/api/v1/organizations/{orgId}/orders` *(ORGANIZER)*
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/` | List org orders (`?status=` filter, paginated) |
-| GET | `/{id}` | Get order by ID |
-| PATCH | `/{id}/status` | Advance order status (transitions below) |
+| GET | `/orders` | List org orders (`?status=` filter, paginated) |
+| GET | `/orders/{id}` | Get order by ID |
+| PATCH | `/orders/{id}/status` | Advance order status (CONFIRMED → READY for single order) |
+| PATCH | `/orders/{id}/checkin` | Mark READY order as COMPLETED (campus pickup check-in) |
+| PATCH | `/orders/{id}/cancel` | Cancel PENDING or CONFIRMED order (body: `cancelReason`, optional `cancelReasonNote`) — stock restored |
+| POST | `/pickup-schedules` | Create a pickup schedule for a batch of CONFIRMED orders — transitions them all to READY and sends customer notifications |
+| GET | `/pickup-schedules` | List org pickup schedules (paginated) |
+| GET | `/pickup-schedules/{scheduleId}/orders` | List orders assigned to a pickup schedule (check-in list) |
 
 **Order status transitions:**
 
 ```
-PENDING → CONFIRMED → READY_FOR_PICKUP → SUCCESS
-PENDING → CANCELLED        (stock restored)
-CONFIRMED → CANCELLED      (stock restored)
+PENDING → CONFIRMED → READY → COMPLETED
+PENDING → CANCELLED                          (stock restored)
+CONFIRMED → CANCELLED                        (stock restored)
 ```
 
-An email notification is sent to the customer on every transition.
+`READY` is reached via `createPickupSchedule` (batch) or `updateOrderStatus` (single). `COMPLETED` is set by `checkInOrder` when the customer physically collects at campus. An email notification is sent to the customer on every transition; a push notification is also created in-app when the order reaches `READY`.
 
 ### Orders — Public `/api/v1/public/orders`
 
@@ -230,6 +236,15 @@ An email notification is sent to the customer on every transition.
 | GET | `/` | Get wishlist with full merch details |
 | POST | `/{merchId}` | Add merch item to wishlist (409 if already exists) |
 | DELETE | `/{merchId}` | Remove merch item from wishlist |
+
+### Notifications — `/api/v1/customer/notifications` *(CUSTOMER)*
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | List own notifications (paginated, newest first) |
+| GET | `/unread-count` | Get count of unread notifications |
+| PATCH | `/{id}/read` | Mark a single notification as read |
+| PATCH | `/read-all` | Mark all notifications as read |
 
 ### Events — `/api/v1/organizations/{orgId}/events` *(ORGANIZER)*
 
@@ -304,7 +319,7 @@ Auto-seeded on startup. Skipped if data already exists.
 | `org1@uit.edu.vn` | `Org12345` | ORGANIZER | ACTIVE org · has merch, events, orders |
 | `org2@uit.edu.vn` | `Org12345` | ORGANIZER | PENDING org · test admin approval |
 | `cust1@uit.edu.vn` | `Cust1234` | CUSTOMER | Active cart · wishlist · 2 orders |
-| `cust2@uit.edu.vn` | `Cust1234` | CUSTOMER | 1 order READY\_FOR\_PICKUP |
+| `cust2@uit.edu.vn` | `Cust1234` | CUSTOMER | 1 order READY (campus pickup) |
 
 ### PostgreSQL real seed (V12–V16 migrations)
 
@@ -321,8 +336,8 @@ All seeded accounts use password `UIT@2025`.
 | `nguyen.van.an@student.uit.edu.vn` | CUSTOMER | Active cart + wishlist + 2 orders |
 | `tran.thi.bich@student.uit.edu.vn` | CUSTOMER | Active cart + wishlist + 1 order |
 | `le.minh.cuong@student.uit.edu.vn` | CUSTOMER | Active cart + wishlist + 1 order |
-| `pham.hong.duc@gmail.com` | CUSTOMER | 1 order READY\_FOR\_PICKUP |
-| `hoang.thu.em@gmail.com` | CUSTOMER | 1 order SUCCESS |
+| `pham.hong.duc@gmail.com` | CUSTOMER | 1 order READY (campus pickup) |
+| `hoang.thu.em@gmail.com` | CUSTOMER | 1 order COMPLETED |
 
 5 events seeded (PUBLISHED, DRAFT, ENDED) with event–merch links.
 8 orders seeded covering all status values including 2 guest orders.
@@ -413,6 +428,10 @@ Never modify existing migration files — add a new `VN+1__description.sql` inst
 | V20–V22 | Seed real organization logo URLs |
 | V23 | `invalidated_tokens` table (persistent JWT blacklist — SHA-256 hash, expires_at) |
 | V24 | `users.is_active` column (default `true`) for account ban/deactivation |
+| V25 | Rename `order_status` enum values: `READY_FOR_PICKUP → READY`, `SUCCESS → COMPLETED` |
+| V26 | Add cancel fields to `orders`: `cancelled_by`, `cancel_reason`, `cancel_reason_note`, `cancelled_at` |
+| V27 | `pickup_schedules` table + `orders.pickup_schedule_id` FK |
+| V28 | `notifications` table for in-app CUSTOMER notifications |
 
 ---
 
@@ -424,17 +443,17 @@ Never modify existing migration files — add a new `VN+1__description.sql` inst
 ```
 
 Tests use `@ActiveProfiles("dev")` — H2 in-memory, no PostgreSQL or env vars required.
-**172 tests across 14 test classes**, 0 failures.
+**169 tests across 14 test classes**. 6 currently failing: `CartServiceTest` (3 mock-gap failures) and `WishlistServiceTest` (3 NullPointer — missing `MerchImageRepository` mock). All other suites pass.
 
 | Suite | Tests | Notes |
 |---|---|---|
 | `AuthServiceTest` | 35 | register, verify, login, resend-OTP, forgot/reset password, refresh, logout |
-| `OrderServiceTest` | 36 | all order paths + status transitions (parameterized) + cancellation + stock restore |
+| `OrderServiceTest` | 33 | all order paths + status transitions (parameterized) + cancellation + pickup-schedules + stock restore |
 | `MerchServiceTest` | 15 | create, update, delete, list, popular |
-| `CartServiceTest` | 13 | add, update, remove, checkout |
+| `CartServiceTest` | 13 | add, update, remove, checkout ⚠ 3 failing (mock gap) |
 | `AdminServiceTest` | 13 | users, orgs, orders, ban/activate |
 | `EventServiceTest` | 14 | create, status transitions, attach/detach merch, public access |
-| `WishlistServiceTest` | 7 | get, add, remove |
+| `WishlistServiceTest` | 7 | get, add, remove ⚠ 3 errors (missing `MerchImageRepository` mock) |
 | `OrganizationServiceTest` | 8 | CRUD + ownership |
 | `UserServiceTest` | 5 | profile get/update |
 | `JwtTokenProviderTest` | 10 | access/refresh token type discrimination + tamper detection |

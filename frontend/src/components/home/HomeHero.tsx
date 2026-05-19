@@ -230,6 +230,14 @@ export function HomeHero() {
         aria-hidden="true"
         className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-[#E9FEFF]"
       />
+
+      <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce">
+        <ScrollDownButton
+          onClick={() => {
+            document.getElementById("home-item")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
+      </div>
     </section>
   );
 }

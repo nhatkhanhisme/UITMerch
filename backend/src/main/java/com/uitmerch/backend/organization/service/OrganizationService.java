@@ -88,6 +88,13 @@ public class OrganizationService {
             .orElseThrow(() -> new ResourceNotFoundException("Organization not found for this account."));
     }
 
+    // Used when we need org data without ownership check (e.g. notifying org owner on customer cancel)
+    @Transactional(readOnly = true)
+    public Organization getOrganizationEntityById(UUID orgId) {
+        return organizationRepository.findById(orgId)
+            .orElseThrow(() -> new ResourceNotFoundException("Organization", orgId.toString()));
+    }
+
     private long countPublishedMerch(UUID orgId) {
         return merchItemRepository.countByOrgIdAndStatus(orgId, MerchItemStatus.PUBLISHED);
     }

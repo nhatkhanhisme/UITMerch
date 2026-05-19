@@ -22,4 +22,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
     Page<Order> findByOrgIdAndStatus(UUID orgId, OrderStatus status, Pageable pageable);
 
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
+
+    java.util.List<Order> findByPickupScheduleId(UUID pickupScheduleId);
+
+    long countByPickupScheduleId(UUID pickupScheduleId);
 }

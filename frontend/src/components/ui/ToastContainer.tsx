@@ -65,7 +65,7 @@ export function ToastContainer() {
   }
 
   return (
-    <div className="fixed right-6 top-24 z-50 flex flex-col gap-3 pointer-events-none sm:top-28">
+    <div className="fixed right-6 top-24 z-[9999] flex flex-col gap-3 pointer-events-none sm:top-28">
       {toasts.map((t) => (
         <div className="pointer-events-auto" key={t.id}>
           <ToastItem toast={t} />

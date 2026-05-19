@@ -138,6 +138,14 @@ export type OrderItemResponse = {
   createdAt?: string;
 };
 
+export type PickupScheduleInfo = {
+  id: string;
+  pickupDate: string;
+  pickupTimeSlot: string;
+  location: string;
+  notes?: string;
+};
+
 export type OrderResponse = {
   id: string;
   userId?: string;
@@ -152,8 +160,47 @@ export type OrderResponse = {
   paymentStatus: string;
   note?: string;
   items?: OrderItemResponse[];
+  // cancel metadata
+  cancelledBy?: "customer" | "organizer";
+  cancelReason?: string;
+  cancelReasonNote?: string;
+  cancelledAt?: string;
+  // pickup schedule (embedded)
+  pickupScheduleId?: string;
+  pickupSchedule?: PickupScheduleInfo;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type PickupScheduleResponse = {
+  id: string;
+  orgId: string;
+  pickupDate: string;
+  pickupTimeSlot: string;
+  location: string;
+  notes?: string;
+  orderCount: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type PickupScheduleRequest = {
+  pickupDate: string;
+  pickupTimeSlot: string;
+  location: string;
+  notes?: string;
+  orderIds: string[];
+};
+
+export type NotificationResponse = {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  relatedOrderId?: string;
+  createdAt?: string;
 };
 
 export type GuestOrderItemRequest = {
@@ -165,9 +212,138 @@ export type GuestOrderRequest = {
   items: GuestOrderItemRequest[];
   guestName: string;
   guestPhone: string;
-  guestAddress: string;
+  guestAddress?: string;
   guestEmail?: string;
   note?: string;
+};
+
+export type InstantOrderRequest = {
+  merchId: string;
+  quantity: number;
+  note?: string;
+};
+
+export type CheckoutRequest = {
+  note?: string;
+  shippingName?: string;
+  shippingPhone?: string;
+  shippingAddress?: string;
+};
+
+// ─── Cart Types ────────────────────────────────────────────────────────────────
+
+export type CartItemResponse = {
+  id: string;
+  cartId: string;
+  merch: MerchResponse;
+  quantity: number;
+  subtotal: number;
+  createdAt?: string;
+};
+
+export type CartResponse = {
+  id: string;
+  userId: string;
+  status: string;
+  items: CartItemResponse[];
+  totalAmount: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AddCartItemRequest = {
+  merchId: string;
+  quantity: number;
+};
+
+export type UpdateCartItemRequest = {
+  quantity: number;
+};
+
+// ─── Wishlist Types ────────────────────────────────────────────────────────────
+
+export type WishlistItemResponse = {
+  id: string;
+  merch: MerchResponse;
+  addedAt?: string;
+};
+
+export type WishlistResponse = {
+  id: string;
+  items: WishlistItemResponse[];
+};
+
+// ─── Admin Types ───────────────────────────────────────────────────────────────
+
+export type UserSummaryResponse = {
+  id: string;
+  email: string;
+  fullName: string;
+  phone?: string;
+  role: string;
+  isVerified: boolean;
+  isActive: boolean;
+  createdAt?: string;
+};
+
+// ─── Organizer Merch Request Types ────────────────────────────────────────────
+
+export type CreateMerchRequest = {
+  name: string;
+  description?: string;
+  price?: number;
+  stock: number;
+  categorySlug?: string;
+  imageUrls?: string[];
+};
+
+export type UpdateMerchRequest = {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  categorySlug?: string;
+  imageUrls?: string[];
+  status?: string;
+};
+
+// ─── Organizer Event Request Types ────────────────────────────────────────────
+
+export type CreateEventRequest = {
+  title: string;
+  description?: string;
+  coverUrl?: string;
+  startsAt?: string;
+  endsAt?: string;
+};
+
+export type UpdateEventRequest = {
+  title?: string;
+  description?: string;
+  coverUrl?: string;
+  status?: string;
+  startsAt?: string;
+  endsAt?: string;
+};
+
+// ─── Organizer Order Request Types ────────────────────────────────────────────
+
+export type UpdateOrderStatusRequest = {
+  status: string;
+};
+
+export type CancelOrderRequest = {
+  cancelReason: string;
+  cancelReasonNote?: string;
+};
+
+// ─── Organization Request Types ───────────────────────────────────────────────
+
+export type CreateOrganizationRequest = {
+  name: string;
+  description?: string;
+  logoUrl?: string;
+  coverUrl?: string;
 };
 
 // ─── Intelligent UI Mappers (Preserving Glassmorphism & Visual WOW) ──────────

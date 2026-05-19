@@ -3,7 +3,9 @@ package com.uitmerch.backend.wishlist.service;
 import com.uitmerch.backend.common.exception.ConflictException;
 import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.merch.dto.MerchResponse;
+import com.uitmerch.backend.merch.entity.MerchImage;
 import com.uitmerch.backend.merch.entity.MerchItem;
+import com.uitmerch.backend.merch.repository.MerchImageRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.wishlist.dto.WishlistItemResponse;
 import com.uitmerch.backend.wishlist.dto.WishlistResponse;
@@ -28,22 +30,34 @@ public class WishlistService {
     private final WishlistRepository wishlistRepository;
     private final WishlistItemRepository wishlistItemRepository;
     private final MerchItemRepository merchItemRepository;
+    private final MerchImageRepository merchImageRepository;
 
     @Transactional(readOnly = true)
     public WishlistResponse getWishlist(UUID userId) {
         Wishlist wishlist = findOrCreate(userId);
         List<WishlistItem> items = wishlistItemRepository.findByWishlistId(wishlist.getId());
 
-        // Batch-fetch all referenced merch items in one query
+        // Batch-fetch all referenced merch items and their images in two queries
         List<UUID> merchIds = items.stream().map(WishlistItem::getMerchId).toList();
         Map<UUID, MerchItem> merchById = merchItemRepository.findAllById(merchIds)
             .stream().collect(Collectors.toMap(MerchItem::getId, Function.identity()));
+        Map<UUID, List<String>> imageMap = merchImageRepository
+            .findByMerchIdInOrderByPosition(merchIds)
+            .stream()
+            .collect(Collectors.groupingBy(
+                MerchImage::getMerchId,
+                Collectors.mapping(MerchImage::getUrl, Collectors.toList())
+            ));
 
         List<WishlistItemResponse> itemResponses = items.stream()
             .filter(item -> merchById.containsKey(item.getMerchId()))
             .map(item -> WishlistItemResponse.builder()
                 .id(item.getId())
-                .merch(MerchResponse.from(merchById.get(item.getMerchId())))
+                .merch(MerchResponse.from(
+                    merchById.get(item.getMerchId()),
+                    null,
+                    imageMap.getOrDefault(item.getMerchId(), List.of())
+                ))
                 .addedAt(item.getCreatedAt())
                 .build())
             .toList();

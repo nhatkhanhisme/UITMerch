@@ -6,4 +6,7 @@ import lombok.Data;
 public class CheckoutRequest {
 
     private String note;
+    private String shippingName;
+    private String shippingPhone;
+    private String shippingAddress;
 }

@@ -3,6 +3,7 @@ package com.uitmerch.backend.wishlist.service;
 import com.uitmerch.backend.common.exception.ConflictException;
 import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.merch.entity.MerchItem;
+import com.uitmerch.backend.merch.repository.MerchImageRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.wishlist.entity.Wishlist;
 import com.uitmerch.backend.wishlist.entity.WishlistItem;
@@ -33,6 +34,7 @@ class WishlistServiceTest {
     @Mock private WishlistRepository wishlistRepository;
     @Mock private WishlistItemRepository wishlistItemRepository;
     @Mock private MerchItemRepository merchItemRepository;
+    @Mock private MerchImageRepository merchImageRepository;
 
     @InjectMocks private WishlistService wishlistService;
 

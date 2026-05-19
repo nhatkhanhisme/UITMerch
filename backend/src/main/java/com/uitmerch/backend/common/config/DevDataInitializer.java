@@ -114,12 +114,12 @@ public class DevDataInitializer implements ApplicationRunner {
         saveOrder(cust1.getId(), devClub.getId(), OrderStatus.PENDING, null,
                 List.of(new Line(hoodie, 2)));
 
-        // cust1 — CONFIRMED (organizer can move to READY_FOR_PICKUP)
+        // cust1 — CONFIRMED (organizer can create pickup schedule)
         saveOrder(cust1.getId(), devClub.getId(), OrderStatus.CONFIRMED, "Please pack separately",
                 List.of(new Line(tshirt, 3), new Line(cap, 1)));
 
-        // cust2 — READY_FOR_PICKUP (organizer can move to SUCCESS)
-        saveOrder(cust2.getId(), devClub.getId(), OrderStatus.READY_FOR_PICKUP, null,
+        // cust2 — READY (organizer can check-in)
+        saveOrder(cust2.getId(), devClub.getId(), OrderStatus.READY, null,
                 List.of(new Line(hoodie, 1)));
 
         // guest — PENDING
@@ -132,7 +132,7 @@ public class DevDataInitializer implements ApplicationRunner {
         log.info("  org1@uit.edu.vn   / Org12345  [ORGANIZER — ACTIVE org, has merch + events + orders]");
         log.info("  org2@uit.edu.vn   / Org12345  [ORGANIZER — PENDING org, needs admin approval]");
         log.info("  cust1@uit.edu.vn  / Cust1234  [CUSTOMER  — has cart, wishlist, 2 orders]");
-        log.info("  cust2@uit.edu.vn  / Cust1234  [CUSTOMER  — has 1 order READY_FOR_PICKUP]");
+        log.info("  cust2@uit.edu.vn  / Cust1234  [CUSTOMER  — has 1 order READY (awaiting check-in)]");
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────

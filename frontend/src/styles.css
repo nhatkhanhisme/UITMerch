@@ -80,6 +80,7 @@ body.home-scroll-lock {
 .home-scroll-snap-container {
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
+  overscroll-behavior-y: none;
 }
 
 .home-scroll-snap-container [data-section] {

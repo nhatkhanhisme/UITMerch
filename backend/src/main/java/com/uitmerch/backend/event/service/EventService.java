@@ -105,6 +105,14 @@ public class EventService {
     }
 
     @Transactional
+    public void deleteEvent(UUID ownerId, UUID orgId, UUID eventId) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
+        Event event = eventRepository.findByIdAndOrgId(eventId, org.getId())
+            .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
+        eventRepository.delete(event); // event_merch rows cascade via FK
+    }
+
+    @Transactional
     public EventResponse attachMerch(UUID ownerId, UUID orgId, UUID eventId, UUID merchId) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         Event event = eventRepository.findByIdAndOrgId(eventId, org.getId())

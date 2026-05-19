@@ -38,6 +38,11 @@ spring:
     name: uitmerch-backend
   main:
     lazy-initialization: true
+  data:
+    web:
+      pageable:
+        max-page-size: 200
+        default-page-size: 20
 
   mail:
     host: smtp.gmail.com

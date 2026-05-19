@@ -67,17 +67,23 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 | `/merch` | **Kho Vật Phẩm** (Merch Store) | Full catalog with keyword search, category filters (Đồ lưu niệm, Trang phục, Đồ dùng), sorting, and pagination (16 items/page) |
 | `/organization` | **Tổ Chức** (Organizations) | Grid of 30+ clubs and faculties with search-all and sort |
 | `/event` | **Sự Kiện & Hoạt Động** (Events) | Event listing with status badges (Sắp diễn ra / Đang diễn ra / Đã kết thúc), filter by Newest or Upcoming |
-| `/auth` | **Tài Khoản** (Account) | Login / Register portal with role selection (Customer / Organizer) and OTP email verification |
+| `/auth` | **Tài Khoản** (Account) | Login / Register portal with role selection (Customer / Organizer), OTP email verification, and forgot-password / reset-password flow |
 
 ### Customer (login required)
 - Cart and wishlist management
-- Registered account checkout and guest checkout (Cash on Delivery)
+- Registered account checkout and guest checkout (cash on delivery)
 - Order history and status tracking
+- Cancel PENDING orders with a reason (predefined options + free-text note)
+- In-app notifications — bell icon in nav, auto-dismissed on read; notified when order reaches READY for campus pickup
+- Campus pickup flow: orders progress PENDING → CONFIRMED → READY → COMPLETED; organizer creates pickup schedule slots and marks orders COMPLETED at check-in
 
 ### Organizer (login + approved organization)
 - Create and manage an organization profile (subject to admin approval)
 - Publish, edit, and remove merchandise with multi-image gallery support
 - Create and manage events linked to their organization
+- Confirm and manage orders: PENDING → CONFIRMED → READY (via pickup schedule) → COMPLETED (check-in scan)
+- Create pickup schedule slots that batch-transition CONFIRMED orders to READY and notify customers
+- Cancel PENDING or CONFIRMED orders with a reason
 
 ### Admin
 - Approve or reject organization registration requests
@@ -191,9 +197,11 @@ npm run build      # production build to dist/
 | `GET` | `/api/v1/public/events` | Public | List events |
 | `GET` | `/api/v1/categories` | Public | List all categories |
 | `GET/POST` | `/api/v1/customer/cart` | Customer | Cart management |
-| `GET/POST` | `/api/v1/customer/orders` | Customer | Order management |
-| `CRUD` | `/api/v1/organizations/merchs` | Organizer | Merch management |
-| `CRUD` | `/api/v1/organizations/events` | Organizer | Event management |
+| `GET/POST/PATCH` | `/api/v1/customer/orders` | Customer | Order history, instant order, cancel with reason |
+| `GET/PATCH` | `/api/v1/customer/notifications` | Customer | In-app notifications (unread count, mark read) |
+| `CRUD` | `/api/v1/organizations/{orgId}/merchs` | Organizer | Merch management |
+| `CRUD` | `/api/v1/organizations/{orgId}/events` | Organizer | Event management |
+| `GET/PATCH` | `/api/v1/organizations/{orgId}/orders` | Organizer | Order management, checkin, cancel, pickup schedules |
 | `GET/PATCH` | `/api/v1/admin/organizations` | Admin | Organization approval |
 
 Full API reference: [backend/README.md](backend/README.md)
