@@ -14,6 +14,7 @@ import com.uitmerch.backend.common.service.EmailService;
 import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.notification.service.NotificationService;
+import com.uitmerch.backend.notification.service.SseEmitterManager;
 import com.uitmerch.backend.order.dto.CancelOrderRequest;
 import com.uitmerch.backend.order.dto.GuestOrderItemRequest;
 import com.uitmerch.backend.order.dto.GuestOrderRequest;
@@ -60,6 +61,7 @@ class OrderServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private EmailService emailService;
     @Mock private NotificationService notificationService;
+    @Mock private SseEmitterManager sseEmitterManager;
     @Mock private PickupScheduleRepository pickupScheduleRepository;
 
     @InjectMocks private OrderService orderService;
@@ -290,7 +292,7 @@ class OrderServiceTest {
             .subtotal(BigDecimal.valueOf(200_000)).build();
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-        when(orderRepository.save(any())).thenReturn(orderWithStatus(OrderStatus.CANCELLED));
+        when(orderRepository.saveAndFlush(any())).thenReturn(orderWithStatus(OrderStatus.CANCELLED));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item));
         when(userRepository.findById(any())).thenReturn(Optional.empty());
         when(organizationService.getOrganizationEntityById(any()))

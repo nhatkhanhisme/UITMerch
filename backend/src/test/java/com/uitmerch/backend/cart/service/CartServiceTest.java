@@ -12,6 +12,7 @@ import com.uitmerch.backend.common.exception.ResourceNotFoundException;
 import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.common.model.CartStatus;
 import com.uitmerch.backend.merch.entity.MerchItem;
+import com.uitmerch.backend.merch.repository.MerchImageRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
 import com.uitmerch.backend.order.service.OrderService;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,7 @@ class CartServiceTest {
     @Mock private CartRepository cartRepository;
     @Mock private CartItemRepository cartItemRepository;
     @Mock private MerchItemRepository merchItemRepository;
+    @Mock private MerchImageRepository merchImageRepository;
     @Mock private OrderService orderService;
 
     @InjectMocks private CartService cartService;
