@@ -20,7 +20,7 @@ export function useNotificationStream({ path, onMessage, enabled }: Options) {
   useEffect(() => {
     if (!enabled || !accessToken) return;
 
-    const baseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
+    const baseUrl = ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "").replace(/\/$/, "");
     let attempt = 0;
     let active = true;
 
