@@ -90,7 +90,7 @@ export function OrganizationDetailPage() {
   const [liveProducts, setLiveProducts] = useState<MockProduct[]>([]);
   const [totalItems, setTotalItems] = useState<number | null>(null);
   const [serverTotalPages, setServerTotalPages] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!locationOrg);
   const [hasApiError, setHasApiError] = useState(false);
 
   useEffect(() => {
