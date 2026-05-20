@@ -44,7 +44,7 @@ public class SecurityConfig {
     @Autowired
     private Environment environment;
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
+    @Value("${app.cors.allowed-origins:https://uitmerch.vercel.app, http://localhost:3000,http://localhost:5173}")
     private String allowedOrigins;
 
     @Value("${springdoc.swagger-ui.enabled:false}")
