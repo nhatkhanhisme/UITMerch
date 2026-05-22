@@ -148,6 +148,7 @@ const BACKEND_MESSAGE_MAP: Array<[string, string]> = [
   ["invalid otp", "Mã OTP không đúng hoặc đã hết hạn. Vui lòng thử lại."],
   ["otp expired", "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới."],
   ["email already", "Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác."],
+  ["not verified", "Email chưa được xác thực. Vui lòng kiểm tra hộp thư để lấy mã OTP."],
   ["password", "Mật khẩu không đúng. Vui lòng kiểm tra lại."],
   ["network error", "Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng và thử lại."],
 ];
@@ -159,6 +160,18 @@ function translateBackendMessage(raw: string): string {
   }
   // Return the original if no translation matches — it may already be in Vietnamese.
   return raw;
+}
+
+export function isUnverifiedEmailError(error: unknown): boolean {
+  if (axios.isAxiosError(error)) {
+    if (error.response?.status === 403) {
+      const message: unknown = error.response.data?.message;
+      if (typeof message === "string" && message.toLowerCase().includes("not verified")) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 export function getApiErrorMessage(
