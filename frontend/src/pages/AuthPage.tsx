@@ -5,6 +5,7 @@ import { Button, Input } from "../components/ui";
 import {
   forgotPassword,
   getApiErrorMessage,
+  isUnverifiedEmailError,
   login,
   registerCustomer,
   registerOrganizer,
@@ -150,7 +151,15 @@ export function AuthPage() {
       setShowOtpModal(true);
       setFormState((current) => ({ ...current, password: "" }));
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error));
+      if (mode === "signin" && isUnverifiedEmailError(error)) {
+        setOtpEmail(formState.email);
+        setOtpCode("");
+        setOtpError(null);
+        setOtpSuccess("Tài khoản chưa được xác thực. Vui lòng nhập mã OTP đã gửi đến email của bạn.");
+        setShowOtpModal(true);
+      } else {
+        setErrorMessage(getApiErrorMessage(error));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -616,6 +625,14 @@ export function AuthPage() {
                 type="button"
               >
                 {isResending ? "Đang gửi..." : "Gửi lại mã OTP"}
+              </button>
+
+              <button
+                className="font-sans text-sm text-gray transition hover:text-black-blue"
+                onClick={() => setShowOtpModal(false)}
+                type="button"
+              >
+                Đóng
               </button>
             </div>
           </div>
