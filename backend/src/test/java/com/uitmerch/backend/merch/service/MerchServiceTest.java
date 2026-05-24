@@ -12,6 +12,19 @@ import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.CategoryRepository;
 import com.uitmerch.backend.merch.repository.MerchImageRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
+import com.uitmerch.backend.common.exception.ResourceNotFoundException;
+import com.uitmerch.backend.common.exception.ValidationException;
+import com.uitmerch.backend.common.model.MerchItemStatus;
+import com.uitmerch.backend.common.model.OrganizationStatus;
+import com.uitmerch.backend.merch.dto.CreateMerchRequest;
+import com.uitmerch.backend.merch.dto.MerchResponse;
+import com.uitmerch.backend.merch.dto.UpdateMerchRequest;
+import com.uitmerch.backend.merch.entity.Category;
+import com.uitmerch.backend.merch.entity.MerchItem;
+import com.uitmerch.backend.merch.repository.CategoryRepository;
+import com.uitmerch.backend.merch.repository.MerchImageRepository;
+import com.uitmerch.backend.merch.repository.MerchItemRepository;
+import com.uitmerch.backend.ai.service.MerchEmbeddingService;
 import com.uitmerch.backend.order.repository.OrderItemRepository;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.service.OrganizationService;
@@ -44,6 +57,7 @@ class MerchServiceTest {
     @Mock private CategoryRepository categoryRepository;
     @Mock private OrganizationService organizationService;
     @Mock private OrderItemRepository orderItemRepository;
+    @Mock private MerchEmbeddingService merchEmbeddingService;
 
     @InjectMocks private MerchService merchService;
 

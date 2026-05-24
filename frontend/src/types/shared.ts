@@ -337,6 +337,18 @@ export type CancelOrderRequest = {
   cancelReasonNote?: string;
 };
 
+// ─── AI Visual Search ─────────────────────────────────────────────────────────
+
+export type MerchWithSimilarity = {
+  merch: MerchResponse;
+  similarity: number;
+};
+
+export type VisualSearchResponse = {
+  aiDescription: string;
+  results: MerchWithSimilarity[];
+};
+
 // ─── Organization Request Types ───────────────────────────────────────────────
 
 export type CreateOrganizationRequest = {

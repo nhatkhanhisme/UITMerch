@@ -9,6 +9,6 @@ public class DevVisionAiService implements VisionAiService {
 
     @Override
     public String describeImage(byte[] imageBytes, String mimeType) {
-        return "áo thun, trắng, UIT";
+        return "áo khoa, trắng, UIT";
     }
 }

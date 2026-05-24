@@ -3,6 +3,7 @@ import type {
   ApiResponse,
   CategoryResponse,
   CreateMerchRequest,
+  VisualSearchResponse,
   MerchResponse,
   UpdateMerchRequest,
 } from "../types/shared";
@@ -81,4 +82,17 @@ export async function updateMerch(
 
 export async function deleteMerch(orgId: string, merchId: string) {
   await apiClient.delete(`/api/v1/organizations/${orgId}/merchs/${merchId}`);
+}
+
+// ─── AI Visual Search ─────────────────────────────────────────────────────────
+
+export async function searchMerchByImage(file: File) {
+  const formData = new FormData();
+  formData.append("image", file);
+  const { data } = await apiClient.post<ApiResponse<VisualSearchResponse>>(
+    "/api/v1/public/merch/visual-search",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return data;
 }

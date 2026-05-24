@@ -1,5 +1,6 @@
 package com.uitmerch.backend.ai.service;
 
+import com.uitmerch.backend.ai.dto.MerchWithSimilarity;
 import com.uitmerch.backend.ai.dto.VisualSearchResponse;
 import com.uitmerch.backend.common.exception.ValidationException;
 import com.uitmerch.backend.merch.dto.MerchResponse;
@@ -10,16 +11,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class VisualSearchService {
 
     private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
-    private static final long MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+    private static final long MAX_SIZE_BYTES = 5 * 1024 * 1024;
+    private static final int MAX_RESULTS = 8;
 
     private final VisionAiService visionAiService;
+    private final EmbeddingService embeddingService;
+    private final MerchEmbeddingService merchEmbeddingService;
     private final MerchService merchService;
 
     public VisualSearchResponse search(MultipartFile file) {
@@ -34,7 +41,10 @@ public class VisualSearchService {
 
         String aiDescription = visionAiService.describeImage(bytes, file.getContentType());
 
-        List<MerchResponse> results = searchByKeywords(aiDescription);
+        List<MerchWithSimilarity> results = vectorSearch(aiDescription);
+        if (results.isEmpty()) {
+            results = keywordFallback(aiDescription);
+        }
 
         return VisualSearchResponse.builder()
             .aiDescription(aiDescription)
@@ -42,16 +52,42 @@ public class VisualSearchService {
             .build();
     }
 
-    private List<MerchResponse> searchByKeywords(String aiDescription) {
-        for (String keyword : aiDescription.split(",")) {
-            String trimmed = keyword.trim();
-            if (trimmed.isBlank()) continue;
-            List<MerchResponse> results = merchService
-                .listPublished(trimmed, null, PageRequest.of(0, 8))
-                .getContent();
-            if (!results.isEmpty()) return results;
+    private List<MerchWithSimilarity> vectorSearch(String description) {
+        try {
+            float[] queryVec = embeddingService.embed(description);
+            List<MerchSimilarityEntry> entries = merchEmbeddingService.findNearest(queryVec, MAX_RESULTS);
+            if (entries.isEmpty()) return List.of();
+
+            List<UUID> ids = entries.stream().map(MerchSimilarityEntry::id).toList();
+            List<MerchResponse> merch = merchService.getPublishedMerchByIds(ids);
+
+            Map<UUID, Integer> simMap = entries.stream().collect(Collectors.toMap(
+                MerchSimilarityEntry::id,
+                e -> (int) Math.round(e.similarity() * 100)
+            ));
+
+            return merch.stream()
+                .map(m -> MerchWithSimilarity.builder()
+                    .merch(m)
+                    .similarity(simMap.getOrDefault(m.getId(), 0))
+                    .build())
+                .toList();
+        } catch (Exception e) {
+            return List.of();
         }
-        return List.of();
+    }
+
+    // Fallback for dev profile (no pgvector) or when no embeddings exist yet.
+    // Only searches by the first keyword (product type) to avoid generic terms matching everything.
+    private List<MerchWithSimilarity> keywordFallback(String aiDescription) {
+        String firstKeyword = aiDescription.split(",")[0].trim();
+        if (firstKeyword.isBlank()) return List.of();
+        return merchService
+            .listPublished(firstKeyword, null, PageRequest.of(0, MAX_RESULTS))
+            .getContent()
+            .stream()
+            .map(m -> MerchWithSimilarity.builder().merch(m).similarity(0).build())
+            .toList();
     }
 
     private void validateFile(MultipartFile file) {

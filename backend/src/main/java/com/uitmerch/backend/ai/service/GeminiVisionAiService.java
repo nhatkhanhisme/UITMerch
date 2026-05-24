@@ -3,6 +3,7 @@ package com.uitmerch.backend.ai.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uitmerch.backend.common.exception.ValidationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -13,66 +14,68 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
-@Profile("!(dev | docker)")
+@Profile("default")
+@RequiredArgsConstructor
 public class GeminiVisionAiService implements VisionAiService {
 
     private static final String ENDPOINT =
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
 
     private static final String PROMPT =
-        "Liệt kê 3 từ khóa tiếng Việt ngắn gọn mô tả sản phẩm trong ảnh " +
-        "(ví dụ: áo thun, xanh, UIT), cách nhau bằng dấu phẩy. " +
-        "Chỉ trả về từ khóa, không giải thích.";
+        "Mô tả ngắn gọn sản phẩm trong ảnh: tên sản phẩm, màu sắc, loại hàng. Tối đa 20 từ bằng tiếng Việt.";
 
-    private final String apiKey;
-    private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public GeminiVisionAiService(@Value("${app.ai.gemini-api-key}") String apiKey) {
-        this.apiKey = apiKey;
-        this.httpClient = HttpClient.newHttpClient();
-        this.objectMapper = new ObjectMapper();
-    }
+    @Value("${app.ai.gemini-api-key:}")
+    private String apiKey;
 
     @Override
     public String describeImage(byte[] imageBytes, String mimeType) {
-        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-        String body = """
-            {
-              "contents": [{
-                "parts": [
-                  { "text": "%s" },
-                  { "inline_data": { "mime_type": "%s", "data": "%s" } }
-                ]
-              }]
-            }
-            """.formatted(PROMPT, mimeType, base64Image);
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new ValidationException("GEMINI_API_KEY not configured. Please set GEMINI_API_KEY environment variable.");
+        }
 
         try {
+            String base64 = Base64.getEncoder().encodeToString(imageBytes);
+
+            Map<String, Object> body = Map.of(
+                "contents", List.of(Map.of(
+                    "parts", List.of(
+                        Map.of("inlineData", Map.of("mimeType", mimeType, "data", base64)),
+                        Map.of("text", PROMPT)
+                    )
+                ))
+            );
+
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ENDPOINT + apiKey))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
                 .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                log.warn("Gemini Vision returned HTTP {}: {}", response.statusCode(), response.body());
-                throw new ValidationException("Không thể phân tích ảnh. Vui lòng thử lại.");
+                log.warn("Gemini Vision API error: HTTP {} - {}", response.statusCode(), response.body());
+                throw new ValidationException("Vision API returned HTTP " + response.statusCode() + ". Check API key and rate limits.");
             }
 
             JsonNode root = objectMapper.readTree(response.body());
-            return root.at("/candidates/0/content/parts/0/text").asText().trim();
+            return root.path("candidates").get(0)
+                .path("content").path("parts").get(0)
+                .path("text").asText("").trim();
 
         } catch (ValidationException e) {
             throw e;
         } catch (Exception e) {
-            log.warn("Gemini Vision error: {}", e.getMessage());
-            throw new ValidationException("Không thể phân tích ảnh. Vui lòng thử lại.");
+            log.warn("Gemini Vision API exception: {}", e.getMessage());
+            throw new ValidationException("Vision service error: " + e.getMessage());
         }
     }
 }
