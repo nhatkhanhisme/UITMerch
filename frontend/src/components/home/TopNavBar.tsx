@@ -1,14 +1,24 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { logout } from "../../api/auth";
 import { getCustomerProfile, getOrganizerProfile } from "../../api/profile";
 import { getNotifications, getUnreadCount, markAllNotificationsRead, markNotificationRead } from "../../api/notifications";
 import type { NotificationResponse } from "../../types/shared";
 import { useNotificationStream } from "../../hooks/useNotificationStream";
+import { VisualSearchModal } from "../features/VisualSearchModal";
 
 const logoHeaderUrl = "/assets/figma/logo-header.svg";
 const accountIconUrl = "/assets/figma/account-icon.svg";
+
+function SparkleIcon() {
+  return (
+    <svg className="size-[15px] shrink-0" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+    </svg>
+  );
+}
 
 type OrgNotif = {
   type: string;
@@ -40,6 +50,7 @@ export function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [visualSearchOpen, setVisualSearchOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
   const notifRef = useRef<HTMLDivElement | null>(null);
@@ -137,6 +148,7 @@ export function TopNavBar() {
     setIsAccountMenuOpen(false);
     setIsNotifOpen(false);
     setIsOrgNotifOpen(false);
+    setVisualSearchOpen(false);
   }, [location.pathname, location.search, location.hash]);
 
   // Load initial unread count for CUSTOMER role
@@ -287,6 +299,7 @@ export function TopNavBar() {
   };
 
   return (
+    <>
     <div className="relative h-14 w-full sm:h-16 lg:w-[1280.41px]">
       <nav
         className="relative z-10 flex h-14 w-full items-center justify-between rounded-full border border-white/70 bg-white/20 px-4 py-2 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px] sm:h-16 sm:px-[33px] sm:py-[11px] lg:w-[1280.41px]"
@@ -322,6 +335,17 @@ export function TopNavBar() {
             </Link>
           ))}
         </div>
+
+        {/* AI Visual Search — special feature */}
+        <button
+          aria-label="Tìm kiếm bằng ảnh AI"
+          className="hidden md:flex items-center gap-2 rounded-full bg-brand-gradient px-4 py-2 text-sm font-bold text-black-blue whitespace-nowrap shrink-0 mr-1 animate-ai-glow transition-transform duration-200 hover:scale-105 active:scale-95"
+          onClick={() => setVisualSearchOpen(true)}
+          type="button"
+        >
+          <SparkleIcon />
+          Tìm bằng AI
+        </button>
 
         {/* Notification Bell — CUSTOMER only */}
         {user?.role === "CUSTOMER" && (
@@ -608,6 +632,14 @@ export function TopNavBar() {
       {/* RESPONSIVE */}
       {isMenuOpen && (
         <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 rounded-[28px] border border-white/70 bg-white/75 p-3 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl md:hidden">
+          <button
+            className="flex w-full items-center gap-2 rounded-full bg-brand-gradient px-4 py-3 font-bold text-black-blue mb-2 animate-ai-glow"
+            onClick={() => { setVisualSearchOpen(true); setIsMenuOpen(false); }}
+            type="button"
+          >
+            <SparkleIcon />
+            Tìm kiếm bằng AI
+          </button>
           {navItems.map((item) => (
             <Link
               className={linkClassName(item.href)}
@@ -671,5 +703,11 @@ export function TopNavBar() {
         </div>
       )}
     </div>
+
+      {createPortal(
+        <VisualSearchModal open={visualSearchOpen} onClose={() => setVisualSearchOpen(false)} />,
+        document.body,
+      )}
+    </>
   );
 }

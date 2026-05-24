@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final TraceIdInterceptor traceIdInterceptor;
     private final RequestLoggingInterceptor requestLoggingInterceptor;
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
+    @Value("${app.cors.allowed-origins:https://uitmerch.vercel.app,http://localhost:3000,http://localhost:5173}")
     private String allowedOrigins;
 
     @Override

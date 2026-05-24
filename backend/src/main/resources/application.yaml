@@ -19,6 +19,11 @@ app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
 
+  # AI — Google Gemini for visual merch search (gemini-1.5-flash, free tier via aistudio.google.com)
+  ai:
+    gemini-api-key: ${GEMINI_API_KEY:}
+    model: gemini-2.5-flash
+
   # Trusted reverse-proxy IPs — only these remoteAddrs are allowed to set X-Forwarded-For.
   # Leave blank (default) when running without a proxy; set to your load-balancer IP in production.
   proxy:

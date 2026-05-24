@@ -13,6 +13,7 @@ import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.CategoryRepository;
 import com.uitmerch.backend.merch.repository.MerchImageRepository;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
+import com.uitmerch.backend.ai.service.MerchEmbeddingService;
 import com.uitmerch.backend.order.repository.OrderItemRepository;
 import com.uitmerch.backend.organization.entity.Organization;
 import com.uitmerch.backend.organization.service.OrganizationService;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,7 @@ public class MerchService {
     private final CategoryRepository categoryRepository;
     private final OrganizationService organizationService;
     private final OrderItemRepository orderItemRepository;
+    private final MerchEmbeddingService merchEmbeddingService;
 
     // ------------------------------------------------------------------ //
     //  ORGANIZER
@@ -69,6 +72,7 @@ public class MerchService {
 
         MerchItem saved = merchItemRepository.save(item);
         List<String> images = saveImages(saved.getId(), request.getImageUrls());
+        merchEmbeddingService.storeAsync(saved.getId(), embeddingText(saved));
         return MerchResponse.from(saved, category, images);
     }
 
@@ -124,6 +128,7 @@ public class MerchService {
         }
 
         MerchItem saved = merchItemRepository.save(item);
+        merchEmbeddingService.storeAsync(saved.getId(), embeddingText(saved));
 
         List<String> images;
         if (request.getImageUrls() != null) {
@@ -216,6 +221,26 @@ public class MerchService {
     }
 
     // ------------------------------------------------------------------ //
+    //  AI VISUAL SEARCH
+    // ------------------------------------------------------------------ //
+
+    @Transactional(readOnly = true)
+    public List<MerchResponse> getPublishedMerchByIds(List<UUID> ids) {
+        if (ids.isEmpty()) return List.of();
+        List<MerchItem> items = merchItemRepository.findAllById(ids).stream()
+            .filter(m -> m.getStatus() == MerchItemStatus.PUBLISHED)
+            .toList();
+        Map<UUID, Category> categoryMap = buildCategoryMap();
+        Map<UUID, List<String>> imageMap = buildImageMap(items);
+        Map<UUID, MerchResponse> responseMap = items.stream().collect(Collectors.toMap(
+            MerchItem::getId,
+            item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId()), imageMap.get(item.getId()))
+        ));
+        // Preserve ranking order from the vector search
+        return ids.stream().map(responseMap::get).filter(Objects::nonNull).toList();
+    }
+
+    // ------------------------------------------------------------------ //
     //  PACKAGE-INTERNAL
     // ------------------------------------------------------------------ //
 
@@ -285,5 +310,9 @@ public class MerchService {
             row -> (UUID) row[0],
             row -> ((Number) row[1]).longValue()
         ));
+    }
+
+    private static String embeddingText(MerchItem item) {
+        return item.getName() + (item.getDescription() != null ? " " + item.getDescription() : "");
     }
 }
