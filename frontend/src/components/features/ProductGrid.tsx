@@ -4,12 +4,15 @@ import type { MockProduct } from "../../mocks/merchData";
 interface ProductGridProps {
   products: MockProduct[];
   emptyMessage?: string;
+  density?: "default" | "compact";
 }
 
 export function ProductGrid({
+  density = "default",
   emptyMessage = "Không tìm thấy vật phẩm nào.",
   products,
 }: ProductGridProps) {
+  const isCompact = density === "compact";
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-ink/50">
@@ -33,9 +36,10 @@ export function ProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+    <div className={isCompact ? "responsive-product-grid responsive-product-grid--compact" : "responsive-product-grid"}>
       {products.map((product) => (
         <ProductCard
+          compact={isCompact}
           detailPath={`/merch/${product.id}`}
           description={product.description}
           id={`product-${product.id}`}

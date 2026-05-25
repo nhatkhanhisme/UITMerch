@@ -312,9 +312,9 @@ export function TopNavBar() {
 
   return (
     <>
-    <div className="relative h-14 w-full sm:h-16 lg:w-[1280.41px]">
+    <div className="relative h-[52px] w-full sm:h-16 lg:w-[1280.41px]">
       <nav
-        className="relative z-10 flex h-14 w-full items-center justify-between rounded-full border border-white/70 bg-white/20 px-4 py-2 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px] sm:h-16 sm:px-[33px] sm:py-[11px] lg:w-[1280.41px]"
+        className="relative z-10 flex h-[52px] w-full items-center justify-between rounded-full border border-white/70 bg-white/20 px-3 py-2 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px] sm:h-16 sm:px-[33px] sm:py-[11px] lg:w-[1280.41px]"
         data-node-id="17:4918"
         data-name="TopNavBar Component"
       >
@@ -326,7 +326,7 @@ export function TopNavBar() {
         >
           <img
             alt="UITMerch"
-            className="h-[26px] w-[126px] shrink-0 sm:h-[30px] sm:w-[145px]"
+            className="h-[24px] w-[116px] shrink-0 sm:h-[30px] sm:w-[145px]"
             src={logoHeaderUrl}
           />
         </Link>
@@ -634,7 +634,7 @@ export function TopNavBar() {
         <button
           aria-expanded={isMenuOpen}
           aria-label="Mở điều hướng"
-          className="grid size-11 place-items-center rounded-full font-sans text-2xl leading-none text-slate transition duration-200 ease-out hover:bg-white/35 md:hidden"
+          className="grid size-10 place-items-center rounded-full font-sans text-2xl leading-none text-slate transition duration-200 ease-out hover:bg-white/35 md:hidden"
           onClick={() => setIsMenuOpen((open) => !open)}
           type="button"
         >
@@ -644,7 +644,7 @@ export function TopNavBar() {
 
       {/* RESPONSIVE */}
       {isMenuOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 rounded-[28px] border border-white/70 bg-white/75 p-3 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl md:hidden">
+        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-[24px] border border-white/70 bg-white/85 p-3 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl md:hidden">
           <button
             className="flex w-full items-center gap-2 rounded-full bg-brand-gradient px-4 py-3 font-bold text-black-blue mb-2 animate-ai-glow"
             onClick={() => { setVisualSearchOpen(true); setIsMenuOpen(false); }}

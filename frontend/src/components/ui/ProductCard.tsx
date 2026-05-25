@@ -10,6 +10,7 @@ export interface ProductCardProps extends HTMLAttributes<HTMLElement> {
   detailPath?: string;
   category?: string;
   layout?: "vertical" | "horizontal";
+  compact?: boolean;
 }
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
@@ -27,14 +28,18 @@ export function ProductCard({
   price,
   category,
   layout = "vertical",
+  compact = false,
   ...props
 }: ProductCardProps) {
   const isHorizontal = layout === "horizontal";
+  const isCompactVertical = compact && !isHorizontal;
 
   const content = (
     <article
       className={[
-        "group flex h-full overflow-hidden rounded-panel border border-white/40 bg-white/20 p-4",
+        isCompactVertical
+          ? "group flex h-full min-w-0 overflow-hidden rounded-[18px] border border-white/40 bg-white/20 p-2 sm:rounded-panel sm:p-4"
+          : "group flex h-full min-w-0 overflow-hidden rounded-[22px] border border-white/40 bg-white/20 p-3 sm:rounded-panel sm:p-4",
         "shadow-glass transition duration-300",
         "hover:-translate-y-1 hover:border-aqua hover:bg-white/30 hover:shadow-glass-inset",
         isHorizontal ? "flex-row items-center gap-4" : "flex-col",
@@ -44,8 +49,10 @@ export function ProductCard({
     >
       <div 
         className={[
-          "relative overflow-hidden rounded-[28px] border border-white/20 bg-white/5 shrink-0",
-          isHorizontal ? "size-24 sm:size-28" : "aspect-square w-full"
+          isCompactVertical
+            ? "relative overflow-hidden rounded-[14px] border border-white/20 bg-white/5 shrink-0 sm:rounded-[28px]"
+            : "relative overflow-hidden rounded-[18px] border border-white/20 bg-white/5 shrink-0 sm:rounded-[28px]",
+          isHorizontal ? "size-20 sm:size-28" : "aspect-[4/3] w-full sm:aspect-square"
         ].join(" ")}
       >
         {image ? (
@@ -60,28 +67,34 @@ export function ProductCard({
           </div>
         )}
         {category && !isHorizontal && (
-          <div className="absolute top-2 right-2 rounded-full bg-white/70 backdrop-blur-md px-2 py-0.5 border border-white/40 shadow-sm">
-            <span className="text-[10px] font-bold text-black-blue/80 uppercase tracking-wider">{category}</span>
+          <div className={[
+            "absolute right-1.5 top-1.5 max-w-[calc(100%-0.75rem)] rounded-full border border-white/40 bg-white/75 px-2 py-0.5 shadow-sm backdrop-blur-md sm:right-2 sm:top-2",
+            isCompactVertical ? "hidden sm:block" : "",
+          ].join(" ")}>
+            <span className="block truncate text-[9px] font-bold uppercase tracking-wider text-black-blue/80 sm:text-[10px]">{category}</span>
           </div>
         )}
       </div>
 
-      <div className={`flex flex-1 flex-col gap-1 ${isHorizontal ? "justify-center" : "mt-4"}`}>
-        <span className="font-sans text-xs font-medium text-ink/50 transition-colors group-hover:text-black-blue">
+      <div className={`flex min-w-0 flex-1 flex-col gap-1 ${isHorizontal ? "justify-center" : isCompactVertical ? "mt-2 sm:mt-4" : "mt-3 sm:mt-4"}`}>
+        <span className={[
+          "truncate font-sans text-[11px] font-medium text-ink/50 transition-colors group-hover:text-black-blue sm:text-xs",
+          isCompactVertical ? "hidden sm:block" : "",
+        ].join(" ")}>
           {orgName}
         </span>
 
-        <h3 className="font-fredoka text-xl font-bold leading-tight text-black-blue">
+        <h3 className={isCompactVertical ? "line-clamp-2 font-fredoka text-sm font-bold leading-tight text-black-blue sm:text-xl" : "line-clamp-2 font-fredoka text-base font-bold leading-tight text-black-blue sm:text-xl"}>
           {name}
         </h3>
 
         {description ? (
-          <p className="line-clamp-2 mt-1 font-sans text-xs text-ink/60">
+          <p className={isCompactVertical ? "hidden font-sans text-xs text-ink/60 sm:mt-1 sm:line-clamp-2" : "mt-1 line-clamp-2 font-sans text-xs text-ink/60"}>
             {description}
           </p>
         ) : null}
 
-        <p className="mt-auto pt-3 font-sans text-sm font-semibold text-ink">
+        <p className={isCompactVertical ? "mt-auto pt-1.5 font-sans text-[11px] font-semibold text-ink sm:pt-3 sm:text-sm" : "mt-auto pt-2 font-sans text-xs font-semibold text-ink sm:pt-3 sm:text-sm"}>
           {price !== undefined && price > 0
             ? currencyFormatter.format(price)
             : "Sự kiện / Miễn phí"}

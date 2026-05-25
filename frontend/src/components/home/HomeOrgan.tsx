@@ -89,7 +89,7 @@ export function HomeOrgan() {
     <section
       className="
         relative isolate flex min-h-[100svh] items-center
-        px-4 py-20
+        px-4 py-16
         sm:px-8 sm:py-24
         lg:px-16 lg:py-28
       "
@@ -101,7 +101,7 @@ export function HomeOrgan() {
           <p className="font-sans text-sm font-semibold uppercase tracking-[0.22em] text-slate/70">
             Cộng đồng UIT
           </p>
-          <h2 className="mb-5 mt-2 font-fredoka text-3xl font-bold leading-tight text-black-blue sm:text-4xl lg:whitespace-nowrap lg:text-[44px] xl:text-[56px] 2xl:text-[64px]">
+          <h2 className="mb-5 mt-2 font-fredoka text-2xl font-bold leading-tight text-black-blue sm:text-4xl lg:whitespace-nowrap lg:text-[44px] xl:text-[56px] 2xl:text-[64px]">
             Khám phá merch từ các CLB và Khoa
           </h2>
         </div>
@@ -118,7 +118,7 @@ export function HomeOrgan() {
           </div>
         ) : error || orgs.length === 0 ? (
           <div className="mt-16 flex min-h-[30vh] flex-col items-center justify-center text-center">
-            <div className="mx-auto max-w-md rounded-[32px] border border-white/50 bg-white/30 p-8 shadow-glass backdrop-blur-xl">
+            <div className="mx-auto max-w-md rounded-[24px] border border-white/50 bg-white/30 p-5 shadow-glass backdrop-blur-xl sm:rounded-[32px] sm:p-8">
               <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-aqua/10 text-aqua mb-4">
                 ⚠
               </div>
@@ -132,7 +132,7 @@ export function HomeOrgan() {
           </div>
         ) : (
           <>
-            <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-x-8 gap-y-10 sm:gap-x-10 sm:gap-y-12 md:grid-cols-3 lg:grid-cols-4">
+            <div className="mx-auto mt-8 grid max-w-5xl grid-cols-2 gap-x-4 gap-y-7 sm:mt-10 sm:gap-x-10 sm:gap-y-12 md:grid-cols-3 lg:grid-cols-4">
               {orgs.map((org) => (
                 <Link
                   aria-label={`Xem chi tiết ${org.name}`}
@@ -140,7 +140,7 @@ export function HomeOrgan() {
                   key={org.id}
                   to={`/organization/${org.id}`}
                 >
-                  <div className="relative h-36 w-36 sm:h-40 sm:w-40">
+                  <div className="relative h-28 w-28 sm:h-40 sm:w-40">
                     <div className="relative z-10 inline-flex h-full w-full items-center justify-center overflow-hidden rounded-full border border-white/70 bg-white/20 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px]">
                       {org.logoUrl ? (
                         <img
@@ -166,7 +166,7 @@ export function HomeOrgan() {
                 className="group flex min-w-0 flex-col items-center justify-center gap-3 bg-transparent transition duration-200 ease-out hover:-translate-y-1 focus-visible:outline-aqua"
                 to="/organization"
               >
-                <div className="relative h-36 w-36 sm:h-40 sm:w-40">
+                <div className="relative h-28 w-28 sm:h-40 sm:w-40">
                   <div className="relative z-10 inline-flex h-full w-full items-center justify-center rounded-full border border-white/70 bg-white/20 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px]">
                     <span className="text-base font-bold text-slate-700">...</span>
                   </div>
@@ -177,7 +177,7 @@ export function HomeOrgan() {
               </Link>
             </div>
 
-            <div className="mt-16 flex justify-center">
+            <div className="mt-10 flex justify-center sm:mt-16">
               <HomeMoreLink ariaLabel="Xem thêm cộng đồng UIT" to="/organization" />
             </div>
           </>

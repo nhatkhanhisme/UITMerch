@@ -32,16 +32,16 @@ function formatPrice(price?: number) {
 
 function ProductNotFound() {
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
+    <main className="relative min-h-screen bg-transparent px-3 pb-10 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
         <ShaderBackground />
       </Suspense>
 
-      <section className="relative z-10 mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center rounded-panel border border-white/50 bg-white/35 px-8 text-center shadow-glass backdrop-blur-xl">
+      <section className="relative z-10 mx-auto flex min-h-[55vh] max-w-3xl flex-col items-center justify-center rounded-[24px] border border-white/50 bg-white/35 px-5 py-10 text-center shadow-glass backdrop-blur-xl sm:rounded-panel sm:px-8">
         <p className="font-sans text-sm font-semibold uppercase text-ink/50">
           Không tìm thấy
         </p>
-        <h1 className="mt-3 font-fredoka text-4xl font-bold text-black-blue">
+        <h1 className="mt-3 font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
           Vật phẩm này chưa có trong kho
         </h1>
         <p className="mt-4 max-w-xl text-sm leading-7 text-ink/65">
@@ -73,8 +73,8 @@ function Gallery({
   return (
     <div className="flex flex-col gap-4">
       {/* Main image */}
-      <div className="relative overflow-hidden rounded-[32px] bg-white/25 p-4 shadow-glass-inset">
-        <div className="aspect-square overflow-hidden rounded-[32px] bg-white/40">
+      <div className="relative overflow-hidden rounded-[24px] bg-white/25 p-2 shadow-glass-inset sm:rounded-[32px] sm:p-4">
+        <div className="aspect-square overflow-hidden rounded-[22px] bg-white/40 sm:rounded-[32px]">
           <img
             alt={name}
             className="size-full object-cover mix-blend-multiply transition duration-300"
@@ -97,7 +97,7 @@ function Gallery({
               key={idx}
               aria-label={`Ảnh ${idx + 1}`}
               className={[
-                "h-20 w-20 flex-none overflow-hidden rounded-[18px] border-2 bg-white/30 transition duration-200",
+                "h-16 w-16 flex-none overflow-hidden rounded-[16px] border-2 bg-white/30 transition duration-200 sm:h-20 sm:w-20 sm:rounded-[18px]",
                 idx === selected
                   ? "border-aqua shadow-[0_0_0_2px_rgba(146,251,255,0.4)]"
                   : "border-white/40 opacity-60 hover:opacity-100 hover:border-white/80",
@@ -128,7 +128,7 @@ function QuantityStepper({
   onChange: (nextQuantity: number) => void;
 }) {
   return (
-    <div className="flex h-14 w-full max-w-[236px] items-center justify-between rounded-full bg-white/55 px-5 shadow-glass-inset">
+    <div className="flex h-12 w-full max-w-none items-center justify-between rounded-full bg-white/55 px-5 shadow-glass-inset sm:h-14 sm:max-w-[236px]">
       <button
         aria-label="Giảm số lượng"
         className="text-2xl text-ink/55 transition hover:text-black-blue disabled:opacity-30"
@@ -293,12 +293,12 @@ function PurchasePanel({
 
   if (orderPlaced) {
     return (
-      <aside className="scrollbar-hide self-start rounded-panel border border-aqua/60 bg-white/70 p-6 shadow-glass backdrop-blur-xl lg:fixed lg:right-16 lg:top-28 lg:w-[430px] xl:right-[max(4rem,calc((100vw-1320px)/2))] xl:w-[480px] max-h-[calc(100vh-8rem)] overflow-y-auto">
+      <aside className="scrollbar-hide max-h-none self-start overflow-y-auto rounded-[24px] border border-aqua/60 bg-white/70 p-4 shadow-glass backdrop-blur-xl sm:rounded-panel sm:p-6 lg:fixed lg:right-16 lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:w-[430px] xl:right-[max(4rem,calc((100vw-1320px)/2))] xl:w-[480px]">
         <div className="text-center py-6">
           <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-aqua/20 text-3xl text-black-blue mb-4">
             ✓
           </div>
-          <h2 className="font-fredoka text-3xl font-bold text-black-blue">
+          <h2 className="font-fredoka text-2xl font-bold text-black-blue sm:text-3xl">
             Đặt trước thành công!
           </h2>
           <p className="mt-3 text-sm leading-6 text-ink/70">
@@ -344,7 +344,7 @@ function PurchasePanel({
   }
 
   return (
-    <aside className="scrollbar-hide self-start rounded-panel border border-white/55 bg-white/45 p-6 shadow-glass backdrop-blur-xl lg:fixed lg:right-16 lg:top-28 lg:w-[430px] xl:right-[max(4rem,calc((100vw-1320px)/2))] xl:w-[480px] max-h-[calc(100vh-8rem)] overflow-y-auto">
+    <aside className="scrollbar-hide max-h-none self-start overflow-y-auto rounded-[24px] border border-white/55 bg-white/45 p-4 shadow-glass backdrop-blur-xl sm:rounded-panel sm:p-6 lg:fixed lg:right-16 lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:w-[430px] xl:right-[max(4rem,calc((100vw-1320px)/2))] xl:w-[480px]">
       <div className="border-b border-ink/10 pb-6">
         <Link
           className="inline-flex items-center rounded-full border border-white/70 bg-white/65 px-5 py-2.5 text-sm font-bold text-black-blue shadow-glass-inset transition hover:-translate-y-0.5 hover:border-aqua hover:bg-white"
@@ -355,7 +355,7 @@ function PurchasePanel({
         <p className="mt-6 text-sm font-semibold text-ink/55">
           {product.orgName}
         </p>
-        <h1 className="mt-2 font-fredoka text-4xl font-bold leading-tight text-black-blue sm:text-5xl lg:text-4xl xl:text-5xl">
+        <h1 className="mt-2 font-fredoka text-3xl font-bold leading-tight text-black-blue sm:text-5xl lg:text-4xl xl:text-5xl">
           {product.name}
         </h1>
         <p className="mt-4 text-sm leading-7 text-ink/65">{product.description}</p>
@@ -363,7 +363,7 @@ function PurchasePanel({
 
       <div className="space-y-7 py-7">
         <div>
-          <p className="font-fredoka text-4xl font-bold text-black-blue">
+          <p className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
             {formatPrice(product.price)}
           </p>
           <p className="mt-2 text-sm text-ink/55">
@@ -373,7 +373,7 @@ function PurchasePanel({
 
         {!showCheckout ? (
           <div className="flex flex-col gap-4">
-            <div className="flex gap-4 sm:flex-row lg:flex-col xl:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 lg:flex-col xl:flex-row">
               <QuantityStepper
                 onChange={(nextQuantity) => {
                   setQuantity(nextQuantity);
@@ -535,7 +535,7 @@ function PurchasePanel({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 border-t border-ink/10 pt-6">
+      <div className="grid grid-cols-1 gap-3 border-t border-ink/10 pt-6 sm:grid-cols-2">
         <button
           className={[
             "rounded-full border px-4 py-3 text-sm font-semibold transition disabled:opacity-50",
@@ -629,15 +629,15 @@ export function ProductDetailPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
+    <main className="relative min-h-screen bg-transparent px-3 pb-10 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
         <ShaderBackground />
       </Suspense>
 
       <div className="relative z-10 mx-auto max-w-[1320px]">
         {product ? (
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_430px] xl:grid-cols-[minmax(0,1fr)_480px]">
-            <section className="overflow-hidden rounded-panel border border-white/50 bg-white/30 p-4 shadow-glass backdrop-blur-xl sm:p-5">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_430px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_480px]">
+            <section className="overflow-hidden rounded-[24px] border border-white/50 bg-white/30 p-3 shadow-glass backdrop-blur-xl sm:rounded-panel sm:p-5">
               <Gallery
                 images={product.gallery}
                 name={product.name}
@@ -647,7 +647,7 @@ export function ProductDetailPage() {
                 <p className="text-sm font-bold uppercase text-ink/45">
                   {product.category}
                 </p>
-                <h2 className="mt-2 font-fredoka text-3xl font-bold text-black-blue">
+                <h2 className="mt-2 font-fredoka text-2xl font-bold text-black-blue sm:text-3xl">
                   {product.name}
                 </h2>
                 <p className="mt-3 text-base font-semibold text-ink/70">
@@ -674,10 +674,10 @@ export function ProductDetailPage() {
                   <h2 className="font-fredoka text-3xl font-bold text-black-blue">
                     Vật phẩm liên quan
                   </h2>
-                  <div className="mt-5 grid gap-4 sm:grid-cols-3">
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-4">
                     {relatedProducts.map((item) => (
                       <Link
-                        className="rounded-[28px] border border-white/50 bg-white/35 p-3 transition hover:-translate-y-1 hover:border-aqua"
+                        className="rounded-[22px] border border-white/50 bg-white/35 p-3 transition hover:-translate-y-1 hover:border-aqua sm:rounded-[28px]"
                         key={item.id}
                         to={`/merch/${item.id}`}
                       >
