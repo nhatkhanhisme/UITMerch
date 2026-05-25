@@ -1,6 +1,5 @@
 package com.uitmerch.backend.common.service;
 
-import com.uitmerch.backend.common.entity.InvalidatedToken;
 import com.uitmerch.backend.common.repository.InvalidatedTokenRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +44,7 @@ public class TokenBlacklistService {
     @Transactional
     public void add(String token, Instant expiry) {
         String hash = sha256(token);
-        repository.save(new InvalidatedToken(hash, expiry));
+        repository.insertIgnoreDuplicate(hash, expiry);
         cache.put(hash, expiry);
     }
 

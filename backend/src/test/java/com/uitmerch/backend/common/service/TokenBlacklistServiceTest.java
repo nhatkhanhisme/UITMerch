@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,17 +31,16 @@ class TokenBlacklistServiceTest {
 
     @Test
     void add_persistsHashAndCachesInMemory() {
-        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
         Instant expiry = Instant.now().plusSeconds(3600);
         service.add(TOKEN, expiry);
 
         assertThat(service.isBlacklisted(TOKEN)).isTrue();
 
-        ArgumentCaptor<InvalidatedToken> captor = ArgumentCaptor.forClass(InvalidatedToken.class);
-        verify(repository).save(captor.capture());
-        assertThat(captor.getValue().getTokenHash()).hasSize(64); // SHA-256 hex is 64 chars
-        assertThat(captor.getValue().getExpiresAt()).isEqualTo(expiry);
+        ArgumentCaptor<String> hashCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Instant> expiryCaptor = ArgumentCaptor.forClass(Instant.class);
+        verify(repository).insertIgnoreDuplicate(hashCaptor.capture(), expiryCaptor.capture());
+        assertThat(hashCaptor.getValue()).hasSize(64); // SHA-256 hex is 64 chars
+        assertThat(expiryCaptor.getValue()).isEqualTo(expiry);
     }
 
     @Test
@@ -50,8 +50,6 @@ class TokenBlacklistServiceTest {
 
     @Test
     void isBlacklisted_expiredEntry_returnsFalseAndEvictsFromCache() {
-        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
         service.add(TOKEN, Instant.now().minusSeconds(1)); // already expired
 
         assertThat(service.isBlacklisted(TOKEN)).isFalse();
@@ -76,8 +74,6 @@ class TokenBlacklistServiceTest {
 
     @Test
     void evictExpired_removesStaleEntriesFromCacheAndDb() {
-        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
         service.add(TOKEN, Instant.now().minusSeconds(1));
 
         service.evictExpired();

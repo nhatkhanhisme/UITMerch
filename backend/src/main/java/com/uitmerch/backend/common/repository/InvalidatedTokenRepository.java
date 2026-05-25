@@ -18,6 +18,10 @@ public interface InvalidatedTokenRepository extends JpaRepository<InvalidatedTok
     List<InvalidatedToken> findAllByExpiresAtAfter(Instant now);
 
     @Modifying
+    @Query(value = "INSERT INTO invalidated_tokens (token_hash, expires_at) VALUES (:hash, :expiry) ON CONFLICT (token_hash) DO NOTHING", nativeQuery = true)
+    void insertIgnoreDuplicate(@Param("hash") String hash, @Param("expiry") Instant expiry);
+
+    @Modifying
     @Query("DELETE FROM InvalidatedToken t WHERE t.expiresAt < :cutoff")
     void deleteExpiredBefore(@Param("cutoff") Instant cutoff);
 }
