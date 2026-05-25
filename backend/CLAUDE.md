@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-Spring Boot 3.3.5 · Java 21 · PostgreSQL · Flyway (V1–V24) · JWT (JJWT 0.12.3) · springdoc-openapi 2.6.0 · Maven · logstash-logback-encoder 7.4
+Spring Boot 3.3.5 · Java 21 · PostgreSQL · Flyway (V1–V31) · JWT (JJWT 0.12.3) · springdoc-openapi 2.6.0 · Maven · logstash-logback-encoder 7.4
 
 ## Package root
 
@@ -128,14 +128,17 @@ Flyway runs on startup (default/docker profiles). Migration files: `src/main/res
 
 Never edit existing migration files. Always add a new `VN+1__description.sql` for schema changes.
 
-Current highest: **V28** (`notifications` table).
+Current highest: **V31** (`NEW_ORDER` notification type).
 
 | Migration | Contents |
 |---|---|
 | V25 | Rename `order_status` enum values: `READY_FOR_PICKUP → READY`, `SUCCESS → COMPLETED` |
 | V26 | Add cancel fields to `orders`: `cancelled_by`, `cancel_reason`, `cancel_reason_note`, `cancelled_at` |
 | V27 | `pickup_schedules` table + FK from `orders.pickup_schedule_id` |
-| V28 | `notifications` table for in-app CUSTOMER notifications |
+| V28 | `notifications` table + `notification_type` PostgreSQL enum for in-app notifications |
+| V29 | `merch_embeddings` table + `vector` extension (AI visual search) |
+| V30 | Add `ORDER_PLACED` to `notification_type` enum |
+| V31 | Add `NEW_ORDER` to `notification_type` enum (organizer notifications) |
 
 ## Storage
 
@@ -148,12 +151,24 @@ Never persist images as Base64 or BLOB in the database. Maximum 10 images per me
 
 ## Email
 
-`EmailService` has three methods: `sendOtp`, `sendPasswordReset`, `sendOrderStatusUpdate`.
+`EmailService` has six methods: `sendOtp`, `sendPasswordReset`, `sendOrderPlacedConfirmation`, `sendOrderStatusUpdate`, `sendPickupScheduleNotification`, `sendOrderCancelledNotification`.
 
 - `DevEmailService` — logs to console; no-op. Active on `dev` and `docker`.
-- `JavaMailEmailService` — sends via SMTP. All three methods are `@Async` — they never block the calling thread. Email failures are caught and logged as WARN; they never propagate to the caller.
+- `JavaMailEmailService` — sends via SMTP. All six methods are `@Async` — they never block the calling thread. Email failures are caught and logged as WARN; they never propagate to the caller.
 
 `@EnableAsync` is on `BackendApplication`.
+
+### Email call sites in `OrderService`
+
+| Trigger | Method called | Recipient |
+|---|---|---|
+| Customer or organizer places order | `sendOrderPlacedConfirmation` | Customer |
+| Organizer confirms / marks ready / completes order | `sendOrderStatusUpdate` | Customer |
+| Organizer creates pickup schedule | `sendPickupScheduleNotification` | Customer |
+| Customer cancels order | `sendOrderCancelledNotification` | Customer + org owner |
+| Organizer cancels order | `sendOrderCancelledNotification` | Customer |
+
+`sendOrderStatusUpdate` is **not** called for `CANCELLED` status — `sendOrderCancelledNotification` covers that case and is richer.
 
 ## Caching
 
@@ -198,9 +213,46 @@ All request DTOs must have:
 
 The controller method must have `@Valid` on `@RequestBody` or constraints are silently ignored.
 
+## Notifications
+
+### NotificationService
+
+Two write paths exist — choose carefully:
+
+| Method | DB write | SSE push | When to use |
+|---|---|---|---|
+| `push(userId, title, message, type, relatedOrderId)` | ✓ | ✓ (after TX commit) | Customer notifications where SSE and DB must stay in sync |
+| `saveOnly(userId, title, message, type, relatedOrderId)` | ✓ | ✗ | Organizer notifications — caller (`notifyOrganizer`) manages SSE separately with a richer payload |
+
+Both methods are `@Transactional`. `push` defers the SSE send until after the outer transaction commits via `TransactionSynchronizationManager`.
+
+### SseEmitterManager
+
+Stores per-user `CopyOnWriteArrayList<SseEmitter>` in a `ConcurrentHashMap`.
+
+- **`add(userId)`** — creates emitter (30-min timeout), registers cleanup on completion/timeout/error, sends initial `connect` event.
+- **`send(userId, data)`** — if called inside a `@Transactional`, defers the actual push to `afterCommit`; otherwise sends immediately.
+- **`sendHeartbeat()`** — `@Scheduled(fixedDelay = 25_000)` sends an SSE comment to every connected client every 25 seconds. Prevents reverse proxies and load balancers (AWS ALB default: 60 s idle timeout) from closing idle connections.
+
+> **Production Nginx:** SSE location blocks must include `proxy_buffering off; proxy_cache off; proxy_http_version 1.1; proxy_set_header Connection ''; chunked_transfer_encoding on;` — without these, Nginx buffers events and real-time delivery is broken.
+
+> **Multi-instance deployments:** `SseEmitterManager` is in-memory. Events fired by instance A will not reach browsers connected to instance B. Use sticky sessions or replace with a pub/sub broker (Redis Pub/Sub, etc.) if scaling horizontally.
+
+### notification_type enum
+
+Stored in PostgreSQL as a native `ENUM` type. Adding a new value requires a migration — never rely on Hibernate's `EnumType.STRING` DDL auto-update.
+
+Current values: `NEW_ORDER` · `ORDER_PLACED` · `ORDER_CONFIRMED` · `ORDER_READY` · `ORDER_COMPLETED` · `ORDER_CANCELLED` · `PICKUP_SCHEDULED`
+
+### Organizer notification endpoints
+
+`GET /api/v1/organizer/notifications` · `GET /api/v1/organizer/notifications/unread-count` · `PATCH /api/v1/organizer/notifications/{id}/read` · `PATCH /api/v1/organizer/notifications/read-all`
+
+All delegate to the same `NotificationService` methods used by the customer controller. Organizer notifications are written via `saveOnly()` (no duplicate SSE push).
+
 ## Testing
 
-Tests run with `./mvnw test`. All 172 tests use `@ActiveProfiles("dev")` — H2 in-memory, no PostgreSQL or env vars required.
+Tests run with `./mvnw test`. All 169 tests use `@ActiveProfiles("dev")` — H2 in-memory, no PostgreSQL or env vars required.
 
 ### @DataJpaTest notes
 

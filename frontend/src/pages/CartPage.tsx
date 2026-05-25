@@ -194,6 +194,7 @@ export function CartPage() {
         shippingPhone: shippingPhone.trim(),
       });
       setPlacedOrders(res.data);
+      window.dispatchEvent(new CustomEvent("order-status-changed"));
       toast.success("Đặt hàng thành công!");
     } catch (err) {
       toast.error(getApiErrorMessage(err, "Thanh toán thất bại. Vui lòng thử lại."));

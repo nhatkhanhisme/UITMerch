@@ -20,6 +20,11 @@ public class DevEmailService implements EmailService {
     }
 
     @Override
+    public void sendOrderPlacedConfirmation(String toEmail, String orderId) {
+        log.info("===== [DEV] Order placed confirmation {} (to: {}) =====", orderId, toEmail);
+    }
+
+    @Override
     public void sendOrderStatusUpdate(String toEmail, String orderId, String newStatus) {
         log.info("===== [DEV] Order {} status → {} (to: {}) =====", orderId, newStatus, toEmail);
     }

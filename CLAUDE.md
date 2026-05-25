@@ -55,8 +55,9 @@ Each follows: `entity/ → repository/ → dto/ → service/ → controller/`
 Both swap automatically via `@Profile`:
 
 - **`StorageService`** — `DevStorageService` (dev/docker, no-op) vs `SupabaseStorageServiceImpl` (production S3-compatible). Never store images as Base64/BLOB in the DB.
-- **`EmailService`** — `DevEmailService` (dev/docker, logs OTP to console) vs `JavaMailEmailService` (production SMTP, all methods `@Async`). Three methods: `sendOtp`, `sendPasswordReset`, `sendOrderStatusUpdate`.
-- **`NotificationService`** — creates in-app `Notification` records for CUSTOMER users (e.g., order moved to `READY`). Queried via `GET /api/v1/customer/notifications`; supports mark-read and unread-count.
+- **`EmailService`** — `DevEmailService` (dev/docker, logs to console) vs `JavaMailEmailService` (production SMTP, all methods `@Async`). Six methods: `sendOtp`, `sendPasswordReset`, `sendOrderPlacedConfirmation`, `sendOrderStatusUpdate`, `sendPickupScheduleNotification`, `sendOrderCancelledNotification`. Failures are logged as WARN and never propagate to the caller.
+- **`NotificationService`** — writes in-app `Notification` records and pushes SSE for both CUSTOMER and ORGANIZER users. Two write paths: `push()` (DB + SSE) used for customers; `saveOnly()` (DB only) used for organizers where `notifyOrganizer` manages the SSE payload separately. Customer API: `GET /api/v1/customer/notifications`; Organizer API: `GET /api/v1/organizer/notifications`. Both support unread-count and mark-read.
+- **`SseEmitterManager`** — holds per-user SSE emitter lists; defers pushes until after the active transaction commits. A `@Scheduled` heartbeat fires every 25 s to keep connections alive through reverse-proxy idle-timeout.
 
 ### Security
 
@@ -98,7 +99,7 @@ Schema changes require a new Flyway migration (`VN__description.sql`). Never edi
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **UITMerch** (3695 symbols, 8858 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **UITMerch** (3754 symbols, 8975 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -136,15 +137,15 @@ This project is indexed by GitNexus as **UITMerch** (3695 symbols, 8858 relation
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-| Work in the Service area (438 symbols) | `.claude/skills/generated/service/SKILL.md` |
-| Work in the Pages area (178 symbols) | `.claude/skills/generated/pages/SKILL.md` |
-| Work in the Api area (61 symbols) | `.claude/skills/generated/api/SKILL.md` |
-| Work in the Controller area (56 symbols) | `.claude/skills/generated/controller/SKILL.md` |
-| Work in the Home area (40 symbols) | `.claude/skills/generated/home/SKILL.md` |
+| Work in the Service area (446 symbols) | `.claude/skills/generated/service/SKILL.md` |
+| Work in the Pages area (177 symbols) | `.claude/skills/generated/pages/SKILL.md` |
+| Work in the Api area (65 symbols) | `.claude/skills/generated/api/SKILL.md` |
+| Work in the Controller area (54 symbols) | `.claude/skills/generated/controller/SKILL.md` |
+| Work in the Home area (41 symbols) | `.claude/skills/generated/home/SKILL.md` |
 | Work in the Security area (32 symbols) | `.claude/skills/generated/security/SKILL.md` |
 | Work in the Config area (18 symbols) | `.claude/skills/generated/config/SKILL.md` |
-| Work in the Repository area (16 symbols) | `.claude/skills/generated/repository/SKILL.md` |
-| Work in the Features area (9 symbols) | `.claude/skills/generated/features/SKILL.md` |
+| Work in the Repository area (17 symbols) | `.claude/skills/generated/repository/SKILL.md` |
+| Work in the Features area (17 symbols) | `.claude/skills/generated/features/SKILL.md` |
 | Work in the Exception area (5 symbols) | `.claude/skills/generated/exception/SKILL.md` |
 | Work in the Ui area (5 symbols) | `.claude/skills/generated/ui/SKILL.md` |
 | Work in the Stores area (4 symbols) | `.claude/skills/generated/stores/SKILL.md` |

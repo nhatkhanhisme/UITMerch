@@ -1,11 +1,11 @@
 ---
 name: api
-description: "Skill for the Api area of UITMerch. 61 symbols across 21 files."
+description: "Skill for the Api area of UITMerch. 65 symbols across 22 files."
 ---
 
 # Api
 
-61 symbols | 21 files | Cohesion: 73%
+65 symbols | 22 files | Cohesion: 74%
 
 ## When to Use
 
@@ -23,10 +23,10 @@ description: "Skill for the Api area of UITMerch. 61 symbols across 21 files."
 | `frontend/src/api/storage.ts` | createFileId, buildFilePath, uploadImage, uploadAvatarImage, uploadMerchImage (+1) |
 | `frontend/src/pages/AuthPage.tsx` | AuthPage, handleModeChange, handleAccountTypeChange, setSession, handleSubmit |
 | `frontend/src/api/event.ts` | getOwnEvents, createEvent, updateEvent, attachMerchToEvent, getPublicEvent |
-| `frontend/src/api/merch.ts` | getOwnMerch, createMerch, updateMerch |
+| `frontend/src/api/merch.ts` | getOwnMerch, createMerch, updateMerch, getPublicMerchDetail, searchMerchByImage |
 | `frontend/src/api/admin.ts` | adminListUsers, adminListOrganizations, adminListOrders |
 | `frontend/src/api/organization.ts` | createOrganization, getPublicOrganizationDetail |
-| `frontend/src/api/wishlist.ts` | addToWishlist, removeFromWishlist |
+| `frontend/src/pages/ProductDetailPage.tsx` | fetchProduct, handleWishlistToggle |
 
 ## Entry Points
 
@@ -52,7 +52,7 @@ Start here when exploring this area:
 | `handleModeChange` | Function | `frontend/src/pages/AuthPage.tsx` | 79 |
 | `handleAccountTypeChange` | Function | `frontend/src/pages/AuthPage.tsx` | 85 |
 | `getOwnEvents` | Function | `frontend/src/api/event.ts` | 37 |
-| `getOwnMerch` | Function | `frontend/src/api/merch.ts` | 53 |
+| `getOwnMerch` | Function | `frontend/src/api/merch.ts` | 54 |
 | `getOrgOrders` | Function | `frontend/src/api/order.ts` | 67 |
 | `cancelOrgOrder` | Function | `frontend/src/api/order.ts` | 94 |
 | `createPickupSchedule` | Function | `frontend/src/api/order.ts` | 113 |
@@ -71,18 +71,18 @@ Start here when exploring this area:
 | `OrganizerDashboardPage → GetCategories` | cross_community | 4 |
 | `OrganizerDashboardPage → GetOwnEvents` | cross_community | 4 |
 | `OrganizerDashboardPage → GetOrgOrders` | cross_community | 4 |
+| `ProductDetailPage → FindProductById` | cross_community | 4 |
 | `HandleAvatarUpload → CreateFileId` | intra_community | 4 |
 | `HandleOrganizerLogoUpload → CreateFileId` | cross_community | 4 |
 | `HandleOrganizerCoverUpload → CreateFileId` | cross_community | 4 |
 | `AdminDashboardPage → AdminListUsers` | cross_community | 4 |
 | `AdminDashboardPage → AdminListOrganizations` | cross_community | 4 |
-| `AdminDashboardPage → AdminListOrders` | cross_community | 4 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
-| Pages | 16 calls |
+| Pages | 17 calls |
 
 ## How to Explore
 

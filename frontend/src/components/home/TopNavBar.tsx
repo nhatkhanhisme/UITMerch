@@ -5,6 +5,7 @@ import { useAuthStore } from "../../stores/authStore";
 import { logout } from "../../api/auth";
 import { getCustomerProfile, getOrganizerProfile } from "../../api/profile";
 import { getNotifications, getUnreadCount, markAllNotificationsRead, markNotificationRead } from "../../api/notifications";
+import { getOrgNotifications, getOrgUnreadCount, markAllOrgNotificationsRead } from "../../api/orgNotifications";
 import type { NotificationResponse } from "../../types/shared";
 import { useNotificationStream } from "../../hooks/useNotificationStream";
 import { VisualSearchModal } from "../features/VisualSearchModal";
@@ -20,13 +21,6 @@ function SparkleIcon() {
   );
 }
 
-type OrgNotif = {
-  type: string;
-  orderId: string;
-  shortId: string;
-  totalAmount: number;
-  createdAt: string;
-};
 
 const navItems = [
   { label: "Trang chủ", href: "/" },
@@ -54,7 +48,7 @@ export function TopNavBar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
   const notifRef = useRef<HTMLDivElement | null>(null);
-  const [orgNotifications, setOrgNotifications] = useState<OrgNotif[]>([]);
+  const [orgNotifications, setOrgNotifications] = useState<NotificationResponse[]>([]);
   const [orgUnreadCount, setOrgUnreadCount] = useState(0);
   const [isOrgNotifOpen, setIsOrgNotifOpen] = useState(false);
   const orgNotifRef = useRef<HTMLDivElement | null>(null);
@@ -159,6 +153,14 @@ export function TopNavBar() {
       .catch(() => {});
   }, [user]);
 
+  // Load initial unread count for ORGANIZER role
+  useEffect(() => {
+    if (!user || user.role !== "ORGANIZER") return;
+    getOrgUnreadCount()
+      .then((r) => setOrgUnreadCount(r.data?.unreadCount ?? 0))
+      .catch(() => {});
+  }, [user]);
+
   const handleIncomingNotification = useCallback((data: unknown) => {
     const n = data as NotificationResponse;
     setUnreadCount((c) => c + 1);
@@ -175,16 +177,19 @@ export function TopNavBar() {
   const handleOrgIncomingNotification = useCallback((data: unknown) => {
     const event = data as { type?: string; orderId?: string; shortId?: string; totalAmount?: number };
     if (event.type === "NEW_ORDER" || event.type === "ORDER_CANCELLED") {
-      setOrgNotifications((prev) => [
-        {
-          type: event.type!,
-          orderId: event.orderId ?? "",
-          shortId: event.shortId ?? "",
-          totalAmount: event.totalAmount ?? 0,
-          createdAt: new Date().toISOString(),
-        },
-        ...prev.slice(0, 19),
-      ]);
+      const notif: NotificationResponse = {
+        id: event.orderId ?? crypto.randomUUID(),
+        userId: "",
+        title: event.type === "NEW_ORDER" ? "Đơn hàng mới" : "Đơn hàng bị huỷ",
+        message: event.type === "NEW_ORDER"
+          ? `#${event.shortId} — ${(event.totalAmount ?? 0).toLocaleString("vi-VN")}đ`
+          : `#${event.shortId} đã bị khách huỷ`,
+        type: event.type,
+        isRead: false,
+        relatedOrderId: event.orderId,
+        createdAt: new Date().toISOString(),
+      };
+      setOrgNotifications((prev) => [notif, ...prev.slice(0, 19)]);
       setOrgUnreadCount((c) => c + 1);
     }
     window.dispatchEvent(new CustomEvent("org-order-event", { detail: event }));
@@ -234,10 +239,17 @@ export function TopNavBar() {
     }
   };
 
-  const openOrgNotifications = () => {
+  const openOrgNotifications = async () => {
     setIsOrgNotifOpen((v) => !v);
     if (!isOrgNotifOpen) {
-      setOrgUnreadCount(0);
+      try {
+        const res = await getOrgNotifications({ size: 20 });
+        setOrgNotifications(res.data ?? []);
+        setOrgUnreadCount(0);
+        await markAllOrgNotificationsRead();
+      } catch {
+        // non-critical — panel still opens with any in-memory SSE notifications
+      }
     }
   };
 
@@ -432,18 +444,19 @@ export function TopNavBar() {
                     <p className="px-4 py-6 text-center text-sm text-ink/50">Chưa có thông báo nào.</p>
                   ) : (
                     orgNotifications.map((n, i) => (
-                      <div className="w-full px-4 py-3" key={`${n.orderId}-${i}`}>
-                        <p className="text-xs font-bold text-black-blue">
-                          {n.type === "NEW_ORDER" ? "Đơn hàng mới" : "Đơn hàng bị huỷ"}
+                      <div
+                        className={["w-full px-4 py-3", !n.isRead ? "bg-aqua/5" : ""].join(" ")}
+                        key={`${n.id}-${i}`}
+                      >
+                        <p className={["text-xs text-black-blue", !n.isRead ? "font-bold" : "font-semibold"].join(" ")}>
+                          {n.title}
                         </p>
-                        <p className="mt-0.5 text-xs text-ink/60">
-                          {n.type === "NEW_ORDER"
-                            ? `#${n.shortId} — ${n.totalAmount.toLocaleString("vi-VN")}đ`
-                            : `#${n.shortId} đã bị khách huỷ`}
-                        </p>
-                        <p className="mt-1 text-[10px] text-ink/40">
-                          {new Date(n.createdAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                        </p>
+                        <p className="mt-0.5 text-xs text-ink/60 line-clamp-2">{n.message}</p>
+                        {n.createdAt && (
+                          <p className="mt-1 text-[10px] text-ink/40">
+                            {new Date(n.createdAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        )}
                       </div>
                     ))
                   )}

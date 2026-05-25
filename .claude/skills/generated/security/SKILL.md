@@ -70,6 +70,7 @@ Start here when exploring this area:
 | `Refresh → Sha256` | cross_community | 4 |
 | `Refresh → AuthenticationException` | intra_community | 3 |
 | `Refresh → GetTraceId` | cross_community | 3 |
+| `DoFilterInternal → Sha256` | cross_community | 3 |
 
 ## Connected Areas
 

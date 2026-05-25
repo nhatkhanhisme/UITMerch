@@ -1,6 +1,5 @@
 package com.uitmerch.backend.common.service;
 
-import com.uitmerch.backend.common.exception.StorageException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -46,23 +45,50 @@ public class JavaMailEmailService implements EmailService {
 
     @Async
     @Override
-    public void sendOrderStatusUpdate(String toEmail, String orderId, String newStatus) {
-        String subject = "Your UITMerch order has been updated";
+    public void sendOrderPlacedConfirmation(String toEmail, String orderId) {
+        String shortId = orderId.substring(0, 8).toUpperCase();
         String body = """
             <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px;
                         background:#f9f9f9;border-radius:8px;border:1px solid #e0e0e0">
-              <h2 style="color:#1a1a1a;margin-bottom:8px">Order Update</h2>
-              <p style="color:#444;">Your order <strong>%s</strong> status has changed to:</p>
+              <h2 style="color:#1a1a1a;margin-bottom:8px">Đặt hàng thành công!</h2>
+              <p style="color:#444;">Đơn hàng <strong>#%s</strong> của bạn đã được tạo thành công
+                 và đang chờ xác nhận từ ban tổ chức.</p>
+              <p style="color:#444;">Chúng tôi sẽ thông báo cho bạn khi đơn hàng được cập nhật.</p>
+              <p style="color:#888;font-size:12px;margin-top:24px">
+                Mã đơn hàng đầy đủ: <code>%s</code><br>
+                Cảm ơn bạn đã sử dụng UITMerch.
+              </p>
+            </div>
+            """.formatted(shortId, orderId);
+        sendMail(toEmail, "UITMerch — Đặt hàng thành công #" + shortId, body);
+    }
+
+    @Async
+    @Override
+    public void sendOrderStatusUpdate(String toEmail, String orderId, String newStatus) {
+        String shortId = orderId.substring(0, 8).toUpperCase();
+        String statusVi = switch (newStatus) {
+            case "CONFIRMED" -> "Đã xác nhận";
+            case "READY"     -> "Sẵn sàng để nhận";
+            case "COMPLETED" -> "Hoàn thành";
+            default          -> newStatus;
+        };
+        String body = """
+            <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px;
+                        background:#f9f9f9;border-radius:8px;border:1px solid #e0e0e0">
+              <h2 style="color:#1a1a1a;margin-bottom:8px">Cập nhật đơn hàng</h2>
+              <p style="color:#444;">Đơn hàng <strong>#%s</strong> của bạn đã được cập nhật:</p>
               <div style="background:#ffffff;border:1px solid #d0d0d0;border-radius:6px;
-                          padding:20px;text-align:center;font-size:24px;font-weight:bold;color:#1a1a1a">
+                          padding:20px;text-align:center;font-size:22px;font-weight:bold;color:#1a1a1a">
                 %s
               </div>
               <p style="color:#888;font-size:12px;margin-top:24px">
-                Thank you for shopping at UITMerch.
+                Mã đơn hàng đầy đủ: <code>%s</code><br>
+                Cảm ơn bạn đã sử dụng UITMerch.
               </p>
             </div>
-            """.formatted(orderId, newStatus);
-        sendMail(toEmail, subject, body);
+            """.formatted(shortId, statusVi, orderId);
+        sendMail(toEmail, "UITMerch — Cập nhật đơn hàng #" + shortId, body);
     }
 
     @Async
@@ -128,8 +154,7 @@ public class JavaMailEmailService implements EmailService {
             mailSender.send(message);
             log.info("Email '{}' sent to {}", subject, toEmail);
         } catch (MessagingException | java.io.UnsupportedEncodingException e) {
-            log.error("Failed to send email '{}' to {}: {}", subject, toEmail, e.getMessage());
-            throw new StorageException("Failed to send email. Please try again.", e);
+            log.warn("Failed to send email '{}' to {}: {}", subject, toEmail, e.getMessage());
         }
     }
 
