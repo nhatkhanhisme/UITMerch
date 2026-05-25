@@ -23,8 +23,18 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
 }
 
+.responsive-product-grid--compact {
+  gap: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 @media (min-width: 640px) {
   .responsive-product-grid {
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  }
+
+  .responsive-product-grid--compact {
     gap: 1.25rem;
     grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   }
