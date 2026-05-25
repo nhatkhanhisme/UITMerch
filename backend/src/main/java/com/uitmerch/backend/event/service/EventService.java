@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,6 +48,13 @@ public class EventService {
     public EventResponse createEvent(UUID ownerId, UUID orgId, CreateEventRequest request) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
+        validateDates(request.getStartsAt(), request.getEndsAt());
+
+        EventStatus status = request.getStatus() != null ? request.getStatus() : EventStatus.DRAFT;
+        if (status == EventStatus.ENDED || status == EventStatus.CANCELLED) {
+            throw new ValidationException("Cannot create an event with status " + status + ".");
+        }
+
         Event event = Event.builder()
             .orgId(org.getId())
             .title(request.getTitle())
@@ -54,6 +62,7 @@ public class EventService {
             .coverUrl(request.getCoverUrl())
             .startsAt(request.getStartsAt())
             .endsAt(request.getEndsAt())
+            .status(status)
             .build();
 
         return EventResponse.from(eventRepository.save(event));
@@ -100,6 +109,8 @@ public class EventService {
         if (request.getEndsAt() != null) {
             event.setEndsAt(request.getEndsAt());
         }
+
+        validateDates(event.getStartsAt(), event.getEndsAt());
 
         return EventResponse.from(eventRepository.save(event));
     }
@@ -215,13 +226,21 @@ public class EventService {
 
     private void validateStatusTransition(EventStatus current, EventStatus next) {
         boolean valid = switch (current) {
-            case DRAFT -> next == EventStatus.PUBLISHED;
-            case PUBLISHED -> next == EventStatus.ENDED;
-            case ENDED -> false;
+            case DRAFT      -> next == EventStatus.PUBLISHED || next == EventStatus.CANCELLED;
+            case PUBLISHED  -> next == EventStatus.DRAFT || next == EventStatus.ENDED || next == EventStatus.CANCELLED;
+            case ENDED, CANCELLED -> false;
         };
 
         if (!valid) {
-            throw new ValidationException("Invalid event status transition.");
+            throw new ValidationException(
+                "Cannot transition event from " + current + " to " + next + "."
+            );
+        }
+    }
+
+    private void validateDates(LocalDateTime startsAt, LocalDateTime endsAt) {
+        if (startsAt != null && endsAt != null && !startsAt.isBefore(endsAt)) {
+            throw new ValidationException("startsAt must be before endsAt.");
         }
     }
 }
