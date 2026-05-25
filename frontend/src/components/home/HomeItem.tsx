@@ -128,7 +128,7 @@ export function HomeItem() {
     <section
       className="
         relative isolate flex min-h-[100svh] items-center
-        px-5 py-20
+        px-4 py-16
         sm:px-8 sm:py-24
         lg:px-16 lg:py-16
       "
@@ -185,7 +185,7 @@ export function HomeItem() {
           </div>
         ) : error || slides.length === 0 ? (
           <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
-            <div className="mx-auto max-w-md rounded-[32px] border border-white/50 bg-white/30 p-8 shadow-glass backdrop-blur-xl">
+            <div className="mx-auto max-w-md rounded-[24px] border border-white/50 bg-white/30 p-5 shadow-glass backdrop-blur-xl sm:rounded-[32px] sm:p-8">
               <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-peach/10 text-peach mb-4">
                 ⚠
               </div>
@@ -201,7 +201,7 @@ export function HomeItem() {
           <>
             <div
               className="
-                grid items-center gap-8
+                grid items-center gap-6
                 lg:grid-cols-[1fr_420px] lg:gap-10
                 xl:grid-cols-[1fr_480px] xl:gap-14
               "
@@ -217,13 +217,13 @@ export function HomeItem() {
                       <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
                         Vật phẩm nổi bật
                       </p>
-                      <h2 className="mt-4 font-fredoka text-[30px] font-bold leading-tight tracking-[0.01em] text-peach line-clamp-2 sm:text-[40px] lg:text-[46px] xl:text-[52px]">
+                      <h2 className="mt-3 font-fredoka text-[26px] font-bold leading-tight tracking-[0.01em] text-peach line-clamp-2 sm:mt-4 sm:text-[40px] lg:text-[46px] xl:text-[52px]">
                         {previousProduct.title}
                       </h2>
                       <p className="mt-1 font-sans text-lg font-semibold text-gold sm:text-xl">
                         {previousProduct.subtitle}
                       </p>
-                      <p className="mx-auto mt-4 max-w-[420px] font-sans text-sm font-normal leading-6 text-gray line-clamp-3 lg:mx-0">
+                      <p className="mx-auto mt-3 max-w-[420px] font-sans text-sm font-normal leading-6 text-gray line-clamp-3 sm:mt-4 lg:mx-0">
                         {previousProduct.description}
                       </p>
                     </div>
@@ -234,13 +234,13 @@ export function HomeItem() {
                       <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-slate/70 sm:text-sm">
                         Vật phẩm nổi bật
                       </p>
-                      <h2 className="mt-4 font-fredoka text-[30px] font-bold leading-tight tracking-[0.01em] text-peach line-clamp-2 sm:text-[40px] lg:text-[46px] xl:text-[52px]">
+                      <h2 className="mt-3 font-fredoka text-[26px] font-bold leading-tight tracking-[0.01em] text-peach line-clamp-2 sm:mt-4 sm:text-[40px] lg:text-[46px] xl:text-[52px]">
                         {activeProduct.title}
                       </h2>
                       <p className="mt-1 font-sans text-lg font-semibold text-gold sm:text-xl">
                         {activeProduct.subtitle}
                       </p>
-                      <p className="mx-auto mt-4 max-w-[420px] font-sans text-sm font-normal leading-6 text-gray line-clamp-3 lg:mx-0">
+                      <p className="mx-auto mt-3 max-w-[420px] font-sans text-sm font-normal leading-6 text-gray line-clamp-3 sm:mt-4 lg:mx-0">
                         {activeProduct.description}
                       </p>
                     </div>
@@ -249,18 +249,18 @@ export function HomeItem() {
               </div>
 
               {/* Image panel — fixed square, always same size */}
-              <div className="relative mx-auto w-full max-w-[380px] sm:max-w-[420px] lg:max-w-none">
-                <div className="absolute inset-6 rounded-[42px] bg-white/35 blur-2xl" />
+              <div className="relative mx-auto w-full max-w-[300px] sm:max-w-[420px] lg:max-w-none">
+                <div className="absolute inset-4 rounded-[32px] bg-white/35 blur-2xl sm:inset-6 sm:rounded-[42px]" />
                 <div
                   className="
-                    relative aspect-square w-full overflow-hidden rounded-[34px]
-                    border border-white/80 bg-white/30 p-6
+                    relative aspect-square w-full overflow-hidden rounded-[24px]
+                    border border-white/80 bg-white/30 p-4 sm:rounded-[34px] sm:p-6
                     shadow-[20px_28px_70px_rgba(82,128,145,0.22),inset_2px_2px_14px_rgba(255,255,255,0.95)]
                     backdrop-blur-md
                   "
                 >
                   {/* Badge — entering badge sets height; exiting badge overlays absolutely */}
-                  <div className="absolute left-5 top-5 z-20">
+                  <div className="absolute left-3 top-3 z-20 sm:left-5 sm:top-5">
                     <div className="relative">
                       {previousProduct && (
                         <div className="home-item-exit absolute inset-0">
@@ -304,7 +304,7 @@ export function HomeItem() {
               </div>
             </div>
 
-            <div className="mt-10 flex flex-col items-center gap-8">
+            <div className="mt-8 flex flex-col items-center gap-6 sm:mt-10 sm:gap-8">
               <div
                 className="
                   flex items-center justify-center gap-4

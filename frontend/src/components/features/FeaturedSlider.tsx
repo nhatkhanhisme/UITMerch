@@ -32,9 +32,9 @@ export function FeaturedSlider({ items, autoPlayInterval = 4000, isPaused = fals
   if (!items?.length) return null;
 
   return (
-    <div className="relative w-full mb-10 overflow-hidden rounded-[32px] border border-white/30 bg-white/10 backdrop-blur-md shadow-glass group">
+    <div className="group relative mb-6 w-full overflow-hidden rounded-[24px] border border-white/30 bg-white/10 shadow-glass backdrop-blur-md sm:mb-10 sm:rounded-[32px]">
       <div
-        className="flex transition-transform duration-700 ease-in-out h-64 sm:h-80"
+        className="flex h-[22rem] transition-transform duration-700 ease-in-out sm:h-80"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {items.map((item) => {
@@ -43,9 +43,9 @@ export function FeaturedSlider({ items, autoPlayInterval = 4000, isPaused = fals
             <ContentWrapper
               key={item.id}
               to={item.link || '#'}
-              className="w-full flex-shrink-0 flex items-center p-6 sm:p-10 gap-8 hover:opacity-95 transition-opacity"
+              className="flex w-full flex-shrink-0 flex-col gap-4 p-4 transition-opacity hover:opacity-95 sm:flex-row sm:items-center sm:gap-8 sm:p-10"
             >
-              <div className="w-1/3 sm:w-1/2 h-full flex justify-center items-center bg-transparent">
+              <div className="flex h-40 w-full items-center justify-center bg-transparent sm:h-full sm:w-1/2">
               {item.image ? (
                 <img
                   src={item.image}
@@ -57,13 +57,13 @@ export function FeaturedSlider({ items, autoPlayInterval = 4000, isPaused = fals
               )}
             </div>
 
-            <div className="w-2/3 sm:w-1/2 flex flex-col justify-center">
+            <div className="flex min-w-0 flex-1 flex-col justify-center sm:w-1/2">
               {item.orgName && (
                 <Link to="#" className="mb-2 font-sans text-sm font-medium text-black-blue/60 hover:text-black-blue hover:underline">
                   {item.orgName}
                 </Link>
               )}
-              <h2 className="mb-3 font-fredoka text-2xl font-bold tracking-[0.01em] text-black-blue sm:text-4xl">{item.name}</h2>
+              <h2 className="mb-2 line-clamp-2 font-fredoka text-xl font-bold tracking-[0.01em] text-black-blue sm:mb-3 sm:text-4xl">{item.name}</h2>
               {item.desc && (
                 <p className="mb-4 line-clamp-3 font-sans text-sm font-normal text-black-blue/70 sm:text-base">{item.desc}</p>
               )}
@@ -73,7 +73,7 @@ export function FeaturedSlider({ items, autoPlayInterval = 4000, isPaused = fals
         })}
       </div>
 
-      <div className="absolute bottom-5 left-0 right-0 flex justify-center items-center gap-2.5">
+      <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-2.5 sm:bottom-5">
         {items.map((_, idx) => (
           <button
             key={idx}

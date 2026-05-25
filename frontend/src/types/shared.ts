@@ -315,6 +315,8 @@ export type CreateEventRequest = {
   coverUrl?: string;
   startsAt?: string;
   endsAt?: string;
+  /** Defaults to DRAFT when omitted. Only DRAFT or PUBLISHED are accepted on create. */
+  status?: string;
 };
 
 export type UpdateEventRequest = {

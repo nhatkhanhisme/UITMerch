@@ -76,7 +76,7 @@ export function HomeFixedChrome({ showSlideBar = true }: HomeFixedChromeProps) {
   return (
     <>
       <div
-        className="fixed left-1/2 top-4 z-50 w-[calc(100vw-32px)] max-w-[1280.41px] -translate-x-1/2 sm:top-[18px] sm:w-[calc(100vw-64px)] lg:w-[1280.41px]"
+        className="fixed left-1/2 top-3 z-50 w-[calc(100vw-24px)] max-w-[1280.41px] -translate-x-1/2 sm:top-[18px] sm:w-[calc(100vw-64px)] lg:w-[1280.41px]"
         style={{
           // RESPONSIVE
           transform:

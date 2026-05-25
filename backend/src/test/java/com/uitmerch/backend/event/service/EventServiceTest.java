@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -80,7 +81,7 @@ class EventServiceTest {
     // ── updateEvent: status transitions ─────────────────────────────────────
 
     @ParameterizedTest(name = "{0} → {1}")
-    @CsvSource({"DRAFT,PUBLISHED", "PUBLISHED,ENDED"})
+    @CsvSource({"DRAFT,PUBLISHED", "DRAFT,CANCELLED", "PUBLISHED,ENDED", "PUBLISHED,DRAFT", "PUBLISHED,CANCELLED"})
     void updateEvent_validStatusTransition_succeeds(EventStatus from, EventStatus to) {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(org());
         when(eventRepository.findByIdAndOrgId(eventId, orgId)).thenReturn(Optional.of(event(from)));
@@ -93,7 +94,7 @@ class EventServiceTest {
     }
 
     @ParameterizedTest(name = "{0} → {1}")
-    @CsvSource({"DRAFT,ENDED", "PUBLISHED,DRAFT", "ENDED,DRAFT", "ENDED,PUBLISHED"})
+    @CsvSource({"DRAFT,ENDED", "ENDED,DRAFT", "ENDED,PUBLISHED", "CANCELLED,DRAFT", "CANCELLED,PUBLISHED"})
     void updateEvent_invalidStatusTransition_throwsValidation(EventStatus from, EventStatus to) {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(org());
         when(eventRepository.findByIdAndOrgId(eventId, orgId)).thenReturn(Optional.of(event(from)));
@@ -115,6 +116,20 @@ class EventServiceTest {
 
         assertThatThrownBy(() -> eventService.updateEvent(ownerId, orgId, eventId, req))
             .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void updateEvent_endBeforeStart_throwsValidation() {
+        when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(org());
+        when(eventRepository.findByIdAndOrgId(eventId, orgId)).thenReturn(Optional.of(event(EventStatus.DRAFT)));
+
+        UpdateEventRequest req = new UpdateEventRequest();
+        req.setStartsAt(LocalDateTime.of(2026, 6, 2, 10, 0));
+        req.setEndsAt(LocalDateTime.of(2026, 6, 1, 10, 0));
+
+        assertThatThrownBy(() -> eventService.updateEvent(ownerId, orgId, eventId, req))
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining("startsAt");
     }
 
     // ── attachMerch ──────────────────────────────────────────────────────────
