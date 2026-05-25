@@ -1,11 +1,11 @@
 ---
 name: features
-description: "Skill for the Features area of UITMerch. 9 symbols across 5 files."
+description: "Skill for the Features area of UITMerch. 17 symbols across 6 files."
 ---
 
 # Features
 
-9 symbols | 5 files | Cohesion: 56%
+17 symbols | 6 files | Cohesion: 71%
 
 ## When to Use
 
@@ -17,6 +17,7 @@ description: "Skill for the Features area of UITMerch. 9 symbols across 5 files.
 
 | File | Symbols |
 |------|---------|
+| `frontend/src/components/features/VisualSearchModal.tsx` | CameraIcon, SparkleIcon, VisualSearchModal, DoneState, validateAndPreview (+3) |
 | `frontend/src/components/features/MerchToolbar.tsx` | SearchIcon, ChevronDownIcon, Dropdown, MerchToolbar |
 | `frontend/src/pages/MerchPage.tsx` | ShaderBackground, MerchPage |
 | `frontend/src/components/features/FeaturedSlider.tsx` | FeaturedSlider |
@@ -42,10 +43,18 @@ Start here when exploring this area:
 | `ProductCard` | Function | `frontend/src/components/ui/ProductCard.tsx` | 19 |
 | `MerchPage` | Function | `frontend/src/pages/MerchPage.tsx` | 37 |
 | `MerchToolbar` | Function | `frontend/src/components/features/MerchToolbar.tsx` | 137 |
+| `VisualSearchModal` | Function | `frontend/src/components/features/VisualSearchModal.tsx` | 38 |
+| `validateAndPreview` | Function | `frontend/src/components/features/VisualSearchModal.tsx` | 61 |
+| `handleFile` | Function | `frontend/src/components/features/VisualSearchModal.tsx` | 74 |
+| `handleInputChange` | Function | `frontend/src/components/features/VisualSearchModal.tsx` | 80 |
+| `handleDrop` | Function | `frontend/src/components/features/VisualSearchModal.tsx` | 86 |
 | `ShaderBackground` | Function | `frontend/src/pages/MerchPage.tsx` | 14 |
 | `SearchIcon` | Function | `frontend/src/components/features/MerchToolbar.tsx` | 18 |
 | `ChevronDownIcon` | Function | `frontend/src/components/features/MerchToolbar.tsx` | 27 |
 | `Dropdown` | Function | `frontend/src/components/features/MerchToolbar.tsx` | 42 |
+| `CameraIcon` | Function | `frontend/src/components/features/VisualSearchModal.tsx` | 16 |
+| `SparkleIcon` | Function | `frontend/src/components/features/VisualSearchModal.tsx` | 25 |
+| `DoneState` | Function | `frontend/src/components/features/VisualSearchModal.tsx` | 256 |
 
 ## Execution Flows
 

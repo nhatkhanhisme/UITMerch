@@ -121,6 +121,7 @@ public class OrderService {
             List<OrderItem> savedItems = orderItemRepository.saveAll(orderItems);
 
             notifyOrganizer(orgId, order, "NEW_ORDER");
+            notifyCustomerOrderPlaced(order);
             results.add(OrderResponse.from(order, savedItems));
         }
 
@@ -172,6 +173,7 @@ public class OrderService {
         orderItem = orderItemRepository.save(orderItem);
 
         notifyOrganizer(merch.getOrgId(), order, "NEW_ORDER");
+        notifyCustomerOrderPlaced(order);
         return OrderResponse.from(order, List.of(orderItem));
     }
 
@@ -617,6 +619,22 @@ public class OrderService {
             sseEmitterManager.send(org.getOwnerId(), event);
         } catch (Exception e) {
             log.warn("Failed to send SSE {} event to organizer for org {}: {}", eventType, orgId, e.getMessage());
+        }
+    }
+
+    private void notifyCustomerOrderPlaced(Order order) {
+        if (order.getUserId() == null) return;
+        try {
+            String shortId = order.getId().toString().substring(0, 8).toUpperCase();
+            notificationService.push(
+                order.getUserId(),
+                "Đặt hàng thành công",
+                "Đơn hàng #" + shortId + " đã được tạo và đang chờ xác nhận từ ban tổ chức.",
+                NotificationType.ORDER_PLACED,
+                order.getId()
+            );
+        } catch (Exception e) {
+            log.warn("Failed to send order-placed notification for order {}: {}", order.getId(), e.getMessage());
         }
     }
 

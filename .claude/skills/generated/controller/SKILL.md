@@ -1,11 +1,11 @@
 ---
 name: controller
-description: "Skill for the Controller area of UITMerch. 56 symbols across 30 files."
+description: "Skill for the Controller area of UITMerch. 54 symbols across 30 files."
 ---
 
 # Controller
 
-56 symbols | 30 files | Cohesion: 70%
+54 symbols | 30 files | Cohesion: 69%
 
 ## When to Use
 
@@ -20,13 +20,13 @@ description: "Skill for the Controller area of UITMerch. 56 symbols across 30 fi
 | `backend/src/main/java/com/uitmerch/backend/auth/controller/AuthController.java` | register, registerOrganizer, login, resendOtp, forgotPassword |
 | `backend/src/test/java/com/uitmerch/backend/common/service/RateLimiterServiceTest.java` | isAllowed_withinLimit_returnsTrue, isAllowed_atLimitOnNextAttempt_returnsFalse, isAllowed_differentKeys_haveIndependentLimits, isAllowed_windowExpiry_resetsCounter, isAllowed_zeroAttempts_immediatelyFalse |
 | `backend/src/main/java/com/uitmerch/backend/common/model/ApiResponse.java` | success, error, success |
-| `backend/src/main/java/com/uitmerch/backend/merch/controller/MerchController.java` | createMerch, getOwnMerchItem, updateMerch |
 | `backend/src/main/java/com/uitmerch/backend/notification/controller/NotificationController.java` | getUnreadCount, markAllRead, getNotifications |
 | `backend/src/main/java/com/uitmerch/backend/notification/repository/NotificationRepository.java` | countByUserIdAndIsReadFalse, markAllReadByUserId, findByUserIdOrderByCreatedAtDesc |
 | `backend/src/main/java/com/uitmerch/backend/notification/service/NotificationService.java` | countUnread, markAllRead, getForUser |
 | `backend/src/main/java/com/uitmerch/backend/event/repository/EventRepository.java` | findByOrgId, findByStatusIn, findByOrgIdAndStatusIn |
 | `backend/src/main/java/com/uitmerch/backend/event/service/EventService.java` | getOwnEvents, getPublicEvents, getPublicEventsByOrg |
 | `backend/src/main/java/com/uitmerch/backend/organization/controller/PublicOrganizationController.java` | listOrganizations, getOrgMerch, getOrgEvents |
+| `backend/src/main/java/com/uitmerch/backend/admin/controller/AdminController.java` | listUsers, listAllOrders |
 
 ## Entry Points
 
@@ -55,13 +55,13 @@ Start here when exploring this area:
 | `isAllowed` | Method | `backend/src/main/java/com/uitmerch/backend/common/service/RateLimiterService.java` | 28 |
 | `extractClientIp` | Method | `backend/src/main/java/com/uitmerch/backend/common/util/IpUtil.java` | 44 |
 | `getTraceId` | Method | `backend/src/main/java/com/uitmerch/backend/common/util/TraceIdUtil.java` | 39 |
-| `createMerch` | Method | `backend/src/main/java/com/uitmerch/backend/merch/controller/MerchController.java` | 35 |
 | `getOwnMerchItem` | Method | `backend/src/main/java/com/uitmerch/backend/merch/controller/MerchController.java` | 74 |
-| `updateMerch` | Method | `backend/src/main/java/com/uitmerch/backend/merch/controller/MerchController.java` | 93 |
 | `getUnreadCount` | Method | `backend/src/main/java/com/uitmerch/backend/notification/controller/NotificationController.java` | 53 |
 | `markAllRead` | Method | `backend/src/main/java/com/uitmerch/backend/notification/controller/NotificationController.java` | 74 |
 | `countByUserIdAndIsReadFalse` | Method | `backend/src/main/java/com/uitmerch/backend/notification/repository/NotificationRepository.java` | 17 |
 | `markAllReadByUserId` | Method | `backend/src/main/java/com/uitmerch/backend/notification/repository/NotificationRepository.java` | 19 |
+| `countUnread` | Method | `backend/src/main/java/com/uitmerch/backend/notification/service/NotificationService.java` | 40 |
+| `markAllRead` | Method | `backend/src/main/java/com/uitmerch/backend/notification/service/NotificationService.java` | 56 |
 
 ## Execution Flows
 
@@ -82,7 +82,7 @@ Start here when exploring this area:
 
 | Area | Connections |
 |------|-------------|
-| Service | 18 calls |
+| Service | 16 calls |
 | Repository | 1 calls |
 
 ## How to Explore

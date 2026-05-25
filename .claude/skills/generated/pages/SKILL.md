@@ -1,11 +1,11 @@
 ---
 name: pages
-description: "Skill for the Pages area of UITMerch. 178 symbols across 38 files."
+description: "Skill for the Pages area of UITMerch. 177 symbols across 39 files."
 ---
 
 # Pages
 
-178 symbols | 38 files | Cohesion: 72%
+177 symbols | 39 files | Cohesion: 72%
 
 ## When to Use
 
@@ -19,7 +19,7 @@ description: "Skill for the Pages area of UITMerch. 178 symbols across 38 files.
 |------|---------|
 | `frontend/src/pages/OrganizerDashboardPage.tsx` | bustEventsCache, handle, handleSave, formatDate, OrgCancelModal (+19) |
 | `frontend/src/pages/OrganizerProfilePage.tsx` | handleOrganizerLogoUpload, handleOrganizerCoverUpload, CalendarIcon, ShieldIcon, CameraIcon (+8) |
-| `frontend/src/pages/ProductDetailPage.tsx` | handleBuyNow, handleAddToCart, handleCheckoutSubmit, fetchProduct, ShaderBackground (+6) |
+| `frontend/src/pages/ProductDetailPage.tsx` | handleBuyNow, handleAddToCart, handleCheckoutSubmit, ShaderBackground, formatPrice (+5) |
 | `frontend/src/pages/CustomerProfilePage.tsx` | MailIcon, CalendarIcon, CameraIcon, CustomerProfilePage, updateUser (+5) |
 | `frontend/src/pages/AdminDashboardPage.tsx` | ShaderBackground, formatDate, UsersTab, handleRoleChange, handleToggleActive (+4) |
 | `frontend/src/pages/CartPage.tsx` | handleCheckout, ShaderBackground, formatPrice, EmptyCart, OrderSuccess (+3) |
@@ -33,9 +33,9 @@ description: "Skill for the Pages area of UITMerch. 178 symbols across 38 files.
 Start here when exploring this area:
 
 - **`getPublicEvents`** (Function) — `frontend/src/api/event.ts:15`
-- **`getPublicMerchList`** (Function) — `frontend/src/api/merch.ts:17`
-- **`getPopularMerch`** (Function) — `frontend/src/api/merch.ts:25`
-- **`getCategories`** (Function) — `frontend/src/api/merch.ts:39`
+- **`getPublicMerchList`** (Function) — `frontend/src/api/merch.ts:18`
+- **`getPopularMerch`** (Function) — `frontend/src/api/merch.ts:26`
+- **`getCategories`** (Function) — `frontend/src/api/merch.ts:40`
 - **`getPublicOrganizations`** (Function) — `frontend/src/api/organization.ts:15`
 
 ## Key Symbols
@@ -43,9 +43,9 @@ Start here when exploring this area:
 | Symbol | Type | File | Line |
 |--------|------|------|------|
 | `getPublicEvents` | Function | `frontend/src/api/event.ts` | 15 |
-| `getPublicMerchList` | Function | `frontend/src/api/merch.ts` | 17 |
-| `getPopularMerch` | Function | `frontend/src/api/merch.ts` | 25 |
-| `getCategories` | Function | `frontend/src/api/merch.ts` | 39 |
+| `getPublicMerchList` | Function | `frontend/src/api/merch.ts` | 18 |
+| `getPopularMerch` | Function | `frontend/src/api/merch.ts` | 26 |
+| `getCategories` | Function | `frontend/src/api/merch.ts` | 40 |
 | `getPublicOrganizations` | Function | `frontend/src/api/organization.ts` | 15 |
 | `getPublicOrgMerch` | Function | `frontend/src/api/organization.ts` | 30 |
 | `cacheGet` | Function | `frontend/src/lib/sessionCache.ts` | 26 |
