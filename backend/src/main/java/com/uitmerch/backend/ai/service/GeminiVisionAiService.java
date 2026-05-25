@@ -78,8 +78,13 @@ public class GeminiVisionAiService implements VisionAiService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+            if (response.statusCode() == 403) {
+                rotator.markCurrentBad();
+                log.warn("Gemini Vision HTTP 403 on attempt {}/{} — key revoked, rotating", i + 1, attempts);
+                continue;
+            }
             if (response.statusCode() == 429) {
-                log.warn("Gemini Vision 429 on attempt {}/{}", i + 1, attempts);
+                log.warn("Gemini Vision HTTP 429 on attempt {}/{} — rate limited, rotating", i + 1, attempts);
                 continue;
             }
             if (response.statusCode() != 200) {

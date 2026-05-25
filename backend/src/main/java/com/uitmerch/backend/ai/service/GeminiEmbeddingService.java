@@ -74,8 +74,13 @@ public class GeminiEmbeddingService implements EmbeddingService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+            if (response.statusCode() == 403) {
+                rotator.markCurrentBad();
+                log.warn("Gemini Embedding HTTP 403 on attempt {}/{} — key revoked, rotating", i + 1, attempts);
+                continue;
+            }
             if (response.statusCode() == 429) {
-                log.warn("Gemini Embedding 429 on attempt {}/{}", i + 1, attempts);
+                log.warn("Gemini Embedding HTTP 429 on attempt {}/{} — rate limited, rotating", i + 1, attempts);
                 continue;
             }
             if (response.statusCode() != 200) {
