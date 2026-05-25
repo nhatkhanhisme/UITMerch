@@ -67,12 +67,13 @@ cp .env.example .env
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 3.3.5, Java 21 |
-| Database | PostgreSQL 16, Flyway (V1–V28 migrations) |
+| Database | PostgreSQL 16, Flyway (V1–V31 migrations) |
 | Auth | JWT via JJWT 0.12.x — stateless, access + refresh tokens, type-checked |
 | Token blacklist | PostgreSQL-backed `invalidated_tokens` table — survives restarts |
 | Rate limiting | In-memory sliding-window (`RateLimiterService`) — login, register, OTP, guest checkout |
 | Storage | Supabase Storage (S3-compatible via AWS SDK) |
-| Email | JavaMail (SMTP) with `@Async` dispatch — OTP, password reset, order status |
+| Email | JavaMail (SMTP) with `@Async` dispatch — OTP, password reset, order placed, order status update, pickup schedule, order cancelled |
+| Real-time | SSE (`SseEmitter`) — per-user streams with 25-second heartbeat to prevent proxy idle-timeout disconnections |
 | Cache | Spring `ConcurrentMapCache` — categories, popular merch |
 | API Docs | springdoc-openapi 2.6 — Swagger UI at `/swagger-ui.html` (disabled by default in prod) |
 | Tests | 169 tests across 14 test classes — unit (Mockito) + `@DataJpaTest` integration |
@@ -95,7 +96,7 @@ Each domain follows the pattern: `entity/ → repository/ → dto/ → service/ 
 | **order** | `GET/PATCH /api/v1/organizations/{orgId}/orders/**` | `GET/POST/PATCH /api/v1/customer/orders/**` | `GET/POST /api/v1/public/orders/**` |
 | **wishlist** | — | `GET/POST/DELETE /api/v1/customer/wishlist/**` | — |
 | **event** | `CRUD /api/v1/organizations/{orgId}/events/**` | — | `GET /api/v1/public/events/**` |
-| **notification** | — | `GET/PATCH /api/v1/customer/notifications/**` | — |
+| **notification** | `GET/PATCH /api/v1/organizer/notifications/**` · `GET /api/v1/organizer/notifications/stream` | `GET/PATCH /api/v1/customer/notifications/**` · `GET /api/v1/customer/notifications/stream` | — |
 | **admin** | — | — | `GET/PATCH /api/v1/admin/**` |
 
 Role enforcement is via `@PreAuthorize` at method level (not in `SecurityConfig`).
@@ -220,7 +221,12 @@ PENDING → CANCELLED                          (stock restored)
 CONFIRMED → CANCELLED                        (stock restored)
 ```
 
-`READY` is reached via `createPickupSchedule` (batch) or `updateOrderStatus` (single). `COMPLETED` is set by `checkInOrder` when the customer physically collects at campus. An email notification is sent to the customer on every transition; a push notification is also created in-app when the order reaches `READY`.
+`READY` is reached via `createPickupSchedule` (batch) or `updateOrderStatus` (single). `COMPLETED` is set by `checkInOrder` when the customer physically collects at campus.
+
+Notifications sent at each stage:
+- **Order placed** — confirmation email + `ORDER_PLACED` in-app notification to customer; `NEW_ORDER` in-app notification to organizer
+- **CONFIRMED / READY / COMPLETED** — status-update email + in-app notification to customer
+- **CANCELLED** — dedicated cancellation email to customer (and org owner if customer-cancelled); `ORDER_CANCELLED` in-app notification to organizer
 
 ### Orders — Public `/api/v1/public/orders`
 
@@ -237,10 +243,21 @@ CONFIRMED → CANCELLED                        (stock restored)
 | POST | `/{merchId}` | Add merch item to wishlist (409 if already exists) |
 | DELETE | `/{merchId}` | Remove merch item from wishlist |
 
-### Notifications — `/api/v1/customer/notifications` *(CUSTOMER)*
+### Notifications — Customer `/api/v1/customer/notifications` *(CUSTOMER)*
 
 | Method | Path | Description |
 |---|---|---|
+| GET | `/stream` | SSE stream — real-time push (ORDER_PLACED, ORDER_READY, etc.) |
+| GET | `/` | List own notifications (paginated, newest first) |
+| GET | `/unread-count` | Get count of unread notifications |
+| PATCH | `/{id}/read` | Mark a single notification as read |
+| PATCH | `/read-all` | Mark all notifications as read |
+
+### Notifications — Organizer `/api/v1/organizer/notifications` *(ORGANIZER)*
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/stream` | SSE stream — real-time push (NEW_ORDER, ORDER_CANCELLED) |
 | GET | `/` | List own notifications (paginated, newest first) |
 | GET | `/unread-count` | Get count of unread notifications |
 | PATCH | `/{id}/read` | Mark a single notification as read |
@@ -431,7 +448,10 @@ Never modify existing migration files — add a new `VN+1__description.sql` inst
 | V25 | Rename `order_status` enum values: `READY_FOR_PICKUP → READY`, `SUCCESS → COMPLETED` |
 | V26 | Add cancel fields to `orders`: `cancelled_by`, `cancel_reason`, `cancel_reason_note`, `cancelled_at` |
 | V27 | `pickup_schedules` table + `orders.pickup_schedule_id` FK |
-| V28 | `notifications` table for in-app CUSTOMER notifications |
+| V28 | `notifications` table + `notification_type` PostgreSQL enum (in-app notifications) |
+| V29 | `merch_embeddings` table + `vector` extension (AI visual search) |
+| V30 | Add `ORDER_PLACED` to `notification_type` enum |
+| V31 | Add `NEW_ORDER` to `notification_type` enum (organizer notifications) |
 
 ---
 
@@ -443,17 +463,17 @@ Never modify existing migration files — add a new `VN+1__description.sql` inst
 ```
 
 Tests use `@ActiveProfiles("dev")` — H2 in-memory, no PostgreSQL or env vars required.
-**169 tests across 14 test classes**. 6 currently failing: `CartServiceTest` (3 mock-gap failures) and `WishlistServiceTest` (3 NullPointer — missing `MerchImageRepository` mock). All other suites pass.
+**169 tests across 14 test classes — all pass.**
 
 | Suite | Tests | Notes |
 |---|---|---|
 | `AuthServiceTest` | 35 | register, verify, login, resend-OTP, forgot/reset password, refresh, logout |
 | `OrderServiceTest` | 33 | all order paths + status transitions (parameterized) + cancellation + pickup-schedules + stock restore |
 | `MerchServiceTest` | 15 | create, update, delete, list, popular |
-| `CartServiceTest` | 13 | add, update, remove, checkout ⚠ 3 failing (mock gap) |
+| `CartServiceTest` | 13 | add, update, remove, checkout |
 | `AdminServiceTest` | 13 | users, orgs, orders, ban/activate |
 | `EventServiceTest` | 14 | create, status transitions, attach/detach merch, public access |
-| `WishlistServiceTest` | 7 | get, add, remove ⚠ 3 errors (missing `MerchImageRepository` mock) |
+| `WishlistServiceTest` | 7 | get, add, remove |
 | `OrganizationServiceTest` | 8 | CRUD + ownership |
 | `UserServiceTest` | 5 | profile get/update |
 | `JwtTokenProviderTest` | 10 | access/refresh token type discrimination + tamper detection |

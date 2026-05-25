@@ -55,8 +55,9 @@ Each follows: `entity/ → repository/ → dto/ → service/ → controller/`
 Both swap automatically via `@Profile`:
 
 - **`StorageService`** — `DevStorageService` (dev/docker, no-op) vs `SupabaseStorageServiceImpl` (production S3-compatible). Never store images as Base64/BLOB in the DB.
-- **`EmailService`** — `DevEmailService` (dev/docker, logs OTP to console) vs `JavaMailEmailService` (production SMTP, all methods `@Async`). Three methods: `sendOtp`, `sendPasswordReset`, `sendOrderStatusUpdate`.
-- **`NotificationService`** — creates in-app `Notification` records for CUSTOMER users (e.g., order moved to `READY`). Queried via `GET /api/v1/customer/notifications`; supports mark-read and unread-count.
+- **`EmailService`** — `DevEmailService` (dev/docker, logs to console) vs `JavaMailEmailService` (production SMTP, all methods `@Async`). Six methods: `sendOtp`, `sendPasswordReset`, `sendOrderPlacedConfirmation`, `sendOrderStatusUpdate`, `sendPickupScheduleNotification`, `sendOrderCancelledNotification`. Failures are logged as WARN and never propagate to the caller.
+- **`NotificationService`** — writes in-app `Notification` records and pushes SSE for both CUSTOMER and ORGANIZER users. Two write paths: `push()` (DB + SSE) used for customers; `saveOnly()` (DB only) used for organizers where `notifyOrganizer` manages the SSE payload separately. Customer API: `GET /api/v1/customer/notifications`; Organizer API: `GET /api/v1/organizer/notifications`. Both support unread-count and mark-read.
+- **`SseEmitterManager`** — holds per-user SSE emitter lists; defers pushes until after the active transaction commits. A `@Scheduled` heartbeat fires every 25 s to keep connections alive through reverse-proxy idle-timeout.
 
 ### Security
 

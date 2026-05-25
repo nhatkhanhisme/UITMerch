@@ -74,7 +74,7 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 - Registered account checkout and guest checkout (cash on delivery)
 - Order history and status tracking
 - Cancel PENDING orders with a reason (predefined options + free-text note)
-- In-app notifications — bell icon in nav, auto-dismissed on read; notified when order reaches READY for campus pickup
+- In-app notifications (SSE real-time) — bell icon in nav; ORDER_PLACED confirmation on checkout, notified when order reaches READY for campus pickup
 - Campus pickup flow: orders progress PENDING → CONFIRMED → READY → COMPLETED; organizer creates pickup schedule slots and marks orders COMPLETED at check-in
 
 ### Organizer (login + approved organization)
@@ -84,6 +84,7 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 - Confirm and manage orders: PENDING → CONFIRMED → READY (via pickup schedule) → COMPLETED (check-in scan)
 - Create pickup schedule slots that batch-transition CONFIRMED orders to READY and notify customers
 - Cancel PENDING or CONFIRMED orders with a reason
+- In-app notifications (SSE real-time) — notified on new orders and customer cancellations; persisted across page refreshes
 
 ### Admin
 - Approve or reject organization registration requests
@@ -199,6 +200,7 @@ npm run build      # production build to dist/
 | `GET/POST` | `/api/v1/customer/cart` | Customer | Cart management |
 | `GET/POST/PATCH` | `/api/v1/customer/orders` | Customer | Order history, instant order, cancel with reason |
 | `GET/PATCH` | `/api/v1/customer/notifications` | Customer | In-app notifications (unread count, mark read) |
+| `GET/PATCH` | `/api/v1/organizer/notifications` | Organizer | In-app notifications — new orders, customer cancellations |
 | `CRUD` | `/api/v1/organizations/{orgId}/merchs` | Organizer | Merch management |
 | `CRUD` | `/api/v1/organizations/{orgId}/events` | Organizer | Event management |
 | `GET/PATCH` | `/api/v1/organizations/{orgId}/orders` | Organizer | Order management, checkin, cancel, pickup schedules |
