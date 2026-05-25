@@ -72,12 +72,12 @@ function Dropdown({
   }, [isOpen]);
 
   return (
-    <div className={`relative ${zIndex}`} ref={ref}>
+    <div className={`relative w-full sm:w-auto ${zIndex}`} ref={ref}>
       <button
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         className={[
-          "flex items-center gap-2 rounded-full border px-5 py-3",
+          "flex min-h-12 w-full items-center justify-between gap-2 rounded-full border px-4 py-2.5 sm:w-auto sm:px-5 sm:py-3",
           "text-sm font-semibold backdrop-blur-md transition whitespace-nowrap",
           isActive
             ? "border-aqua bg-aqua/20 text-black-blue shadow-inner"
@@ -93,7 +93,8 @@ function Dropdown({
       {isOpen && (
         <div
           className={[
-            "absolute right-0 top-[calc(100%+6px)] min-w-[180px] max-h-[300px] overflow-y-auto",
+            "absolute left-0 top-[calc(100%+6px)] max-h-[300px] min-w-full overflow-y-auto sm:left-auto sm:right-0 sm:min-w-[180px]",
+            "w-[min(100%,calc(100vw-2rem))] sm:w-max sm:max-w-[calc(100vw-2rem)]",
             "rounded-[20px] border border-white/60 bg-white/90 backdrop-blur-2xl",
             "shadow-[0_8px_32px_rgba(82,128,145,0.18)]",
             "animate-in fade-in slide-in-from-top-2 duration-150 scrollbar-hide",
@@ -149,13 +150,13 @@ export function MerchToolbar({
   const activeCatLabel = categoryOptions?.find((o) => o.value === activeCategory)?.label ?? "Tất cả danh mục";
 
   return (
-    <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="mb-6 flex flex-col gap-3 md:mb-8 md:flex-row md:items-center">
       {onQueryChange && (
         <label
           className={[
             "flex flex-1 cursor-text items-center gap-3",
             "rounded-full border border-white/60 bg-white/50 backdrop-blur-md",
-            "px-4 py-3 shadow-sm transition",
+            "min-h-12 px-4 py-2.5 shadow-sm transition sm:py-3",
             "focus-within:border-aqua focus-within:ring-2 focus-within:ring-aqua/25",
           ].join(" ")}
         >

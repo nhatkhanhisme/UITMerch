@@ -59,13 +59,13 @@ function getStatusBadge(status?: string) {
   switch (status?.toUpperCase()) {
     case "PUBLISHED":
       return (
-        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 border border-green-300">
+        <span className="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-bold text-green-700 border border-green-300 sm:px-3 sm:text-xs">
           Đang diễn ra
         </span>
       );
     case "ENDED":
       return (
-        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-600 border border-gray-300">
+        <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-gray-600 border border-gray-300 sm:px-3 sm:text-xs">
           Đã kết thúc
         </span>
       );
@@ -173,7 +173,7 @@ export function EventPage() {
   const countDisplay = filteredEvents.length;
 
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
+    <main className="relative min-h-screen bg-transparent px-3 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
         <div className="z-0">
           <ShaderBackground />
@@ -183,7 +183,7 @@ export function EventPage() {
       <div className="relative z-10">
         <GlassContainer>
           <header className="mb-6">
-            <h1 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
+            <h1 className="font-fredoka text-2xl font-bold text-black-blue sm:text-4xl">
               Sự Kiện &amp; Hoạt Động
             </h1>
             <p className="mt-1 font-sans text-sm text-ink/60">
@@ -214,36 +214,36 @@ export function EventPage() {
                 <p className="font-sans text-base">{apiError}</p>
               </div>
             ) : pageEvents.length > 0 ? (
-              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                 {pageEvents.map((ev) => (
                   <Link
                     to={`/event/${ev.id}`}
-                    className="group flex flex-col overflow-hidden rounded-[32px] border border-white/60 bg-white/40 shadow-glass backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-aqua hover:shadow-glass-inset focus-visible:outline-aqua focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
+                    className="group flex flex-col overflow-hidden rounded-[24px] border border-white/60 bg-white/40 shadow-glass backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-aqua hover:shadow-glass-inset focus-visible:outline-aqua focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 sm:rounded-[32px]"
                     key={ev.id}
                   >
-                    <div className="relative h-48 w-full overflow-hidden bg-white/50">
+                    <div className="relative h-40 w-full overflow-hidden bg-white/50 sm:h-48">
                       <img
                         alt={ev.name}
                         className="size-full object-cover mix-blend-multiply transition duration-500 group-hover:scale-105"
                         src={ev.bannerUrl}
                       />
-                      <div className="absolute right-4 top-4 z-10">
+                      <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
                         {getStatusBadge(ev.status)}
                       </div>
                     </div>
 
-                    <div className="flex flex-1 flex-col p-6">
+                    <div className="flex flex-1 flex-col p-4 sm:p-6">
                       <p className="font-sans text-xs font-bold uppercase tracking-wider text-ink/45">
                         {ev.orgName}
                       </p>
-                      <h3 className="mt-2 font-fredoka text-xl font-bold text-black-blue group-hover:text-aqua">
+                      <h3 className="mt-2 line-clamp-2 font-fredoka text-lg font-bold text-black-blue group-hover:text-aqua sm:text-xl">
                         {ev.name}
                       </h3>
                       <p className="mt-3 flex-1 font-sans text-sm leading-6 text-ink/70 line-clamp-3">
                         {ev.description}
                       </p>
 
-                      <div className="mt-6 border-t border-white/50 pt-4 space-y-2 font-sans text-xs text-ink/65">
+                      <div className="mt-4 space-y-2 border-t border-white/50 pt-4 font-sans text-xs text-ink/65 sm:mt-6">
                         <div className="flex items-center gap-2">
                           <Calendar className="size-4 shrink-0 text-black-blue/60" />
                           <span>{formatDate(ev.startDate)}</span>

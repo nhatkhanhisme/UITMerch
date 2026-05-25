@@ -169,7 +169,7 @@ export function HomeHero() {
 
   return (
     <section
-      className="relative mx-0 min-h-[100svh] w-screen bg-canvas "
+      className="relative mx-0 min-h-[100svh] w-screen bg-canvas pb-20 pt-24 sm:pt-28 lg:py-0"
       id="home-hero"
       data-node-id="13:3814"
       data-section="home-hero"
@@ -205,12 +205,12 @@ export function HomeHero() {
             >
               <img
                 alt="UIT Merch"
-                className="relative h-auto w-[200px] sm:w-[236px] lg:h-[228px] lg:w-[320px]"
+                className="relative h-auto w-[176px] sm:w-[236px] lg:h-[228px] lg:w-[320px]"
                 data-node-id="17:4228"
                 src={logoTitleUrl}
               />
               <p
-                className="relative mt-8 max-w-[472px] text-center font-sans text-base leading-7 text-gray sm:mt-10 sm:text-[16px] lg:mt-0 lg:w-[472px] lg:text-[16px] lg:leading-[1.45]"
+                className="relative mt-5 max-w-[472px] text-center font-sans text-sm leading-6 text-gray sm:mt-10 sm:text-[16px] sm:leading-7 lg:mt-0 lg:w-[472px] lg:text-[16px] lg:leading-[1.45]"
                 data-node-id="17:4943"
               >
                 {heroParagraph}
@@ -218,7 +218,7 @@ export function HomeHero() {
             </div>
 
             <div
-              className="relative mx-auto aspect-[1.09] w-full max-w-[520px] overflow-hidden sm:max-w-[600px] lg:mx-0 lg:h-[718px] lg:w-[783px] lg:max-w-none"
+              className="relative mx-auto aspect-[1.09] w-full max-w-[360px] overflow-hidden sm:max-w-[600px] lg:mx-0 lg:h-[718px] lg:w-[783px] lg:max-w-none"
               data-node-id="28:12288"
             >
               <HeroAnniversaryLogo />
@@ -231,7 +231,7 @@ export function HomeHero() {
         className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-[#E9FEFF]"
       />
 
-      <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 animate-bounce sm:bottom-8">
         <ScrollDownButton
           onClick={() => {
             document.getElementById("home-item")?.scrollIntoView({ behavior: "smooth" });

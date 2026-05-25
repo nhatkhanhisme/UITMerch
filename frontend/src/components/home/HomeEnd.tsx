@@ -30,7 +30,7 @@ export function HomeEnd() {
     <section
       className="
         relative isolate flex min-h-[100svh] flex-col justify-between
-        px-5 pb-10 pt-20
+        px-4 pb-8 pt-16
         sm:px-8 sm:pb-12 sm:pt-24
         lg:px-16 lg:pb-14 lg:pt-20
       "
@@ -46,16 +46,16 @@ export function HomeEnd() {
       <div className="relative z-10 mx-auto flex w-full max-w-canvas flex-1 flex-col">
 
         {/* Hero grid — content + campus image */}
-        <div className="my-auto grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12">
+        <div className="my-auto grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12">
           <div>
             <p className="font-sans text-sm font-semibold uppercase tracking-[0.22em] text-slate/70">
               Đại học Công nghệ Thông tin
             </p>
             <h2 className="mt-4 font-fredoka font-bold text-black-blue">
               <span className="flex flex-col gap-2 lg:gap-3">
-                <span className="text-[30px] leading-none tracking-[0.01em] sm:text-4xl lg:text-[58px]">University of</span>
-                <span className="text-[30px] leading-none tracking-[0.01em] sm:text-4xl lg:text-[58px]">Information</span>
-                <span className="text-[30px] leading-none tracking-[0.01em] sm:text-4xl lg:text-[58px]">Technology</span>
+                <span className="text-[28px] leading-none tracking-[0.01em] sm:text-4xl lg:text-[58px]">University of</span>
+                <span className="text-[28px] leading-none tracking-[0.01em] sm:text-4xl lg:text-[58px]">Information</span>
+                <span className="text-[28px] leading-none tracking-[0.01em] sm:text-4xl lg:text-[58px]">Technology</span>
               </span>
             </h2>
             <div className="mt-7 grid gap-5 sm:mt-8 md:grid-cols-2 md:gap-7">
@@ -67,13 +67,13 @@ export function HomeEnd() {
           <img
             src="/assets/figma/sticker/uit%20image-01%202.svg"
             alt="UIT Campus"
-            className="w-full h-auto object-contain drop-shadow-[0_8px_32px_rgba(82,128,145,0.12)]"
+            className="mx-auto h-auto max-h-[260px] w-full object-contain drop-shadow-[0_8px_32px_rgba(82,128,145,0.12)] sm:max-h-none"
           />
         </div>
       </div>
 
       {/* ── Footer — always pinned to bottom ── */}
-      <footer className="relative z-10 mx-auto mt-12 w-full max-w-canvas">
+      <footer className="relative z-10 mx-auto mt-8 w-full max-w-canvas sm:mt-12">
         <div className="flex flex-col gap-4 border-t border-slate/15 pt-7 sm:flex-row sm:items-end sm:justify-between">
           {/* Logo + tagline */}
           <div className="flex flex-col items-center gap-2 sm:items-start">

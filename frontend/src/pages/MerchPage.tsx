@@ -189,7 +189,7 @@ export function MerchPage() {
   const countDisplay = totalItems ?? liveProducts.length;
 
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
+    <main className="relative min-h-screen bg-transparent px-2 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
         <div className="z-0">
           <ShaderBackground />
@@ -197,9 +197,9 @@ export function MerchPage() {
       </Suspense>
 
       <div className="relative z-10">
-        <GlassContainer>
-          <header className="mb-8">
-            <h1 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
+        <GlassContainer className="px-3 sm:px-6 lg:px-10">
+          <header className="mb-6 sm:mb-8">
+            <h1 className="font-fredoka text-2xl font-bold text-black-blue sm:text-4xl">
               Kho Vật Phẩm
             </h1>
             <p className="mt-2 font-sans text-sm text-ink/60">
@@ -217,7 +217,7 @@ export function MerchPage() {
           </header>
 
           {popularProducts === null ? (
-            <div className="relative mb-10 flex h-64 w-full items-center justify-center overflow-hidden rounded-[32px] border border-white/30 bg-white/10 shadow-glass backdrop-blur-md sm:h-80">
+            <div className="relative mb-6 flex h-56 w-full items-center justify-center overflow-hidden rounded-[24px] border border-white/30 bg-white/10 shadow-glass backdrop-blur-md sm:mb-10 sm:h-80 sm:rounded-[32px]">
               <div className="size-10 animate-spin rounded-full border-4 border-white/20 border-t-aqua"></div>
             </div>
           ) : popularProducts.length > 0 ? (
@@ -241,7 +241,7 @@ export function MerchPage() {
                 <p className="font-sans text-base">{apiError}</p>
               </div>
             ) : (
-              <ProductGrid products={liveProducts} />
+              <ProductGrid density="compact" products={liveProducts} />
             )}
           </div>
 
