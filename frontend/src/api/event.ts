@@ -10,7 +10,6 @@ export type GetPublicEventsParams = {
   page?: number;
   size?: number;
   sort?: string;
-  status?: string;
 };
 
 export async function getPublicEvents(params?: GetPublicEventsParams) {

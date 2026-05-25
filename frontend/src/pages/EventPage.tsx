@@ -113,16 +113,13 @@ export function EventPage() {
             }
           }
 
-          const isStatusFilter = activeFilter === "upcoming";
-          const res = await getPublicEvents({
-            page: 0,
-            size: 200, // fetch entire dataset in one shot
-            sort: (!activeFilter || activeFilter === "newest") ? "createdAt,desc" : undefined,
-            status: isStatusFilter ? "UPCOMING" : undefined,
-          });
+          // "newest"  → sort by createdAt desc (default)
+          // "upcoming" → sort by startsAt asc, then client-filter startsAt > now
+          const sort = activeFilter === "upcoming" ? "startsAt,asc" : "createdAt,desc";
+          const res = await getPublicEvents({ page: 0, size: 200, sort });
 
           if (isActive && res?.data) {
-            const mapped: UIEventItem[] = res.data.map((ev: EventResponse) => ({
+            let mapped: UIEventItem[] = res.data.map((ev: EventResponse) => ({
               bannerUrl:
                 ev.coverUrl ||
                 "https://placehold.co/800x400/e9feff/1a3a4a?font=montserrat&text=EVENT",
@@ -133,8 +130,15 @@ export function EventPage() {
               name: ev.title || "Sự kiện UIT",
               orgName: orgMap[ev.orgId] || "Cộng đồng UIT",
               startDate: ev.startsAt,
-              status: ev.status || "UPCOMING",
+              status: ev.status,
             }));
+
+            // Keep only events that haven't started yet (or have no start date)
+            if (activeFilter === "upcoming") {
+              const now = new Date().toISOString();
+              mapped = mapped.filter(ev => !ev.startDate || ev.startDate > now);
+            }
+
             setAllEvents(mapped);
             setApiError(null);
             cacheSet(ck, mapped, 5 * 60 * 1000);

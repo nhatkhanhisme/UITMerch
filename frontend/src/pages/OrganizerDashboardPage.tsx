@@ -538,6 +538,14 @@ function MerchTab({ orgId }: { orgId: string }) {
 
 // ─── Events Tab ────────────────────────────────────────────────────────────────
 
+// Valid status options per current status. Terminals (ENDED/CANCELLED) only show themselves.
+const ALLOWED_EDIT_STATUSES: Record<string, string[]> = {
+  DRAFT:     ["DRAFT", "PUBLISHED", "CANCELLED"],
+  PUBLISHED: ["PUBLISHED", "DRAFT", "ENDED", "CANCELLED"],
+  ENDED:     ["ENDED"],
+  CANCELLED: ["CANCELLED"],
+};
+
 function EventsTab({ orgId }: { orgId: string }) {
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [orgMerch, setOrgMerch] = useState<MerchResponse[]>([]);
@@ -638,6 +646,10 @@ function EventsTab({ orgId }: { orgId: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) return;
+    if (form.startsAt && form.endsAt && new Date(form.startsAt) >= new Date(form.endsAt)) {
+      toast.error("Thời gian bắt đầu phải trước thời gian kết thúc.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       if (editingEvent) {
@@ -659,6 +671,7 @@ function EventsTab({ orgId }: { orgId: string }) {
         const res = await createEvent(orgId, {
           title: form.title.trim(),
           description: form.description.trim() || undefined,
+          status: form.status || undefined,
           startsAt: form.startsAt || undefined,
           endsAt: form.endsAt || undefined,
         });
@@ -794,20 +807,30 @@ function EventsTab({ orgId }: { orgId: string }) {
                 />
               </div>
             </div>
-            {editingEvent && (
-              <div>
-                <label className="block text-xs font-semibold text-ink/70 mb-1">Trạng thái</label>
+            <div>
+              <label className="block text-xs font-semibold text-ink/70 mb-1">Trạng thái</label>
+              {editingEvent ? (
+                <select
+                  className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={editingEvent.status === "ENDED" || editingEvent.status === "CANCELLED"}
+                  onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+                  value={form.status}
+                >
+                  {(ALLOWED_EDIT_STATUSES[editingEvent.status] ?? [editingEvent.status]).map(s => (
+                    <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
+                  ))}
+                </select>
+              ) : (
                 <select
                   className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua"
                   onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
                   value={form.status}
                 >
-                  <option value="DRAFT">Nháp</option>
-                  <option value="PUBLISHED">Công bố</option>
-                  <option value="ENDED">Đã kết thúc</option>
+                  <option value="DRAFT">Nháp (mặc định)</option>
+                  <option value="PUBLISHED">Công bố ngay</option>
                 </select>
-              </div>
-            )}
+              )}
+            </div>
             <div>
               <label className="block text-xs font-semibold text-ink/70 mb-1">Mô tả</label>
               <textarea
