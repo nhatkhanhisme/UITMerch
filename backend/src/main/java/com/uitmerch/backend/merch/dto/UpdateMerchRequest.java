@@ -19,7 +19,7 @@ public class UpdateMerchRequest {
     @Size(max = 2000, message = "Description must not exceed 2000 characters")
     private String description;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Price must be 0 or more")
     private BigDecimal price;
 
     @Min(value = 0, message = "Stock must be 0 or more")
