@@ -103,7 +103,7 @@ export function OrganizationPage() {
   const countDisplay = filteredOrgs.length;
 
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
+    <main className="relative min-h-screen bg-transparent px-3 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
         <div className="z-0">
           <ShaderBackground />
@@ -113,7 +113,7 @@ export function OrganizationPage() {
       <div className="relative z-10">
         <GlassContainer>
           <header className="mb-6">
-            <h1 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
+            <h1 className="font-fredoka text-2xl font-bold text-black-blue sm:text-4xl">
               Tổ Chức
             </h1>
             <p className="mt-1 font-sans text-sm text-ink/60">
@@ -144,7 +144,7 @@ export function OrganizationPage() {
                 <p className="font-sans text-base">{apiError}</p>
               </div>
             ) : pageOrgs.length > 0 ? (
-              <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-10 md:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-8 md:grid-cols-4">
                 {pageOrgs.map((org) => (
                   <OrgCard key={org.id} org={org} />
                 ))}

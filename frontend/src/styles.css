@@ -17,6 +17,38 @@
   }
 }
 
+.responsive-product-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+}
+
+@media (min-width: 640px) {
+  .responsive-product-grid {
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-product-grid {
+    gap: 1.5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .home-scroll-snap-container {
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+  }
+
+  .home-scroll-snap-container [data-section] {
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+  }
+}
+
 @keyframes aiGlow {
   0%, 100% {
     box-shadow: 0 4px 14px rgba(146, 251, 255, 0.35), 0 2px 6px rgba(248, 217, 135, 0.2);

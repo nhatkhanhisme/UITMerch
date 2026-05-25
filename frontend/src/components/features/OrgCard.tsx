@@ -13,7 +13,7 @@ export function OrgCard({ org }: OrgCardProps) {
   return (
     <Link
       aria-label={`Xem chi tiết ${org.name}`}
-      className="flex flex-col items-center gap-4 rounded-panel focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-aqua"
+      className="mx-auto flex w-full max-w-[150px] flex-col items-center gap-3 rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-aqua sm:max-w-none sm:gap-4 sm:rounded-panel"
       id={`org-${org.id}`}
       state={{ org }}
       to={`/organization/${org.id}`}
@@ -41,7 +41,7 @@ export function OrgCard({ org }: OrgCardProps) {
       </div>
 
       {/* Org name below */}
-      <p className="text-center font-fredoka text-base font-bold leading-tight text-black-blue">
+      <p className="line-clamp-2 text-center font-fredoka text-sm font-bold leading-tight text-black-blue sm:text-base">
         {org.name}
       </p>
     </Link>

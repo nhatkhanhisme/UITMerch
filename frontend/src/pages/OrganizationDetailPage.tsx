@@ -45,16 +45,16 @@ const FILTER_OPTIONS: FilterOption[] = [
 
 function OrganizationNotFound() {
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
+    <main className="relative min-h-screen bg-transparent px-3 pb-10 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
         <ShaderBackground />
       </Suspense>
 
-      <section className="relative z-10 mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center rounded-panel border border-white/50 bg-white/35 px-8 text-center shadow-glass backdrop-blur-xl">
+      <section className="relative z-10 mx-auto flex min-h-[55vh] max-w-3xl flex-col items-center justify-center rounded-[24px] border border-white/50 bg-white/35 px-5 py-10 text-center shadow-glass backdrop-blur-xl sm:rounded-panel sm:px-8">
         <p className="font-sans text-sm font-semibold uppercase text-ink/50">
           Không tìm thấy
         </p>
-        <h1 className="mt-3 font-fredoka text-4xl font-bold text-black-blue">
+        <h1 className="mt-3 font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
           Tổ chức này chưa có trong UITMerch
         </h1>
         <p className="mt-4 max-w-xl text-sm leading-7 text-ink/65">
@@ -270,7 +270,7 @@ export function OrganizationDetailPage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-10 pt-28 sm:px-8 lg:px-16">
+    <main className="relative min-h-screen bg-transparent px-3 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28 lg:px-16">
       <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
         <div className="z-0">
           <ShaderBackground />
@@ -280,8 +280,8 @@ export function OrganizationDetailPage() {
       <div className="relative z-10">
         {organization ? (
           <GlassContainer>
-            <section className="grid gap-8 border-b border-white/50 pb-10 lg:grid-cols-[minmax(220px,320px)_minmax(0,1fr)] lg:items-center">
-              <div className="mx-auto flex aspect-square w-full max-w-[280px] items-center justify-center overflow-hidden rounded-full border border-white/60 bg-white/25 p-8 shadow-[inset_2px_2px_18px_rgba(255,255,255,0.72),0_16px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl lg:mx-0">
+            <section className="grid gap-5 border-b border-white/50 pb-7 sm:gap-8 sm:pb-10 lg:grid-cols-[minmax(220px,320px)_minmax(0,1fr)] lg:items-center">
+              <div className="mx-auto flex aspect-square w-full max-w-[180px] items-center justify-center overflow-hidden rounded-full border border-white/60 bg-white/25 p-5 shadow-[inset_2px_2px_18px_rgba(255,255,255,0.72),0_16px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl sm:max-w-[280px] sm:p-8 lg:mx-0">
                 {organization.logo ? (
                   <img
                     alt={organization.name}
@@ -289,7 +289,7 @@ export function OrganizationDetailPage() {
                     src={organization.logo}
                   />
                 ) : (
-                  <span className="font-fredoka text-6xl font-bold text-black-blue/20">
+                  <span className="font-fredoka text-4xl font-bold text-black-blue/20 sm:text-6xl">
                     {(organization.name || "U").charAt(0)}
                   </span>
                 )}
@@ -302,15 +302,15 @@ export function OrganizationDetailPage() {
                 >
                   ← Tổ chức
                 </Link>
-                <h1 className="mt-5 font-fredoka text-4xl font-bold leading-tight text-black-blue sm:text-5xl">
+                <h1 className="mt-5 font-fredoka text-3xl font-bold leading-tight text-black-blue sm:text-5xl">
                   {organization.name}
                 </h1>
-                <p className="mx-auto mt-4 max-w-3xl font-sans text-base leading-8 text-ink/65 lg:mx-0">
+                <p className="mx-auto mt-3 max-w-3xl font-sans text-sm leading-7 text-ink/65 sm:mt-4 sm:text-base sm:leading-8 lg:mx-0">
                   {organization.description || "Chưa có mô tả chi tiết cho tổ chức này."}
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-4">
-                  <div className="min-w-[140px] rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
+                <div className="mt-5 flex flex-wrap gap-3 sm:mt-7 sm:gap-4">
+                  <div className="min-w-[130px] flex-1 rounded-[22px] border border-white/50 bg-white/35 p-4 text-left sm:min-w-[140px] sm:rounded-[28px] sm:p-5">
                     <p className="text-xs font-semibold uppercase text-ink/45">
                       Vật phẩm
                     </p>
@@ -318,7 +318,7 @@ export function OrganizationDetailPage() {
                       {countDisplay}
                     </p>
                   </div>
-                  <div className="min-w-[140px] rounded-[28px] border border-white/50 bg-white/35 p-5 text-left">
+                  <div className="min-w-[130px] flex-1 rounded-[22px] border border-white/50 bg-white/35 p-4 text-left sm:min-w-[140px] sm:rounded-[28px] sm:p-5">
                     <p className="text-xs font-semibold uppercase text-ink/45">
                       Sự kiện
                     </p>
@@ -330,13 +330,13 @@ export function OrganizationDetailPage() {
               </div>
             </section>
 
-            <section className="pt-9">
+            <section className="pt-6 sm:pt-9">
               {/* Tab selector */}
-              <div className="mb-6 flex gap-2">
+              <div className="mb-6 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 {(["merch", "events"] as const).map((tab) => (
                   <button
                     className={[
-                      "rounded-full px-5 py-2 text-sm font-semibold transition",
+                      "shrink-0 rounded-full px-5 py-2 text-sm font-semibold transition",
                       activeTab === tab
                         ? "bg-black-blue text-white shadow-[0_8px_20px_rgba(82,128,145,0.2)]"
                         : "border border-white/60 bg-white/50 text-gray hover:bg-white/80",
@@ -353,7 +353,7 @@ export function OrganizationDetailPage() {
               {activeTab === "merch" ? (
                 <>
                   <header className="mb-6">
-                    <h2 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
+                    <h2 className="font-fredoka text-2xl font-bold text-black-blue sm:text-4xl">
                       Vật phẩm đang mở bán
                     </h2>
                     <p className="mt-2 font-sans text-sm text-ink/60">
@@ -373,6 +373,8 @@ export function OrganizationDetailPage() {
                     activeFilter={activeFilter}
                     filterOptions={FILTER_OPTIONS}
                     onFilterChange={handleFilterChange}
+                    onQueryChange={handleQueryChange}
+                    query={query}
                   />
 
                   <div className={isLoading ? "opacity-50 transition-opacity" : ""}>
@@ -391,7 +393,7 @@ export function OrganizationDetailPage() {
               ) : (
                 <>
                   <header className="mb-6">
-                    <h2 className="font-fredoka text-3xl font-bold text-black-blue sm:text-4xl">
+                    <h2 className="font-fredoka text-2xl font-bold text-black-blue sm:text-4xl">
                       Sự kiện
                     </h2>
                     <p className="mt-2 font-sans text-sm text-ink/60">
@@ -404,10 +406,10 @@ export function OrganizationDetailPage() {
                   ) : liveEvents.length === 0 ? (
                     <div className="py-16 text-center text-sm text-ink/50">Tổ chức chưa có sự kiện nào.</div>
                   ) : (
-                    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
                       {liveEvents.map((event) => (
                         <Link
-                          className="group rounded-[28px] border border-white/50 bg-white/35 p-4 shadow-glass backdrop-blur transition hover:-translate-y-1 hover:border-aqua hover:bg-white/60"
+                          className="group rounded-[22px] border border-white/50 bg-white/35 p-3 shadow-glass backdrop-blur transition hover:-translate-y-1 hover:border-aqua hover:bg-white/60 sm:rounded-[28px] sm:p-4"
                           key={event.id}
                           to={`/events/${event.id}`}
                         >

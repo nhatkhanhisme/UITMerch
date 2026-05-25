@@ -116,20 +116,20 @@ export function VisualSearchModal({ open, onClose }: VisualSearchModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-4"
       style={{ background: "rgba(10,30,40,0.35)", backdropFilter: "blur(6px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-lg rounded-[32px] border border-white/40 bg-white/85 backdrop-blur-2xl shadow-glass max-h-[88vh] overflow-y-auto scrollbar-hide">
+      <div className="relative max-h-[92svh] w-full max-w-lg overflow-y-auto rounded-[24px] border border-white/40 bg-white/90 shadow-glass backdrop-blur-2xl scrollbar-hide sm:max-h-[88vh] sm:rounded-[32px]">
         {/* Header */}
-        <div className="flex items-center justify-between px-7 pt-7 pb-5 border-b border-white/30">
+        <div className="flex items-start justify-between border-b border-white/30 px-4 pb-4 pt-5 sm:items-center sm:px-7 sm:pb-5 sm:pt-7">
           <div>
-            <h2 className="font-fredoka text-2xl font-bold text-black-blue">Tìm kiếm bằng ảnh</h2>
+            <h2 className="font-fredoka text-xl font-bold text-black-blue sm:text-2xl">Tìm kiếm bằng ảnh</h2>
             <p className="mt-0.5 font-sans text-xs text-ink/50">AI sẽ nhận diện vật phẩm và gợi ý sản phẩm phù hợp</p>
           </div>
           <button
             aria-label="Đóng"
-            className="ml-4 shrink-0 flex size-9 items-center justify-center rounded-full border border-white/40 bg-white/50 text-ink/50 transition hover:bg-white/80 hover:text-black-blue"
+            className="ml-3 flex size-9 shrink-0 items-center justify-center rounded-full border border-white/40 bg-white/50 text-ink/50 transition hover:bg-white/80 hover:text-black-blue sm:ml-4"
             onClick={onClose}
             type="button"
           >
@@ -137,13 +137,13 @@ export function VisualSearchModal({ open, onClose }: VisualSearchModalProps) {
           </button>
         </div>
 
-        <div className="px-7 py-6">
+        <div className="px-4 py-5 sm:px-7 sm:py-6">
           {/* IDLE */}
           {state.kind === "idle" && (
             <div className="flex flex-col items-center gap-4">
               <div
                 className={[
-                  "relative flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-[24px] border-2 border-dashed p-10 transition",
+                  "relative flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-[20px] border-2 border-dashed p-6 transition sm:rounded-[24px] sm:p-10",
                   dragOver
                     ? "border-aqua bg-aqua/10 scale-[1.01]"
                     : "border-white/50 bg-white/30 hover:border-aqua/60 hover:bg-white/50",
@@ -277,7 +277,7 @@ function DoneState({
           src={preview}
         />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 rounded-full border border-aqua/40 bg-aqua/15 px-3 py-1.5 font-sans text-xs font-semibold text-black-blue w-full">
+          <div className="flex w-full min-w-0 items-center gap-1.5 rounded-full border border-aqua/40 bg-aqua/15 px-3 py-1.5 font-sans text-xs font-semibold text-black-blue">
             <SparkleIcon />
             <span className="truncate min-w-0">AI nhận ra: {result.aiDescription}</span>
           </div>
