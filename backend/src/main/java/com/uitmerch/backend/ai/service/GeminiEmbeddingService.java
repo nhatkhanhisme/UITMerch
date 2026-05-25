@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uitmerch.backend.common.exception.ValidationException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -23,46 +22,30 @@ public class GeminiEmbeddingService implements EmbeddingService {
     private static final String ENDPOINT =
         "https://generativelanguage.googleapis.com/v1/models/gemini-embedding-001:embedContent?key=";
 
-    private final String apiKey;
+    private final GeminiKeyRotator rotator;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    public GeminiEmbeddingService(
-        @Value("${app.ai.gemini-api-key:}") String apiKey,
-        ObjectMapper objectMapper
-    ) {
-        this.apiKey = apiKey;
+    public GeminiEmbeddingService(GeminiKeyRotator rotator, ObjectMapper objectMapper) {
+        this.rotator = rotator;
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newHttpClient();
     }
 
     @Override
     public float[] embed(String text) {
-        if (apiKey == null || apiKey.isBlank()) {
+        if (!rotator.hasKeys()) {
             throw new ValidationException("GEMINI_API_KEY not configured.");
         }
         try {
-            Map<String, Object> body = Map.of(
+            String requestBody = objectMapper.writeValueAsString(Map.of(
                 "model", "models/gemini-embedding-001",
                 "content", Map.of("parts", List.of(Map.of("text", text))),
                 "outputDimensionality", 768
-            );
-
-            String requestBody = objectMapper.writeValueAsString(body);
+            ));
             log.debug("Gemini Embedding request: {}", requestBody);
 
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ENDPOINT + apiKey))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() != 200) {
-                log.warn("Gemini Embedding API error: HTTP {} — {}", response.statusCode(), response.body());
-                throw new ValidationException("Embedding service error: HTTP " + response.statusCode());
-            }
+            HttpResponse<String> response = callWithRotation(requestBody);
 
             JsonNode values = objectMapper.readTree(response.body()).at("/embedding/values");
             float[] vec = new float[values.size()];
@@ -77,5 +60,30 @@ public class GeminiEmbeddingService implements EmbeddingService {
             log.warn("Gemini Embedding exception: {}", e.getMessage());
             throw new ValidationException("Embedding service unavailable.");
         }
+    }
+
+    private HttpResponse<String> callWithRotation(String requestBody) throws Exception {
+        int attempts = rotator.keyCount();
+        for (int i = 0; i < attempts; i++) {
+            String key = (i == 0) ? rotator.currentKey() : rotator.rotateAndGet();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(ENDPOINT + key))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 429) {
+                log.warn("Gemini Embedding 429 on attempt {}/{}", i + 1, attempts);
+                continue;
+            }
+            if (response.statusCode() != 200) {
+                log.warn("Gemini Embedding API error: HTTP {} — {}", response.statusCode(), response.body());
+                throw new ValidationException("Embedding service error: HTTP " + response.statusCode());
+            }
+            return response;
+        }
+        throw new ValidationException("All Gemini API keys are rate-limited (429). Try again later.");
     }
 }
