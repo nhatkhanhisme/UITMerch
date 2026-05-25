@@ -1,16 +1,16 @@
 ---
 name: repository
-description: "Skill for the Repository area of UITMerch. 16 symbols across 9 files."
+description: "Skill for the Repository area of UITMerch. 17 symbols across 10 files."
 ---
 
 # Repository
 
-16 symbols | 9 files | Cohesion: 59%
+17 symbols | 10 files | Cohesion: 61%
 
 ## When to Use
 
 - Working with code in `backend/`
-- Understanding how findByStatus, findByStatusAndNameContainingIgnoreCase, findByStatusAndCategoryId work
+- Understanding how keywordFallback, findByStatus, findByStatusAndNameContainingIgnoreCase work
 - Modifying repository-related functionality
 
 ## Key Files
@@ -19,6 +19,7 @@ description: "Skill for the Repository area of UITMerch. 16 symbols across 9 fil
 |------|---------|
 | `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java` | findByStatus, findByStatusAndNameContainingIgnoreCase, findByStatusAndCategoryId, findByStatusAndCategoryIdAndNameContainingIgnoreCase, deductStock |
 | `backend/src/test/java/com/uitmerch/backend/merch/repository/MerchItemRepositoryTest.java` | savedMerch, deductStock_sufficientStock_returnsOneAndDeducts, deductStock_insufficientStock_returnsZeroAndLeavesSame, deductStock_concurrent_neverGoesNegative |
+| `backend/src/main/java/com/uitmerch/backend/ai/service/VisualSearchService.java` | keywordFallback |
 | `backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java` | listPublished |
 | `backend/src/main/java/com/uitmerch/backend/event/repository/EventMerchRepository.java` | findByEventId |
 | `backend/src/main/java/com/uitmerch/backend/event/service/EventService.java` | fetchMerchForEvent |
@@ -31,21 +32,22 @@ description: "Skill for the Repository area of UITMerch. 16 symbols across 9 fil
 
 Start here when exploring this area:
 
+- **`keywordFallback`** (Method) — `backend/src/main/java/com/uitmerch/backend/ai/service/VisualSearchService.java:81`
 - **`findByStatus`** (Method) — `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java:19`
 - **`findByStatusAndNameContainingIgnoreCase`** (Method) — `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java:25`
 - **`findByStatusAndCategoryId`** (Method) — `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java:27`
 - **`findByStatusAndCategoryIdAndNameContainingIgnoreCase`** (Method) — `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java:29`
-- **`listPublished`** (Method) — `backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java:152`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
+| `keywordFallback` | Method | `backend/src/main/java/com/uitmerch/backend/ai/service/VisualSearchService.java` | 81 |
 | `findByStatus` | Method | `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java` | 19 |
 | `findByStatusAndNameContainingIgnoreCase` | Method | `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java` | 25 |
 | `findByStatusAndCategoryId` | Method | `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java` | 27 |
 | `findByStatusAndCategoryIdAndNameContainingIgnoreCase` | Method | `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java` | 29 |
-| `listPublished` | Method | `backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java` | 152 |
+| `listPublished` | Method | `backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java` | 156 |
 | `deductStock` | Method | `backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java` | 49 |
 | `findByEventId` | Method | `backend/src/main/java/com/uitmerch/backend/event/repository/EventMerchRepository.java` | 14 |
 | `fetchMerchForEvent` | Method | `backend/src/main/java/com/uitmerch/backend/event/service/EventService.java` | 184 |
@@ -81,6 +83,6 @@ Start here when exploring this area:
 
 ## How to Explore
 
-1. `gitnexus_context({name: "findByStatus"})` — see callers and callees
+1. `gitnexus_context({name: "keywordFallback"})` — see callers and callees
 2. `gitnexus_query({query: "repository"})` — find related execution flows
 3. Read key files listed above for implementation details

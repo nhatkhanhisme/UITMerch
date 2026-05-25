@@ -20,6 +20,18 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SseEmitterManager sseEmitterManager;
 
+    /** Persist to DB only — caller is responsible for sending the SSE event separately. */
+    @Transactional
+    public void saveOnly(UUID userId, String title, String message, NotificationType type, UUID relatedOrderId) {
+        notificationRepository.save(Notification.builder()
+            .userId(userId)
+            .title(title)
+            .message(message)
+            .type(type)
+            .relatedOrderId(relatedOrderId)
+            .build());
+    }
+
     @Transactional
     public void push(UUID userId, String title, String message, NotificationType type, UUID relatedOrderId) {
         Notification saved = notificationRepository.save(Notification.builder()

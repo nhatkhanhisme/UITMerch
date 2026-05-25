@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **UITMerch** (3695 symbols, 8858 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **UITMerch** (3754 symbols, 8975 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -39,15 +39,15 @@ This project is indexed by GitNexus as **UITMerch** (3695 symbols, 8858 relation
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-| Work in the Service area (438 symbols) | `.claude/skills/generated/service/SKILL.md` |
-| Work in the Pages area (178 symbols) | `.claude/skills/generated/pages/SKILL.md` |
-| Work in the Api area (61 symbols) | `.claude/skills/generated/api/SKILL.md` |
-| Work in the Controller area (56 symbols) | `.claude/skills/generated/controller/SKILL.md` |
-| Work in the Home area (40 symbols) | `.claude/skills/generated/home/SKILL.md` |
+| Work in the Service area (446 symbols) | `.claude/skills/generated/service/SKILL.md` |
+| Work in the Pages area (177 symbols) | `.claude/skills/generated/pages/SKILL.md` |
+| Work in the Api area (65 symbols) | `.claude/skills/generated/api/SKILL.md` |
+| Work in the Controller area (54 symbols) | `.claude/skills/generated/controller/SKILL.md` |
+| Work in the Home area (41 symbols) | `.claude/skills/generated/home/SKILL.md` |
 | Work in the Security area (32 symbols) | `.claude/skills/generated/security/SKILL.md` |
 | Work in the Config area (18 symbols) | `.claude/skills/generated/config/SKILL.md` |
-| Work in the Repository area (16 symbols) | `.claude/skills/generated/repository/SKILL.md` |
-| Work in the Features area (9 symbols) | `.claude/skills/generated/features/SKILL.md` |
+| Work in the Repository area (17 symbols) | `.claude/skills/generated/repository/SKILL.md` |
+| Work in the Features area (17 symbols) | `.claude/skills/generated/features/SKILL.md` |
 | Work in the Exception area (5 symbols) | `.claude/skills/generated/exception/SKILL.md` |
 | Work in the Ui area (5 symbols) | `.claude/skills/generated/ui/SKILL.md` |
 | Work in the Stores area (4 symbols) | `.claude/skills/generated/stores/SKILL.md` |

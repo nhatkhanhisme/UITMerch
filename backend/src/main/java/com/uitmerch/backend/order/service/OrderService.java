@@ -121,6 +121,7 @@ public class OrderService {
             List<OrderItem> savedItems = orderItemRepository.saveAll(orderItems);
 
             notifyOrganizer(orgId, order, "NEW_ORDER");
+            notifyCustomerOrderPlaced(order);
             results.add(OrderResponse.from(order, savedItems));
         }
 
@@ -172,6 +173,7 @@ public class OrderService {
         orderItem = orderItemRepository.save(orderItem);
 
         notifyOrganizer(merch.getOrgId(), order, "NEW_ORDER");
+        notifyCustomerOrderPlaced(order);
         return OrderResponse.from(order, List.of(orderItem));
     }
 
@@ -608,6 +610,25 @@ public class OrderService {
         try {
             Organization org = organizationService.getOrganizationEntityById(orgId);
             String shortId = order.getId().toString().substring(0, 8).toUpperCase();
+
+            if ("NEW_ORDER".equals(eventType)) {
+                notificationService.saveOnly(
+                    org.getOwnerId(),
+                    "Đơn hàng mới",
+                    "Đơn hàng #" + shortId + " — " + order.getTotalAmount().toPlainString() + "đ",
+                    NotificationType.NEW_ORDER,
+                    order.getId()
+                );
+            } else if ("ORDER_CANCELLED".equals(eventType)) {
+                notificationService.saveOnly(
+                    org.getOwnerId(),
+                    "Đơn hàng bị huỷ",
+                    "Đơn hàng #" + shortId + " đã bị huỷ bởi khách hàng.",
+                    NotificationType.ORDER_CANCELLED,
+                    order.getId()
+                );
+            }
+
             Map<String, Object> event = new LinkedHashMap<>();
             event.put("type", eventType);
             event.put("orgId", orgId.toString());
@@ -620,12 +641,35 @@ public class OrderService {
         }
     }
 
-    private void notifyCustomerInApp(Order order, OrderStatus status) {
+    private void notifyCustomerOrderPlaced(Order order) {
         if (order.getUserId() == null) return;
         try {
             String email = userRepository.findById(order.getUserId())
                 .map(u -> u.getEmail()).orElse(null);
             if (email != null) {
+                emailService.sendOrderPlacedConfirmation(email, order.getId().toString());
+            }
+            String shortId = order.getId().toString().substring(0, 8).toUpperCase();
+            notificationService.push(
+                order.getUserId(),
+                "Đặt hàng thành công",
+                "Đơn hàng #" + shortId + " đã được tạo và đang chờ xác nhận từ ban tổ chức.",
+                NotificationType.ORDER_PLACED,
+                order.getId()
+            );
+        } catch (Exception e) {
+            log.warn("Failed to send order-placed notification for order {}: {}", order.getId(), e.getMessage());
+        }
+    }
+
+    private void notifyCustomerInApp(Order order, OrderStatus status) {
+        if (order.getUserId() == null) return;
+        try {
+            String email = userRepository.findById(order.getUserId())
+                .map(u -> u.getEmail()).orElse(null);
+            // CANCELLED callers always invoke sendCancelEmail first, which already sends the
+            // richer sendOrderCancelledNotification — skip the generic update email here.
+            if (email != null && status != OrderStatus.CANCELLED) {
                 emailService.sendOrderStatusUpdate(email, order.getId().toString(), status.name());
             }
             String shortId = order.getId().toString().substring(0, 8).toUpperCase();

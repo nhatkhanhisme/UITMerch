@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -84,6 +85,25 @@ public class SseEmitterManager {
             }
         }
         dead.forEach(e -> remove(userId, e));
+    }
+
+    @Scheduled(fixedDelay = 25_000)
+    public void sendHeartbeat() {
+        if (emitters.isEmpty()) return;
+        List<UUID> deadUsers = new ArrayList<>();
+        emitters.forEach((userId, userEmitters) -> {
+            List<SseEmitter> dead = new ArrayList<>();
+            for (SseEmitter emitter : userEmitters) {
+                try {
+                    emitter.send(SseEmitter.event().comment("heartbeat"));
+                } catch (IOException e) {
+                    dead.add(emitter);
+                }
+            }
+            dead.forEach(e -> remove(userId, e));
+            if (userEmitters.isEmpty()) deadUsers.add(userId);
+        });
+        deadUsers.forEach(emitters::remove);
     }
 
     private void remove(UUID userId, SseEmitter emitter) {
