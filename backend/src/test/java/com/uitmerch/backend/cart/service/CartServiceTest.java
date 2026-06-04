@@ -30,6 +30,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -62,6 +63,22 @@ class CartServiceTest {
             .price(BigDecimal.valueOf(50_000))
             .stock(stock)
             .build();
+    }
+
+    // ── getCart ──────────────────────────────────────────────────────────────
+
+    @Test
+    void getCart_noActiveCart_createsNewCartNotOldCheckedOut() {
+        Cart newCart = activeCart();
+        when(cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)).thenReturn(Optional.empty());
+        when(cartRepository.save(any())).thenReturn(newCart);
+        when(cartItemRepository.findByCartId(cartId)).thenReturn(Collections.emptyList());
+        when(merchItemRepository.findAllById(any())).thenReturn(Collections.emptyList());
+
+        cartService.getCart(userId);
+
+        // save must be called with a brand-new Cart (id == null), never an old one being reactivated
+        verify(cartRepository).save(argThat(c -> c.getId() == null && userId.equals(c.getUserId())));
     }
 
     // ── addItem ──────────────────────────────────────────────────────────────
