@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -229,6 +230,26 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.updateOrderStatus(userId, orgId, orderId, to))
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("Cannot transition");
+    }
+
+    @ParameterizedTest(name = "{0} → {0} (idempotent)")
+    @CsvSource({
+        "PENDING",
+        "CONFIRMED",
+        "READY"
+    })
+    void updateOrderStatus_sameStatus_isIdempotent(OrderStatus status) {
+        Organization org = Organization.builder().id(orgId).ownerId(userId).build();
+        Order order = orderWithStatus(status);
+
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any())).thenReturn(order);
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatNoException().isThrownBy(
+            () -> orderService.updateOrderStatus(userId, orgId, orderId, status));
     }
 
     @Test
