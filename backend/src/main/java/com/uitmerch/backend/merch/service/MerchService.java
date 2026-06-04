@@ -26,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -307,9 +308,19 @@ public class MerchService {
 
     private static Map<UUID, Long> toOrderCountMap(List<Object[]> rows) {
         return rows.stream().collect(Collectors.toMap(
-            row -> (UUID) row[0],
+            row -> toUuid(row[0]),
             row -> ((Number) row[1]).longValue()
         ));
+    }
+
+    private static UUID toUuid(Object val) {
+        if (val instanceof UUID uuid) return uuid;
+        if (val instanceof String s) return UUID.fromString(s);
+        if (val instanceof byte[] b) {
+            ByteBuffer buf = ByteBuffer.wrap(b);
+            return new UUID(buf.getLong(), buf.getLong());
+        }
+        throw new IllegalArgumentException("Cannot convert " + val.getClass().getName() + " to UUID");
     }
 
     private static String embeddingText(MerchItem item) {
