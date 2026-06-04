@@ -175,16 +175,38 @@ export function TopNavBar() {
   });
 
   const handleOrgIncomingNotification = useCallback((data: unknown) => {
-    const event = data as { type?: string; orderId?: string; shortId?: string; totalAmount?: number };
-    if (event.type === "NEW_ORDER" || event.type === "ORDER_CANCELLED") {
+    const event = data as { type?: string; orderId?: string; shortId?: string; totalAmount?: number; status?: string };
+
+    const STATUS_LABELS: Record<string, string> = {
+      CONFIRMED: "đã được xác nhận",
+      READY: "đã sẵn sàng để giao",
+      COMPLETED: "đã hoàn thành",
+    };
+
+    let title: string | null = null;
+    let message: string | null = null;
+
+    if (event.type === "NEW_ORDER") {
+      title = "Đơn hàng mới";
+      message = `#${event.shortId} — ${(event.totalAmount ?? 0).toLocaleString("vi-VN")}đ`;
+    } else if (event.type === "CUSTOMER_CANCELLED") {
+      title = "Đơn hàng bị huỷ";
+      message = `#${event.shortId} đã bị khách hàng huỷ`;
+    } else if (event.type === "ORG_CANCELLED") {
+      title = "Đơn hàng bị huỷ";
+      message = `#${event.shortId} đã bị ban tổ chức huỷ`;
+    } else if (event.type === "ORDER_STATUS_CHANGED" && event.status) {
+      title = "Cập nhật đơn hàng";
+      message = `#${event.shortId} ${STATUS_LABELS[event.status] ?? "đã thay đổi trạng thái"}`;
+    }
+
+    if (title && message) {
       const notif: NotificationResponse = {
         id: event.orderId ?? crypto.randomUUID(),
         userId: "",
-        title: event.type === "NEW_ORDER" ? "Đơn hàng mới" : "Đơn hàng bị huỷ",
-        message: event.type === "NEW_ORDER"
-          ? `#${event.shortId} — ${(event.totalAmount ?? 0).toLocaleString("vi-VN")}đ`
-          : `#${event.shortId} đã bị khách huỷ`,
-        type: event.type,
+        title,
+        message,
+        type: event.type ?? "",
         isRead: false,
         relatedOrderId: event.orderId,
         createdAt: new Date().toISOString(),
@@ -192,6 +214,7 @@ export function TopNavBar() {
       setOrgNotifications((prev) => [notif, ...prev.slice(0, 19)]);
       setOrgUnreadCount((c) => c + 1);
     }
+
     window.dispatchEvent(new CustomEvent("org-order-event", { detail: event }));
   }, []);
 
