@@ -25,7 +25,6 @@ public class OrderResponse {
     private String guestName;
     private String guestEmail;
     private String guestPhone;
-    private String guestAddress;
     private BigDecimal totalAmount;
     private OrderStatus status;
     private PaymentMethod paymentMethod;
@@ -89,7 +88,6 @@ public class OrderResponse {
             .guestName(order.getGuestName())
             .guestEmail(order.getGuestEmail())
             .guestPhone(order.getGuestPhone())
-            .guestAddress(order.getGuestAddress())
             .totalAmount(order.getTotalAmount())
             .status(order.getStatus())
             .paymentMethod(order.getPaymentMethod())

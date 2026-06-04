@@ -45,9 +45,6 @@ public class Order {
     @Column(name = "guest_phone")
     private String guestPhone;
 
-    @Column(name = "guest_address", columnDefinition = "TEXT")
-    private String guestAddress;
-
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 

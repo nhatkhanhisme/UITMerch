@@ -243,6 +243,7 @@ public class OrderService {
             List<OrderItem> savedItems = orderItemRepository.saveAll(orderItems);
 
             notifyOrganizer(orgId, order, "NEW_ORDER");
+            emailService.sendOrderPlacedConfirmation(order.getGuestEmail(), order.getId().toString());
             results.add(OrderResponse.from(order, savedItems));
         }
 
