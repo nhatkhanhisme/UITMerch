@@ -256,6 +256,31 @@ class AuthServiceTest {
     }
 
     @Test
+    void verifyEmail_expiredLockout_resetsAttemptCountAndAllowsRetry() {
+        User user = User.builder().id(UUID.randomUUID()).email("test@uit.edu.vn").build();
+        OtpToken otp = OtpToken.builder()
+            .otpCode("123456")
+            .expiresAt(LocalDateTime.now().plusMinutes(10))
+            .isUsed(false)
+            .attemptCount(5)
+            .lockedUntil(LocalDateTime.now().minusMinutes(1)) // lockout already expired
+            .build();
+
+        when(userRepository.findByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
+        when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        VerifyEmailRequest req = new VerifyEmailRequest();
+        req.setEmail("test@uit.edu.vn");
+        req.setOtpCode("WRONG!");
+
+        assertThatThrownBy(() -> authService.verifyEmail(req))
+            .isInstanceOf(InvalidOtpException.class);
+        assertThat(otp.getAttemptCount()).isEqualTo(1); // reset to 0, then incremented once
+        assertThat(otp.getLockedUntil()).isNull();
+    }
+
+    @Test
     void verifyEmail_unknownEmail_throws() {
         when(userRepository.findByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
 
