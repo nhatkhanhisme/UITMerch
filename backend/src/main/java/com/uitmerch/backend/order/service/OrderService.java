@@ -483,7 +483,7 @@ public class OrderService {
 
         sendCancelEmail(order, "customer");
         notifyOrgOwnerOfCancel(order);
-        notifyOrganizer(order.getOrgId(), order, "ORDER_CANCELLED");
+        notifyOrganizer(order.getOrgId(), order, "CUSTOMER_CANCELLED");
 
         return OrderResponse.from(order, items);
     }
@@ -516,7 +516,7 @@ public class OrderService {
 
         sendCancelEmail(order, "organizer");
         notifyCustomerInApp(order, OrderStatus.CANCELLED);
-        notifyOrganizer(order.getOrgId(), order, "ORDER_CANCELLED");
+        notifyOrganizer(order.getOrgId(), order, "ORG_CANCELLED");
 
         return OrderResponse.from(order, items);
     }
@@ -616,11 +616,18 @@ public class OrderService {
                         "Đơn hàng #" + shortId + " — " + order.getTotalAmount().toPlainString() + "đ",
                         NotificationType.NEW_ORDER,
                         order.getId());
-            } else if ("ORDER_CANCELLED".equals(eventType)) {
+            } else if ("CUSTOMER_CANCELLED".equals(eventType)) {
                 notificationService.saveOnly(
                         org.getOwnerId(),
                         "Đơn hàng bị huỷ",
                         "Đơn hàng #" + shortId + " đã bị huỷ bởi khách hàng.",
+                        NotificationType.ORDER_CANCELLED,
+                        order.getId());
+            } else if ("ORG_CANCELLED".equals(eventType)) {
+                notificationService.saveOnly(
+                        org.getOwnerId(),
+                        "Đơn hàng bị huỷ",
+                        "Đơn hàng #" + shortId + " đã bị huỷ bởi ban tổ chức.",
                         NotificationType.ORDER_CANCELLED,
                         order.getId());
             } else if ("ORDER_STATUS_CHANGED".equals(eventType)) {
