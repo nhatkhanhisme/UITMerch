@@ -34,7 +34,7 @@ docker compose logs -f backend
 ### Option 2 — Dev profile (local, H2 in-memory)
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+./mvnw spring-boot:run y
 # Windows: .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 

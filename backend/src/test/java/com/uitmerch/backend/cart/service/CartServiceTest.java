@@ -100,19 +100,38 @@ class CartServiceTest {
     }
 
     @Test
-    void addItem_outOfStock_throwsValidation() {
+    void addItem_requestedQuantityExceedsStock_throwsValidation() {
         Cart cart = activeCart();
         when(cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
         when(cartItemRepository.existsByCartIdAndMerchId(cartId, merchId)).thenReturn(false);
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(merch(0)));
+        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(merch(2)));
 
         AddCartItemRequest req = new AddCartItemRequest();
         req.setMerchId(merchId);
-        req.setQuantity(1);
+        req.setQuantity(5);
 
         assertThatThrownBy(() -> cartService.addItem(userId, req))
             .isInstanceOf(ValidationException.class)
-            .hasMessageContaining("out of stock");
+            .hasMessageContaining("Only 2 units")
+            .hasMessageContaining("are available");
+    }
+
+    @Test
+    void addItem_requestedQuantityEqualsStock_succeeds() {
+        Cart cart = activeCart();
+        when(cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.existsByCartIdAndMerchId(cartId, merchId)).thenReturn(false);
+        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(merch(2)));
+        when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(cartItemRepository.findByCartId(cartId)).thenReturn(Collections.emptyList());
+        when(merchItemRepository.findAllById(any())).thenReturn(Collections.emptyList());
+
+        AddCartItemRequest req = new AddCartItemRequest();
+        req.setMerchId(merchId);
+        req.setQuantity(2);
+
+        assertThatNoException().isThrownBy(() -> cartService.addItem(userId, req));
+        verify(cartItemRepository).save(any());
     }
 
     @Test

@@ -64,8 +64,8 @@ public class CartService {
         MerchItem merch = merchItemRepository.findById(request.getMerchId())
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", request.getMerchId().toString()));
 
-        if (merch.getStock() <= 0) {
-            throw new ValidationException("This item is out of stock.");
+        if (merch.getStock() < request.getQuantity()) {
+            throw new ValidationException("Only " + merch.getStock() + " units of \"" + merch.getName() + "\" are available.");
         }
 
         CartItem item = CartItem.builder()
