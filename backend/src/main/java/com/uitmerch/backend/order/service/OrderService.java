@@ -623,6 +623,27 @@ public class OrderService {
                         "Đơn hàng #" + shortId + " đã bị huỷ bởi khách hàng.",
                         NotificationType.ORDER_CANCELLED,
                         order.getId());
+            } else if ("ORDER_STATUS_CHANGED".equals(eventType)) {
+                NotificationType type = switch (order.getStatus()) {
+                    case CONFIRMED -> NotificationType.ORDER_CONFIRMED;
+                    case READY     -> NotificationType.ORDER_READY;
+                    case COMPLETED -> NotificationType.ORDER_COMPLETED;
+                    default -> throw new IllegalStateException(
+                            "Unexpected status for ORDER_STATUS_CHANGED: " + order.getStatus());
+                };
+                String message = switch (order.getStatus()) {
+                    case CONFIRMED -> "Đơn hàng #" + shortId + " đã được xác nhận.";
+                    case READY     -> "Đơn hàng #" + shortId + " đã sẵn sàng để giao.";
+                    case COMPLETED -> "Đơn hàng #" + shortId + " đã hoàn thành.";
+                    default -> throw new IllegalStateException(
+                            "Unexpected status for ORDER_STATUS_CHANGED: " + order.getStatus());
+                };
+                notificationService.saveOnly(
+                        org.getOwnerId(),
+                        "Cập nhật đơn hàng",
+                        message,
+                        type,
+                        order.getId());
             }
 
             Map<String, Object> event = new LinkedHashMap<>();
@@ -631,6 +652,7 @@ public class OrderService {
             event.put("orderId", order.getId().toString());
             event.put("shortId", shortId);
             event.put("totalAmount", order.getTotalAmount());
+            event.put("status", order.getStatus().name());
             sseEmitterManager.send(org.getOwnerId(), event);
         } catch (Exception e) {
             log.warn("Failed to send SSE {} event to organizer for org {}: {}", eventType, orgId, e.getMessage());
