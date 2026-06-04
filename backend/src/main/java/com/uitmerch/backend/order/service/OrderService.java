@@ -51,7 +51,7 @@ public class OrderService {
     private final PickupScheduleRepository pickupScheduleRepository;
 
     // ------------------------------------------------------------------ //
-    //  CART CHECKOUT
+    // CART CHECKOUT
     // ------------------------------------------------------------------ //
 
     @Transactional
@@ -59,7 +59,7 @@ public class OrderService {
             String shippingName, String shippingPhone, String shippingAddress) {
         List<UUID> merchIds = cartItems.stream().map(CartItem::getMerchId).toList();
         Map<UUID, MerchItem> merchMap = merchItemRepository.findAllById(merchIds)
-            .stream().collect(Collectors.toMap(MerchItem::getId, m -> m));
+                .stream().collect(Collectors.toMap(MerchItem::getId, m -> m));
 
         for (CartItem cartItem : cartItems) {
             MerchItem merch = merchMap.get(cartItem.getMerchId());
@@ -69,13 +69,12 @@ public class OrderService {
             }
             if (merch.getStock() < cartItem.getQuantity()) {
                 throw new ValidationException(
-                    "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock()
-                );
+                        "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock());
             }
         }
 
         Map<UUID, List<CartItem>> byOrg = cartItems.stream()
-            .collect(Collectors.groupingBy(ci -> merchMap.get(ci.getMerchId()).getOrgId()));
+                .collect(Collectors.groupingBy(ci -> merchMap.get(ci.getMerchId()).getOrgId()));
 
         List<OrderResponse> results = new ArrayList<>();
 
@@ -92,28 +91,27 @@ public class OrderService {
                 total = total.add(subtotal);
 
                 orderItems.add(OrderItem.builder()
-                    .merchId(merch.getId())
-                    .merchName(merch.getName())
-                    .unitPrice(merch.getPrice())
-                    .quantity(cartItem.getQuantity())
-                    .subtotal(subtotal)
-                    .build());
+                        .merchId(merch.getId())
+                        .merchName(merch.getName())
+                        .unitPrice(merch.getPrice())
+                        .quantity(cartItem.getQuantity())
+                        .subtotal(subtotal)
+                        .build());
 
                 if (merchItemRepository.deductStock(merch.getId(), cartItem.getQuantity()) == 0) {
                     throw new ValidationException(
-                        "\"" + merch.getName() + "\" just sold out — please update your cart."
-                    );
+                            "\"" + merch.getName() + "\" just sold out — please update your cart.");
                 }
             }
 
             Order order = Order.builder()
-                .userId(userId)
-                .orgId(orgId)
-                .totalAmount(total)
-                .note(note)
-                .guestName(shippingName)
-                .guestPhone(shippingPhone)
-                .build();
+                    .userId(userId)
+                    .orgId(orgId)
+                    .totalAmount(total)
+                    .note(note)
+                    .guestName(shippingName)
+                    .guestPhone(shippingPhone)
+                    .build();
             order = orderRepository.save(order);
 
             final UUID orderId = order.getId();
@@ -129,47 +127,45 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  INSTANT ORDER (authenticated customer)
+    // INSTANT ORDER (authenticated customer)
     // ------------------------------------------------------------------ //
 
     @Transactional
     public OrderResponse createInstantOrder(UUID userId, InstantOrderRequest request) {
         MerchItem merch = merchItemRepository.findById(request.getMerchId())
-            .orElseThrow(() -> new ResourceNotFoundException("Merch item", request.getMerchId().toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Merch item", request.getMerchId().toString()));
 
         if (merch.getStatus() != MerchItemStatus.PUBLISHED) {
             throw new ValidationException("This item is not available for purchase.");
         }
         if (merch.getStock() < request.getQuantity()) {
             throw new ValidationException(
-                "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock()
-            );
+                    "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock());
         }
 
         BigDecimal subtotal = merch.getPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
 
         if (merchItemRepository.deductStock(merch.getId(), request.getQuantity()) == 0) {
             throw new ValidationException(
-                "\"" + merch.getName() + "\" just sold out — please try again."
-            );
+                    "\"" + merch.getName() + "\" just sold out — please try again.");
         }
 
         Order order = Order.builder()
-            .userId(userId)
-            .orgId(merch.getOrgId())
-            .totalAmount(subtotal)
-            .note(request.getNote())
-            .build();
+                .userId(userId)
+                .orgId(merch.getOrgId())
+                .totalAmount(subtotal)
+                .note(request.getNote())
+                .build();
         order = orderRepository.save(order);
 
         OrderItem orderItem = OrderItem.builder()
-            .orderId(order.getId())
-            .merchId(merch.getId())
-            .merchName(merch.getName())
-            .unitPrice(merch.getPrice())
-            .quantity(request.getQuantity())
-            .subtotal(subtotal)
-            .build();
+                .orderId(order.getId())
+                .merchId(merch.getId())
+                .merchName(merch.getName())
+                .unitPrice(merch.getPrice())
+                .quantity(request.getQuantity())
+                .subtotal(subtotal)
+                .build();
         orderItem = orderItemRepository.save(orderItem);
 
         notifyOrganizer(merch.getOrgId(), order, "NEW_ORDER");
@@ -178,7 +174,7 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  GUEST ORDER
+    // GUEST ORDER
     // ------------------------------------------------------------------ //
 
     @Transactional
@@ -186,7 +182,7 @@ public class OrderService {
         List<GuestOrderItemRequest> items = request.getItems();
         List<UUID> merchIds = items.stream().map(GuestOrderItemRequest::getMerchId).toList();
         Map<UUID, MerchItem> merchMap = merchItemRepository.findAllById(merchIds)
-            .stream().collect(Collectors.toMap(MerchItem::getId, m -> m));
+                .stream().collect(Collectors.toMap(MerchItem::getId, m -> m));
 
         for (GuestOrderItemRequest item : items) {
             MerchItem merch = merchMap.get(item.getMerchId());
@@ -196,13 +192,12 @@ public class OrderService {
             }
             if (merch.getStock() < item.getQuantity()) {
                 throw new ValidationException(
-                    "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock()
-                );
+                        "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock());
             }
         }
 
         Map<UUID, List<GuestOrderItemRequest>> byOrg = items.stream()
-            .collect(Collectors.groupingBy(i -> merchMap.get(i.getMerchId()).getOrgId()));
+                .collect(Collectors.groupingBy(i -> merchMap.get(i.getMerchId()).getOrgId()));
 
         List<OrderResponse> results = new ArrayList<>();
 
@@ -219,29 +214,28 @@ public class OrderService {
                 total = total.add(subtotal);
 
                 orderItems.add(OrderItem.builder()
-                    .merchId(merch.getId())
-                    .merchName(merch.getName())
-                    .unitPrice(merch.getPrice())
-                    .quantity(item.getQuantity())
-                    .subtotal(subtotal)
-                    .build());
+                        .merchId(merch.getId())
+                        .merchName(merch.getName())
+                        .unitPrice(merch.getPrice())
+                        .quantity(item.getQuantity())
+                        .subtotal(subtotal)
+                        .build());
 
                 if (merchItemRepository.deductStock(merch.getId(), item.getQuantity()) == 0) {
                     throw new ValidationException(
-                        "\"" + merch.getName() + "\" just sold out — please try again."
-                    );
+                            "\"" + merch.getName() + "\" just sold out — please try again.");
                 }
             }
 
             Order order = Order.builder()
-                .userId(null)
-                .orgId(orgId)
-                .guestName(request.getGuestName())
-                .guestEmail(request.getGuestEmail())
-                .guestPhone(request.getGuestPhone())
-                .totalAmount(total)
-                .note(request.getNote())
-                .build();
+                    .userId(null)
+                    .orgId(orgId)
+                    .guestName(request.getGuestName())
+                    .guestEmail(request.getGuestEmail())
+                    .guestPhone(request.getGuestPhone())
+                    .totalAmount(total)
+                    .note(request.getNote())
+                    .build();
             order = orderRepository.save(order);
 
             final UUID orderId = order.getId();
@@ -256,14 +250,14 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  CUSTOMER READ
+    // CUSTOMER READ
     // ------------------------------------------------------------------ //
 
     @Transactional(readOnly = true)
     public Page<OrderResponse> getCustomerOrders(UUID userId, OrderStatus statusFilter, Pageable pageable) {
         Page<Order> orders = statusFilter != null
-            ? orderRepository.findByUserIdAndStatus(userId, statusFilter, pageable)
-            : orderRepository.findByUserId(userId, pageable);
+                ? orderRepository.findByUserIdAndStatus(userId, statusFilter, pageable)
+                : orderRepository.findByUserId(userId, pageable);
 
         return orders.map(order -> {
             List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
@@ -275,7 +269,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderResponse getCustomerOrder(UUID userId, UUID orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
 
         if (!userId.equals(order.getUserId())) {
             throw new ResourceNotFoundException("Order", orderId.toString());
@@ -287,7 +281,7 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  ORGANIZER READ + STATUS UPDATE
+    // ORGANIZER READ + STATUS UPDATE
     // ------------------------------------------------------------------ //
 
     @Transactional(readOnly = true)
@@ -296,8 +290,8 @@ public class OrderService {
         UUID resolvedOrgId = org.getId();
 
         Page<Order> orders = statusFilter != null
-            ? orderRepository.findByOrgIdAndStatus(resolvedOrgId, statusFilter, pageable)
-            : orderRepository.findByOrgId(resolvedOrgId, pageable);
+                ? orderRepository.findByOrgIdAndStatus(resolvedOrgId, statusFilter, pageable)
+                : orderRepository.findByOrgId(resolvedOrgId, pageable);
 
         return orders.map(order -> {
             List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
@@ -311,7 +305,7 @@ public class OrderService {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
 
         if (!org.getId().equals(order.getOrgId())) {
             throw new ResourceNotFoundException("Order", orderId.toString());
@@ -324,14 +318,15 @@ public class OrderService {
 
     /**
      * Handles non-cancel status transitions by the organizer:
-     * PENDING → CONFIRMED, CONFIRMED → READY (individual), READY → COMPLETED (check-in).
+     * PENDING → CONFIRMED, CONFIRMED → READY (individual), READY → COMPLETED
+     * (check-in).
      */
     @Transactional
     public OrderResponse updateOrderStatus(UUID ownerId, UUID orgId, UUID orderId, OrderStatus newStatus) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
 
         if (!org.getId().equals(order.getOrgId())) {
             throw new ResourceNotFoundException("Order", orderId.toString());
@@ -352,7 +347,7 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  CHECK-IN (READY → COMPLETED)
+    // CHECK-IN (READY → COMPLETED)
     // ------------------------------------------------------------------ //
 
     @Transactional
@@ -360,7 +355,7 @@ public class OrderService {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
 
         if (!org.getId().equals(order.getOrgId())) {
             throw new ResourceNotFoundException("Order", orderId.toString());
@@ -368,8 +363,7 @@ public class OrderService {
 
         if (order.getStatus() != OrderStatus.READY) {
             throw new ValidationException(
-                "Only READY orders can be checked in. Current status: " + order.getStatus()
-            );
+                    "Only READY orders can be checked in. Current status: " + order.getStatus());
         }
 
         order.setStatus(OrderStatus.COMPLETED);
@@ -385,7 +379,7 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  PICKUP SCHEDULE MANAGEMENT
+    // PICKUP SCHEDULE MANAGEMENT
     // ------------------------------------------------------------------ //
 
     @Transactional
@@ -394,9 +388,9 @@ public class OrderService {
 
         // Validate all orders belong to this org and are CONFIRMED
         List<Order> orders = request.getOrderIds().stream()
-            .map(id -> orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", id.toString())))
-            .toList();
+                .map(id -> orderRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Order", id.toString())))
+                .toList();
 
         for (Order order : orders) {
             if (!org.getId().equals(order.getOrgId())) {
@@ -404,18 +398,17 @@ public class OrderService {
             }
             if (order.getStatus() != OrderStatus.CONFIRMED) {
                 throw new ValidationException(
-                    "Order " + order.getId() + " is not CONFIRMED (status: " + order.getStatus() + ")."
-                );
+                        "Order " + order.getId() + " is not CONFIRMED (status: " + order.getStatus() + ").");
             }
         }
 
         PickupSchedule schedule = pickupScheduleRepository.save(PickupSchedule.builder()
-            .orgId(org.getId())
-            .pickupDate(request.getPickupDate())
-            .pickupTimeSlot(request.getPickupTimeSlot())
-            .location(request.getLocation())
-            .notes(request.getNotes())
-            .build());
+                .orgId(org.getId())
+                .pickupDate(request.getPickupDate())
+                .pickupTimeSlot(request.getPickupTimeSlot())
+                .location(request.getLocation())
+                .notes(request.getNotes())
+                .build());
 
         // Move each order CONFIRMED → READY and link to schedule
         String pickupDateStr = request.getPickupDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
@@ -434,10 +427,10 @@ public class OrderService {
     public Page<PickupScheduleResponse> getPickupSchedules(UUID ownerId, UUID orgId, Pageable pageable) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
         return pickupScheduleRepository.findByOrgIdOrderByPickupDateDesc(org.getId(), pageable)
-            .map(schedule -> {
-                long count = orderRepository.countByPickupScheduleId(schedule.getId());
-                return PickupScheduleResponse.from(schedule, (int) count);
-            });
+                .map(schedule -> {
+                    long count = orderRepository.countByPickupScheduleId(schedule.getId());
+                    return PickupScheduleResponse.from(schedule, (int) count);
+                });
     }
 
     @Transactional(readOnly = true)
@@ -445,28 +438,28 @@ public class OrderService {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         PickupSchedule schedule = pickupScheduleRepository.findById(scheduleId)
-            .orElseThrow(() -> new ResourceNotFoundException("Pickup schedule", scheduleId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Pickup schedule", scheduleId.toString()));
 
         if (!org.getId().equals(schedule.getOrgId())) {
             throw new ResourceNotFoundException("Pickup schedule", scheduleId.toString());
         }
 
         return orderRepository.findByPickupScheduleId(scheduleId).stream()
-            .map(order -> {
-                List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
-                return OrderResponse.from(order, items, schedule);
-            })
-            .toList();
+                .map(order -> {
+                    List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
+                    return OrderResponse.from(order, items, schedule);
+                })
+                .toList();
     }
 
     // ------------------------------------------------------------------ //
-    //  CUSTOMER CANCELLATION
+    // CUSTOMER CANCELLATION
     // ------------------------------------------------------------------ //
 
     @Transactional
     public OrderResponse cancelCustomerOrder(UUID userId, UUID orderId, CancelOrderRequest request) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
 
         if (!userId.equals(order.getUserId())) {
             throw new ResourceNotFoundException("Order", orderId.toString());
@@ -474,13 +467,14 @@ public class OrderService {
 
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new ValidationException(
-                "Customers may only cancel PENDING orders. Current status: " + order.getStatus()
-            );
+                    "Customers may only cancel PENDING orders. Current status: " + order.getStatus());
         }
 
         applyCancel(order, "customer", request.getCancelReason(), request.getCancelReasonNote());
-        // saveAndFlush ensures the UPDATE is sent to DB before restoreStockForItems() calls
-        // @Modifying(clearAutomatically = true), which would otherwise evict the pending
+        // saveAndFlush ensures the UPDATE is sent to DB before restoreStockForItems()
+        // calls
+        // @Modifying(clearAutomatically = true), which would otherwise evict the
+        // pending
         // order UPDATE from Hibernate's action queue via session.clear().
         order = orderRepository.saveAndFlush(order);
 
@@ -495,7 +489,7 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  ORGANIZER CANCELLATION
+    // ORGANIZER CANCELLATION
     // ------------------------------------------------------------------ //
 
     @Transactional
@@ -503,7 +497,7 @@ public class OrderService {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
 
         if (!org.getId().equals(order.getOrgId())) {
             throw new ResourceNotFoundException("Order", orderId.toString());
@@ -511,8 +505,7 @@ public class OrderService {
 
         if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.CONFIRMED) {
             throw new ValidationException(
-                "Organizers may cancel PENDING or CONFIRMED orders. Current status: " + order.getStatus()
-            );
+                    "Organizers may cancel PENDING or CONFIRMED orders. Current status: " + order.getStatus());
         }
 
         applyCancel(order, "organizer", request.getCancelReason(), request.getCancelReasonNote());
@@ -529,13 +522,13 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  GUEST ORDER TRACKING
+    // GUEST ORDER TRACKING
     // ------------------------------------------------------------------ //
 
     @Transactional(readOnly = true)
     public OrderResponse getGuestOrderByEmail(UUID orderId, String guestEmail) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
 
         if (order.getUserId() != null
                 || order.getGuestEmail() == null
@@ -549,14 +542,14 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  ADMIN
+    // ADMIN
     // ------------------------------------------------------------------ //
 
     @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(OrderStatus statusFilter, Pageable pageable) {
         Page<Order> orders = statusFilter != null
-            ? orderRepository.findByStatus(statusFilter, pageable)
-            : orderRepository.findAll(pageable);
+                ? orderRepository.findByStatus(statusFilter, pageable)
+                : orderRepository.findAll(pageable);
 
         return orders.map(order -> {
             List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
@@ -565,16 +558,21 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
-    //  HELPERS
+    // HELPERS
     // ------------------------------------------------------------------ //
 
     /**
-     * Valid non-cancel transitions (cancel is handled by dedicated cancel endpoints):
+     * Valid non-cancel transitions (cancel is handled by dedicated cancel
+     * endpoints):
      * PENDING → CONFIRMED
-     * CONFIRMED → READY   (individual; batch is via createPickupSchedule)
-     * READY → COMPLETED   (used as fallback; preferred path is checkInOrder)
+     * CONFIRMED → READY (individual; batch is via createPickupSchedule)
+     * READY → COMPLETED (used as fallback; preferred path is checkInOrder)
      */
     private void validateStatusTransition(OrderStatus current, OrderStatus next) {
+        // idempotent if same status is sent again
+        if (current == next) {
+            return;
+        } 
         boolean valid = switch (current) {
             case PENDING -> next == OrderStatus.CONFIRMED;
             case CONFIRMED -> next == OrderStatus.READY;
@@ -584,8 +582,7 @@ public class OrderService {
 
         if (!valid) {
             throw new ValidationException(
-                "Cannot transition order from " + current + " to " + next + "."
-            );
+                    "Cannot transition order from " + current + " to " + next + ".");
         }
     }
 
@@ -602,7 +599,8 @@ public class OrderService {
     }
 
     private PickupSchedule loadPickupSchedule(Order order) {
-        if (order.getPickupScheduleId() == null) return null;
+        if (order.getPickupScheduleId() == null)
+            return null;
         return pickupScheduleRepository.findById(order.getPickupScheduleId()).orElse(null);
     }
 
@@ -613,20 +611,18 @@ public class OrderService {
 
             if ("NEW_ORDER".equals(eventType)) {
                 notificationService.saveOnly(
-                    org.getOwnerId(),
-                    "Đơn hàng mới",
-                    "Đơn hàng #" + shortId + " — " + order.getTotalAmount().toPlainString() + "đ",
-                    NotificationType.NEW_ORDER,
-                    order.getId()
-                );
+                        org.getOwnerId(),
+                        "Đơn hàng mới",
+                        "Đơn hàng #" + shortId + " — " + order.getTotalAmount().toPlainString() + "đ",
+                        NotificationType.NEW_ORDER,
+                        order.getId());
             } else if ("ORDER_CANCELLED".equals(eventType)) {
                 notificationService.saveOnly(
-                    org.getOwnerId(),
-                    "Đơn hàng bị huỷ",
-                    "Đơn hàng #" + shortId + " đã bị huỷ bởi khách hàng.",
-                    NotificationType.ORDER_CANCELLED,
-                    order.getId()
-                );
+                        org.getOwnerId(),
+                        "Đơn hàng bị huỷ",
+                        "Đơn hàng #" + shortId + " đã bị huỷ bởi khách hàng.",
+                        NotificationType.ORDER_CANCELLED,
+                        order.getId());
             }
 
             Map<String, Object> event = new LinkedHashMap<>();
@@ -642,57 +638,59 @@ public class OrderService {
     }
 
     private void notifyCustomerOrderPlaced(Order order) {
-        if (order.getUserId() == null) return;
+        if (order.getUserId() == null)
+            return;
         try {
             String email = userRepository.findById(order.getUserId())
-                .map(u -> u.getEmail()).orElse(null);
+                    .map(u -> u.getEmail()).orElse(null);
             if (email != null) {
                 emailService.sendOrderPlacedConfirmation(email, order.getId().toString());
             }
             String shortId = order.getId().toString().substring(0, 8).toUpperCase();
             notificationService.push(
-                order.getUserId(),
-                "Đặt hàng thành công",
-                "Đơn hàng #" + shortId + " đã được tạo và đang chờ xác nhận từ ban tổ chức.",
-                NotificationType.ORDER_PLACED,
-                order.getId()
-            );
+                    order.getUserId(),
+                    "Đặt hàng thành công",
+                    "Đơn hàng #" + shortId + " đã được tạo và đang chờ xác nhận từ ban tổ chức.",
+                    NotificationType.ORDER_PLACED,
+                    order.getId());
         } catch (Exception e) {
             log.warn("Failed to send order-placed notification for order {}: {}", order.getId(), e.getMessage());
         }
     }
 
     private void notifyCustomerInApp(Order order, OrderStatus status) {
-        if (order.getUserId() == null) return;
+        if (order.getUserId() == null)
+            return;
         try {
             String email = userRepository.findById(order.getUserId())
-                .map(u -> u.getEmail()).orElse(null);
-            // CANCELLED callers always invoke sendCancelEmail first, which already sends the
+                    .map(u -> u.getEmail()).orElse(null);
+            // CANCELLED callers always invoke sendCancelEmail first, which already sends
+            // the
             // richer sendOrderCancelledNotification — skip the generic update email here.
             if (email != null && status != OrderStatus.CANCELLED) {
                 emailService.sendOrderStatusUpdate(email, order.getId().toString(), status.name());
             }
             String shortId = order.getId().toString().substring(0, 8).toUpperCase();
             String title = switch (status) {
-                case CONFIRMED  -> "Đơn hàng đã được xác nhận";
-                case READY      -> "Đơn hàng sẵn sàng để nhận";
-                case COMPLETED  -> "Đơn hàng đã hoàn thành";
-                case CANCELLED  -> "Đơn hàng đã bị huỷ";
-                default         -> "Cập nhật đơn hàng";
+                case CONFIRMED -> "Đơn hàng đã được xác nhận";
+                case READY -> "Đơn hàng sẵn sàng để nhận";
+                case COMPLETED -> "Đơn hàng đã hoàn thành";
+                case CANCELLED -> "Đơn hàng đã bị huỷ";
+                default -> "Cập nhật đơn hàng";
             };
             String message = switch (status) {
                 case CONFIRMED -> "Đơn hàng #" + shortId + " đã được ban tổ chức xác nhận.";
-                case READY     -> "Đơn hàng #" + shortId + " đã sẵn sàng. Hãy kiểm tra lịch nhận hàng.";
+                case READY -> "Đơn hàng #" + shortId + " đã sẵn sàng. Hãy kiểm tra lịch nhận hàng.";
                 case COMPLETED -> "Bạn đã nhận thành công đơn hàng #" + shortId + ".";
                 case CANCELLED -> "Đơn hàng #" + shortId + " đã bị huỷ.";
-                default        -> "Trạng thái đơn hàng #" + shortId + " đã thay đổi.";
+                default -> "Trạng thái đơn hàng #" + shortId + " đã thay đổi.";
             };
             NotificationType type = switch (status) {
                 case CONFIRMED -> NotificationType.ORDER_CONFIRMED;
-                case READY     -> NotificationType.ORDER_READY;
+                case READY -> NotificationType.ORDER_READY;
                 case COMPLETED -> NotificationType.ORDER_COMPLETED;
                 case CANCELLED -> NotificationType.ORDER_CANCELLED;
-                default        -> NotificationType.ORDER_CONFIRMED;
+                default -> NotificationType.ORDER_CONFIRMED;
             };
             notificationService.push(order.getUserId(), title, message, type, order.getId());
         } catch (Exception e) {
@@ -705,9 +703,8 @@ public class OrderService {
             String email = resolveCustomerEmail(order);
             if (email != null) {
                 emailService.sendOrderCancelledNotification(
-                    email, order.getId().toString(),
-                    order.getCancelReason(), cancelledBy
-                );
+                        email, order.getId().toString(),
+                        order.getCancelReason(), cancelledBy);
             }
         } catch (Exception e) {
             log.warn("Failed to send cancel email for order {}: {}", order.getId(), e.getMessage());
@@ -717,12 +714,9 @@ public class OrderService {
     private void notifyOrgOwnerOfCancel(Order order) {
         try {
             Organization org = organizationService.getOrganizationEntityById(order.getOrgId());
-            userRepository.findById(org.getOwnerId()).ifPresent(owner ->
-                emailService.sendOrderCancelledNotification(
+            userRepository.findById(org.getOwnerId()).ifPresent(owner -> emailService.sendOrderCancelledNotification(
                     owner.getEmail(), order.getId().toString(),
-                    order.getCancelReason(), "customer"
-                )
-            );
+                    order.getCancelReason(), "customer"));
         } catch (Exception e) {
             log.warn("Failed to notify org owner for cancelled order {}: {}", order.getId(), e.getMessage());
         }
@@ -733,24 +727,22 @@ public class OrderService {
             String email = resolveCustomerEmail(order);
             if (email != null) {
                 emailService.sendPickupScheduleNotification(
-                    email, order.getId().toString(),
-                    pickupDateStr,
-                    schedule.getPickupTimeSlot(),
-                    schedule.getLocation(),
-                    schedule.getNotes()
-                );
+                        email, order.getId().toString(),
+                        pickupDateStr,
+                        schedule.getPickupTimeSlot(),
+                        schedule.getLocation(),
+                        schedule.getNotes());
             }
             if (order.getUserId() != null) {
                 String shortId = order.getId().toString().substring(0, 8).toUpperCase();
                 notificationService.push(
-                    order.getUserId(),
-                    "Lịch nhận hàng đã được tạo",
-                    "Đơn hàng #" + shortId + " có thể nhận vào " + pickupDateStr
-                        + " lúc " + schedule.getPickupTimeSlot()
-                        + " tại " + schedule.getLocation() + ".",
-                    NotificationType.PICKUP_SCHEDULED,
-                    order.getId()
-                );
+                        order.getUserId(),
+                        "Lịch nhận hàng đã được tạo",
+                        "Đơn hàng #" + shortId + " có thể nhận vào " + pickupDateStr
+                                + " lúc " + schedule.getPickupTimeSlot()
+                                + " tại " + schedule.getLocation() + ".",
+                        NotificationType.PICKUP_SCHEDULED,
+                        order.getId());
             }
         } catch (Exception e) {
             log.warn("Failed to send pickup notification for order {}: {}", order.getId(), e.getMessage());
@@ -762,6 +754,7 @@ public class OrderService {
             return userRepository.findById(order.getUserId()).map(u -> u.getEmail()).orElse(null);
         }
         return (order.getGuestEmail() != null && !order.getGuestEmail().isBlank())
-            ? order.getGuestEmail() : null;
+                ? order.getGuestEmail()
+                : null;
     }
 }
