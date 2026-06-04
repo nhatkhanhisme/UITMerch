@@ -82,7 +82,11 @@ public class AuthService {
             long minutesLeft = ChronoUnit.MINUTES.between(LocalDateTime.now(), otp.getLockedUntil()) + 1;
             throw new InvalidOtpException(
                     "Too many failed attempts. Please try again in " + minutesLeft + " minute(s).");
+        } else if (otp.getLockedUntil() != null) {
+            otp.setAttemptCount(0);
+            otp.setLockedUntil(null);
         }
+
 
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw genericError;
