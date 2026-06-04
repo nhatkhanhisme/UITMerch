@@ -124,7 +124,7 @@ public class DevDataInitializer implements ApplicationRunner {
 
         // guest — PENDING
         saveGuestOrder(devClub.getId(),
-                "Vo Thi C", "0905555555", "789 Vo Van Ngan, Thu Duc, TP.HCM", "guest@example.com",
+                "Vo Thi C", "0905555555", "guest@example.com",
                 List.of(new Line(cap, 2)));
 
         log.info("Sample data ready — accounts:");
@@ -211,7 +211,7 @@ public class DevDataInitializer implements ApplicationRunner {
     }
 
     private void saveGuestOrder(UUID orgId, String guestName, String guestPhone,
-                                 String guestAddress, String guestEmail, List<Line> lines) {
+                                 String guestEmail, List<Line> lines) {
         BigDecimal total = lines.stream()
                 .map(l -> l.merch().getPrice().multiply(BigDecimal.valueOf(l.qty())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -220,7 +220,6 @@ public class DevDataInitializer implements ApplicationRunner {
                 .orgId(orgId)
                 .guestName(guestName)
                 .guestPhone(guestPhone)
-                .guestAddress(guestAddress)
                 .guestEmail(guestEmail)
                 .totalAmount(total)
                 .status(OrderStatus.PENDING)

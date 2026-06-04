@@ -18,9 +18,6 @@ public class GuestOrderRequest {
     @NotBlank(message = "Guest phone is required")
     private String guestPhone;
 
-    // Optional — campus pickup model; no shipping address needed.
-    private String guestAddress;
-
     private String guestEmail;
 
     private String note;

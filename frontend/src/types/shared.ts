@@ -153,7 +153,6 @@ export type OrderResponse = {
   guestName?: string;
   guestEmail?: string;
   guestPhone?: string;
-  guestAddress?: string;
   totalAmount: number;
   status: string;
   paymentMethod: string;
@@ -212,7 +211,6 @@ export type GuestOrderRequest = {
   items: GuestOrderItemRequest[];
   guestName: string;
   guestPhone: string;
-  guestAddress?: string;
   guestEmail?: string;
   note?: string;
 };

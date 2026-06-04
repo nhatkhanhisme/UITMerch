@@ -417,7 +417,6 @@ class OrderServiceTest {
         req.setItems(List.of(item));
         req.setGuestName("Guest");
         req.setGuestPhone("0901");
-        req.setGuestAddress("Addr");
 
         MerchItem merch = publishedMerch(1);
         when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
@@ -426,6 +425,36 @@ class OrderServiceTest {
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("Insufficient stock");
         verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void createGuestOrder_success_sendsConfirmationEmail() {
+        GuestOrderItemRequest item = new GuestOrderItemRequest();
+        item.setMerchId(merchId);
+        item.setQuantity(1);
+
+        GuestOrderRequest req = new GuestOrderRequest();
+        req.setItems(List.of(item));
+        req.setGuestName("Guest");
+        req.setGuestEmail("guest@test.com");
+        req.setGuestPhone("0901234567");
+
+        MerchItem merch = publishedMerch(5);
+        Order savedOrder = Order.builder()
+            .id(orderId).orgId(orgId)
+            .guestEmail("guest@test.com")
+            .totalAmount(BigDecimal.valueOf(100_000))
+            .status(OrderStatus.PENDING).build();
+
+        when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
+        when(merchItemRepository.deductStock(merchId, 1)).thenReturn(1);
+        when(orderRepository.save(any())).thenReturn(savedOrder);
+        when(orderItemRepository.saveAll(any())).thenReturn(Collections.emptyList());
+
+        orderService.createGuestOrder(req);
+
+        verify(emailService).sendOrderPlacedConfirmation(
+            eq("guest@test.com"), eq(orderId.toString()));
     }
 
     // ── getGuestOrderByEmail ─────────────────────────────────────────────────
