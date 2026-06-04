@@ -141,6 +141,8 @@ const BACKEND_MESSAGE_MAP: Array<[string, string]> = [
   ["already in your cart", "Sản phẩm đã có trong giỏ hàng. Bạn có thể thay đổi số lượng ngay trong giỏ."],
   ["insufficient stock", "Số lượng tồn kho không đủ. Vui lòng chọn số lượng ít hơn."],
   ["out of stock", "Sản phẩm đã hết hàng."],
+  ["are available", "Chỉ còn một số lượng hạn chế của sản phẩm này. Vui lòng chọn số lượng nhỏ hơn hoặc thử lại sau."],
+  ["only ", "Chỉ còn một số lượng hạn chế của sản phẩm này. Vui lòng chọn số lượng nhỏ hơn hoặc thử lại sau."],
   ["not found", "Không tìm thấy thông tin yêu cầu. Vui lòng thử lại."],
   ["unauthorized", "Bạn cần đăng nhập để thực hiện thao tác này."],
   ["forbidden", "Bạn không có quyền thực hiện thao tác này."],
