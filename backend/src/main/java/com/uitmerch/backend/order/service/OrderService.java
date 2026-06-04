@@ -483,7 +483,7 @@ public class OrderService {
 
         sendCancelEmail(order, "customer");
         notifyOrgOwnerOfCancel(order);
-        notifyOrganizer(order.getOrgId(), order, "ORDER_CANCELLED");
+        notifyOrganizer(order.getOrgId(), order, "CUSTOMER_CANCELLED");
 
         return OrderResponse.from(order, items);
     }
@@ -516,7 +516,7 @@ public class OrderService {
 
         sendCancelEmail(order, "organizer");
         notifyCustomerInApp(order, OrderStatus.CANCELLED);
-        notifyOrganizer(order.getOrgId(), order, "ORDER_CANCELLED");
+        notifyOrganizer(order.getOrgId(), order, "ORG_CANCELLED");
 
         return OrderResponse.from(order, items);
     }
@@ -616,12 +616,40 @@ public class OrderService {
                         "Đơn hàng #" + shortId + " — " + order.getTotalAmount().toPlainString() + "đ",
                         NotificationType.NEW_ORDER,
                         order.getId());
-            } else if ("ORDER_CANCELLED".equals(eventType)) {
+            } else if ("CUSTOMER_CANCELLED".equals(eventType)) {
                 notificationService.saveOnly(
                         org.getOwnerId(),
                         "Đơn hàng bị huỷ",
                         "Đơn hàng #" + shortId + " đã bị huỷ bởi khách hàng.",
                         NotificationType.ORDER_CANCELLED,
+                        order.getId());
+            } else if ("ORG_CANCELLED".equals(eventType)) {
+                notificationService.saveOnly(
+                        org.getOwnerId(),
+                        "Đơn hàng bị huỷ",
+                        "Đơn hàng #" + shortId + " đã bị huỷ bởi ban tổ chức.",
+                        NotificationType.ORDER_CANCELLED,
+                        order.getId());
+            } else if ("ORDER_STATUS_CHANGED".equals(eventType)) {
+                NotificationType type = switch (order.getStatus()) {
+                    case CONFIRMED -> NotificationType.ORDER_CONFIRMED;
+                    case READY     -> NotificationType.ORDER_READY;
+                    case COMPLETED -> NotificationType.ORDER_COMPLETED;
+                    default -> throw new IllegalStateException(
+                            "Unexpected status for ORDER_STATUS_CHANGED: " + order.getStatus());
+                };
+                String message = switch (order.getStatus()) {
+                    case CONFIRMED -> "Đơn hàng #" + shortId + " đã được xác nhận.";
+                    case READY     -> "Đơn hàng #" + shortId + " đã sẵn sàng để giao.";
+                    case COMPLETED -> "Đơn hàng #" + shortId + " đã hoàn thành.";
+                    default -> throw new IllegalStateException(
+                            "Unexpected status for ORDER_STATUS_CHANGED: " + order.getStatus());
+                };
+                notificationService.saveOnly(
+                        org.getOwnerId(),
+                        "Cập nhật đơn hàng",
+                        message,
+                        type,
                         order.getId());
             }
 
@@ -631,6 +659,7 @@ public class OrderService {
             event.put("orderId", order.getId().toString());
             event.put("shortId", shortId);
             event.put("totalAmount", order.getTotalAmount());
+            event.put("status", order.getStatus().name());
             sseEmitterManager.send(org.getOwnerId(), event);
         } catch (Exception e) {
             log.warn("Failed to send SSE {} event to organizer for org {}: {}", eventType, orgId, e.getMessage());

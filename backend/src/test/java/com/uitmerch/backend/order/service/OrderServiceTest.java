@@ -13,6 +13,7 @@ import com.uitmerch.backend.common.model.UserRole;
 import com.uitmerch.backend.common.service.EmailService;
 import com.uitmerch.backend.merch.entity.MerchItem;
 import com.uitmerch.backend.merch.repository.MerchItemRepository;
+import com.uitmerch.backend.common.model.NotificationType;
 import com.uitmerch.backend.notification.service.NotificationService;
 import com.uitmerch.backend.notification.service.SseEmitterManager;
 import com.uitmerch.backend.order.dto.CancelOrderRequest;
@@ -250,6 +251,31 @@ class OrderServiceTest {
 
         assertThatNoException().isThrownBy(
             () -> orderService.updateOrderStatus(userId, orgId, orderId, status));
+    }
+
+    @ParameterizedTest(name = "{0} → {1} persists {2}")
+    @CsvSource({
+        "PENDING,CONFIRMED,ORDER_CONFIRMED",
+        "CONFIRMED,READY,ORDER_READY",
+        "READY,COMPLETED,ORDER_COMPLETED"
+    })
+    void updateOrderStatus_savesOrganizerNotificationToDB(
+            OrderStatus from, OrderStatus to, NotificationType expectedType) {
+        Organization org = Organization.builder().id(orgId).ownerId(userId).build();
+        Order order = orderWithStatus(from);
+        Order updated = orderWithStatus(to);
+
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
+        when(organizationService.getOrganizationEntityById(orgId)).thenReturn(org);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any())).thenReturn(updated);
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
+
+        orderService.updateOrderStatus(userId, orgId, orderId, to);
+
+        verify(notificationService).saveOnly(
+            eq(userId), any(), any(), eq(expectedType), eq(orderId));
     }
 
     @Test

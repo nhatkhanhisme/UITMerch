@@ -1868,6 +1868,10 @@ export function OrganizerDashboardPage() {
       const event = (e as CustomEvent<{ type?: string }>).detail;
       if (event?.type === "NEW_ORDER") {
         toast.info("Có đơn hàng mới!");
+      } else if (event?.type === "CUSTOMER_CANCELLED") {
+        toast.info("Khách hàng đã huỷ một đơn hàng.");
+      } else if (event?.type === "ORG_CANCELLED") {
+        toast.info("Ban tổ chức đã huỷ một đơn hàng.");
       }
       setOrderRefreshTrigger((t) => t + 1);
     };
