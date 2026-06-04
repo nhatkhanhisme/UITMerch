@@ -18,6 +18,8 @@ import com.uitmerch.backend.notification.service.NotificationService;
 import com.uitmerch.backend.notification.service.SseEmitterManager;
 import com.uitmerch.backend.order.dto.CancelOrderRequest;
 import com.uitmerch.backend.order.dto.GuestOrderItemRequest;
+import com.uitmerch.backend.order.dto.PickupScheduleRequest;
+import com.uitmerch.backend.order.entity.PickupSchedule;
 import com.uitmerch.backend.order.dto.GuestOrderRequest;
 import com.uitmerch.backend.order.dto.InstantOrderRequest;
 import com.uitmerch.backend.order.dto.OrderResponse;
@@ -369,6 +371,74 @@ class OrderServiceTest {
 
         assertThatThrownBy(() -> orderService.cancelCustomerOrder(otherUser, orderId, cancelRequest()))
             .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    // ── createPickupSchedule ─────────────────────────────────────────────────
+
+    @Test
+    void createPickupSchedule_unknownOrderId_throwsResourceNotFound() {
+        Organization org = Organization.builder().id(orgId).ownerId(userId).build();
+        UUID unknownId = UUID.randomUUID();
+
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
+        when(orderRepository.findAllById(List.of(orderId, unknownId))).thenReturn(List.of(orderWithStatus(OrderStatus.CONFIRMED)));
+
+        PickupScheduleRequest req = new PickupScheduleRequest();
+        req.setOrderIds(List.of(orderId, unknownId));
+        req.setPickupDate(java.time.LocalDate.now().plusDays(1));
+        req.setPickupTimeSlot("08:00-09:00");
+        req.setLocation("UIT");
+
+        assertThatThrownBy(() -> orderService.createPickupSchedule(userId, orgId, req))
+            .isInstanceOf(ResourceNotFoundException.class);
+        verify(pickupScheduleRepository, never()).save(any());
+    }
+
+    @Test
+    void createPickupSchedule_orderNotConfirmed_throwsValidation() {
+        Organization org = Organization.builder().id(orgId).ownerId(userId).build();
+        Order pendingOrder = orderWithStatus(OrderStatus.PENDING);
+
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
+        when(orderRepository.findAllById(List.of(orderId))).thenReturn(List.of(pendingOrder));
+
+        PickupScheduleRequest req = new PickupScheduleRequest();
+        req.setOrderIds(List.of(orderId));
+        req.setPickupDate(java.time.LocalDate.now().plusDays(1));
+        req.setPickupTimeSlot("08:00-09:00");
+        req.setLocation("UIT");
+
+        assertThatThrownBy(() -> orderService.createPickupSchedule(userId, orgId, req))
+            .isInstanceOf(ValidationException.class)
+            .hasMessageContaining("not CONFIRMED");
+        verify(pickupScheduleRepository, never()).save(any());
+    }
+
+    @Test
+    void createPickupSchedule_success_batchSavesOrders() {
+        Organization org = Organization.builder().id(orgId).ownerId(userId).build();
+        Order confirmedOrder = orderWithStatus(OrderStatus.CONFIRMED);
+        PickupSchedule schedule = PickupSchedule.builder()
+            .id(UUID.randomUUID()).orgId(orgId)
+            .pickupDate(java.time.LocalDate.now().plusDays(1))
+            .pickupTimeSlot("08:00-09:00").location("UIT").build();
+
+        when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
+        when(orderRepository.findAllById(List.of(orderId))).thenReturn(List.of(confirmedOrder));
+        when(pickupScheduleRepository.save(any())).thenReturn(schedule);
+        when(orderRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        PickupScheduleRequest req = new PickupScheduleRequest();
+        req.setOrderIds(List.of(orderId));
+        req.setPickupDate(java.time.LocalDate.now().plusDays(1));
+        req.setPickupTimeSlot("08:00-09:00");
+        req.setLocation("UIT");
+
+        orderService.createPickupSchedule(userId, orgId, req);
+
+        verify(orderRepository).saveAll(any());
+        verify(orderRepository, never()).save(any());
     }
 
     // ── createOrdersFromCart ─────────────────────────────────────────────────
