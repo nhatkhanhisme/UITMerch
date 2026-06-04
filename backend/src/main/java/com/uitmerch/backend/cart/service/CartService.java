@@ -157,15 +157,7 @@ public class CartService {
 
     private Cart findOrCreateActiveCart(UUID userId) {
         return cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)
-            .orElseGet(() -> {
-                List<Cart> existing = cartRepository.findByUserId(userId);
-                if (!existing.isEmpty()) {
-                    Cart cart = existing.get(0);
-                    cart.setStatus(CartStatus.ACTIVE);
-                    return cartRepository.save(cart);
-                }
-                return cartRepository.save(Cart.builder().userId(userId).build());
-            });
+            .orElseGet(() -> cartRepository.save(Cart.builder().userId(userId).build()));
     }
 
     private Cart getActiveCartOrThrow(UUID userId) {
