@@ -5,6 +5,7 @@ import com.uitmerch.backend.auth.dto.ForgotPasswordRequest;
 import com.uitmerch.backend.auth.dto.RegisterRequest;
 import com.uitmerch.backend.auth.dto.ResetPasswordRequest;
 import com.uitmerch.backend.auth.dto.VerifyEmailRequest;
+import com.uitmerch.backend.auth.entity.OtpPurpose;
 import com.uitmerch.backend.auth.entity.OtpToken;
 import com.uitmerch.backend.auth.entity.User;
 import com.uitmerch.backend.auth.repository.OtpTokenRepository;
@@ -144,6 +145,7 @@ class AuthServiceTest {
         User user = User.builder().id(UUID.randomUUID()).email("test@uit.edu.vn").build();
         OtpToken otp = OtpToken.builder()
             .otpCode("123456")
+            .purpose(OtpPurpose.VERIFY_EMAIL)
             .expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false)
             .attemptCount(0)
@@ -168,6 +170,7 @@ class AuthServiceTest {
         User user = User.builder().id(UUID.randomUUID()).email("test@uit.edu.vn").build();
         OtpToken otp = OtpToken.builder()
             .otpCode("123456")
+            .purpose(OtpPurpose.VERIFY_EMAIL)
             .expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false)
             .attemptCount(0)
@@ -235,6 +238,7 @@ class AuthServiceTest {
         User user = User.builder().id(UUID.randomUUID()).email("test@uit.edu.vn").build();
         OtpToken otp = OtpToken.builder()
             .otpCode("123456")
+            .purpose(OtpPurpose.VERIFY_EMAIL)
             .expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false)
             .attemptCount(4) // 5th attempt will hit limit
@@ -260,6 +264,7 @@ class AuthServiceTest {
         User user = User.builder().id(UUID.randomUUID()).email("test@uit.edu.vn").build();
         OtpToken otp = OtpToken.builder()
             .otpCode("123456")
+            .purpose(OtpPurpose.VERIFY_EMAIL)
             .expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false)
             .attemptCount(5)
@@ -565,7 +570,8 @@ class AuthServiceTest {
     void resetPassword_validOtp_updatesPasswordHash() {
         User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
         OtpToken otp = OtpToken.builder()
-            .otpCode("123456").expiresAt(LocalDateTime.now().plusMinutes(10))
+            .otpCode("123456").purpose(OtpPurpose.RESET_PASSWORD)
+            .expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false).attemptCount(0).build();
 
         when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
@@ -589,7 +595,8 @@ class AuthServiceTest {
     void resetPassword_weakPassword_throwsValidation() {
         User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
         OtpToken otp = OtpToken.builder()
-            .otpCode("123456").expiresAt(LocalDateTime.now().plusMinutes(10))
+            .otpCode("123456").purpose(OtpPurpose.RESET_PASSWORD)
+            .expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false).attemptCount(0).build();
 
         when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
@@ -609,7 +616,8 @@ class AuthServiceTest {
     void resetPassword_wrongOtp_throwsInvalidOtp() {
         User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
         OtpToken otp = OtpToken.builder()
-            .otpCode("111111").expiresAt(LocalDateTime.now().plusMinutes(10))
+            .otpCode("111111").purpose(OtpPurpose.RESET_PASSWORD)
+            .expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false).attemptCount(0).build();
 
         when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
@@ -643,5 +651,50 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.resetPassword(req))
             .isInstanceOf(InvalidOtpException.class);
+    }
+
+    // ── cross-purpose OTP rejection ─────────────────────────────────────────
+
+    @Test
+    void verifyEmail_resetPasswordOtp_rejectsWithGenericError() {
+        User user = User.builder().id(UUID.randomUUID()).email("test@uit.edu.vn").build();
+        OtpToken otp = OtpToken.builder()
+            .otpCode("123456")
+            .purpose(OtpPurpose.RESET_PASSWORD)
+            .expiresAt(LocalDateTime.now().plusMinutes(10))
+            .isUsed(false).attemptCount(0).build();
+
+        when(userRepository.findByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
+
+        VerifyEmailRequest req = new VerifyEmailRequest();
+        req.setEmail("test@uit.edu.vn");
+        req.setOtpCode("123456");
+
+        assertThatThrownBy(() -> authService.verifyEmail(req))
+            .isInstanceOf(InvalidOtpException.class);
+        assertThat(otp.isUsed()).isFalse();
+    }
+
+    @Test
+    void resetPassword_verifyEmailOtp_rejectsWithGenericError() {
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
+        OtpToken otp = OtpToken.builder()
+            .otpCode("123456")
+            .purpose(OtpPurpose.VERIFY_EMAIL)
+            .expiresAt(LocalDateTime.now().plusMinutes(10))
+            .isUsed(false).attemptCount(0).build();
+
+        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
+
+        ResetPasswordRequest req = new ResetPasswordRequest();
+        req.setEmail("u@uit.edu.vn");
+        req.setOtpCode("123456");
+        req.setNewPassword("NewPass1");
+
+        assertThatThrownBy(() -> authService.resetPassword(req))
+            .isInstanceOf(InvalidOtpException.class);
+        assertThat(otp.isUsed()).isFalse();
     }
 }
