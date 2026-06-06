@@ -21,6 +21,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -236,7 +238,20 @@ public class AuthService {
 
         otpTokenRepository.save(otp);
 
-        emailService.sendOtp(user.getEmail(), code);
+        runAfterCommit(() -> emailService.sendOtp(user.getEmail(), code));
+    }
+
+    private void runAfterCommit(Runnable action) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    action.run();
+                }
+            });
+        } else {
+            action.run();
+        }
     }
 
     private String generateOtpCode() {
@@ -270,7 +285,7 @@ public class AuthService {
                     .isUsed(false)
                     .build();
                 otpTokenRepository.save(otp);
-                emailService.sendPasswordReset(user.getEmail(), code);
+                runAfterCommit(() -> emailService.sendPasswordReset(user.getEmail(), code));
                 log.info("Password-reset OTP issued for {}", email);
             }
         });

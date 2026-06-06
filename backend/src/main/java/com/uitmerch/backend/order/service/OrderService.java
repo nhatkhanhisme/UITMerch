@@ -28,6 +28,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -243,7 +245,9 @@ public class OrderService {
             List<OrderItem> savedItems = orderItemRepository.saveAll(orderItems);
 
             notifyOrganizer(orgId, order, "NEW_ORDER");
-            emailService.sendOrderPlacedConfirmation(order.getGuestEmail(), order.getId().toString());
+            final String guestEmail = order.getGuestEmail();
+            final String guestOrderId = order.getId().toString();
+            runAfterCommit(() -> emailService.sendOrderPlacedConfirmation(guestEmail, guestOrderId));
             results.add(OrderResponse.from(order, savedItems));
         }
 
@@ -418,8 +422,11 @@ public class OrderService {
             order.setStatus(OrderStatus.READY);
             order.setPickupScheduleId(schedule.getId());
             sendPickupNotification(order, schedule, pickupDateStr);
+
+            orderRepository.save(order);
+
         }
-        orderRepository.saveAll(orders);
+        
 
         return PickupScheduleResponse.from(schedule, orders.size());
     }
@@ -573,7 +580,7 @@ public class OrderService {
         // idempotent if same status is sent again
         if (current == next) {
             return;
-        } 
+        }
         boolean valid = switch (current) {
             case PENDING -> next == OrderStatus.CONFIRMED;
             case CONFIRMED -> next == OrderStatus.READY;
@@ -634,14 +641,14 @@ public class OrderService {
             } else if ("ORDER_STATUS_CHANGED".equals(eventType)) {
                 NotificationType type = switch (order.getStatus()) {
                     case CONFIRMED -> NotificationType.ORDER_CONFIRMED;
-                    case READY     -> NotificationType.ORDER_READY;
+                    case READY -> NotificationType.ORDER_READY;
                     case COMPLETED -> NotificationType.ORDER_COMPLETED;
                     default -> throw new IllegalStateException(
                             "Unexpected status for ORDER_STATUS_CHANGED: " + order.getStatus());
                 };
                 String message = switch (order.getStatus()) {
                     case CONFIRMED -> "Đơn hàng #" + shortId + " đã được xác nhận.";
-                    case READY     -> "Đơn hàng #" + shortId + " đã sẵn sàng để giao.";
+                    case READY -> "Đơn hàng #" + shortId + " đã sẵn sàng để giao.";
                     case COMPLETED -> "Đơn hàng #" + shortId + " đã hoàn thành.";
                     default -> throw new IllegalStateException(
                             "Unexpected status for ORDER_STATUS_CHANGED: " + order.getStatus());
@@ -674,7 +681,9 @@ public class OrderService {
             String email = userRepository.findById(order.getUserId())
                     .map(u -> u.getEmail()).orElse(null);
             if (email != null) {
-                emailService.sendOrderPlacedConfirmation(email, order.getId().toString());
+                final String capturedEmail = email;
+                final String capturedOrderId = order.getId().toString();
+                runAfterCommit(() -> emailService.sendOrderPlacedConfirmation(capturedEmail, capturedOrderId));
             }
             String shortId = order.getId().toString().substring(0, 8).toUpperCase();
             notificationService.push(
@@ -698,7 +707,10 @@ public class OrderService {
             // the
             // richer sendOrderCancelledNotification — skip the generic update email here.
             if (email != null && status != OrderStatus.CANCELLED) {
-                emailService.sendOrderStatusUpdate(email, order.getId().toString(), status.name());
+                final String capturedEmail = email;
+                final String capturedOrderId = order.getId().toString();
+                final String capturedStatus = status.name();
+                runAfterCommit(() -> emailService.sendOrderStatusUpdate(capturedEmail, capturedOrderId, capturedStatus));
             }
             String shortId = order.getId().toString().substring(0, 8).toUpperCase();
             String title = switch (status) {
@@ -732,9 +744,11 @@ public class OrderService {
         try {
             String email = resolveCustomerEmail(order);
             if (email != null) {
-                emailService.sendOrderCancelledNotification(
-                        email, order.getId().toString(),
-                        order.getCancelReason(), cancelledBy);
+                final String capturedEmail = email;
+                final String capturedOrderId = order.getId().toString();
+                final String capturedReason = order.getCancelReason();
+                runAfterCommit(() -> emailService.sendOrderCancelledNotification(
+                        capturedEmail, capturedOrderId, capturedReason, cancelledBy));
             }
         } catch (Exception e) {
             log.warn("Failed to send cancel email for order {}: {}", order.getId(), e.getMessage());
@@ -744,9 +758,11 @@ public class OrderService {
     private void notifyOrgOwnerOfCancel(Order order) {
         try {
             Organization org = organizationService.getOrganizationEntityById(order.getOrgId());
-            userRepository.findById(org.getOwnerId()).ifPresent(owner -> emailService.sendOrderCancelledNotification(
-                    owner.getEmail(), order.getId().toString(),
-                    order.getCancelReason(), "customer"));
+            final String capturedOrderId = order.getId().toString();
+            final String capturedReason = order.getCancelReason();
+            userRepository.findById(org.getOwnerId()).ifPresent(owner ->
+                runAfterCommit(() -> emailService.sendOrderCancelledNotification(
+                        owner.getEmail(), capturedOrderId, capturedReason, "customer")));
         } catch (Exception e) {
             log.warn("Failed to notify org owner for cancelled order {}: {}", order.getId(), e.getMessage());
         }
@@ -756,12 +772,14 @@ public class OrderService {
         try {
             String email = resolveCustomerEmail(order);
             if (email != null) {
-                emailService.sendPickupScheduleNotification(
-                        email, order.getId().toString(),
+                final String capturedEmail = email;
+                final String capturedOrderId = order.getId().toString();
+                runAfterCommit(() -> emailService.sendPickupScheduleNotification(
+                        capturedEmail, capturedOrderId,
                         pickupDateStr,
                         schedule.getPickupTimeSlot(),
                         schedule.getLocation(),
-                        schedule.getNotes());
+                        schedule.getNotes()));
             }
             if (order.getUserId() != null) {
                 String shortId = order.getId().toString().substring(0, 8).toUpperCase();
@@ -776,6 +794,19 @@ public class OrderService {
             }
         } catch (Exception e) {
             log.warn("Failed to send pickup notification for order {}: {}", order.getId(), e.getMessage());
+        }
+    }
+
+    private void runAfterCommit(Runnable action) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    action.run();
+                }
+            });
+        } else {
+            action.run();
         }
     }
 
