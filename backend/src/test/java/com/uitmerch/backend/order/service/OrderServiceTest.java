@@ -35,8 +35,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -455,6 +458,94 @@ class OrderServiceTest {
 
         verify(emailService).sendOrderPlacedConfirmation(
             eq("guest@test.com"), eq(orderId.toString()));
+    }
+
+    @Test
+    void createGuestOrder_txRollback_emailNotSent() {
+        TransactionSynchronizationManager.initSynchronization();
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+        try {
+            GuestOrderItemRequest item = new GuestOrderItemRequest();
+            item.setMerchId(merchId);
+            item.setQuantity(1);
+            GuestOrderRequest req = new GuestOrderRequest();
+            req.setItems(List.of(item));
+            req.setGuestName("Guest");
+            req.setGuestEmail("guest@test.com");
+            req.setGuestPhone("0901234567");
+
+            MerchItem merch = publishedMerch(5);
+            Order savedOrder = Order.builder()
+                .id(orderId).orgId(orgId)
+                .guestEmail("guest@test.com")
+                .totalAmount(BigDecimal.valueOf(100_000))
+                .status(OrderStatus.PENDING).build();
+
+            when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
+            when(merchItemRepository.deductStock(merchId, 1)).thenReturn(1);
+            when(orderRepository.save(any())).thenReturn(savedOrder);
+            when(orderItemRepository.saveAll(any())).thenReturn(Collections.emptyList());
+
+            orderService.createGuestOrder(req);
+
+            // deferred — not yet sent while TX is open
+            verify(emailService, never()).sendOrderPlacedConfirmation(any(), any());
+
+            // simulate rollback: trigger afterCompletion with ROLLED_BACK, skip afterCommit
+            List<TransactionSynchronization> syncs =
+                new ArrayList<>(TransactionSynchronizationManager.getSynchronizations());
+            syncs.forEach(s -> s.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK));
+
+            // still not sent
+            verify(emailService, never()).sendOrderPlacedConfirmation(any(), any());
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization();
+            TransactionSynchronizationManager.setActualTransactionActive(false);
+        }
+    }
+
+    @Test
+    void createGuestOrder_txCommit_emailSentAfterCommit() {
+        TransactionSynchronizationManager.initSynchronization();
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+        try {
+            GuestOrderItemRequest item = new GuestOrderItemRequest();
+            item.setMerchId(merchId);
+            item.setQuantity(1);
+            GuestOrderRequest req = new GuestOrderRequest();
+            req.setItems(List.of(item));
+            req.setGuestName("Guest");
+            req.setGuestEmail("guest@test.com");
+            req.setGuestPhone("0901234567");
+
+            MerchItem merch = publishedMerch(5);
+            Order savedOrder = Order.builder()
+                .id(orderId).orgId(orgId)
+                .guestEmail("guest@test.com")
+                .totalAmount(BigDecimal.valueOf(100_000))
+                .status(OrderStatus.PENDING).build();
+
+            when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
+            when(merchItemRepository.deductStock(merchId, 1)).thenReturn(1);
+            when(orderRepository.save(any())).thenReturn(savedOrder);
+            when(orderItemRepository.saveAll(any())).thenReturn(Collections.emptyList());
+
+            orderService.createGuestOrder(req);
+
+            // deferred — not yet sent while TX is open
+            verify(emailService, never()).sendOrderPlacedConfirmation(any(), any());
+
+            // simulate commit
+            List<TransactionSynchronization> syncs =
+                new ArrayList<>(TransactionSynchronizationManager.getSynchronizations());
+            syncs.forEach(TransactionSynchronization::afterCommit);
+            syncs.forEach(s -> s.afterCompletion(TransactionSynchronization.STATUS_COMMITTED));
+
+            verify(emailService).sendOrderPlacedConfirmation(eq("guest@test.com"), eq(orderId.toString()));
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization();
+            TransactionSynchronizationManager.setActualTransactionActive(false);
+        }
     }
 
     // ── getGuestOrderByEmail ─────────────────────────────────────────────────
