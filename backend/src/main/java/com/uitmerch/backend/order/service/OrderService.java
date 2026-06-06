@@ -392,10 +392,11 @@ public class OrderService {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         // Validate all orders belong to this org and are CONFIRMED
-        List<Order> orders = request.getOrderIds().stream()
-                .map(id -> orderRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Order", id.toString())))
-                .toList();
+        List<Order> orders = orderRepository.findAllById(request.getOrderIds());
+
+        if (orders.size() != request.getOrderIds().size()) {
+            throw new ResourceNotFoundException("One or more order IDs not found.");
+        }
 
         for (Order order : orders) {
             if (!org.getId().equals(order.getOrgId())) {
@@ -425,6 +426,7 @@ public class OrderService {
             orderRepository.save(order);
 
         }
+        
 
         return PickupScheduleResponse.from(schedule, orders.size());
     }
