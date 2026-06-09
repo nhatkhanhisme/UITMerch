@@ -422,11 +422,9 @@ public class OrderService {
             order.setStatus(OrderStatus.READY);
             order.setPickupScheduleId(schedule.getId());
             sendPickupNotification(order, schedule, pickupDateStr);
-
-            orderRepository.save(order);
-
         }
-        
+        orderRepository.saveAll(orders);
+
 
         return PickupScheduleResponse.from(schedule, orders.size());
     }

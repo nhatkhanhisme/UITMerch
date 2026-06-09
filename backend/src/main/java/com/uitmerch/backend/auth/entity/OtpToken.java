@@ -34,6 +34,10 @@ public class OtpToken {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "purpose", nullable = false, length = 30)
+    private OtpPurpose purpose;
+
     @Builder.Default
     @Column(name = "is_used", nullable = false)
     private boolean isUsed = false;

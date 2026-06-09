@@ -1,6 +1,7 @@
 package com.uitmerch.backend.auth.service;
 
 import com.uitmerch.backend.auth.dto.*;
+import com.uitmerch.backend.auth.entity.OtpPurpose;
 import com.uitmerch.backend.auth.entity.OtpToken;
 import com.uitmerch.backend.auth.entity.User;
 import com.uitmerch.backend.auth.repository.OtpTokenRepository;
@@ -91,6 +92,10 @@ public class AuthService {
 
 
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw genericError;
+        }
+
+        if (otp.getPurpose() != OtpPurpose.VERIFY_EMAIL) {
             throw genericError;
         }
 
@@ -205,7 +210,7 @@ public class AuthService {
 
         userRepository.save(user);
 
-        issueOtp(user);
+        issueOtp(user, OtpPurpose.VERIFY_EMAIL);
     }
 
     private void validatePassword(String password) {
@@ -224,7 +229,7 @@ public class AuthService {
         }
     }
 
-    private void issueOtp(User user) {
+    private void issueOtp(User user, OtpPurpose purpose) {
         otpTokenRepository.deleteAllByUser(user);
 
         String code = generateOtpCode();
@@ -232,13 +237,18 @@ public class AuthService {
         OtpToken otp = OtpToken.builder()
                 .user(user)
                 .otpCode(code)
+                .purpose(purpose)
                 .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES))
                 .isUsed(false)
                 .build();
 
         otpTokenRepository.save(otp);
 
-        runAfterCommit(() -> emailService.sendOtp(user.getEmail(), code));
+        if (purpose == OtpPurpose.VERIFY_EMAIL) {
+            runAfterCommit(() -> emailService.sendOtp(user.getEmail(), code));
+        } else {
+            runAfterCommit(() -> emailService.sendPasswordReset(user.getEmail(), code));
+        }
     }
 
     private void runAfterCommit(Runnable action) {
@@ -265,7 +275,7 @@ public class AuthService {
         // Silent no-op for unknown, already-verified, or inactive accounts — prevents enumeration
         userRepository.findByEmail(email).ifPresent(user -> {
             if (user.isActive() && !user.isVerified()) {
-                issueOtp(user);
+                issueOtp(user, OtpPurpose.VERIFY_EMAIL);
                 log.info("OTP re-issued for unverified user {}", email);
             }
         });
@@ -276,16 +286,7 @@ public class AuthService {
         // Use a generic response to avoid revealing whether an email is registered
         userRepository.findByEmail(email).ifPresent(user -> {
             if (user.isActive() && user.isVerified()) {
-                otpTokenRepository.deleteAllByUser(user);
-                String code = generateOtpCode();
-                OtpToken otp = OtpToken.builder()
-                    .user(user)
-                    .otpCode(code)
-                    .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES))
-                    .isUsed(false)
-                    .build();
-                otpTokenRepository.save(otp);
-                runAfterCommit(() -> emailService.sendPasswordReset(user.getEmail(), code));
+                issueOtp(user, OtpPurpose.RESET_PASSWORD);
                 log.info("Password-reset OTP issued for {}", email);
             }
         });
@@ -307,6 +308,10 @@ public class AuthService {
         }
 
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw genericError;
+        }
+
+        if (otp.getPurpose() != OtpPurpose.RESET_PASSWORD) {
             throw genericError;
         }
 
