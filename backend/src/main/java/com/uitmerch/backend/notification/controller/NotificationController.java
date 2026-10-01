@@ -36,8 +36,10 @@ public class NotificationController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "SSE stream — real-time notification push for the authenticated customer")
-    public SseEmitter stream(@RequestAttribute("userId") String userId) {
-        return sseEmitterManager.add(UUID.fromString(userId));
+    public SseEmitter stream(@RequestAttribute("userId") String userId,
+        @RequestAttribute("sessionId") String sessionId, @RequestAttribute("authVersion") long authVersion,
+        @RequestAttribute("accessExpiresAt") java.time.Instant expiresAt) {
+        return sseEmitterManager.add(UUID.fromString(userId), sessionId, authVersion, expiresAt);
     }
 
     @GetMapping

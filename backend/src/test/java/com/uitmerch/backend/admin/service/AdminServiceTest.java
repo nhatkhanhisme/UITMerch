@@ -90,7 +90,7 @@ class AdminServiceTest {
     @Test
     void updateUserRole_success_changesRole() {
         User u = user(UserRole.CUSTOMER);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(u));
+        when(userRepository.findLockedById(userId)).thenReturn(Optional.of(u));
         when(userRepository.save(u)).thenReturn(u);
 
         UserSummaryResponse response = adminService.updateUserRole(userId, UserRole.ORGANIZER);
@@ -101,7 +101,7 @@ class AdminServiceTest {
 
     @Test
     void updateUserRole_userNotFound_throwsResourceNotFound() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findLockedById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminService.updateUserRole(userId, UserRole.ADMIN))
             .isInstanceOf(ResourceNotFoundException.class);
@@ -112,7 +112,7 @@ class AdminServiceTest {
     @Test
     void setUserActive_deactivate_setsActiveToFalse() {
         User u = user(UserRole.CUSTOMER);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(u));
+        when(userRepository.findLockedById(userId)).thenReturn(Optional.of(u));
         when(userRepository.save(u)).thenReturn(u);
 
         adminService.setUserActive(userId, false);
@@ -125,7 +125,7 @@ class AdminServiceTest {
     void setUserActive_activate_setsActiveToTrue() {
         User u = user(UserRole.CUSTOMER);
         u.setActive(false);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(u));
+        when(userRepository.findLockedById(userId)).thenReturn(Optional.of(u));
         when(userRepository.save(u)).thenReturn(u);
 
         adminService.setUserActive(userId, true);
@@ -135,7 +135,7 @@ class AdminServiceTest {
 
     @Test
     void setUserActive_userNotFound_throwsResourceNotFound() {
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findLockedById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminService.setUserActive(userId, false))
             .isInstanceOf(ResourceNotFoundException.class);

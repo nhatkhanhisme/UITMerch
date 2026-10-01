@@ -24,7 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/public/orders")
 @RequiredArgsConstructor
-@Tag(name = "Public", description = "Guest checkout without authentication")
+@Tag(name = "Public", description = "Guest and customer checkout")
 public class PublicOrderController {
 
     private final OrderService orderService;
@@ -35,7 +35,7 @@ public class PublicOrderController {
     private static final Duration GUEST_ORDER_WINDOW = Duration.ofHours(1);
 
     @PostMapping
-    @Operation(summary = "Guest checkout", description = "Places orders as a guest without requiring an account. Items are grouped by organization.")
+    @Operation(summary = "Guest checkout", description = "Places guest orders anonymously or account-linked orders for an authenticated CUSTOMER. Items are grouped by organization.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Guest order placed successfully"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors or insufficient stock"),
@@ -49,7 +49,16 @@ public class PublicOrderController {
         if (!rateLimiterService.isAllowed("guest-order:" + ipUtil.extractClientIp(httpRequest), GUEST_ORDER_MAX, GUEST_ORDER_WINDOW)) {
             throw new ValidationException("Too many orders from this IP. Please try again later.");
         }
-        List<OrderResponse> orders = orderService.createGuestOrder(request);
+        Object authenticatedId = httpRequest.getAttribute("userId");
+        List<OrderResponse> orders;
+        if (authenticatedId != null) {
+            if (!"CUSTOMER".equals(httpRequest.getAttribute("role"))) {
+                throw new com.uitmerch.backend.common.exception.ForbiddenException("Only customers can place account-linked orders.");
+            }
+            orders = orderService.createPublicOrder(UUID.fromString(authenticatedId.toString()), request);
+        } else {
+            orders = orderService.createGuestOrder(request);
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success("Guest order placed successfully. " + orders.size() + " order(s) created.", orders));
     }

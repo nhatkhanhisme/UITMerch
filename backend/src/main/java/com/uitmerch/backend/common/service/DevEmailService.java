@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service
+@Service("mailTransport")
 @Profile("dev | docker")
 public class DevEmailService implements EmailService {
 

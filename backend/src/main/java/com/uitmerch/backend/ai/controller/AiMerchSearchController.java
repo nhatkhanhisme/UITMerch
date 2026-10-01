@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class AiMerchSearchController {
 
     private final VisualSearchService visualSearchService;
+    private final com.uitmerch.backend.common.service.RateLimiterService rateLimiter;
+    private final com.uitmerch.backend.common.util.IpUtil ipUtil;
 
     @PostMapping(value = "/visual-search", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
@@ -34,8 +36,12 @@ public class AiMerchSearchController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file type, size, or AI error")
     })
     public ResponseEntity<ApiResponse<VisualSearchResponse>> visualSearch(
-        @RequestPart("image") MultipartFile image
+        @RequestPart("image") MultipartFile image, jakarta.servlet.http.HttpServletRequest request
     ) {
+        if (!rateLimiter.isAllowed("visual-search:ip:" + ipUtil.extractClientIp(request), 5, java.time.Duration.ofMinutes(1))
+            || !rateLimiter.isAllowed("visual-search:global", 20, java.time.Duration.ofMinutes(1))) {
+            throw new com.uitmerch.backend.common.exception.RateLimitException("Too many image searches. Please try again later.", 60);
+        }
         VisualSearchResponse result = visualSearchService.search(image);
         return ResponseEntity.ok(ApiResponse.success("Tìm kiếm thành công.", result));
     }

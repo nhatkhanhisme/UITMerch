@@ -55,7 +55,7 @@ class EventServiceTest {
     private final UUID merchId  = UUID.randomUUID();
 
     private Organization org() {
-        return Organization.builder().id(orgId).ownerId(ownerId).build();
+        return Organization.builder().id(orgId).ownerId(ownerId).status(com.uitmerch.backend.common.model.OrganizationStatus.ACTIVE).build();
     }
 
     private Event event(EventStatus status) {
@@ -178,6 +178,7 @@ class EventServiceTest {
 
     @Test
     void getPublicEvent_publishedEvent_returnsResponse() {
+        when(organizationService.getOrganizationEntityById(orgId)).thenReturn(org());
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event(EventStatus.PUBLISHED)));
         when(eventMerchRepository.findByEventId(eventId)).thenReturn(Collections.emptyList());
         when(merchItemRepository.findAllById(any())).thenReturn(Collections.emptyList());

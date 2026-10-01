@@ -26,7 +26,7 @@ public class MerchEmbeddingBackfillRunner {
 
     private final MerchItemRepository merchItemRepository;
     private final MerchEmbeddingService merchEmbeddingService;
-    private final EmbeddingService embeddingService;
+    private final com.uitmerch.backend.common.delivery.BackgroundJobService jobs;
 
     @Async
     @EventListener(ApplicationReadyEvent.class)
@@ -47,15 +47,12 @@ public class MerchEmbeddingBackfillRunner {
         int success = 0;
         for (MerchItem item : toProcess) {
             try {
-                String text = item.getName() +
-                    (item.getDescription() != null ? " " + item.getDescription() : "");
-                float[] vec = embeddingService.embed(text);
-                merchEmbeddingService.store(item.getId(), vec);
+                jobs.enqueueEmbedding(item.getId());
                 success++;
             } catch (Exception e) {
                 log.warn("Backfill failed for merch {}: {}", item.getId(), e.getMessage());
             }
         }
-        log.info("Embedding backfill complete: {}/{} items embedded.", success, toProcess.size());
+        log.info("Embedding backfill queued: {}/{} items for durable delivery.", success, toProcess.size());
     }
 }

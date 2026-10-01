@@ -42,6 +42,9 @@ public class OtpToken {
     @Column(name = "attempt_count", nullable = false)
     private int attemptCount = 0;
 
+    @Column(name = "password_reset", nullable = false)
+    private boolean passwordReset;
+
     @Column(name = "locked_until")
     private LocalDateTime lockedUntil;
 

@@ -50,6 +50,7 @@ class AuthServiceTest {
     @Mock private JwtTokenProvider jwtTokenProvider;
     @Mock private EmailService emailService;
     @Mock private TokenBlacklistService tokenBlacklistService;
+    @Mock private AuthSessionService authSessionService;
 
     @InjectMocks private AuthService authService;
 
@@ -149,7 +150,7 @@ class AuthServiceTest {
             .attemptCount(0)
             .build();
 
-        when(userRepository.findByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
         when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -173,7 +174,7 @@ class AuthServiceTest {
             .attemptCount(0)
             .build();
 
-        when(userRepository.findByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
         when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -196,7 +197,7 @@ class AuthServiceTest {
             .isUsed(false)
             .build();
 
-        when(userRepository.findByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
 
         VerifyEmailRequest req = new VerifyEmailRequest();
@@ -218,7 +219,7 @@ class AuthServiceTest {
             .lockedUntil(LocalDateTime.now().plusMinutes(12))
             .build();
 
-        when(userRepository.findByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
 
         VerifyEmailRequest req = new VerifyEmailRequest();
@@ -227,7 +228,7 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.verifyEmail(req))
             .isInstanceOf(InvalidOtpException.class)
-            .hasMessageContaining("Too many failed attempts");
+            .hasMessage("Invalid email or OTP code");
     }
 
     @Test
@@ -240,7 +241,7 @@ class AuthServiceTest {
             .attemptCount(4) // 5th attempt will hit limit
             .build();
 
-        when(userRepository.findByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("test@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
         when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -257,7 +258,7 @@ class AuthServiceTest {
 
     @Test
     void verifyEmail_unknownEmail_throws() {
-        when(userRepository.findByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
+        when(userRepository.findLockedByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
 
         VerifyEmailRequest req = new VerifyEmailRequest();
         req.setEmail("ghost@uit.edu.vn");
@@ -281,10 +282,9 @@ class AuthServiceTest {
             .isVerified(true)
             .build();
 
-        when(userRepository.findByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Password1", "hashed")).thenReturn(true);
-        when(jwtTokenProvider.generateAccessToken(any(), any(), any())).thenReturn("access.token.xyz");
-        when(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh.token.xyz");
+        when(authSessionService.create(user)).thenReturn(new AuthSessionService.Tokens("access.token.xyz", "refresh.token.xyz"));
 
         LoginRequest req = new LoginRequest();
         req.setEmail("user@uit.edu.vn");
@@ -306,7 +306,7 @@ class AuthServiceTest {
             .isVerified(true)
             .build();
 
-        when(userRepository.findByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "hashed")).thenReturn(false);
 
         LoginRequest req = new LoginRequest();
@@ -325,7 +325,7 @@ class AuthServiceTest {
             .isVerified(false)
             .build();
 
-        when(userRepository.findByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(any(), any())).thenReturn(true);
 
         LoginRequest req = new LoginRequest();
@@ -338,7 +338,7 @@ class AuthServiceTest {
 
     @Test
     void login_unknownEmail_throwsAuthentication() {
-        when(userRepository.findByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
+        when(userRepository.findLockedByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
 
         LoginRequest req = new LoginRequest();
         req.setEmail("ghost@uit.edu.vn");
@@ -357,7 +357,7 @@ class AuthServiceTest {
             .isActive(false)
             .build();
 
-        when(userRepository.findByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(any(), any())).thenReturn(true);
 
         LoginRequest req = new LoginRequest();
@@ -377,7 +377,7 @@ class AuthServiceTest {
             .id(UUID.randomUUID()).email("u@uit.edu.vn").passwordHash("h")
             .fullName("U").role(UserRole.CUSTOMER).isVerified(false).isActive(true).build();
 
-        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         authService.resendOtp("u@uit.edu.vn");
@@ -391,7 +391,7 @@ class AuthServiceTest {
             .id(UUID.randomUUID()).email("v@uit.edu.vn").passwordHash("h")
             .fullName("V").role(UserRole.CUSTOMER).isVerified(true).isActive(true).build();
 
-        when(userRepository.findByEmail("v@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("v@uit.edu.vn")).thenReturn(Optional.of(user));
 
         authService.resendOtp("v@uit.edu.vn");
 
@@ -400,7 +400,7 @@ class AuthServiceTest {
 
     @Test
     void resendOtp_unknownEmail_silentNoOp() {
-        when(userRepository.findByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
+        when(userRepository.findLockedByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
 
         authService.resendOtp("ghost@uit.edu.vn");
 
@@ -420,10 +420,9 @@ class AuthServiceTest {
         when(jwtTokenProvider.validateAsRefreshToken("refresh.token")).thenReturn(true);
         when(tokenBlacklistService.isBlacklisted("refresh.token")).thenReturn(false);
         when(jwtTokenProvider.getUserIdFromToken("refresh.token")).thenReturn(userId.toString());
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findLockedById(userId)).thenReturn(Optional.of(user));
         when(jwtTokenProvider.getExpiryFromToken("refresh.token")).thenReturn(Instant.now().plusSeconds(60));
-        when(jwtTokenProvider.generateAccessToken(any(), any(), any())).thenReturn("new.access");
-        when(jwtTokenProvider.generateRefreshToken(any())).thenReturn("new.refresh");
+        when(authSessionService.rotate("refresh.token", user)).thenReturn(new AuthSessionService.Tokens("new.access", "new.refresh"));
 
         var response = authService.refreshToken("refresh.token");
 
@@ -492,7 +491,7 @@ class AuthServiceTest {
             .passwordHash("h").fullName("U").role(UserRole.CUSTOMER)
             .isVerified(true).isActive(true).build();
 
-        when(userRepository.findByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("user@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         authService.forgotPassword("user@uit.edu.vn");
@@ -502,7 +501,7 @@ class AuthServiceTest {
 
     @Test
     void forgotPassword_unknownEmail_silentNoOp() {
-        when(userRepository.findByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
+        when(userRepository.findLockedByEmail("ghost@uit.edu.vn")).thenReturn(Optional.empty());
 
         assertThatNoException().isThrownBy(() -> authService.forgotPassword("ghost@uit.edu.vn"));
         verifyNoInteractions(emailService);
@@ -514,7 +513,7 @@ class AuthServiceTest {
             .id(UUID.randomUUID()).email("u@uit.edu.vn")
             .isVerified(false).isActive(true).build();
 
-        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
 
         authService.forgotPassword("u@uit.edu.vn");
 
@@ -527,7 +526,7 @@ class AuthServiceTest {
             .id(UUID.randomUUID()).email("u@uit.edu.vn")
             .isVerified(true).isActive(false).build();
 
-        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
 
         authService.forgotPassword("u@uit.edu.vn");
 
@@ -538,12 +537,12 @@ class AuthServiceTest {
 
     @Test
     void resetPassword_validOtp_updatesPasswordHash() {
-        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
-        OtpToken otp = OtpToken.builder()
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").isVerified(true).build();
+        OtpToken otp = OtpToken.builder().passwordReset(true)
             .otpCode("123456").expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false).attemptCount(0).build();
 
-        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
         when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -562,12 +561,12 @@ class AuthServiceTest {
 
     @Test
     void resetPassword_weakPassword_throwsValidation() {
-        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
-        OtpToken otp = OtpToken.builder()
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").isVerified(true).build();
+        OtpToken otp = OtpToken.builder().passwordReset(true)
             .otpCode("123456").expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false).attemptCount(0).build();
 
-        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
 
         ResetPasswordRequest req = new ResetPasswordRequest();
@@ -582,12 +581,12 @@ class AuthServiceTest {
 
     @Test
     void resetPassword_wrongOtp_throwsInvalidOtp() {
-        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
-        OtpToken otp = OtpToken.builder()
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").isVerified(true).build();
+        OtpToken otp = OtpToken.builder().passwordReset(true)
             .otpCode("111111").expiresAt(LocalDateTime.now().plusMinutes(10))
             .isUsed(false).attemptCount(0).build();
 
-        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
         when(otpTokenRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -603,12 +602,12 @@ class AuthServiceTest {
 
     @Test
     void resetPassword_expiredOtp_throws() {
-        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").build();
-        OtpToken otp = OtpToken.builder()
+        User user = User.builder().id(UUID.randomUUID()).email("u@uit.edu.vn").isVerified(true).build();
+        OtpToken otp = OtpToken.builder().passwordReset(true)
             .otpCode("123456").expiresAt(LocalDateTime.now().minusMinutes(1))
             .isUsed(false).build();
 
-        when(userRepository.findByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
+        when(userRepository.findLockedByEmail("u@uit.edu.vn")).thenReturn(Optional.of(user));
         when(otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)).thenReturn(Optional.of(otp));
 
         ResetPasswordRequest req = new ResetPasswordRequest();

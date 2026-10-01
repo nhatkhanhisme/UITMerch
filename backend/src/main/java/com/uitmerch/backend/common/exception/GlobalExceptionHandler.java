@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         MethodArgumentNotValidException ex,
         WebRequest request
     ) {
-        logger.warn("Validation failed: {}", ex.getMessage());
+        logger.warn("Request validation failed for {} field(s)", ex.getBindingResult().getErrorCount());
 
         Map<String, String> fieldErrors = new LinkedHashMap<>();
         ex.getBindingResult().getFieldErrors()
@@ -42,9 +42,11 @@ public class GlobalExceptionHandler {
         WebRequest request
     ) {
         logger.warn("Application exception [{}]: {}", ex.getErrorCode(), ex.getMessage());
-        return ResponseEntity
-            .status(ex.getHttpStatus())
-            .body(ApiResponse.error(ex.getMessage()));
+        var response = ResponseEntity.status(ex.getHttpStatus());
+        if (ex instanceof RateLimitException rateLimit) {
+            response.header("Retry-After", Long.toString(rateLimit.getRetryAfterSeconds()));
+        }
+        return response.body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)

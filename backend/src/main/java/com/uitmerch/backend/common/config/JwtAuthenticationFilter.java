@@ -35,11 +35,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenBlacklistService tokenBlacklistService;
+    private final com.uitmerch.backend.auth.repository.UserRepository userRepository;
+    private final com.uitmerch.backend.auth.service.AuthSessionService authSessionService;
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
-                                   TokenBlacklistService tokenBlacklistService) {
+                                   TokenBlacklistService tokenBlacklistService,
+                                   com.uitmerch.backend.auth.repository.UserRepository userRepository,
+                                   com.uitmerch.backend.auth.service.AuthSessionService authSessionService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.tokenBlacklistService = tokenBlacklistService;
+        this.userRepository = userRepository;
+        this.authSessionService = authSessionService;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // These endpoints authenticate their own credentials; stale browser access
+        // headers must not prevent login or refresh. Logout still validates its bearer.
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        return java.util.Set.of("/api/v1/auth/login", "/api/v1/auth/refresh",
+            "/api/v1/auth/register", "/api/v1/auth/register/organizer",
+            "/api/v1/auth/verify-email", "/api/v1/auth/resend-otp",
+            "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password").contains(path);
     }
     
     @Override
@@ -51,11 +68,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = extractToken(request);
             
-            if (jwt != null && jwtTokenProvider.validateToken(jwt) && !tokenBlacklistService.isBlacklisted(jwt)) {
+            if (jwt != null) {
+                if (!jwtTokenProvider.validateAsAccessToken(jwt) || tokenBlacklistService.isBlacklisted(jwt)) {
+                    throw new org.springframework.security.authentication.BadCredentialsException("Invalid token");
+                }
                 // Extract claims and set authentication
                 String userId = jwtTokenProvider.getUserIdFromToken(jwt);
-                String email = jwtTokenProvider.getEmailFromToken(jwt);
-                String role = jwtTokenProvider.getRoleFromToken(jwt);
+                var user = userRepository.findById(java.util.UUID.fromString(userId))
+                    .orElseThrow(() -> new org.springframework.security.authentication.BadCredentialsException("Invalid token"));
+                if (!authSessionService.isActive(jwt, user)) {
+                    throw new org.springframework.security.authentication.BadCredentialsException("Invalid session");
+                }
+                String email = user.getEmail();
+                String role = user.getRole().name();
                 
                 // Create authorities with "ROLE_" prefix for hasRole() matching
                 Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -78,9 +103,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 request.setAttribute("userId", userId);
                 request.setAttribute("email", email);
                 request.setAttribute("role", role);
+                request.setAttribute("sessionId", jwtTokenProvider.getSessionIdFromToken(jwt));
+                request.setAttribute("authVersion", user.getAuthVersion());
+                request.setAttribute("accessExpiresAt", jwtTokenProvider.getExpiryFromToken(jwt));
             }
         } catch (Exception e) {
-            logger.warn("JWT authentication failed — treating request as unauthenticated: {}", e.getMessage());
+            SecurityContextHolder.clearContext();
+            logger.debug("JWT authentication failed: {}", e.getClass().getSimpleName());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"success\":false,\"message\":\"Invalid or expired credentials\"}");
+            return;
         }
         
         filterChain.doFilter(request, response);
@@ -96,6 +129,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
             return authHeader.substring(BEARER_PREFIX.length());
+        }
+        if (authHeader != null) {
+            throw new org.springframework.security.authentication.BadCredentialsException("Invalid Authorization header");
         }
         // EventSource cannot set custom headers, so SSE endpoints accept token as a query param.
         String path = request.getServletPath();

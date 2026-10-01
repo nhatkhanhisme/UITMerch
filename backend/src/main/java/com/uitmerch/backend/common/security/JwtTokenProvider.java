@@ -74,27 +74,35 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token);
+            getAllClaims(token);
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException e) {
-            logger.warn("Invalid JWT signature: {}", e.getMessage());
-            return false;
-        } catch (MalformedJwtException e) {
-            logger.warn("Invalid JWT token: {}", e.getMessage());
-            return false;
-        } catch (ExpiredJwtException e) {
-            logger.warn("Expired JWT token: {}", e.getMessage());
-            return false;
-        } catch (UnsupportedJwtException e) {
-            logger.warn("Unsupported JWT token: {}", e.getMessage());
-            return false;
-        } catch (IllegalArgumentException e) {
-            logger.warn("JWT token is empty: {}", e.getMessage());
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            logger.debug("JWT validation failed: {}", e.getClass().getSimpleName());
             return false;
         }
+    }
+
+    public boolean validateAsAccessToken(String token) {
+        return validateToken(token) && ACCESS_TOKEN_TYPE.equals(getClaim(token, TOKEN_TYPE_CLAIM, String.class));
+    }
+
+    public String generateSessionAccessToken(String userId, String email, String role, String sessionId, long version) {
+        return generateToken(Map.of(USER_ID_CLAIM, userId, EMAIL_CLAIM, email, ROLE_CLAIM, role,
+            TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE, "sid", sessionId, "ver", version), accessTokenExpiration);
+    }
+
+    public String generateSessionRefreshToken(String userId, String sessionId, long version) {
+        return generateToken(Map.of(USER_ID_CLAIM, userId, TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE,
+            "sid", sessionId, "ver", version), refreshTokenExpiration);
+    }
+
+    public String getSessionIdFromToken(String token) {
+        return getClaim(token, "sid", String.class);
+    }
+
+    public long getAuthVersionFromToken(String token) {
+        Number version = getAllClaims(token).get("ver", Number.class);
+        return version == null ? -1 : version.longValue();
     }
 
     public boolean validateAsRefreshToken(String token) {
@@ -133,6 +141,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
             .claims(claims)
+            .id(java.util.UUID.randomUUID().toString())
             .issuer(ISSUER)
             .issuedAt(now)
             .expiration(expiration)
@@ -147,6 +156,7 @@ public class JwtTokenProvider {
     private Claims getAllClaims(String token) {
         return Jwts.parser()
             .verifyWith(getSigningKey())
+            .requireIssuer(ISSUER)
             .build()
             .parseSignedClaims(token)
             .getPayload();

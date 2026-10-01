@@ -18,10 +18,12 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     Page<Event> findByStatus(EventStatus status, Pageable pageable);
 
+    @org.springframework.data.jpa.repository.Query("SELECT e FROM Event e WHERE e.status IN :statuses AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = e.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     Page<Event> findByStatusIn(Collection<EventStatus> statuses, Pageable pageable);
 
     Page<Event> findByOrgIdAndStatus(UUID orgId, EventStatus status, Pageable pageable);
 
+    @org.springframework.data.jpa.repository.Query("SELECT e FROM Event e WHERE e.orgId = :orgId AND e.status IN :statuses AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = e.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     Page<Event> findByOrgIdAndStatusIn(UUID orgId, Collection<EventStatus> statuses, Pageable pageable);
 
     Optional<Event> findByIdAndOrgId(UUID id, UUID orgId);

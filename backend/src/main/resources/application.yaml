@@ -44,6 +44,10 @@ app:
 spring:
   application:
     name: uitmerch-backend
+  task:
+    scheduling:
+      pool:
+        size: 3
   main:
     lazy-initialization: true
   data:
@@ -60,6 +64,9 @@ spring:
     properties:
       mail:
         smtp:
+          connectiontimeout: 5000
+          timeout: 10000
+          writetimeout: 10000
           auth: ${MAIL_SMTP_AUTH:true}
           starttls:
             enable: true
@@ -101,17 +108,17 @@ spring:
     validate-on-migrate: true
     out-of-order: false
   
-  # OpenAPI/Swagger Documentation — disabled by default in production
-  # Set SWAGGER_ENABLED=true to re-enable (e.g. for staging environments)
-  springdoc:
-    swagger-ui:
-      path: /swagger-ui.html
-      persistAuthorization: true
-      tryItOutEnabled: true
-      enabled: ${SWAGGER_ENABLED:false}
-    api-docs:
-      path: /v3/api-docs
-      enabled: ${SWAGGER_ENABLED:false}
+# OpenAPI/Swagger Documentation — disabled by default in production
+# Set SWAGGER_ENABLED=true to re-enable (e.g. for staging environments)
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    persistAuthorization: true
+    tryItOutEnabled: true
+    enabled: ${SWAGGER_ENABLED:false}
+  api-docs:
+    path: /v3/api-docs
+    enabled: ${SWAGGER_ENABLED:false}
 
 logging:
   level:

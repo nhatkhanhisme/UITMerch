@@ -59,6 +59,13 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
+    @Column(name = "auth_version", nullable = false)
+    private long authVersion;
+
+    @Version
+    @Column(name = "record_version", nullable = false)
+    private long recordVersion;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

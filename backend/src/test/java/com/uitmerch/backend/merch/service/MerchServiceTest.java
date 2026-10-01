@@ -161,7 +161,7 @@ class MerchServiceTest {
     @Test
     void updateMerch_publishWithInactiveOrg_throwsValidation() {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(pendingOrg());
-        when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(savedItem()));
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.of(savedItem()));
 
         UpdateMerchRequest req = new UpdateMerchRequest();
         req.setStatus(MerchItemStatus.PUBLISHED);
@@ -175,7 +175,7 @@ class MerchServiceTest {
     void updateMerch_publishWithActiveOrg_succeeds() {
         MerchItem item = savedItem();
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
-        when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(item));
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.of(item));
         when(merchItemRepository.save(any())).thenReturn(item);
         when(merchImageRepository.findByMerchIdOrderByPosition(any())).thenReturn(Collections.emptyList());
 
@@ -192,7 +192,7 @@ class MerchServiceTest {
     void updateMerch_partialUpdate_onlyModifiesProvidedFields() {
         MerchItem item = savedItem();
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
-        when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(item));
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.of(item));
         when(merchItemRepository.save(any())).thenReturn(item);
         when(merchImageRepository.findByMerchIdOrderByPosition(any())).thenReturn(Collections.emptyList());
 
@@ -209,7 +209,7 @@ class MerchServiceTest {
     @Test
     void updateMerch_itemNotOwned_throwsResourceNotFound() {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
-        when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.empty());
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.empty());
 
         UpdateMerchRequest req = new UpdateMerchRequest();
         req.setName("New Name");
@@ -224,7 +224,7 @@ class MerchServiceTest {
     void deleteMerch_success_archivesItem() {
         MerchItem item = savedItem();
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
-        when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.of(item));
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.of(item));
         when(merchItemRepository.save(any())).thenReturn(item);
 
         merchService.deleteMerch(ownerId, orgId, merchId);
@@ -236,7 +236,7 @@ class MerchServiceTest {
     @Test
     void deleteMerch_itemNotOwned_throwsResourceNotFound() {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(activeOrg());
-        when(merchItemRepository.findByIdAndOrgId(merchId, orgId)).thenReturn(Optional.empty());
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> merchService.deleteMerch(ownerId, orgId, merchId))
             .isInstanceOf(ResourceNotFoundException.class);
@@ -249,7 +249,7 @@ class MerchServiceTest {
         MerchItem item = savedItem();
         item.setStatus(MerchItemStatus.PUBLISHED);
 
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(item));
+        when(merchItemRepository.findPublicByIds(List.of(merchId))).thenReturn(List.of(item));
         when(merchImageRepository.findByMerchIdOrderByPosition(any())).thenReturn(Collections.emptyList());
 
         MerchResponse response = merchService.getPublishedMerch(merchId);
@@ -259,7 +259,7 @@ class MerchServiceTest {
 
     @Test
     void getPublishedMerch_draftItem_throwsResourceNotFound() {
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(savedItem())); // DRAFT status
+        when(merchItemRepository.findPublicByIds(List.of(merchId))).thenReturn(List.of()); // SQL excludes drafts
 
         assertThatThrownBy(() -> merchService.getPublishedMerch(merchId))
             .isInstanceOf(ResourceNotFoundException.class);
@@ -267,7 +267,7 @@ class MerchServiceTest {
 
     @Test
     void getPublishedMerch_notFound_throwsResourceNotFound() {
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.empty());
+        when(merchItemRepository.findPublicByIds(List.of(merchId))).thenReturn(List.of());
 
         assertThatThrownBy(() -> merchService.getPublishedMerch(merchId))
             .isInstanceOf(ResourceNotFoundException.class);

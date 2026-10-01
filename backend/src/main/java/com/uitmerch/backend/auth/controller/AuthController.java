@@ -85,8 +85,9 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<Void>> verifyEmail(
-            @Valid @RequestBody VerifyEmailRequest request
+            @Valid @RequestBody VerifyEmailRequest request, HttpServletRequest httpRequest
     ) {
+        limitOtpSubmission(request.getEmail(), httpRequest);
         authService.verifyEmail(request);
         return ResponseEntity.ok(ApiResponse.success("Email verified successfully.", null));
     }
@@ -167,10 +168,19 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid or expired OTP, or weak password")
     })
     public ResponseEntity<ApiResponse<Void>> resetPassword(
-            @Valid @RequestBody ResetPasswordRequest request
+            @Valid @RequestBody ResetPasswordRequest request, HttpServletRequest httpRequest
     ) {
+        limitOtpSubmission(request.getEmail(), httpRequest);
         authService.resetPassword(request);
         return ResponseEntity.ok(ApiResponse.success("Password reset successfully. You can now log in.", null));
+    }
+
+    private void limitOtpSubmission(String email, HttpServletRequest request) {
+        String account = email.trim().toLowerCase(java.util.Locale.ROOT);
+        if (!rateLimiterService.isAllowed("otp-submit:account:" + account, 10, LOGIN_WINDOW)
+            || !rateLimiterService.isAllowed("otp-submit:ip:" + ipUtil.extractClientIp(request), 30, LOGIN_WINDOW)) {
+            throw new com.uitmerch.backend.common.exception.RateLimitException("Too many OTP attempts. Please try again later.", 900);
+        }
     }
 
     @PostMapping("/logout")
@@ -184,6 +194,9 @@ public class AuthController {
         String authHeader = request.getHeader("Authorization");
         String token = (authHeader != null && authHeader.startsWith("Bearer "))
                 ? authHeader.substring(7) : null;
+        if (token == null || token.isBlank()) {
+            throw new com.uitmerch.backend.common.exception.AuthenticationException("A valid bearer token is required to log out.");
+        }
         authService.logout(token);
         return ResponseEntity.ok(ApiResponse.success("Logged out successfully.", null));
     }

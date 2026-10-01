@@ -31,8 +31,9 @@ public class WishlistService {
     private final WishlistItemRepository wishlistItemRepository;
     private final MerchItemRepository merchItemRepository;
     private final MerchImageRepository merchImageRepository;
+    private final com.uitmerch.backend.auth.repository.UserRepository userRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public WishlistResponse getWishlist(UUID userId) {
         Wishlist wishlist = findOrCreate(userId);
         List<WishlistItem> items = wishlistItemRepository.findByWishlistId(wishlist.getId());
@@ -98,6 +99,8 @@ public class WishlistService {
     }
 
     private Wishlist findOrCreate(UUID userId) {
+        userRepository.findLockedById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User", userId.toString()));
         return wishlistRepository.findByUserId(userId)
             .orElseGet(() -> wishlistRepository.save(
                 Wishlist.builder().userId(userId).build()

@@ -55,6 +55,9 @@ public class EventService {
             throw new ValidationException("Cannot create an event with status " + status + ".");
         }
 
+        if (status == EventStatus.PUBLISHED && org.getStatus() != com.uitmerch.backend.common.model.OrganizationStatus.ACTIVE) {
+            throw new ValidationException("Organization must be ACTIVE to publish an event.");
+        }
         Event event = Event.builder()
             .orgId(org.getId())
             .title(request.getTitle())
@@ -90,6 +93,11 @@ public class EventService {
         Event event = eventRepository.findByIdAndOrgId(eventId, org.getId())
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
 
+        if ((request.getStatus() == EventStatus.PUBLISHED || event.getStatus() == EventStatus.PUBLISHED)
+            && org.getStatus() != com.uitmerch.backend.common.model.OrganizationStatus.ACTIVE
+            && request.getStatus() != EventStatus.DRAFT && request.getStatus() != EventStatus.CANCELLED) {
+            throw new ValidationException("Organization must be ACTIVE to publish an event.");
+        }
         if (request.getStatus() != null && !request.getStatus().equals(event.getStatus())) {
             validateStatusTransition(event.getStatus(), request.getStatus());
             event.setStatus(request.getStatus());
@@ -181,11 +189,15 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
 
-        if (!PUBLIC_STATUSES.contains(event.getStatus())) {
+        if (!PUBLIC_STATUSES.contains(event.getStatus())
+            || organizationService.getOrganizationEntityById(event.getOrgId()).getStatus() != com.uitmerch.backend.common.model.OrganizationStatus.ACTIVE) {
             throw new ResourceNotFoundException("Event", eventId.toString());
         }
 
-        List<MerchResponse> merch = fetchMerchForEvent(eventId);
+        List<MerchResponse> merch = fetchMerchForEvent(eventId).stream()
+            .filter(m -> m.getStatus() == com.uitmerch.backend.common.model.MerchItemStatus.PUBLISHED)
+            .filter(m -> event.getOrgId().equals(m.getOrgId()))
+            .toList();
         return EventResponse.from(event, merch);
     }
 

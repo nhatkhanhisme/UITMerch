@@ -28,10 +28,21 @@ public class VisualSearchService {
     private final EmbeddingService embeddingService;
     private final MerchEmbeddingService merchEmbeddingService;
     private final MerchService merchService;
+    private final java.util.concurrent.Semaphore searches = new java.util.concurrent.Semaphore(2);
 
     public VisualSearchResponse search(MultipartFile file) {
         validateFile(file);
+        if (!searches.tryAcquire()) {
+            throw new com.uitmerch.backend.common.exception.RateLimitException("Image search is busy. Please try again later.", 1);
+        }
+        try {
+            return searchValidated(file);
+        } finally {
+            searches.release();
+        }
+    }
 
+    private VisualSearchResponse searchValidated(MultipartFile file) {
         byte[] bytes;
         try {
             bytes = file.getBytes();
@@ -39,6 +50,7 @@ public class VisualSearchService {
             throw new ValidationException("Không thể đọc file ảnh.");
         }
 
+        com.uitmerch.backend.common.util.ImageContentValidator.validate(bytes, file.getContentType());
         String aiDescription = visionAiService.describeImage(bytes, file.getContentType());
 
         List<MerchWithSimilarity> results = vectorSearch(aiDescription);

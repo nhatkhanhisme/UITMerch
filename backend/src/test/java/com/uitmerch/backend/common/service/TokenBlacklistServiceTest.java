@@ -33,6 +33,7 @@ class TokenBlacklistServiceTest {
     void add_persistsHashAndCachesInMemory() {
         Instant expiry = Instant.now().plusSeconds(3600);
         service.add(TOKEN, expiry);
+        when(repository.existsByTokenHashAndExpiresAtAfter(anyString(), any())).thenReturn(true);
 
         assertThat(service.isBlacklisted(TOKEN)).isTrue();
 

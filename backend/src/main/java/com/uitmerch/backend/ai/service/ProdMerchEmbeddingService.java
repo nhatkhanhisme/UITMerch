@@ -18,16 +18,11 @@ public class ProdMerchEmbeddingService implements MerchEmbeddingService {
 
     private final JdbcTemplate jdbcTemplate;
     private final EmbeddingService embeddingService;
+    private final com.uitmerch.backend.common.delivery.BackgroundJobService jobs;
 
-    @Async
     @Override
     public void storeAsync(UUID merchId, String text) {
-        try {
-            float[] vec = embeddingService.embed(text);
-            store(merchId, vec);
-        } catch (Exception e) {
-            log.warn("Failed to store embedding for merch {}: {}", merchId, e.getMessage());
-        }
+        jobs.enqueueEmbedding(merchId);
     }
 
     @Override
@@ -51,8 +46,9 @@ public class ProdMerchEmbeddingService implements MerchEmbeddingService {
     public List<MerchSimilarityEntry> findNearest(float[] queryVec, int limit) {
         String vec = toVectorString(queryVec);
         return jdbcTemplate.query(
-            "SELECT merch_id, embedding <=> ?::vector AS distance FROM merch_embeddings " +
-            "WHERE embedding <=> ?::vector < ? " +
+            "SELECT e.merch_id, e.embedding <=> ?::vector AS distance FROM merch_embeddings e " +
+            "JOIN merch_items m ON m.id = e.merch_id JOIN organizations o ON o.id = m.org_id " +
+            "WHERE m.status = 'PUBLISHED' AND o.status = 'ACTIVE' AND e.embedding <=> ?::vector < ? " +
             "ORDER BY distance " +
             "LIMIT ?",
             (rs, i) -> new MerchSimilarityEntry(

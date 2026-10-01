@@ -52,16 +52,18 @@ public class AdminService {
 
     @Transactional
     public UserSummaryResponse updateUserRole(UUID userId, UserRole newRole) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findLockedById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User", userId.toString()));
+        if (user.getRole() != newRole) user.setAuthVersion(user.getAuthVersion() + 1);
         user.setRole(newRole);
         return UserSummaryResponse.from(userRepository.save(user));
     }
 
     @Transactional
     public UserSummaryResponse setUserActive(UUID userId, boolean active) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findLockedById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User", userId.toString()));
+        if (user.isActive() != active) user.setAuthVersion(user.getAuthVersion() + 1);
         user.setActive(active);
         log.info("User {} {} by admin", userId, active ? "activated" : "deactivated");
         return UserSummaryResponse.from(userRepository.save(user));

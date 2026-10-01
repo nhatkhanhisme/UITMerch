@@ -111,7 +111,7 @@ BEGIN
     -- Event 2: Máy Tính Cũ – Móc khóa gây quỹ
     INSERT INTO event_merch (event_id, merch_id) VALUES
         (ev2, m_moc_ram),
-        (ev2, m_moc_cpu)
+        (ev2, m_moc_cpu);
 
     -- Event 3: UIT Store – Sản phẩm thương hiệu 2024
     INSERT INTO event_merch (event_id, merch_id) VALUES

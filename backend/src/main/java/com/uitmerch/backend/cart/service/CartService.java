@@ -36,12 +36,13 @@ public class CartService {
     private final MerchItemRepository merchItemRepository;
     private final MerchImageRepository merchImageRepository;
     private final OrderService orderService;
+    private final com.uitmerch.backend.auth.repository.UserRepository userRepository;
 
     // ------------------------------------------------------------------ //
     //  GET CART
     // ------------------------------------------------------------------ //
 
-    @Transactional(readOnly = true)
+    @Transactional
     public CartResponse getCart(UUID userId) {
         Cart cart = findOrCreateActiveCart(userId);
         return buildCartResponse(cart);
@@ -64,8 +65,9 @@ public class CartService {
         MerchItem merch = merchItemRepository.findById(request.getMerchId())
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", request.getMerchId().toString()));
 
-        if (merch.getStock() <= 0) {
-            throw new ValidationException("This item is out of stock.");
+        if (request.getQuantity() < 1 || merch.getStatus() != com.uitmerch.backend.common.model.MerchItemStatus.PUBLISHED
+            || merch.getStock() < request.getQuantity()) {
+            throw new ValidationException("This item is out of stock or unavailable for the requested quantity.");
         }
 
         CartItem item = CartItem.builder()
@@ -96,7 +98,7 @@ public class CartService {
         MerchItem merch = merchItemRepository.findById(item.getMerchId())
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", item.getMerchId().toString()));
 
-        if (merch.getStock() < request.getQuantity()) {
+        if (request.getQuantity() < 1 || merch.getStatus() != com.uitmerch.backend.common.model.MerchItemStatus.PUBLISHED || merch.getStock() < request.getQuantity()) {
             throw new ValidationException(
                 "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock()
             );
@@ -156,6 +158,7 @@ public class CartService {
     // ------------------------------------------------------------------ //
 
     private Cart findOrCreateActiveCart(UUID userId) {
+        lockUser(userId);
         return cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)
             .orElseGet(() -> {
                 List<Cart> existing = cartRepository.findByUserId(userId);
@@ -169,8 +172,14 @@ public class CartService {
     }
 
     private Cart getActiveCartOrThrow(UUID userId) {
+        lockUser(userId);
         return cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)
             .orElseThrow(() -> new ResourceNotFoundException("Active cart not found for this user."));
+    }
+
+    private void lockUser(UUID userId) {
+        userRepository.findLockedById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User", userId.toString()));
     }
 
     private CartResponse buildCartResponse(Cart cart) {

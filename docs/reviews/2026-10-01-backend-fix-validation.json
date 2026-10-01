@@ -1,0 +1,673 @@
+{
+  "date": "2026-10-01",
+  "scope": "Backend bug fixes; new product features await user approval.",
+  "environment": {
+    "java": "Temporary Temurin 21.0.12.1+1",
+    "postgresql": "17.6",
+    "pgvector": "0.8.2",
+    "database_scope": "Disposable local databases only; no hosted database used",
+    "postgres_image": "public.ecr.aws/supabase/postgres:17.6.1.167",
+    "system_java_limitation": "Installed libjli.so is corrupt; system Java cannot start"
+  },
+  "baseline": {
+    "existing_suite_tests_passed": 174,
+    "regressions_on_original_code": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0
+    },
+    "baseline_exception": "Only V16 missing semicolon corrected in temporary original-code build to permit migrations."
+  },
+  "cold_database": {
+    "totals": {
+      "tests": 214,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "com.uitmerch.backend.BackendApplicationTests",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.admin.service.AdminServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.auth.service.AuthServiceTest",
+        "tests": 35,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.cart.service.CartServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.common.security.JwtTokenProviderTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.common.service.RateLimiterServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.common.service.TokenBlacklistServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.event.service.EventServiceTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.merch.repository.MerchItemRepositoryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.merch.service.MerchServiceTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.order.service.OrderServiceTest",
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.organization.service.OrganizationServiceTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.AiResourceRegressionTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.DeliveryRegressionTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.DevAuthRegressionTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.PostgresRegressionTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.SecurityAndMailRegressionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.user.service.UserServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.wishlist.service.WishlistServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "reports_path": "/tmp/uitmerch-backend-test.umxtKj/target/surefire-reports",
+    "log_path": "/tmp/uitmerch-final-cold-tests.log",
+    "process_exit_code": 0,
+    "migrations_validated": 34,
+    "migrations_applied": 34,
+    "final_schema_version": 34
+  },
+  "upgrade_database": {
+    "totals": {
+      "tests": 214,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "com.uitmerch.backend.BackendApplicationTests",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.admin.service.AdminServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.auth.service.AuthServiceTest",
+        "tests": 35,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.cart.service.CartServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.common.security.JwtTokenProviderTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.common.service.RateLimiterServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.common.service.TokenBlacklistServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.event.service.EventServiceTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.merch.repository.MerchItemRepositoryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.merch.service.MerchServiceTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.order.service.OrderServiceTest",
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.organization.service.OrganizationServiceTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.AiResourceRegressionTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.DeliveryRegressionTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.DevAuthRegressionTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.PostgresRegressionTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.regression.SecurityAndMailRegressionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.user.service.UserServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.uitmerch.backend.wishlist.service.WishlistServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "reports_path": "/tmp/uitmerch-current-backend/target/surefire-reports",
+    "log_path": "/tmp/uitmerch-upgrade-tests.log",
+    "initial_schema_version": 32,
+    "migrations_validated": 34,
+    "migrations_applied": [
+      33,
+      34
+    ],
+    "history_rows": 34,
+    "all_history_rows_successful": true,
+    "final_schema_version": 34,
+    "historical_v16_checksum": "Temporary baseline used corrected V16; an existing deployment with a different checksum still requires review."
+  },
+  "gitnexus": {
+    "indexed_nodes": 4419,
+    "indexed_edges": 10247,
+    "indexed_flows": 370,
+    "detect_changes": {
+      "tracked_changed_files": 44,
+      "changed_symbols": 251,
+      "affected_processes": 164,
+      "risk": "critical"
+    },
+    "output_path": "/tmp/uitmerch-final-detect-changes.txt",
+    "limitations": [
+      "Change detection maps tracked git diff; added untracked files are included separately in the file manifest.",
+      "Index warns of capped process traversal and unresolved cross-language fields. Absent callers/flows do not establish unused code."
+    ],
+    "tool_generated_docs": "Analyzer-generated AGENTS/CLAUDE and skill relocation changes reverted; final source changes remain backend/docs only."
+  },
+  "checks": {
+    "git_diff_check": "passed",
+    "bash_syntax_check": "passed",
+    "cold_test_copy_matches_current_source": true,
+    "committed": false,
+    "deployed": false
+  },
+  "backend_file_manifest": [
+    {
+      "path": "backend/scripts/test-postgres.sh",
+      "status": "new",
+      "sha256": "6ddb729185919c4aa483b997ebc39dc944424748ff77f959677c0a0159c90159"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/admin/service/AdminService.java",
+      "status": "modified",
+      "sha256": "30709bbcfc7d54a4c1d8d3c5a2385c84d71255c832dcb6f7be3a3b1e3af227bc"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/ai/MerchEmbeddingBackfillRunner.java",
+      "status": "modified",
+      "sha256": "617d6488a6fc38e9af556f1e52d18dfd291143779fc5aba12957a8d96f7fc959"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/ai/controller/AiMerchSearchController.java",
+      "status": "modified",
+      "sha256": "636b8bbb818d731e0db81c70158e496afab35deb3290fb12892a8f4a8ed1567a"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/ai/service/GeminiEmbeddingService.java",
+      "status": "modified",
+      "sha256": "52a3c3f0097318b6fe269d15913fc20d0bbfdb24cb6ce2fa8d84f09bf6515d07"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/ai/service/GeminiVisionAiService.java",
+      "status": "modified",
+      "sha256": "949cb599b9f0d76325a71bd1c3cac55f8bc786ec4012ff695973e5c5097d7171"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/ai/service/ProdMerchEmbeddingService.java",
+      "status": "modified",
+      "sha256": "a13af63e9aa2815c63587aef9f6681ef03ee8aaeba341e9958e230c9033cdbd7"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/ai/service/VisualSearchService.java",
+      "status": "modified",
+      "sha256": "c8543a40295f76b14320b7d49300c9951a14384822be8e8ae207df1a51fc4b4f"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/auth/controller/AuthController.java",
+      "status": "modified",
+      "sha256": "70bb25e96dc4b0301c2b94a61b3659439b72ed8a20f549303fe9e00e1f9a1550"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/auth/entity/AuthSession.java",
+      "status": "new",
+      "sha256": "ecef95e451cb1e2a83e4a9204c47091bfae38cef4a73c530b0265078f9cd6006"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/auth/entity/OtpToken.java",
+      "status": "modified",
+      "sha256": "c16cb052292a5ad93caa835a8af3920bb4809e9fb14484d269d8781d65edcba0"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/auth/entity/User.java",
+      "status": "modified",
+      "sha256": "b7176602a00c28f665124821df25b2ece3480026021064613e2dcae6dc52336c"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/auth/repository/AuthSessionRepository.java",
+      "status": "new",
+      "sha256": "538b1f305badfed21706f8a12b5557b0f9a998eee31701e8ef8ec5d15be687b4"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/auth/repository/UserRepository.java",
+      "status": "modified",
+      "sha256": "4dc766e8bb55b7a0fe3efcdfd5cb291f5b38ea192eb5ee0796421258bfca1d3c"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/auth/service/AuthService.java",
+      "status": "modified",
+      "sha256": "d85b219a710c976a5ab12fcda4635eeb1fd1d288d872e703784844965781e58d"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/auth/service/AuthSessionService.java",
+      "status": "new",
+      "sha256": "513271b6473072925b2d6889ad6c846249a38f08773afba495cef5ee5bdc2f12"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/cart/service/CartService.java",
+      "status": "modified",
+      "sha256": "cf679c6bfaf5b65be616de176ca9a6eaca72712f904bef5a7aaa9342c541ad5c"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/config/JwtAuthenticationFilter.java",
+      "status": "modified",
+      "sha256": "8ee10c0920189cda5ab99cdec8acee483134c6207356ca9c73a152183600e86f"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/config/SecurityConfig.java",
+      "status": "modified",
+      "sha256": "c6758d6baaa40ad36cd5d2970daf2a8e737d66dd2b179f588c2bf0b904531e97"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJob.java",
+      "status": "new",
+      "sha256": "894cb895ee7424b966c62a1bf19e9b80a1954e81247603689af6bd9baf6cd650"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobClaimService.java",
+      "status": "new",
+      "sha256": "6037a5bc2eeffebd9100f74612cefaa9785c0322ceb879fdbc574f20ea385aff"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobDispatcher.java",
+      "status": "new",
+      "sha256": "b670715cdc1ebc82550adaa5def71e00252e6d6583f70d701bbcfe3244d6bf56"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobRepository.java",
+      "status": "new",
+      "sha256": "5b0899fa5cf34e2d872420abc14cedc4629583350ee9aa9fc4aa71b8dd2909c0"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobScheduler.java",
+      "status": "new",
+      "sha256": "c1ddd48afe9baba4b5afae33ab4875d9df1bec2d1c29c0a36134a5c50a863764"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobService.java",
+      "status": "new",
+      "sha256": "e61662847eb265b262f5ca35d1f6c1b973a739017fdb3c25dc8e49e41a0d3509"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/delivery/OutboxEmailService.java",
+      "status": "new",
+      "sha256": "a120a9c0d58ced083f5445ebde9a486a958ce6157f9ead78be9b2f2c7f0718d8"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/exception/GlobalExceptionHandler.java",
+      "status": "modified",
+      "sha256": "8b8899c32cb9ae4388a4dc899095aebf0499eda4ca3b5ad6961762c3fca85454"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/exception/RateLimitException.java",
+      "status": "new",
+      "sha256": "513714e1a38021c0b02c8abafffc32c1e41871f7f6238118a9e9f5cd6ec1d8f1"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/repository/InvalidatedTokenRepository.java",
+      "status": "modified",
+      "sha256": "19e8a1839135404b51e1b0d5253725b617c58222bd1702b2f92fb69f28bdc068"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/security/JwtTokenProvider.java",
+      "status": "modified",
+      "sha256": "056b42bfd33744a5259e3483e9a856e09eba1c1f772c9a06e4b6d7310ddb666b"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/service/DevEmailService.java",
+      "status": "modified",
+      "sha256": "b62093df93e4cab0d8f0ac5d299980543cfa55a58dd67c530e4e6ea59feb4426"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "status": "modified",
+      "sha256": "bdde87a0235441abe1fc5773598e1762034e29f3f4108bce57c7942cba040378"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/service/TokenBlacklistService.java",
+      "status": "modified",
+      "sha256": "608d8d714414b2a0fd5a30454b04a3f08038c68d06f225df13fd46fb4af066e5"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/common/util/ImageContentValidator.java",
+      "status": "new",
+      "sha256": "f7bcfe3a2c0eb8d64fa2ed914f69909d56e2d82060f16ef095975bf0e59d8816"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/event/repository/EventRepository.java",
+      "status": "modified",
+      "sha256": "ffb3123b01dd3594e73800137455940fa4bee06b1d59651e6f533afea9919336"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/event/service/EventService.java",
+      "status": "modified",
+      "sha256": "88d97d6cba5683e2bf005a62b71201f531439c2bb81fe1d6784cef2de7dcda85"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java",
+      "status": "modified",
+      "sha256": "aca0f4a48673d5a1981cebfc67654e4536de60d0d026de653e55490a4ec014df"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java",
+      "status": "modified",
+      "sha256": "12bc5f475af4adb2002e652ce6053c7cc2aab94f419e5cf50bb9d1a1c98eaf94"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/notification/controller/NotificationController.java",
+      "status": "modified",
+      "sha256": "1d238e8cfbe985938a1f875ccf8b6eb9ac50b8066581a7752f7779ee5b57729f"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/notification/controller/OrganizerNotificationController.java",
+      "status": "modified",
+      "sha256": "865f731c7b2ade65f32eae97472abf8d46619026d83d5db454bb74a5aec93188"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/notification/service/SseEmitterManager.java",
+      "status": "modified",
+      "sha256": "170d21c416eaa1bf9654e7360c3893e4f1ee3eb6956f6b9fe911728019949bf6"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/order/controller/PublicOrderController.java",
+      "status": "modified",
+      "sha256": "1a456d2e76f342a834bd4644e75fe8d9d38f2dc89030ba261bc57fcdd041479f"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/order/dto/GuestOrderRequest.java",
+      "status": "modified",
+      "sha256": "2788a87429beeb25fb1ae89448f5e478fe41b78006adc745385a70c282ae9ef4"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/order/dto/PickupScheduleRequest.java",
+      "status": "modified",
+      "sha256": "f9ea1e4fa102ddf054979364243696f6e6ce1e4121a4f77a56cd2f3f5dfd6450"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/order/repository/OrderRepository.java",
+      "status": "modified",
+      "sha256": "2e2b30a3461fdfed48c485790759c80a49ae10fb64dc602620ca290d9319180e"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "status": "modified",
+      "sha256": "6d098a6a87b7c404dc6fde40874e0fa5d4e73c1f1d4bc6923b14868d95cada3c"
+    },
+    {
+      "path": "backend/src/main/java/com/uitmerch/backend/wishlist/service/WishlistService.java",
+      "status": "modified",
+      "sha256": "ec8a60e9ebf9075376705543cf72616edd1d76f40959ea73fe25d01ad263355d"
+    },
+    {
+      "path": "backend/src/main/resources/application.yaml",
+      "status": "modified",
+      "sha256": "4dbf32b686870c583664f6ee2a58f816fbae9c787505ce1822735e307cc82a17"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V16__seed_five_real_events.sql",
+      "status": "modified",
+      "sha256": "2b868b343a7f03a6c38842524fbbb5b63ba8a97fc1676683d4e8ce53451f993c"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V33__authentication_sessions_and_otp_purpose.sql",
+      "status": "new",
+      "sha256": "38c3d59ff9cf2330f3c41ff0de5f7a8a9504ec735dba143ab8edc1f426a33bb1"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V34__durable_background_delivery.sql",
+      "status": "new",
+      "sha256": "bbeecfd06379536ef6efd53d3b11323454d688c04bc5ec9467c3b079dd1275c2"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/admin/service/AdminServiceTest.java",
+      "status": "modified",
+      "sha256": "887c90f12c7ce318f2bda409b4849aa2a1675c0e6d254d0416f9b76862095798"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/auth/service/AuthServiceTest.java",
+      "status": "modified",
+      "sha256": "e2b2fbfaab672bb47de4ce8349e89a401f6478e98e774ecbb8cea82a7005ff4e"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/cart/service/CartServiceTest.java",
+      "status": "modified",
+      "sha256": "78317cbf8dc4fa4bf8595736e4d7bb1df68f245ff75ffa03b0c9f5091c7599bf"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/common/service/TokenBlacklistServiceTest.java",
+      "status": "modified",
+      "sha256": "f1040ef7a14925bbd85829e58e70d016983cfaeb131afba3731b803542c8c014"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/event/service/EventServiceTest.java",
+      "status": "modified",
+      "sha256": "c9a7fdc79531bc33e6c49a629f681c7a878b776d04adc18d97b1df4bde2c2744"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/merch/service/MerchServiceTest.java",
+      "status": "modified",
+      "sha256": "8da3e5dfffcc3ddaa81e2b914afa389535297bf97603b4813d77bdcbc8f6502e"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/order/service/OrderServiceTest.java",
+      "status": "modified",
+      "sha256": "4a771ef86d54e02863f6605d778cc1ac4cce3abe566bd2c51d65fe6bed5e5ba0"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/regression/AiResourceRegressionTest.java",
+      "status": "new",
+      "sha256": "909c39150f478302ddff3d02729ca0212df842b48bf7797af0959224dc08ab8d"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/regression/DeliveryRegressionTest.java",
+      "status": "new",
+      "sha256": "388c20fd8cc8f4147aa61870129e8c2f8deb1db09c3704346463bf835546773d"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/regression/DevAuthRegressionTest.java",
+      "status": "new",
+      "sha256": "14ea6221c624b6c669efda5ea8953550f97898984cbae3c20e81fcb9cde8b7aa"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/regression/PostgresRegressionTest.java",
+      "status": "new",
+      "sha256": "fa659765dda4f5a98b95ed3474557b865bc7d0e0fe83fecd1b40ed17d93acc7f"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/regression/SecurityAndMailRegressionTest.java",
+      "status": "new",
+      "sha256": "adf910a44b04f1ca4b6ed237655114896e072676617161210a210989ac7bc513"
+    },
+    {
+      "path": "backend/src/test/java/com/uitmerch/backend/wishlist/service/WishlistServiceTest.java",
+      "status": "modified",
+      "sha256": "21f5aa12862c07c2a389f198271c1bfc3c684b6c7378afb69c2d2280e6c37d25"
+    }
+  ],
+  "approval_gate": "Do not implement new product features until the user approves backend bug fixes."
+}

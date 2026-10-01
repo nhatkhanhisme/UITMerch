@@ -17,23 +17,40 @@ import java.util.UUID;
 @Repository
 public interface MerchItemRepository extends JpaRepository<MerchItem, UUID> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT m FROM MerchItem m WHERE m.id = :id")
+    Optional<MerchItem> findLockedById(@Param("id") UUID id);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT m FROM MerchItem m WHERE m.id IN :ids ORDER BY m.id")
+    List<MerchItem> findAllLockedByIds(@Param("ids") List<UUID> ids);
+
+    @Query("SELECT m FROM MerchItem m WHERE m.status = :status AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = m.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     Page<MerchItem> findByStatus(MerchItemStatus status, Pageable pageable);
 
     List<MerchItem> findAllByStatus(MerchItemStatus status);
 
+    @Query("SELECT m FROM MerchItem m WHERE m.status = :status AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = m.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     Page<MerchItem> findAllByStatus(MerchItemStatus status, Pageable pageable);
 
+    @Query("SELECT m FROM MerchItem m WHERE m.status = :status AND LOWER(m.name) LIKE LOWER(CONCAT('%', :name, '%')) AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = m.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     Page<MerchItem> findByStatusAndNameContainingIgnoreCase(MerchItemStatus status, String name, Pageable pageable);
 
+    @Query("SELECT m FROM MerchItem m WHERE m.status = :status AND m.categoryId = :categoryId AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = m.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     Page<MerchItem> findByStatusAndCategoryId(MerchItemStatus status, UUID categoryId, Pageable pageable);
 
+    @Query("SELECT m FROM MerchItem m WHERE m.status = :status AND m.categoryId = :categoryId AND LOWER(m.name) LIKE LOWER(CONCAT('%', :name, '%')) AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = m.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     Page<MerchItem> findByStatusAndCategoryIdAndNameContainingIgnoreCase(MerchItemStatus status, UUID categoryId, String name, Pageable pageable);
 
     Page<MerchItem> findByOrgId(UUID orgId, Pageable pageable);
 
+    @Query("SELECT m FROM MerchItem m WHERE m.orgId = :orgId AND m.status = :status AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = m.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     Page<MerchItem> findByOrgIdAndStatus(UUID orgId, MerchItemStatus status, Pageable pageable);
 
     Optional<MerchItem> findByIdAndOrgId(UUID id, UUID orgId);
+
+    @Query("SELECT m FROM MerchItem m WHERE m.id IN :ids AND m.status = :#{T(com.uitmerch.backend.common.model.MerchItemStatus).PUBLISHED} AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = m.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
+    List<MerchItem> findPublicByIds(@Param("ids") List<UUID> ids);
 
     boolean existsByIdAndOrgId(UUID id, UUID orgId);
 
@@ -47,21 +64,21 @@ public interface MerchItemRepository extends JpaRepository<MerchItem, UUID> {
      * Atomically deducts qty from stock only when stock >= qty.
      * Returns 1 on success, 0 if stock was insufficient (concurrent order won the race).
      */
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE MerchItem m SET m.stock = m.stock - :qty WHERE m.id = :id AND m.stock >= :qty")
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE MerchItem m SET m.stock = m.stock - :qty WHERE m.id = :id AND :qty > 0 AND m.stock >= :qty AND m.status = :#{T(com.uitmerch.backend.common.model.MerchItemStatus).PUBLISHED} AND EXISTS (SELECT o.id FROM Organization o WHERE o.id = m.orgId AND o.status = :#{T(com.uitmerch.backend.common.model.OrganizationStatus).ACTIVE})")
     int deductStock(@Param("id") UUID id, @Param("qty") int qty);
 
     /**
      * Archives all PUBLISHED merch for an org when the org is suspended/deactivated.
      */
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE MerchItem m SET m.status = com.uitmerch.backend.common.model.MerchItemStatus.ARCHIVED WHERE m.orgId = :orgId AND m.status = com.uitmerch.backend.common.model.MerchItemStatus.PUBLISHED")
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE MerchItem m SET m.status = :#{T(com.uitmerch.backend.common.model.MerchItemStatus).ARCHIVED} WHERE m.orgId = :orgId AND m.status = :#{T(com.uitmerch.backend.common.model.MerchItemStatus).PUBLISHED}")
     int archivePublishedByOrgId(@Param("orgId") UUID orgId);
 
     /**
      * Restores stock after an order is cancelled.
      */
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE MerchItem m SET m.stock = m.stock + :qty WHERE m.id = :id")
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE MerchItem m SET m.stock = m.stock + :qty WHERE m.id = :id AND :qty > 0")
     void restoreStock(@Param("id") UUID id, @Param("qty") int qty);
 }

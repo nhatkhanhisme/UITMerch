@@ -19,8 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Token blacklist backed by the invalidated_tokens PostgreSQL table.
  *
  * Tokens are stored as SHA-256 hashes (not the raw JWT) to save space.
- * An in-memory ConcurrentHashMap mirrors the DB so every authenticated
- * request only pays a hash computation + map lookup, not a DB query.
+ * The database remains authoritative on every check, including revocations
+ * committed by another application instance.
  * On startup the in-memory cache is populated from the DB, surviving
  * server restarts without losing logout state.
  */
@@ -49,14 +49,7 @@ public class TokenBlacklistService {
     }
 
     public boolean isBlacklisted(String token) {
-        String hash = sha256(token);
-        Instant expiry = cache.get(hash);
-        if (expiry == null) return false;
-        if (expiry.isBefore(Instant.now())) {
-            cache.remove(hash);
-            return false;
-        }
-        return true;
+        return repository.existsByTokenHashAndExpiresAtAfter(sha256(token), Instant.now());
     }
 
     @Transactional

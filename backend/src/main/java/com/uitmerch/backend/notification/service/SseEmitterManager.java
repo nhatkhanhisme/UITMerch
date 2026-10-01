@@ -25,14 +25,26 @@ public class SseEmitterManager {
 
     private final ConcurrentHashMap<UUID, CopyOnWriteArrayList<SseEmitter>> emitters = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper;
+    private final com.uitmerch.backend.auth.repository.UserRepository users;
+    private final com.uitmerch.backend.auth.repository.AuthSessionRepository sessions;
+    private final ConcurrentHashMap<SseEmitter, StreamCredential> credentials = new ConcurrentHashMap<>();
+    private record StreamCredential(UUID sessionId, long authVersion, java.time.Instant expiresAt) {}
 
-    public SseEmitterManager(ObjectMapper objectMapper) {
+    public SseEmitterManager(ObjectMapper objectMapper, com.uitmerch.backend.auth.repository.UserRepository users,
+        com.uitmerch.backend.auth.repository.AuthSessionRepository sessions) {
         this.objectMapper = objectMapper;
+        this.users = users;
+        this.sessions = sessions;
     }
 
-    public SseEmitter add(UUID userId) {
+    public SseEmitter add(UUID userId, String sessionId, long authVersion, java.time.Instant expiresAt) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
-        emitters.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>()).add(emitter);
+        credentials.put(emitter, new StreamCredential(UUID.fromString(sessionId), authVersion, expiresAt));
+        emitters.compute(userId, (id, list) -> {
+            if (list == null) list = new CopyOnWriteArrayList<>();
+            list.add(emitter);
+            return list;
+        });
 
         Runnable cleanup = () -> remove(userId, emitter);
         emitter.onCompletion(cleanup);
@@ -79,6 +91,11 @@ public class SseEmitterManager {
         List<SseEmitter> dead = new ArrayList<>();
         for (SseEmitter emitter : userEmitters) {
             try {
+                if (!isAuthorized(userId, emitter)) {
+                    emitter.complete();
+                    dead.add(emitter);
+                    continue;
+                }
                 emitter.send(SseEmitter.event().name("notification").data(json));
             } catch (IOException e) {
                 dead.add(emitter);
@@ -90,29 +107,45 @@ public class SseEmitterManager {
     @Scheduled(fixedDelay = 25_000)
     public void sendHeartbeat() {
         if (emitters.isEmpty()) return;
-        List<UUID> deadUsers = new ArrayList<>();
         emitters.forEach((userId, userEmitters) -> {
             List<SseEmitter> dead = new ArrayList<>();
             for (SseEmitter emitter : userEmitters) {
                 try {
+                    if (!isAuthorized(userId, emitter)) {
+                        emitter.complete();
+                        dead.add(emitter);
+                        continue;
+                    }
                     emitter.send(SseEmitter.event().comment("heartbeat"));
                 } catch (IOException e) {
                     dead.add(emitter);
                 }
             }
             dead.forEach(e -> remove(userId, e));
-            if (userEmitters.isEmpty()) deadUsers.add(userId);
         });
-        deadUsers.forEach(emitters::remove);
+    }
+
+    private boolean isAuthorized(UUID userId, SseEmitter emitter) {
+        StreamCredential credential = credentials.get(emitter);
+        if (credential == null || !credential.expiresAt().isAfter(java.time.Instant.now())) return false;
+        try {
+            var user = users.findById(userId);
+            var session = sessions.findById(credential.sessionId());
+            return user.isPresent() && user.get().isActive() && user.get().isVerified()
+                && user.get().getAuthVersion() == credential.authVersion()
+                && session.isPresent() && session.get().getUserId().equals(userId)
+                && session.get().getRevokedAt() == null && session.get().getExpiresAt().isAfter(java.time.Instant.now());
+        } catch (org.springframework.dao.DataAccessException e) {
+            log.warn("Closing notification stream after authentication storage failure");
+            return false;
+        }
     }
 
     private void remove(UUID userId, SseEmitter emitter) {
-        CopyOnWriteArrayList<SseEmitter> list = emitters.get(userId);
-        if (list != null) {
+        credentials.remove(emitter);
+        emitters.computeIfPresent(userId, (id, list) -> {
             list.remove(emitter);
-            if (list.isEmpty()) {
-                emitters.remove(userId, list);
-            }
-        }
+            return list.isEmpty() ? null : list;
+        });
     }
 }

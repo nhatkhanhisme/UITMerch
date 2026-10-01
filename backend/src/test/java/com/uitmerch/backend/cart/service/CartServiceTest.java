@@ -44,6 +44,14 @@ class CartServiceTest {
     @Mock private MerchImageRepository merchImageRepository;
     @Mock private OrderService orderService;
 
+    @Mock private com.uitmerch.backend.auth.repository.UserRepository userRepository;
+
+    @org.junit.jupiter.api.BeforeEach
+    void existingAccount() {
+        org.mockito.Mockito.lenient().when(userRepository.findLockedById(any()))
+            .thenAnswer(inv -> Optional.of(com.uitmerch.backend.auth.entity.User.builder().id(inv.getArgument(0)).build()));
+    }
+
     @InjectMocks private CartService cartService;
 
     private final UUID userId = UUID.randomUUID();
@@ -60,6 +68,7 @@ class CartServiceTest {
             .id(merchId)
             .name("Test Merch")
             .price(BigDecimal.valueOf(50_000))
+            .status(com.uitmerch.backend.common.model.MerchItemStatus.PUBLISHED)
             .stock(stock)
             .build();
     }

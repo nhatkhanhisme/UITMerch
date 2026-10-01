@@ -98,7 +98,9 @@ public class MerchService {
     @Transactional
     public MerchResponse updateMerch(UUID ownerId, UUID orgId, UUID merchId, UpdateMerchRequest request) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
-        MerchItem item = findOwnItemOrThrow(org.getId(), merchId);
+        MerchItem item = merchItemRepository.findLockedById(merchId)
+            .filter(m -> m.getOrgId().equals(org.getId()))
+            .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
 
         if (request.getName() != null && !request.getName().isBlank()) {
             item.setName(request.getName());
@@ -145,7 +147,9 @@ public class MerchService {
     @Transactional
     public void deleteMerch(UUID ownerId, UUID orgId, UUID merchId) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
-        MerchItem item = findOwnItemOrThrow(org.getId(), merchId);
+        MerchItem item = merchItemRepository.findLockedById(merchId)
+            .filter(m -> m.getOrgId().equals(org.getId()))
+            .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
         item.setStatus(MerchItemStatus.ARCHIVED);
         merchItemRepository.save(item);
     }
@@ -179,7 +183,7 @@ public class MerchService {
 
     @Transactional(readOnly = true)
     public MerchResponse getPublishedMerch(UUID merchId) {
-        MerchItem item = merchItemRepository.findById(merchId)
+        MerchItem item = merchItemRepository.findPublicByIds(List.of(merchId)).stream().findFirst()
             .filter(m -> m.getStatus() == MerchItemStatus.PUBLISHED)
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
         Category category = item.getCategoryId() != null ? categoryRepository.findById(item.getCategoryId()).orElse(null) : null;
@@ -187,7 +191,6 @@ public class MerchService {
         return MerchResponse.from(item, category, images);
     }
 
-    @Cacheable("popular-merch")
     @Transactional(readOnly = true)
     public List<MerchResponse> getPopularMerch() {
         // Cap candidates at 500 most-recent items to avoid a full-table scan
@@ -227,7 +230,7 @@ public class MerchService {
     @Transactional(readOnly = true)
     public List<MerchResponse> getPublishedMerchByIds(List<UUID> ids) {
         if (ids.isEmpty()) return List.of();
-        List<MerchItem> items = merchItemRepository.findAllById(ids).stream()
+        List<MerchItem> items = merchItemRepository.findPublicByIds(ids).stream()
             .filter(m -> m.getStatus() == MerchItemStatus.PUBLISHED)
             .toList();
         Map<UUID, Category> categoryMap = buildCategoryMap();
@@ -246,7 +249,7 @@ public class MerchService {
 
     @Transactional(readOnly = true)
     public MerchItem getMerchEntityForOrder(UUID merchId) {
-        return merchItemRepository.findById(merchId)
+        return merchItemRepository.findPublicByIds(List.of(merchId)).stream().findFirst()
             .filter(m -> m.getStatus() == MerchItemStatus.PUBLISHED)
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
     }

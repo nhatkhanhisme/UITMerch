@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
@@ -41,6 +40,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final EmailService emailService;
     private final TokenBlacklistService tokenBlacklistService;
+    private final AuthSessionService authSessionService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -66,22 +66,23 @@ public class AuthService {
         );
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidOtpException.class)
     public void verifyEmail(VerifyEmailRequest request) {
         // Generic error for both unknown email and wrong code — prevents user enumeration
         final InvalidOtpException genericError = new InvalidOtpException("Invalid email or OTP code");
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> genericError);
+        User user = userRepository.findLockedByEmail(request.getEmail()).orElseThrow(() -> genericError);
+        if (!user.isActive()) throw genericError;
 
         OtpToken otp = otpTokenRepository
                 .findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> genericError);
 
+        if (user.isVerified() || otp.isPasswordReset()) throw genericError;
+
         // Enforce lock-out after repeated failures
         if (otp.getLockedUntil() != null && otp.getLockedUntil().isAfter(LocalDateTime.now())) {
-            long minutesLeft = ChronoUnit.MINUTES.between(LocalDateTime.now(), otp.getLockedUntil()) + 1;
-            throw new InvalidOtpException(
-                    "Too many failed attempts. Please try again in " + minutesLeft + " minute(s).");
+            throw genericError;
         }
 
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -107,8 +108,9 @@ public class AuthService {
         log.info("Email verified for user: {}", user.getEmail());
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findLockedByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthenticationException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
@@ -123,11 +125,9 @@ public class AuthService {
             throw new UnverifiedEmailException("Email is not verified yet. Please check your email for the OTP.");
         }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(
-            user.getId().toString(), user.getEmail(), user.getRole().name()
-        );
-
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId().toString());
+        AuthSessionService.Tokens tokens = authSessionService.create(user);
+        String accessToken = tokens.accessToken();
+        String refreshToken = tokens.refreshToken();
 
         return AuthResponse.builder()
             .token(accessToken)
@@ -141,6 +141,7 @@ public class AuthService {
             .build();
     }
 
+    @Transactional
     public AuthResponse refreshToken(String refreshToken) {
         if (refreshToken == null
                 || !jwtTokenProvider.validateAsRefreshToken(refreshToken)
@@ -149,15 +150,16 @@ public class AuthService {
         }
 
         String userId = jwtTokenProvider.getUserIdFromToken(refreshToken);
-        User user = userRepository.findById(java.util.UUID.fromString(userId))
+        User user = userRepository.findLockedById(java.util.UUID.fromString(userId))
                 .orElseThrow(() -> new AuthenticationException("Invalid or expired refresh token"));
 
-        // Rotate: blacklist the used refresh token
+        if (!user.isActive() || !user.isVerified()) {
+            throw new AuthenticationException("Invalid or expired refresh token");
+        }
+        AuthSessionService.Tokens tokens = authSessionService.rotate(refreshToken, user);
         tokenBlacklistService.add(refreshToken, jwtTokenProvider.getExpiryFromToken(refreshToken));
-
-        String newAccessToken = jwtTokenProvider.generateAccessToken(
-                user.getId().toString(), user.getEmail(), user.getRole().name());
-        String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId().toString());
+        String newAccessToken = tokens.accessToken();
+        String newRefreshToken = tokens.refreshToken();
 
         return AuthResponse.builder()
                 .token(newAccessToken)
@@ -171,8 +173,10 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
     public void logout(String token) {
         if (token != null && jwtTokenProvider.validateToken(token)) {
+            authSessionService.revoke(token);
             tokenBlacklistService.add(token, jwtTokenProvider.getExpiryFromToken(token));
         }
     }
@@ -219,6 +223,9 @@ public class AuthService {
     }
 
     private void issueOtp(User user) {
+        OtpToken previous = otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user).orElse(null);
+        if (previous != null && previous.getLockedUntil() != null && previous.getLockedUntil().isAfter(LocalDateTime.now())) return;
+        int attempts = previous != null && previous.getExpiresAt().isAfter(LocalDateTime.now()) ? previous.getAttemptCount() : 0;
         otpTokenRepository.deleteAllByUser(user);
 
         String code = generateOtpCode();
@@ -228,6 +235,7 @@ public class AuthService {
                 .otpCode(code)
                 .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES))
                 .isUsed(false)
+                .attemptCount(attempts)
                 .build();
 
         otpTokenRepository.save(otp);
@@ -244,7 +252,7 @@ public class AuthService {
     @Transactional
     public void resendOtp(String email) {
         // Silent no-op for unknown, already-verified, or inactive accounts — prevents enumeration
-        userRepository.findByEmail(email).ifPresent(user -> {
+        userRepository.findLockedByEmail(email).ifPresent(user -> {
             if (user.isActive() && !user.isVerified()) {
                 issueOtp(user);
                 log.info("OTP re-issued for unverified user {}", email);
@@ -255,8 +263,11 @@ public class AuthService {
     @Transactional
     public void forgotPassword(String email) {
         // Use a generic response to avoid revealing whether an email is registered
-        userRepository.findByEmail(email).ifPresent(user -> {
+        userRepository.findLockedByEmail(email).ifPresent(user -> {
             if (user.isActive() && user.isVerified()) {
+                OtpToken previous = otpTokenRepository.findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user).orElse(null);
+                if (previous != null && previous.getLockedUntil() != null && previous.getLockedUntil().isAfter(LocalDateTime.now())) return;
+                int attempts = previous != null && previous.getExpiresAt().isAfter(LocalDateTime.now()) ? previous.getAttemptCount() : 0;
                 otpTokenRepository.deleteAllByUser(user);
                 String code = generateOtpCode();
                 OtpToken otp = OtpToken.builder()
@@ -264,6 +275,8 @@ public class AuthService {
                     .otpCode(code)
                     .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES))
                     .isUsed(false)
+                    .passwordReset(true)
+                    .attemptCount(attempts)
                     .build();
                 otpTokenRepository.save(otp);
                 emailService.sendPasswordReset(user.getEmail(), code);
@@ -272,19 +285,21 @@ public class AuthService {
         });
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidOtpException.class)
     public void resetPassword(ResetPasswordRequest request) {
         final InvalidOtpException genericError = new InvalidOtpException("Invalid email or OTP code");
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> genericError);
+        User user = userRepository.findLockedByEmail(request.getEmail()).orElseThrow(() -> genericError);
+        if (!user.isActive()) throw genericError;
 
         OtpToken otp = otpTokenRepository
             .findTopByUserAndIsUsedFalseOrderByCreatedAtDesc(user)
             .orElseThrow(() -> genericError);
 
+        if (!user.isVerified() || !otp.isPasswordReset()) throw genericError;
+
         if (otp.getLockedUntil() != null && otp.getLockedUntil().isAfter(LocalDateTime.now())) {
-            long minutesLeft = ChronoUnit.MINUTES.between(LocalDateTime.now(), otp.getLockedUntil()) + 1;
-            throw new InvalidOtpException("Too many failed attempts. Please try again in " + minutesLeft + " minute(s).");
+            throw genericError;
         }
 
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -305,6 +320,7 @@ public class AuthService {
         otp.setUsed(true);
         otpTokenRepository.save(otp);
 
+        user.setAuthVersion(user.getAuthVersion() + 1);
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 

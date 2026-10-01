@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service
+@Service("mailTransport")
 @Profile("!(dev | docker)")
 @RequiredArgsConstructor
 public class JavaMailEmailService implements EmailService {
@@ -26,13 +26,11 @@ public class JavaMailEmailService implements EmailService {
     @Value("${app.mail.from-name:UITMerch}")
     private String fromName;
 
-    @Async
     @Override
     public void sendOtp(String toEmail, String otpCode) {
         sendMail(toEmail, "Your UITMerch verification code", buildHtml(otpCode));
     }
 
-    @Async
     @Override
     public void sendPasswordReset(String toEmail, String otpCode) {
         sendMail(toEmail, "Reset your UITMerch password", buildOtpHtml(
@@ -43,7 +41,6 @@ public class JavaMailEmailService implements EmailService {
         ));
     }
 
-    @Async
     @Override
     public void sendOrderPlacedConfirmation(String toEmail, String orderId) {
         String shortId = orderId.substring(0, 8).toUpperCase();
@@ -63,7 +60,6 @@ public class JavaMailEmailService implements EmailService {
         sendMail(toEmail, "UITMerch — Đặt hàng thành công #" + shortId, body);
     }
 
-    @Async
     @Override
     public void sendOrderStatusUpdate(String toEmail, String orderId, String newStatus) {
         String shortId = orderId.substring(0, 8).toUpperCase();
@@ -87,17 +83,16 @@ public class JavaMailEmailService implements EmailService {
                 Cảm ơn bạn đã sử dụng UITMerch.
               </p>
             </div>
-            """.formatted(shortId, statusVi, orderId);
+            """.formatted(shortId, escape(statusVi), escape(orderId));
         sendMail(toEmail, "UITMerch — Cập nhật đơn hàng #" + shortId, body);
     }
 
-    @Async
     @Override
     public void sendPickupScheduleNotification(String toEmail, String orderId,
                                                String pickupDate, String pickupTimeSlot,
                                                String location, String notes) {
         String notesHtml = (notes != null && !notes.isBlank())
-            ? "<p style=\"color:#444;\"><strong>Ghi chú:</strong> " + notes + "</p>"
+            ? "<p style=\"color:#444;\"><strong>Ghi chú:</strong> " + org.springframework.web.util.HtmlUtils.htmlEscape(notes) + "</p>"
             : "";
         String body = """
             <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px;
@@ -116,11 +111,10 @@ public class JavaMailEmailService implements EmailService {
                 Mã đơn: <strong>%s</strong>
               </p>
             </div>
-            """.formatted(orderId, pickupDate, pickupTimeSlot, location, notesHtml, orderId);
+            """.formatted(escape(orderId), escape(pickupDate), escape(pickupTimeSlot), escape(location), notesHtml, escape(orderId));
         sendMail(toEmail, "UITMerch — Lịch nhận hàng của bạn", body);
     }
 
-    @Async
     @Override
     public void sendOrderCancelledNotification(String toEmail, String orderId,
                                                String cancelReason, String cancelledBy) {
@@ -139,7 +133,7 @@ public class JavaMailEmailService implements EmailService {
                 Cảm ơn bạn đã sử dụng UITMerch.
               </p>
             </div>
-            """.formatted(orderId, cancelledByVi, cancelReason);
+            """.formatted(escape(orderId), cancelledByVi, escape(cancelReason));
         sendMail(toEmail, "UITMerch — Đơn hàng đã bị huỷ", body);
     }
 
@@ -154,8 +148,12 @@ public class JavaMailEmailService implements EmailService {
             mailSender.send(message);
             log.info("Email '{}' sent to {}", subject, toEmail);
         } catch (MessagingException | java.io.UnsupportedEncodingException e) {
-            log.warn("Failed to send email '{}' to {}: {}", subject, toEmail, e.getMessage());
+            throw new IllegalStateException("Email transport failed", e);
         }
+    }
+
+    private static String escape(String value) {
+        return value == null ? "" : org.springframework.web.util.HtmlUtils.htmlEscape(value);
     }
 
     private String buildOtpHtml(String title, String description, String otpCode, String footer) {

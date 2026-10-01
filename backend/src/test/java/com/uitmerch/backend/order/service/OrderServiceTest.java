@@ -103,7 +103,7 @@ class OrderServiceTest {
             .merchName("Test Merch").unitPrice(BigDecimal.valueOf(100_000))
             .quantity(2).subtotal(BigDecimal.valueOf(200_000)).build();
 
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(merch));
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.of(merch));
         when(merchItemRepository.deductStock(eq(merchId), eq(2))).thenReturn(1);
         when(orderRepository.save(any())).thenReturn(savedOrder);
         when(orderItemRepository.save(any())).thenReturn(savedItem);
@@ -121,7 +121,7 @@ class OrderServiceTest {
     @Test
     void createInstantOrder_concurrentSellout_throwsValidation() {
         MerchItem merch = publishedMerch(1);
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(merch));
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.of(merch));
         when(merchItemRepository.deductStock(eq(merchId), eq(1))).thenReturn(0); // another thread won
 
         InstantOrderRequest req = new InstantOrderRequest();
@@ -135,7 +135,7 @@ class OrderServiceTest {
 
     @Test
     void createInstantOrder_outOfStock_throwsValidation() {
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(publishedMerch(1)));
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.of(publishedMerch(1)));
 
         InstantOrderRequest req = new InstantOrderRequest();
         req.setMerchId(merchId);
@@ -157,7 +157,7 @@ class OrderServiceTest {
             .status(MerchItemStatus.DRAFT)
             .build();
 
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.of(draft));
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.of(draft));
 
         InstantOrderRequest req = new InstantOrderRequest();
         req.setMerchId(merchId);
@@ -170,7 +170,7 @@ class OrderServiceTest {
 
     @Test
     void createInstantOrder_merchNotFound_throwsResourceNotFound() {
-        when(merchItemRepository.findById(merchId)).thenReturn(Optional.empty());
+        when(merchItemRepository.findLockedById(merchId)).thenReturn(Optional.empty());
 
         InstantOrderRequest req = new InstantOrderRequest();
         req.setMerchId(merchId);
@@ -194,7 +194,7 @@ class OrderServiceTest {
         Order updatedOrder = orderWithStatus(to);
 
         when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findLockedById(orderId)).thenReturn(Optional.of(order));
         when(orderRepository.save(any())).thenReturn(updatedOrder);
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
@@ -224,7 +224,7 @@ class OrderServiceTest {
         Order order = orderWithStatus(from);
 
         when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findLockedById(orderId)).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() -> orderService.updateOrderStatus(userId, orgId, orderId, to))
             .isInstanceOf(ValidationException.class)
@@ -238,7 +238,7 @@ class OrderServiceTest {
         Order order = orderWithStatus(OrderStatus.PENDING); // orgId != otherOrgId
 
         when(organizationService.getOwnOrganizationEntity(userId, orgId)).thenReturn(org);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findLockedById(orderId)).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() -> orderService.updateOrderStatus(userId, orgId, orderId, OrderStatus.CONFIRMED))
             .isInstanceOf(ResourceNotFoundException.class);
@@ -291,7 +291,7 @@ class OrderServiceTest {
             .merchId(merchId).quantity(2).unitPrice(BigDecimal.valueOf(100_000))
             .subtotal(BigDecimal.valueOf(200_000)).build();
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findLockedById(orderId)).thenReturn(Optional.of(order));
         when(orderRepository.saveAndFlush(any())).thenReturn(orderWithStatus(OrderStatus.CANCELLED));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item));
         when(userRepository.findById(any())).thenReturn(Optional.empty());
@@ -306,7 +306,7 @@ class OrderServiceTest {
     @Test
     void cancelCustomerOrder_confirmedOrder_throwsValidation() {
         Order order = orderWithStatus(OrderStatus.CONFIRMED);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findLockedById(orderId)).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() -> orderService.cancelCustomerOrder(userId, orderId, cancelRequest()))
             .isInstanceOf(ValidationException.class)
@@ -318,7 +318,7 @@ class OrderServiceTest {
     void cancelCustomerOrder_wrongUser_throwsResourceNotFound() {
         UUID otherUser = UUID.randomUUID();
         Order order = orderWithStatus(OrderStatus.PENDING);
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findLockedById(orderId)).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() -> orderService.cancelCustomerOrder(otherUser, orderId, cancelRequest()))
             .isInstanceOf(ResourceNotFoundException.class);
@@ -335,7 +335,7 @@ class OrderServiceTest {
         MerchItem draft = MerchItem.builder().id(merchId).orgId(orgId).name("Draft")
             .price(BigDecimal.valueOf(10_000)).stock(5).status(MerchItemStatus.DRAFT).build();
 
-        when(merchItemRepository.findAllById(any())).thenReturn(List.of(draft));
+        when(merchItemRepository.findAllLockedByIds(any())).thenReturn(List.of(draft));
 
         assertThatThrownBy(() -> orderService.createOrdersFromCart(userId, cart, List.of(cartItem), null, null, null, null))
             .isInstanceOf(ValidationException.class)
@@ -350,7 +350,7 @@ class OrderServiceTest {
             .cartId(cart.getId()).merchId(merchId).quantity(10).build();
 
         MerchItem merch = publishedMerch(2); // only 2 in stock
-        when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
+        when(merchItemRepository.findAllLockedByIds(any())).thenReturn(List.of(merch));
 
         assertThatThrownBy(() -> orderService.createOrdersFromCart(userId, cart, List.of(cartItem), null, null, null, null))
             .isInstanceOf(ValidationException.class)
@@ -373,7 +373,7 @@ class OrderServiceTest {
         req.setGuestAddress("Addr");
 
         MerchItem merch = publishedMerch(1);
-        when(merchItemRepository.findAllById(any())).thenReturn(List.of(merch));
+        when(merchItemRepository.findAllLockedByIds(any())).thenReturn(List.of(merch));
 
         assertThatThrownBy(() -> orderService.createGuestOrder(req))
             .isInstanceOf(ValidationException.class)

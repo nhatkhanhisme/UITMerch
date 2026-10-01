@@ -32,5 +32,6 @@ public class PickupScheduleRequest {
 
     @NotEmpty(message = "At least one CONFIRMED order must be assigned to the schedule")
     @Schema(description = "IDs of CONFIRMED orders to include in this pickup schedule")
-    private List<UUID> orderIds;
+    @Size(max = 100)
+    private List<@NotNull UUID> orderIds;
 }

@@ -17,18 +17,18 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@Profile("default")
+@Profile("!(dev | docker)")
 public class GeminiVisionAiService implements VisionAiService {
 
     private static final String ENDPOINT =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
     private static final String PROMPT =
         "Mô tả ngắn gọn sản phẩm trong ảnh: tên sản phẩm, màu sắc, loại hàng. Tối đa 20 từ bằng tiếng Việt.";
 
     private final GeminiKeyRotator rotator;
     private final ObjectMapper objectMapper;
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(5)).build();
 
     public GeminiVisionAiService(GeminiKeyRotator rotator, ObjectMapper objectMapper) {
         this.rotator = rotator;
@@ -54,24 +54,32 @@ public class GeminiVisionAiService implements VisionAiService {
             HttpResponse<String> response = callWithRotation(requestBody);
 
             JsonNode root = objectMapper.readTree(response.body());
-            return root.path("candidates").get(0)
-                .path("content").path("parts").get(0)
-                .path("text").asText("").trim();
+            String description = root.at("/candidates/0/content/parts/0/text").asText("").trim();
+            if (description.isEmpty() || description.length() > 2000) {
+                throw new ValidationException("Vision service returned no usable description.");
+            }
+            return description;
 
         } catch (ValidationException e) {
             throw e;
         } catch (Exception e) {
-            log.warn("Gemini Vision API exception: {}", e.getMessage());
-            throw new ValidationException("Vision service error: " + e.getMessage());
+            if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+            log.warn("Gemini Vision request failed: {}", e.getClass().getSimpleName());
+            throw new ValidationException("Vision service unavailable. Please try again later.");
         }
     }
 
     private HttpResponse<String> callWithRotation(String requestBody) throws Exception {
-        int attempts = rotator.keyCount();
+        int attempts = Math.min(rotator.keyCount(), 3);
+        java.time.Instant deadline = java.time.Instant.now().plusSeconds(20);
         for (int i = 0; i < attempts; i++) {
+            java.time.Duration remaining = java.time.Duration.between(java.time.Instant.now(), deadline);
+            if (remaining.isNegative() || remaining.isZero()) throw new ValidationException("AI service timed out.");
             String key = (i == 0) ? rotator.currentKey() : rotator.rotateAndGet();
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ENDPOINT + key))
+                .uri(URI.create(ENDPOINT))
+                .timeout(remaining)
+                .header("x-goog-api-key", key)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                 .build();
@@ -88,7 +96,7 @@ public class GeminiVisionAiService implements VisionAiService {
                 continue;
             }
             if (response.statusCode() != 200) {
-                log.warn("Gemini Vision API error: HTTP {} — {}", response.statusCode(), response.body());
+                log.warn("Gemini Vision API error: HTTP {}", response.statusCode());
                 throw new ValidationException("Vision API returned HTTP " + response.statusCode());
             }
             return response;

@@ -13,6 +13,14 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.email = :email")
+    Optional<User> findLockedByEmail(@org.springframework.data.repository.query.Param("email") String email);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.id = :id")
+    Optional<User> findLockedById(@org.springframework.data.repository.query.Param("id") UUID id);
+
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
