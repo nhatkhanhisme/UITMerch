@@ -20,6 +20,17 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.error("Access denied"));
+    }
+
+    @ExceptionHandler({org.springframework.beans.TypeMismatchException.class,
+        org.springframework.http.converter.HttpMessageNotReadableException.class})
+    public ResponseEntity<ApiResponse<Void>> handleMalformedRequest(Exception ex) {
+        return ResponseEntity.badRequest().body(ApiResponse.error("Invalid request format."));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(
         MethodArgumentNotValidException ex,
