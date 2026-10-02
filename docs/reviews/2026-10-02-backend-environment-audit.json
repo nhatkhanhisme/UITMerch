@@ -1,0 +1,1455 @@
+{
+  "checked_at": "2026-10-02T15:09:06.940291+00:00",
+  "configuration": {
+    "default": {
+      "profiles": [],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    },
+    "dev": {
+      "profiles": [
+        "dev"
+      ],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    },
+    "docker": {
+      "profiles": [
+        "docker"
+      ],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    },
+    "prod": {
+      "profiles": [
+        "prod"
+      ],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    },
+    "simulated_env_file": {
+      "profiles": [],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    },
+    "no_env_file": {
+      "profiles": [],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": false,
+          "exception": "IllegalArgumentException"
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": false,
+          "exception": "IllegalArgumentException"
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": false,
+          "exception": "IllegalArgumentException"
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": false,
+          "exception": "IllegalArgumentException"
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": false,
+          "exception": "IllegalArgumentException"
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": false,
+          "exception": "IllegalArgumentException"
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": false,
+          "exception": "IllegalArgumentException"
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": false,
+          "exception": "IllegalArgumentException"
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    },
+    "simulated_env_file_dev": {
+      "profiles": [
+        "dev"
+      ],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    },
+    "no_env_file_dev": {
+      "profiles": [
+        "dev"
+      ],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": false
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": false,
+          "raw_matches_dotenv": false,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    },
+    "simulated_env_file_docker": {
+      "profiles": [
+        "docker"
+      ],
+      "startup": "PASS",
+      "variables": [
+        {
+          "key": "SERVER_PORT",
+          "property": "server.port",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_URL",
+          "property": "spring.datasource.url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_USERNAME",
+          "property": "spring.datasource.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SPRING_DATASOURCE_PASSWORD",
+          "property": "spring.datasource.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_USERNAME",
+          "property": "spring.mail.username",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_PASSWORD",
+          "property": "spring.mail.password",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "MAIL_SMTP_AUTH",
+          "property": "spring.mail.properties.mail.smtp.auth",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_ENDPOINT",
+          "property": "app.storage.endpoint",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_PROJECT_URL",
+          "property": "app.storage.public-url",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_REGION",
+          "property": "app.storage.region",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_ACCESS_KEY_ID",
+          "property": "app.storage.access-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SUPABASE_STORAGE_S3_SECRET_KEY",
+          "property": "app.storage.secret-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_JWT_SECRET",
+          "property": "app.jwt.secret",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "APP_CORS_ALLOWED_ORIGINS",
+          "property": "app.cors.allowed-origins",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "SWAGGER_ENABLED",
+          "property": "springdoc.swagger-ui.enabled",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEYS",
+          "property": "app.ai.gemini-api-keys",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        },
+        {
+          "key": "GEMINI_API_KEY",
+          "property": "app.ai.gemini-api-key",
+          "raw_loaded": true,
+          "raw_matches_dotenv": true,
+          "effective_resolved": true,
+          "effective_matches_dotenv": true
+        }
+      ],
+      "jwt_expiration": "86400000",
+      "jwt_refresh_expiration": "604800000"
+    }
+  },
+  "h2_runtime": {
+    "dev": {
+      "profiles": [
+        "dev"
+      ],
+      "startup": "PASS",
+      "mail_transport": "DevEmailService",
+      "storage_service": "DevStorageService",
+      "s3_client_active": false,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 200,
+      "/v3/api-docs": 200
+    },
+    "default": {
+      "profiles": [],
+      "startup": "PASS",
+      "mail_transport": "JavaMailEmailService",
+      "storage_service": "SupabaseStorageServiceImpl",
+      "s3_client_active": true,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 200,
+      "/v3/api-docs": 401
+    },
+    "docker": {
+      "profiles": [
+        "docker"
+      ],
+      "startup": "PASS",
+      "mail_transport": "DevEmailService",
+      "storage_service": "DevStorageService",
+      "s3_client_active": false,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 200,
+      "/v3/api-docs": 401
+    },
+    "prod": {
+      "profiles": [
+        "prod"
+      ],
+      "startup": "PASS",
+      "mail_transport": "JavaMailEmailService",
+      "storage_service": "SupabaseStorageServiceImpl",
+      "s3_client_active": true,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 200,
+      "/v3/api-docs": 401
+    }
+  },
+  "readonly_postgres_runtime": {
+    "default": {
+      "profiles": [],
+      "startup": "PASS",
+      "mail_transport": "JavaMailEmailService",
+      "storage_service": "SupabaseStorageServiceImpl",
+      "s3_client_active": true,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 500,
+      "/v3/api-docs": 401
+    },
+    "docker": {
+      "profiles": [
+        "docker"
+      ],
+      "startup": "PASS",
+      "mail_transport": "DevEmailService",
+      "storage_service": "DevStorageService",
+      "s3_client_active": false,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 500,
+      "/v3/api-docs": 401
+    },
+    "prod": {
+      "profiles": [
+        "prod"
+      ],
+      "startup": "PASS",
+      "mail_transport": "JavaMailEmailService",
+      "storage_service": "SupabaseStorageServiceImpl",
+      "s3_client_active": true,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 500,
+      "/v3/api-docs": 401
+    }
+  },
+  "credentials": {
+    "database_readonly_select": "PASS",
+    "smtp_auth_without_sending": "PASS",
+    "storage_readonly_auth": "PASS"
+  },
+  "schema": {
+    "latest_migration": "34",
+    "latest_migration_success": true,
+    "pgvector_installed": true,
+    "read_only": true
+  },
+  "flyway": {
+    "pending_versions": [
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "applied_migrations_validate": false,
+    "invalid_migrations": 3,
+    "invalid_details": [
+      {
+        "error_code": "CHECKSUM_MISMATCH",
+        "version": "16"
+      },
+      {
+        "error_code": "CHECKSUM_MISMATCH",
+        "version": "33"
+      },
+      {
+        "error_code": "CHECKSUM_MISMATCH",
+        "version": "34"
+      }
+    ],
+    "validation_error_code": "VALIDATE_ERROR"
+  },
+  "artifact": {
+    "dotenv_file_in_current_jar": false,
+    "credential_literals_in_app_classes": {
+      "APP_JWT_SECRET": false,
+      "MAIL_PASSWORD": false,
+      "SPRING_DATASOURCE_PASSWORD": false,
+      "SUPABASE_STORAGE_S3_ACCESS_KEY_ID": false,
+      "SUPABASE_STORAGE_S3_SECRET_KEY": false
+    }
+  },
+  "docker_build": "BLOCKED_NO_SPACE_LEFT_ON_DEVICE",
+  "docker_container_runtime": "NOT_VERIFIED_NO_SPACE_LEFT_ON_DEVICE"
+}
