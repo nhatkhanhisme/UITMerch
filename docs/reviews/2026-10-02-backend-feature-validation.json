@@ -1,0 +1,1331 @@
+{
+  "date": "2026-10-02",
+  "baselineCommit": "e81915ce3c4cfbdd034e42bd96b197ef588cdfbe",
+  "postgresImage": "public.ecr.aws/supabase/postgres:17.6.1.167",
+  "newFlywayVersions": [
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41
+  ],
+  "fullSuite": {
+    "tests": 253,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testClasses": [
+    {
+      "class": "com.uitmerch.backend.BackendApplicationTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.admin.service.AdminServiceTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.auth.service.AuthServiceTest",
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.cart.service.CartServiceTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.common.security.JwtTokenProviderTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.common.service.RateLimiterServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.common.service.TokenBlacklistServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.event.service.EventServiceTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.features.AnalyticsFeatureTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.features.ApiBoundaryFeatureTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.features.CampaignFeatureTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.features.FollowingFeatureTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.features.LockingFeatureTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.features.MigrationUpgradeFeatureTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.features.PickupFeatureTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.features.RestockFeatureTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.merch.repository.MerchItemRepositoryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.merch.service.MerchServiceTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.order.service.OrderServiceTest",
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.organization.service.OrganizationServiceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.regression.AiResourceRegressionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.regression.DeliveryRegressionTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.regression.DevAuthRegressionTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.regression.PostgresRegressionTest",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.regression.SecurityAndMailRegressionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.user.service.UserServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.uitmerch.backend.wishlist.service.WishlistServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "command": "UITMERCH_TEST_POSTGRES_IMAGE=public.ecr.aws/supabase/postgres:17.6.1.167 backend/scripts/test-postgres.sh -q",
+  "isolatedTestBuild": "/tmp/uitmerch-backend-test.paX58V",
+  "sourceSha256": {
+    "backend/mvnw": "cae96cef89ebea3531221f4ae17c23cf8edf67d00eae8306d4186ae1bbed4d02",
+    "backend/pom.xml": "18920872661949381dbba9d167cd33a0d515880cfae1e89e37bab04b3c367ca2",
+    "backend/src/main/java/com/uitmerch/backend/BackendApplication.java": "dcaf6a354364969075a464111966a6c27ce059813791150684d63692f4259e44",
+    "backend/src/main/java/com/uitmerch/backend/admin/controller/AdminController.java": "b1925e77fb52417cca2e73d9e968c9a4287fbd047eea32840d28bd8a3447f436",
+    "backend/src/main/java/com/uitmerch/backend/admin/dto/UpdateOrganizationStatusRequest.java": "5103c552de39edabbb1c6dd4f7f75918b211eec1d5a85eb2fce26b5432e8820c",
+    "backend/src/main/java/com/uitmerch/backend/admin/dto/UpdateUserRoleRequest.java": "b1dd6e495179a4cce13bb722c0e35b83ee39bf4403a7f54b63c541069bc4123d",
+    "backend/src/main/java/com/uitmerch/backend/admin/dto/UserSummaryResponse.java": "229783182490dfb11cbb6ee9f24edf00836a54eead0ee20a05f63d8ec38b2391",
+    "backend/src/main/java/com/uitmerch/backend/admin/service/AdminService.java": "30709bbcfc7d54a4c1d8d3c5a2385c84d71255c832dcb6f7be3a3b1e3af227bc",
+    "backend/src/main/java/com/uitmerch/backend/ai/MerchEmbeddingBackfillRunner.java": "617d6488a6fc38e9af556f1e52d18dfd291143779fc5aba12957a8d96f7fc959",
+    "backend/src/main/java/com/uitmerch/backend/ai/controller/AiMerchSearchController.java": "636b8bbb818d731e0db81c70158e496afab35deb3290fb12892a8f4a8ed1567a",
+    "backend/src/main/java/com/uitmerch/backend/ai/dto/MerchWithSimilarity.java": "c072edac8b0897b07a906b939ebfaedc79612577be6cea1631aa91bab6b38651",
+    "backend/src/main/java/com/uitmerch/backend/ai/dto/VisualSearchResponse.java": "bf72ac662c602430557fa90c7f4672a6e3d860b5e95cf7fd6db4650310b50427",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/DevEmbeddingService.java": "15695e14ff3d80c50107ae7a170a766806b247466f6b3e8d4d7e7c8a033a3c66",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/DevMerchEmbeddingService.java": "77e89e0e1e2e4d6a86fbf072f7ab43f1bfcdffb030e734860680022b4ee9804a",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/DevVisionAiService.java": "d26ac8121116c7f7ced243bd4558f19b24c08040076d54566bce61595524d932",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/EmbeddingService.java": "cd52f8d6f7f4b63aa58ef709d121bfc16c9a6cca719b2a1664b70a496613156f",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/GeminiEmbeddingService.java": "52a3c3f0097318b6fe269d15913fc20d0bbfdb24cb6ce2fa8d84f09bf6515d07",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/GeminiKeyRotator.java": "50b40067e1ddaee59aec34e82b364fd9ed3d279d2ab53bef4440d3cec7e289b6",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/GeminiVisionAiService.java": "949cb599b9f0d76325a71bd1c3cac55f8bc786ec4012ff695973e5c5097d7171",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/MerchEmbeddingService.java": "856e29091c2d0e5a87bc0bbc0b02e1c034e283fa50cdd477ac08583bb4008b5f",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/MerchSimilarityEntry.java": "4eed765185524bb0d3c0ea9464d21364c5d4eecf5da0a96171bd23fddabf8773",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/ProdMerchEmbeddingService.java": "a13af63e9aa2815c63587aef9f6681ef03ee8aaeba341e9958e230c9033cdbd7",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/VisionAiService.java": "f264e4f0c73fe701c2dd411bf58eef2496946346a0b8693d46bf449f4893b838",
+    "backend/src/main/java/com/uitmerch/backend/ai/service/VisualSearchService.java": "c8543a40295f76b14320b7d49300c9951a14384822be8e8ae207df1a51fc4b4f",
+    "backend/src/main/java/com/uitmerch/backend/analytics/AnalyticsController.java": "b98a5d4423acbd314a9ada819e615a7f54fa8e69ac53af9a5cdccb949c0ac709",
+    "backend/src/main/java/com/uitmerch/backend/analytics/AnalyticsResponse.java": "9b5364ea785c37fda704fc5dc6e587a1ade558c68360352b76ba20241a5ecde4",
+    "backend/src/main/java/com/uitmerch/backend/analytics/AnalyticsService.java": "9bf1f34d414150694fedf76dcd06010887b67cf579eb6c9054e90aee9d4f6e9c",
+    "backend/src/main/java/com/uitmerch/backend/auth/controller/AuthController.java": "70bb25e96dc4b0301c2b94a61b3659439b72ed8a20f549303fe9e00e1f9a1550",
+    "backend/src/main/java/com/uitmerch/backend/auth/controller/DevOtpController.java": "90f67d6ad9795e8fbfbb60ee7c7288cf0201368603f63fc0bda60e2e8af50f2a",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/AuthResponse.java": "07ee3502b98efb39bafeb2c6288229e468dc8f80c2c4326c43eeffdaf839e007",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/ForgotPasswordRequest.java": "4926878ede52f6e31e2b41685a32d199260dd0f176fb99e6314d153dfd68e510",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/LoginRequest.java": "949244daf7952cb88f44b5ff15d8cd27a8f9439f42ddaa8821eb4ad7b86c651b",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/RefreshTokenRequest.java": "60aa5df8b7b66f70b46ffe18c56bf5b24ad0258d80f2ee89110972d93bb71226",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/RegisterOrganizerRequest.java": "44923e4e3499e6c1a20e191427ca2a7264496911450f523e7e174299e2f766e5",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/RegisterRequest.java": "ea613fb720eb3f56767bcb59e99f22477e150846bd0f577c4c70a3a991ae70a0",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/ResendOtpRequest.java": "fd5efb43adec98e22b811ac718d5920cb5aefc323ff325168087088a03e33d4f",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/ResetPasswordRequest.java": "e9a555ea26e6d40746db5c8cea02cce99933af8ff0e371e2c3bb9d5c5e2e4a5c",
+    "backend/src/main/java/com/uitmerch/backend/auth/dto/VerifyEmailRequest.java": "810d5ac694514e3ac301a5adc71f77d1efb0dd8665bc3532c2f409a5e72c99da",
+    "backend/src/main/java/com/uitmerch/backend/auth/entity/AuthSession.java": "ecef95e451cb1e2a83e4a9204c47091bfae38cef4a73c530b0265078f9cd6006",
+    "backend/src/main/java/com/uitmerch/backend/auth/entity/OtpToken.java": "c16cb052292a5ad93caa835a8af3920bb4809e9fb14484d269d8781d65edcba0",
+    "backend/src/main/java/com/uitmerch/backend/auth/entity/User.java": "b7176602a00c28f665124821df25b2ece3480026021064613e2dcae6dc52336c",
+    "backend/src/main/java/com/uitmerch/backend/auth/repository/AuthSessionRepository.java": "538b1f305badfed21706f8a12b5557b0f9a998eee31701e8ef8ec5d15be687b4",
+    "backend/src/main/java/com/uitmerch/backend/auth/repository/OtpTokenRepository.java": "1ba316dfaa0cb5996eff7ac85dc2ec31437e0dc50fdb19c39aeaa54740206184",
+    "backend/src/main/java/com/uitmerch/backend/auth/repository/UserRepository.java": "4dc766e8bb55b7a0fe3efcdfd5cb291f5b38ea192eb5ee0796421258bfca1d3c",
+    "backend/src/main/java/com/uitmerch/backend/auth/service/AuthService.java": "d85b219a710c976a5ab12fcda4635eeb1fd1d288d872e703784844965781e58d",
+    "backend/src/main/java/com/uitmerch/backend/auth/service/AuthSessionService.java": "513271b6473072925b2d6889ad6c846249a38f08773afba495cef5ee5bdc2f12",
+    "backend/src/main/java/com/uitmerch/backend/campaign/Campaign.java": "5b8187f12e74d382b98acb22f51493ab4e23a476268feaac0a3af61369e4c5eb",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignController.java": "df2f8fa1b540b0f27b0750507a482c53077ab4a05e3f8814871039a82bd0088c",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignOrderPolicy.java": "e6b6eefbee8d977e672e275ec2fff924839a61b1a838d858e30ba90f52cffee2",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignRepository.java": "8b32b267bcd119934ce2cadcd29802245f617ef09fbe9ceba83ef8e1d427244e",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignRequests.java": "cbc98087187ad3b8fca25fb620cbf2df2d662bc7661b3dcb4c7b186d83951182",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignReservation.java": "66632ccc1f73e61be00d0a02bdcd471ed0ac6878477593e4963935c3a7b701a1",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignReservationRepository.java": "c32b654446059e09d84761d0317fda8ed9dce80c137e05ef74439275c0c74a7f",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignResponse.java": "d0f7ece6d78fbb6fcb3029d22edacc8df974958b731873c3b47a53f3722c277d",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignScheduler.java": "a942e66b48cafcb9ff95bdb0ad35836164a24ee00e9f38e8f3f59510c0b5dbbd",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignService.java": "bbd2d47531b9dfb13a49d8647d12ed617e289019568ad550cff92f43b2f661c1",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignVariant.java": "3d8efce6d4831a7307c3d672be087e91891b1e51b86b739f146aa64a7a077cdc",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignVariantRepository.java": "6c0de431ecfb979bf7bd338115d7211f33fb8c8890b9bc0767ce21ed6e628f35",
+    "backend/src/main/java/com/uitmerch/backend/cart/controller/CartController.java": "73d0a4ce53875f66e51613e0892dd92c932ad4577d244cf20acae39f34ad26ef",
+    "backend/src/main/java/com/uitmerch/backend/cart/dto/AddCartItemRequest.java": "82a7b6dc32d66cd1c6996f8c9152b630b3ecc67ce4423da182c5ab75efbcfc31",
+    "backend/src/main/java/com/uitmerch/backend/cart/dto/CartItemResponse.java": "a8ec8b214c67d9f5927d382348304863da753933c9515ddbea2f736afaf30c20",
+    "backend/src/main/java/com/uitmerch/backend/cart/dto/CartResponse.java": "a73abfa3bb684b355873d33c73cebeba7e16dcc215e7907fb8e9dcb217d43b29",
+    "backend/src/main/java/com/uitmerch/backend/cart/dto/CheckoutRequest.java": "ece19e2f08f18f81d9d89b59984a7242ab0430a8ae8261f79a12598aa57c6150",
+    "backend/src/main/java/com/uitmerch/backend/cart/dto/UpdateCartItemRequest.java": "557c0671c9732e4de412e14d7080a6c3de8256a6d18d2260bc1f4520c1863371",
+    "backend/src/main/java/com/uitmerch/backend/cart/entity/Cart.java": "70224115ee70d6616dc31ccede2fb3f340bc66d6141a4ef99286c97c0ad8eac4",
+    "backend/src/main/java/com/uitmerch/backend/cart/entity/CartItem.java": "854db42733eef5449ba1682f8892e5d0b6a267a2391e4e3429182e05b4c594e5",
+    "backend/src/main/java/com/uitmerch/backend/cart/repository/CartItemRepository.java": "6ff183ac940dba7fd92a2d4936641b03cc7569b435f4cbd62d0c0665b7960ce5",
+    "backend/src/main/java/com/uitmerch/backend/cart/repository/CartRepository.java": "619f37629da096896a3f7f8c8346d7b9e70a68427d6d885776e88552328b8601",
+    "backend/src/main/java/com/uitmerch/backend/cart/service/CartService.java": "cf679c6bfaf5b65be616de176ca9a6eaca72712f904bef5a7aaa9342c541ad5c",
+    "backend/src/main/java/com/uitmerch/backend/common/config/DevDataInitializer.java": "bdf5b27c6d9a4a3e64e4098d615fd8147e560a2055c8c508cf314fff6c68adfb",
+    "backend/src/main/java/com/uitmerch/backend/common/config/H2DialectWithEnum.java": "92de1cea7fcb789cf25b1621a018be994043e37b3228d4954c07b36001a92a11",
+    "backend/src/main/java/com/uitmerch/backend/common/config/HealthController.java": "791dfcdad422b28a106bcb2dc32a70e901c11f90b3ad6255ec5450ed75fae1b8",
+    "backend/src/main/java/com/uitmerch/backend/common/config/JwtAuthenticationEntryPoint.java": "60a4b2183dd0ce1a86491a2edd6e2cb4a74b4fd2b6a05d87c2d3d70c5992005f",
+    "backend/src/main/java/com/uitmerch/backend/common/config/JwtAuthenticationFilter.java": "8ee10c0920189cda5ab99cdec8acee483134c6207356ca9c73a152183600e86f",
+    "backend/src/main/java/com/uitmerch/backend/common/config/OpenApiConfig.java": "5c837a161aac30b1e1c0fe8b4bae5c8bd592642d84ab6726c49b72459ed139fc",
+    "backend/src/main/java/com/uitmerch/backend/common/config/RequestLoggingInterceptor.java": "137d90f7f4b29a8b7243a72b1c5624a2bc1315593b882f239e89f552ace652ab",
+    "backend/src/main/java/com/uitmerch/backend/common/config/SecurityConfig.java": "c6758d6baaa40ad36cd5d2970daf2a8e737d66dd2b179f588c2bf0b904531e97",
+    "backend/src/main/java/com/uitmerch/backend/common/config/SupabaseStorageConfig.java": "283d6d338b29a36b7a914c410137ad3f421c6f7a7a4192a8236b0c41455f520a",
+    "backend/src/main/java/com/uitmerch/backend/common/config/TraceIdInterceptor.java": "d8a03bd7d4f909e89760740bc50ae8aedcce26b18b19e4c18e2b10e8d223a346",
+    "backend/src/main/java/com/uitmerch/backend/common/config/WebConfig.java": "362d0244c0b665a967c8f685a5f1e9d6d94285669244aa3d02b3eb1eae619c2a",
+    "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJob.java": "894cb895ee7424b966c62a1bf19e9b80a1954e81247603689af6bd9baf6cd650",
+    "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobClaimService.java": "6037a5bc2eeffebd9100f74612cefaa9785c0322ceb879fdbc574f20ea385aff",
+    "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobDispatcher.java": "c3016c978db8d8684a7e50edc5bc729fc1b1275687d5c5a83893b87cf75bbb4a",
+    "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobRepository.java": "5b0899fa5cf34e2d872420abc14cedc4629583350ee9aa9fc4aa71b8dd2909c0",
+    "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobScheduler.java": "c1ddd48afe9baba4b5afae33ab4875d9df1bec2d1c29c0a36134a5c50a863764",
+    "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobService.java": "227766e3dcd4a4bc6b6285c395dbae8401574bbd7e4438d59904271f96ce530a",
+    "backend/src/main/java/com/uitmerch/backend/common/delivery/OutboxEmailService.java": "211c9a3c8efcdded4a9330b3ffbc8d970cbc0df852eb4afe532398b28bfcc5f1",
+    "backend/src/main/java/com/uitmerch/backend/common/entity/InvalidatedToken.java": "ddff5a71ee92740cd224e391aab704c64ce29181158f9a7ac0cfec20f803423a",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/AppException.java": "c6f1aadcfb69a42aeba29a628938592adf5ecf4e20b8c9be73a8d0967299b0ae",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/AuthenticationException.java": "25d323555ad0806094885c1d09b5f806e9b7fa9d21d0f0b5bbf9c2e5361892f8",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/ConflictException.java": "8975300a5efa6835bb52841a2bedba389e0e55776960d4c245051fe34b36a89e",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/ForbiddenException.java": "101cdac0725830b6105c3093358dc94d3898a1a6f16507e996ef34aedaddd42a",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/GlobalExceptionHandler.java": "fafe5f24b252ed7505c9e7a32dd2b5a230bda1f0fa587f20a05092e0de648429",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/InvalidOtpException.java": "b1eba2d9f4691217c8038c2c75b90c0bb32d8bcb6629317b07bf870645aad389",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/RateLimitException.java": "513714e1a38021c0b02c8abafffc32c1e41871f7f6238118a9e9f5cd6ec1d8f1",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/ResourceNotFoundException.java": "97018bbdce0a202b95b9bc8e784cc693f16d3f100e956c9617ef650bff8f6da3",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/StorageException.java": "a51510fddde4d2584ee06f8a31879683ea94f78396e6295522ecf229704b597c",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/UnverifiedEmailException.java": "13509bab0d1494a618bce015ed6aa019986faf2f42e799bd859a6a1899407e89",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/UserAlreadyExistsException.java": "abdec9b2d6e2b5431ed4001a297259a0acc578d96250ffcbc8af8b170b074f31",
+    "backend/src/main/java/com/uitmerch/backend/common/exception/ValidationException.java": "3b18b0df8a994214b67a899607bcb7dcba6b5d9412795cd9ebdbdde153622760",
+    "backend/src/main/java/com/uitmerch/backend/common/model/ApiResponse.java": "5ea99e2e5f5f067342597237e0026ef6a34c7cb419d68961bdd02489e0313265",
+    "backend/src/main/java/com/uitmerch/backend/common/model/CartStatus.java": "0bcbaca3c5a2eca81579e0c04cc2ded80ea8b2a2c6b0cd6d0ec707087039e86d",
+    "backend/src/main/java/com/uitmerch/backend/common/model/EventStatus.java": "e5c2024cdda9a7c7566ad9fa322d67dfca567a16619486bd5c57bdfb91615238",
+    "backend/src/main/java/com/uitmerch/backend/common/model/MerchItemStatus.java": "e7c296b4ae547dfbad57dab37f459da1e398650ed6566c5ec0846c08d499186b",
+    "backend/src/main/java/com/uitmerch/backend/common/model/NotificationType.java": "dd94de035304781ef7a7e187298b8c75985d6f1eef87f33417bceb25aedf538e",
+    "backend/src/main/java/com/uitmerch/backend/common/model/OrderStatus.java": "7e77f204ad12ff69824c1cb92032f31f40bdc773f3a724b36622c0f40f7ac34a",
+    "backend/src/main/java/com/uitmerch/backend/common/model/OrganizationStatus.java": "4ebf6a94e8e298626a37300f7e2c89d0b9f9a958a84e7236350f3277130e0937",
+    "backend/src/main/java/com/uitmerch/backend/common/model/PaginationMeta.java": "79711aef4efbd5a72c57ec9e981382242828ae6d1e095e38ced9218607fbbcce",
+    "backend/src/main/java/com/uitmerch/backend/common/model/PaymentMethod.java": "209284c9884e3209acc8e8b7ebe6a4494a367c711c19c701c75500d1385315ac",
+    "backend/src/main/java/com/uitmerch/backend/common/model/PaymentStatus.java": "6ad89320b7d645370d511d1ff02a972864c4424f7d611b0c32a2b895e26d92d2",
+    "backend/src/main/java/com/uitmerch/backend/common/model/UserRole.java": "ca22873b4253a1808e719d18d22db281daf4ccd277ab2f21e16e38a7df4c1fa5",
+    "backend/src/main/java/com/uitmerch/backend/common/repository/InvalidatedTokenRepository.java": "19e8a1839135404b51e1b0d5253725b617c58222bd1702b2f92fb69f28bdc068",
+    "backend/src/main/java/com/uitmerch/backend/common/security/JwtTokenProvider.java": "056b42bfd33744a5259e3483e9a856e09eba1c1f772c9a06e4b6d7310ddb666b",
+    "backend/src/main/java/com/uitmerch/backend/common/service/DevEmailService.java": "a175240e040fa438fd589b3b414b1e7bba9e751149b3cf15e5ed03c8908fdfec",
+    "backend/src/main/java/com/uitmerch/backend/common/service/DevStorageService.java": "14479c61d6d5f8ed30205c92ba962d9beb0e02e7c0af4c2799374b84f0583f83",
+    "backend/src/main/java/com/uitmerch/backend/common/service/EmailService.java": "6c80c5125dcf84d648d5ec8b992b6cff3d5974031c2ccb9cad35db8c97dfdd17",
+    "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java": "98c650b5f9d43caa66b58e8ace2e8660a206caacbaba3fa2b27c9fab63ed18bb",
+    "backend/src/main/java/com/uitmerch/backend/common/service/RateLimiterService.java": "6cbcf696408d522966f76fe172a516d873bc2f5e80da77060aea57afd9f4d842",
+    "backend/src/main/java/com/uitmerch/backend/common/service/StorageService.java": "87c1bac29bd5a516cf4692d6eb9e3bdeb5763ca9c9c77bbed3461b810b0188b7",
+    "backend/src/main/java/com/uitmerch/backend/common/service/SupabaseStorageServiceImpl.java": "af8996a168be1caa10f526cbd3686c6ac0b659af4eb146ad86cc43c4d0516e21",
+    "backend/src/main/java/com/uitmerch/backend/common/service/TokenBlacklistService.java": "608d8d714414b2a0fd5a30454b04a3f08038c68d06f225df13fd46fb4af066e5",
+    "backend/src/main/java/com/uitmerch/backend/common/util/FileUploadResponse.java": "604079069bc4ed413862fe1266aba840d524193d9e02e18f7e648f4bf5f418ab",
+    "backend/src/main/java/com/uitmerch/backend/common/util/ImageContentValidator.java": "f7bcfe3a2c0eb8d64fa2ed914f69909d56e2d82060f16ef095975bf0e59d8816",
+    "backend/src/main/java/com/uitmerch/backend/common/util/IpUtil.java": "021a4129ec36742817fa3fc4186e5868df668753fed5ae9757ff5376506a554d",
+    "backend/src/main/java/com/uitmerch/backend/common/util/TraceIdUtil.java": "5f9cffe0b8b7ba8edf7cd520b7898fb363bf7a6f0517b7a68c5506ad6181ddec",
+    "backend/src/main/java/com/uitmerch/backend/event/controller/EventController.java": "79e57d8679490197ee08328abb36cb4cdc11600f7db756788edf9a9f1c16b3f7",
+    "backend/src/main/java/com/uitmerch/backend/event/controller/PublicEventController.java": "da860836aa2da63f91c7c38ac4f2aeeb279ba69dab09ae711ed94dea458e9340",
+    "backend/src/main/java/com/uitmerch/backend/event/dto/AttachMerchRequest.java": "a980559845071f1263c58e4d473c060b64555f2e94736e30a16354bb0252d9df",
+    "backend/src/main/java/com/uitmerch/backend/event/dto/CreateEventRequest.java": "80ebd21a57284f81bb26a0f45d4a18ce1992850500a7ce0b086b264fb87dbdab",
+    "backend/src/main/java/com/uitmerch/backend/event/dto/EventResponse.java": "56f2445c242d447c6c9fafcac8dd32102c3ddbe20d9ecf4f9241d805de7d886c",
+    "backend/src/main/java/com/uitmerch/backend/event/dto/UpdateEventRequest.java": "5546873a571b6ce4ca275496b452d1d151a4fd41a2601926ff1032320082847a",
+    "backend/src/main/java/com/uitmerch/backend/event/entity/Event.java": "22b7c25d278c94f3e07ba930766734fee9fc38891f6bfe77c7cb56778ce2f18e",
+    "backend/src/main/java/com/uitmerch/backend/event/entity/EventMerch.java": "1a38999aa47999e706a27902a9da6babbe4607ec3ff60fe261fba0f1ec12731a",
+    "backend/src/main/java/com/uitmerch/backend/event/entity/EventMerchId.java": "5ba9510eee2380c79bbb1a23c6dd01b41a1d0928909e2487d1e7582a22299dae",
+    "backend/src/main/java/com/uitmerch/backend/event/repository/EventMerchRepository.java": "91bcad81de08a927f3bd36b9de3f6d41d8bf340863a77611a08473b3ab0ea303",
+    "backend/src/main/java/com/uitmerch/backend/event/repository/EventRepository.java": "e0411acb33b9bcf57495195aa9ec12b147aaf0fc8a9cb35bcac7e4ee261c72d0",
+    "backend/src/main/java/com/uitmerch/backend/event/service/EventService.java": "0a28f70aa1d5076fdef09872d51086cccad4d33b2d22c119aad1907292684807",
+    "backend/src/main/java/com/uitmerch/backend/following/FollowAudience.java": "8c4ca836c1a140530ea22b33a8c48f9edda744a5aea270d510808c6afd039977",
+    "backend/src/main/java/com/uitmerch/backend/following/FollowController.java": "256d2c8960142e3cd92d61150af7613984819cbeaf3cde5fe0abf63f426d3b60",
+    "backend/src/main/java/com/uitmerch/backend/following/FollowPreferences.java": "34da4c60d6d1b1de3cc95ac49ded9ec22b9250beb19141f7920addadb2947e15",
+    "backend/src/main/java/com/uitmerch/backend/following/FollowRepository.java": "16a1b4b73ef362c45bc57ead48d9db1a564cc9eafaa5174cc7fda6934b77ea9b",
+    "backend/src/main/java/com/uitmerch/backend/following/FollowService.java": "9b527e186b6e1772400384c371b4b97827c22a8c045153b72c9818eac106ba45",
+    "backend/src/main/java/com/uitmerch/backend/following/OrganizationFollow.java": "ff310ccb04f4da51dea64234bf1f000b49398a8de760c06a440cf6178cb07605",
+    "backend/src/main/java/com/uitmerch/backend/following/PublicationService.java": "08d846352009ef7bbedb16d6d92f61402af490edb1d70425181fe2bbb0c8e4bf",
+    "backend/src/main/java/com/uitmerch/backend/merch/controller/CategoryController.java": "79d59d1cd15d49aa3a97f4d972444e234a7bc1aeaf0ffd3343ff61896319835f",
+    "backend/src/main/java/com/uitmerch/backend/merch/controller/MerchController.java": "6015fa90edd0a428343dbd284d9c573c4fd361f983462672cca34d6cf95ebdbf",
+    "backend/src/main/java/com/uitmerch/backend/merch/controller/PublicMerchController.java": "01ce193ad4ded354c55593ecd7838d05525a8f2b3171ae37023448714d24373a",
+    "backend/src/main/java/com/uitmerch/backend/merch/dto/CategoryResponse.java": "f7ccd407527abe14d889daef494b51245752e36b9cf40a9b97c665cbed534e8d",
+    "backend/src/main/java/com/uitmerch/backend/merch/dto/CreateMerchRequest.java": "ab1f1410f75df132b31baba3844aff68c5c53b8ec07120f2d8ae44870907b168",
+    "backend/src/main/java/com/uitmerch/backend/merch/dto/MerchResponse.java": "c9904e46ab2e4b95985bb8d8b2440aff07913b3cf2c0f69450d4302f08d504c8",
+    "backend/src/main/java/com/uitmerch/backend/merch/dto/UpdateMerchRequest.java": "138b8cb450a340781c95826083c0715f36662f0ee0bac4de43e60ec965cc5953",
+    "backend/src/main/java/com/uitmerch/backend/merch/entity/Category.java": "bd022490269b5f1c0f72e4322e84f118b3bc12e40ac010599537319ae38085d4",
+    "backend/src/main/java/com/uitmerch/backend/merch/entity/MerchImage.java": "48c4641e47cd56229b2025e53706853ff71457941b597070b399f03da3257aa2",
+    "backend/src/main/java/com/uitmerch/backend/merch/entity/MerchItem.java": "ec05bd42808d918f70088cc2c7e8b5913a54b79ad4afbe5c99dc597248bf5e8b",
+    "backend/src/main/java/com/uitmerch/backend/merch/repository/CategoryRepository.java": "faa405357d8aafda609d5ac5c27eaf5b71befe520a12115ccb14bc7f793cc88d",
+    "backend/src/main/java/com/uitmerch/backend/merch/repository/MerchImageRepository.java": "56d7811b3a0840ddfc015b70e5aad801be80ba74a03b4139c304093401401a00",
+    "backend/src/main/java/com/uitmerch/backend/merch/repository/MerchItemRepository.java": "aca0f4a48673d5a1981cebfc67654e4536de60d0d026de653e55490a4ec014df",
+    "backend/src/main/java/com/uitmerch/backend/merch/service/CategoryService.java": "207aacf260fa54ab3375dff5ecd50fc5e97974a5e552da2d41ecf06055f1a967",
+    "backend/src/main/java/com/uitmerch/backend/merch/service/InventoryService.java": "f0b585591cca96fca25f62d5011d9ee8b8475a03cd45337b94a360eff67ee1fa",
+    "backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java": "4f4d4b554ef8981f20293d1251ac2d6e691c0fd4ebbdb4975201a8f670d0f0a1",
+    "backend/src/main/java/com/uitmerch/backend/notification/announcement/AnnouncementAudience.java": "e4f1508a9a883db22a0f339cb97c793d70593b37a280f5ef5516625b44a08f41",
+    "backend/src/main/java/com/uitmerch/backend/notification/announcement/AnnouncementDispatcher.java": "e22719d2c998f3e2a471d61213dcab74c106efb570c40f020d37dac6b8d98a23",
+    "backend/src/main/java/com/uitmerch/backend/notification/announcement/AnnouncementEvent.java": "aa42a91523c8b4cd7c42b85b40b24eca32a69b26d49d8c2dfd9fc0b8f9a282b2",
+    "backend/src/main/java/com/uitmerch/backend/notification/announcement/AnnouncementRepository.java": "46ae68758db24ed8bfed90a65f596948eada25ffee51fd7b2b32f880ec731f4a",
+    "backend/src/main/java/com/uitmerch/backend/notification/announcement/AnnouncementService.java": "a4ef904fb1cf9ac32d60f55eeaa35e0c79b88ab07e5c5912f72c50b0c0142cb4",
+    "backend/src/main/java/com/uitmerch/backend/notification/controller/NotificationController.java": "1d238e8cfbe985938a1f875ccf8b6eb9ac50b8066581a7752f7779ee5b57729f",
+    "backend/src/main/java/com/uitmerch/backend/notification/controller/OrganizerNotificationController.java": "865f731c7b2ade65f32eae97472abf8d46619026d83d5db454bb74a5aec93188",
+    "backend/src/main/java/com/uitmerch/backend/notification/dto/NotificationResponse.java": "6850339c80565a6de293dc6c2b500a3c6ce0b1a34d1fbf207b5b0d1c2edd60ee",
+    "backend/src/main/java/com/uitmerch/backend/notification/entity/Notification.java": "f7fa3d9a31deab540eda395b0de9226a66b23e1bd38f8f0b6828c8ef1356f84a",
+    "backend/src/main/java/com/uitmerch/backend/notification/repository/NotificationRepository.java": "3da66386e73e1e4e478b536687bcde4d0503077ebcaa6bcafc844a2cecb3f2e8",
+    "backend/src/main/java/com/uitmerch/backend/notification/service/NotificationService.java": "182bdbbbb4274204988b5f5c582b548ac6052a00809983cb124370d194449c64",
+    "backend/src/main/java/com/uitmerch/backend/notification/service/SseEmitterManager.java": "170d21c416eaa1bf9654e7360c3893e4f1ee3eb6956f6b9fe911728019949bf6",
+    "backend/src/main/java/com/uitmerch/backend/order/controller/CustomerOrderController.java": "306667ce565bdd519c260f4aa8b0bd7168d50c6716779c087efb3c4398e22897",
+    "backend/src/main/java/com/uitmerch/backend/order/controller/OrganizerOrderController.java": "d9e3ab7491334262630cbd8508db879697829ec863f459b0a9ff95e6c94f97d8",
+    "backend/src/main/java/com/uitmerch/backend/order/controller/PublicOrderController.java": "1a456d2e76f342a834bd4644e75fe8d9d38f2dc89030ba261bc57fcdd041479f",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/CancelOrderRequest.java": "c3bad2c9291e2dce94b54c8ca736184abf507534ed8fc6e03d4f9e570fcc7a26",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/GuestOrderItemRequest.java": "7a5c97692246aced8361e3139a1b9394160f310bd95c7d8e515bd5c5aebb5502",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/GuestOrderRequest.java": "2788a87429beeb25fb1ae89448f5e478fe41b78006adc745385a70c282ae9ef4",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/InstantOrderRequest.java": "3723643d9f1c66ac2e454a35c5418ee76886cdb0563dbc25735f01190a4dc325",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/OrderItemResponse.java": "6654ec32837ee341d78b6472c971c7218c08caa1a8d2ed6b623945f4886451ed",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/OrderResponse.java": "88a0446c32ffd82f1bbb589dfe7df94c8a679b259d9cc6e88bacd294288fe189",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/PickupScheduleRequest.java": "f9ea1e4fa102ddf054979364243696f6e6ce1e4121a4f77a56cd2f3f5dfd6450",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/PickupScheduleResponse.java": "aba87c7deb2f47faec9b040cb25f1b2745da2fc7714c7a25af0e5e91eb02b45a",
+    "backend/src/main/java/com/uitmerch/backend/order/dto/UpdateOrderStatusRequest.java": "0564dd0b4a4719f08b70d6e79184a12413137f6fe32145de23fa369991f6f02d",
+    "backend/src/main/java/com/uitmerch/backend/order/entity/Order.java": "0da48fc22871f4b189040ef11cf768bad47099c7e55b0f05e98cc0a6119c0011",
+    "backend/src/main/java/com/uitmerch/backend/order/entity/OrderItem.java": "ddc275b55b019233be9b7b938624a1a14f6a6fbfbe6018e7586e7082ab0c4832",
+    "backend/src/main/java/com/uitmerch/backend/order/entity/PickupSchedule.java": "b8390c69296ff4c3dd30e232e9dd3b38f5501c464b008f2fa152e5dbdcae235e",
+    "backend/src/main/java/com/uitmerch/backend/order/history/OrderHistory.java": "503dd42b83cdc9812ec7dec67315e5cffd83c978188292b3673f1da3409d33aa",
+    "backend/src/main/java/com/uitmerch/backend/order/history/OrderHistoryController.java": "b5ca7dacc9aa3debfc21218fdadbd46bfdb0271f90587fe3649366240035838d",
+    "backend/src/main/java/com/uitmerch/backend/order/history/OrderHistoryRepository.java": "2f71e5af3bac2f0f5823d90c88c18973c7bf92509b16f44f246b5f89acc7c991",
+    "backend/src/main/java/com/uitmerch/backend/order/history/OrderHistoryService.java": "67df05869d519ad83d5867ed7503609fd0ba21251786d9452c36157538bec0aa",
+    "backend/src/main/java/com/uitmerch/backend/order/repository/OrderItemRepository.java": "21bbc7af227e95279d6cf31a71b4347c64ddabfd57fbc996c468aa30073352cd",
+    "backend/src/main/java/com/uitmerch/backend/order/repository/OrderRepository.java": "2e2b30a3461fdfed48c485790759c80a49ae10fb64dc602620ca290d9319180e",
+    "backend/src/main/java/com/uitmerch/backend/order/repository/PickupScheduleRepository.java": "8a47bed25e1701431ad4dce9e0361870ca9847dfe1880f17183b23a46d1de61d",
+    "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java": "6c92229e8ef5d26d1b42a672db1af740d285b378c6700a45d8cbf063032be23d",
+    "backend/src/main/java/com/uitmerch/backend/organization/controller/OrganizationController.java": "e657f82a51bb7428305d042be5383c62678fe017b133d0dd5ad40694eb87106d",
+    "backend/src/main/java/com/uitmerch/backend/organization/controller/PublicOrganizationController.java": "18f256ff1f933f5de5bb3b768177163e061861e102a89cda88f4630a7b4ce63a",
+    "backend/src/main/java/com/uitmerch/backend/organization/dto/CreateOrganizationRequest.java": "2c5c708637949dd3dc40393e2643a7246a00f6d4fe6ea858c5aafea7dff30811",
+    "backend/src/main/java/com/uitmerch/backend/organization/dto/OrganizationResponse.java": "ca3b1f82f1d1b0b1a52331addf23f02c0cb5329f5eb686e3d28de6586236f994",
+    "backend/src/main/java/com/uitmerch/backend/organization/dto/UpdateOrganizationRequest.java": "90626f846e9ce5c60d9c182c532e03bf8db2f24e57efa70864fe5d7e3f930492",
+    "backend/src/main/java/com/uitmerch/backend/organization/entity/Organization.java": "c5a984cee7eed82f7ff50d8798e2221cf1c2756826aed947f1433be88fae7af0",
+    "backend/src/main/java/com/uitmerch/backend/organization/repository/OrganizationRepository.java": "95da214c84b8498794160cd1b9c2af6142eac42734286e18d3c3354d4b050391",
+    "backend/src/main/java/com/uitmerch/backend/organization/service/OrganizationService.java": "0f64582a3acecc0c1e0645d36a06f8dc8cba1affa0054154449cbc9bc48accdc",
+    "backend/src/main/java/com/uitmerch/backend/pickup/GuestPickupReceipt.java": "52c15e2089130ce47eed26ba3f4c33796f73958cc3cfa0860961c8a18ad6f542",
+    "backend/src/main/java/com/uitmerch/backend/pickup/GuestPickupReceiptRepository.java": "954bbbe17723406a8d86087e932cd2dc7be6a8d4f09f8924414555b76250871f",
+    "backend/src/main/java/com/uitmerch/backend/pickup/PickupController.java": "7fbc07e52fd8b1234213475d486a2826cc8707dc1c24dfaea9f6365fb0c1b8fa",
+    "backend/src/main/java/com/uitmerch/backend/pickup/PickupCredentials.java": "bc1ca12d0d250dea50bf95ef5e29baf75a03d2621221df678828f60d489638dc",
+    "backend/src/main/java/com/uitmerch/backend/pickup/PickupService.java": "d5bc30d2945e5053439692dea004f5a4f25a5e16d748266d04342703b80e40bd",
+    "backend/src/main/java/com/uitmerch/backend/pickup/PickupToken.java": "ddf149f121da50b0da14816f8699422ae987a8ea41ede13eadc88caa7a164259",
+    "backend/src/main/java/com/uitmerch/backend/pickup/PickupTokenRepository.java": "06240af797bc17aca898223598ae359020e8ca52af418e1338fcf8947aa4e04c",
+    "backend/src/main/java/com/uitmerch/backend/restock/RestockAudience.java": "7cef9d09239b66cd9ed9c129df1b04c1db2005c7bfaf88a54706d15bbe4c65ad",
+    "backend/src/main/java/com/uitmerch/backend/restock/RestockController.java": "37ea46f09c877c50f1b4173db2080288e07042d8ea786f7468fd826811f60b96",
+    "backend/src/main/java/com/uitmerch/backend/restock/RestockRepository.java": "fa88b79be100d1ff17a57260705b45da086c110e267874527db19e86cee93aeb",
+    "backend/src/main/java/com/uitmerch/backend/restock/RestockService.java": "238ce7d8aa55b247c4a9e2508d1353f7f5a5dce1acfbf8f6babf59250cd7bc87",
+    "backend/src/main/java/com/uitmerch/backend/restock/RestockSubscription.java": "ac59e257207caa4a8b9b7ea4a58a0114ac0df4f79cd2c9c961be96d46b064116",
+    "backend/src/main/java/com/uitmerch/backend/user/controller/UserController.java": "07dbb7e641c37dbb313a3c9959af617fe12f28801c5c7c6bf9fcd42e7bc891da",
+    "backend/src/main/java/com/uitmerch/backend/user/dto/UpdateProfileRequest.java": "239e246b43a764be4248e44539e94eb3cc27c135459a6888fe319d9976abaa97",
+    "backend/src/main/java/com/uitmerch/backend/user/dto/UserProfileResponse.java": "cff075d3639282df3a0db58a74ed10ebbd89b8da15a2d61521fb3fa2f274e230",
+    "backend/src/main/java/com/uitmerch/backend/user/service/UserService.java": "291f568d3f4294a744b155fe9e3d3b8d3a3b908aae97fa905cc9e30550664e18",
+    "backend/src/main/java/com/uitmerch/backend/wishlist/controller/WishlistController.java": "25bc10905eb39769a7ac77cf10787be6f15e94ebb0fbf9ed94c90a677b555c33",
+    "backend/src/main/java/com/uitmerch/backend/wishlist/dto/WishlistItemResponse.java": "5ecd09656c58692eac0bee9fd00ecc8d9bca9cf0ad2a4d54107ea98812ff9b41",
+    "backend/src/main/java/com/uitmerch/backend/wishlist/dto/WishlistResponse.java": "22ef12ff4cce709104212585a9ee098c17b93216336030de1f4759403d7db5e2",
+    "backend/src/main/java/com/uitmerch/backend/wishlist/entity/Wishlist.java": "9165a3b9ffcdc155deead0b52d97e66852446480416473aa1630825ac55d953c",
+    "backend/src/main/java/com/uitmerch/backend/wishlist/entity/WishlistItem.java": "72bbc308ae1bc8b9195019714c55fc4d18199af00c4a4531e416c0391b919e21",
+    "backend/src/main/java/com/uitmerch/backend/wishlist/repository/WishlistItemRepository.java": "9dc47ee2820d5b13d0698f22d639357e429e1bcabac97bbc209a50db0791ea48",
+    "backend/src/main/java/com/uitmerch/backend/wishlist/repository/WishlistRepository.java": "eac434d8860f270b7c859aae958051a7fc625d061efa740ae89083fe50ae6869",
+    "backend/src/main/java/com/uitmerch/backend/wishlist/service/WishlistService.java": "ec8a60e9ebf9075376705543cf72616edd1d76f40959ea73fe25d01ad263355d",
+    "backend/src/main/resources/application-dev.yaml": "284e5d6c07e3a1b946d840b8fbfb7534534ecb3ee459500d4aa268bc5dfaed18",
+    "backend/src/main/resources/application-docker.yaml": "8dca3a3f9071271a57fb3ec248c8803f0b0d0d9b53f65bd8223683555e94a12d",
+    "backend/src/main/resources/application.yaml": "4dbf32b686870c583664f6ee2a58f816fbae9c787505ce1822735e307cc82a17",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/artistry logo.jpg": "9d686b9c81997723b261078cff19684712abdb62e89efea6890ae294e4598cbf",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/badminton logo.jpg": "85014def5f4eeb557efdec5cfb76adebfb8a47eb6be44601c581015ac84ddecf",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/basketball logo.jpg": "35674a2e9d05f0d63477eee382f4fa7d3a388c66ca4203062c46077ac47ff955",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/ceec logo.jpg": "317faa7a812af5d73908fd54a112f04cf32a52e38d66b9c19ee5186f211cb147",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/clb-sach-hanh-dong logo.jpg": "03e6779f0f61d99e73b3def6ee3ada14ccd525c09a2529c4b081f2d0a680b462",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/cs-uit ai logo.png": "ae438db9f54d130254514ceef68f13be754e1717fe0b2741817d10e6d65ac8d2",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/csac logo.jpg": "a0e05fd2dcb115d8fe6f6f7496b8af437677b7d9e347d66bad02ade8b97b0bd9",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/ctxh uit logo.jpg": "fa61d23f329fde2f85005f34581a2bf999814ef7743e89dc6871c6efde8026dc",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/event uit logo.jpg": "311206adf89360ce889bb50c621842bd63fc54d5b5444d14e87e3d41e84f6233",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/futsal logo.jpg": "571be6859481770f32663aaed35af5220ddae71ecd3c074d7d09bd069cd7d0f4",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/gamapp studios logo.jpg": "e0bcf27f3d550c4787eea73cdab104914481d051c91087ca0b31aaab30ec1d7c",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/gdgoc-uit logo.jpg": "98fd777d11f8c7cf499e2310cf4f0e75a8a549dc4ae26e22330defae867cd46c",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/ic uit logo.jpg": "91b2fc2ad984f7790645c867d9f53a64e3294f7a32760e6b42d9aa0796dc53b4",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/lossless uit logo.jpg": "16a8ecef7922727470827a4204fce71b8aa281c7f0af0b89c99c2a301813f6c7",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/ly-luan-tre logo.jpg": "b67e47a299419e85c2b9a08a503a6cbb5f33db9c5e245b72b8ed6b3c6be711bc",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/mtc-ttm logo.jpg": "2a159d675863f9dc9cc3c917585e9d6292f5741dd39cc8254e5814157b383cdf",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/oec logo.jpg": "e4db36d99def0d111825002d1346cb1842cb3e88bf28a802cc9fb7f0e577b1f1",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/sv5t uit logo.jpg": "7ca3418f092510ba74cfb8b75825ff28aeb671f3dc158bb255d9e47040fc536d",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/taekwondo logo.jpg": "19a3333ef4418eb6fec0b9a73a9d438ac064f6bce022c231ba50cdc891eb55cf",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/uit chess logo.jpg": "a6e021368b48e13e5112d932eb3b452ccae9ef3d2bfd0e670958dba809035bdf",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/uit-leader logo 1.jpg": "eef802cb82cfd4966a0d07273089882e208e70190e8db21d1f809a72a0e1821e",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/uma logo.jpg": "f56146a0722c4a586fea1a92d1003bff29869c8a8776af754d621e6ad4973123",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/uvc logo.jpg": "b4f44908dc8d9228236af11f951bab3b2e21b44b148492285075002845b0c8ba",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/wakame logo.jpg": "dd442a48876286367c92805f493de3382bdb33ab93ea79e06a2e679ebe8c98af",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/CLB/webdev logo.jpg": "9aae77970969c08dd3d0ac12047ff8f67e8e181909efb04a3cc5ab610440dafa",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/Tr\u01b0\u1eddng-Khoa/httt logo.png": "7d1fafa75065408ec4f69d31b8f968de8ce57447bf304f2a4610b0cf8123943f",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/Tr\u01b0\u1eddng-Khoa/khkttt-ise logo.png": "d3346f98b10773feb6034f5970390cc48b9a8fe703ced683e11691888c8b9076",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/Tr\u01b0\u1eddng-Khoa/khmt-uit logo.png": "3e026ec4cc1085e98d3bcfa1dff40c741abbc1ee296f5da71cb77c7eccd62cfd",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/Tr\u01b0\u1eddng-Khoa/ktmt-fce-uit logo.jpg": "15bf2ae0e26d8c659ed7b4aedf737b0283e23e492403673f111180ec95c6c89d",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/Tr\u01b0\u1eddng-Khoa/mmt-tt logo.png": "f52f0f29d6c19d4ab4285081a40dcc65436762e19a3cd86fdea5052652a82dab",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/Tr\u01b0\u1eddng-Khoa/se-uit logo.png": "1347b93e8099ff740cad571e40ed290bbc3a6bc4f0a5b8a029e2bd3dc586c48f",
+    "backend/src/main/resources/data/[IMAGE] UIT DATA INFO/Tr\u01b0\u1eddng-Khoa/uit logo.png": "a7803b9e350c732d428380cc247e13b45f92184088a0f763cc27bff2fbdd3794",
+    "backend/src/main/resources/data/data.md": "9c07d626dd00143fefa922813c6dd03461174742ef80c9d1218cf0cc95348dfc",
+    "backend/src/main/resources/db/migration/V10__fix_users_full_name_not_null.sql": "2f856644ef0a7c7ecd41ca1238e4fd8e75b32f0dc16d52907d0b477b9a5bc98c",
+    "backend/src/main/resources/db/migration/V11__add_stock_non_negative_constraint.sql": "f34cf1e7af7eed71605e2884ffdefbb6409dc704bec6367722075a832565b575",
+    "backend/src/main/resources/db/migration/V12__seed_real_organizations_and_merch.sql": "2fd5e341a2219f4dbce6d5b28b7552d37a26e84f6755c0b7ea43f0e981e74a1e",
+    "backend/src/main/resources/db/migration/V13__create_categories.sql": "40576ba017bfb35cae314151293a6751d6dfd4ce4931f7873c3b82bf54925c26",
+    "backend/src/main/resources/db/migration/V14__seed_demo_users_events_and_transactions.sql": "e158c1dd9a7279f0c3adedff2094eb2f50db837c518d673165ed502e2aa21c15",
+    "backend/src/main/resources/db/migration/V15__otp_attempt_tracking.sql": "40352a3ecd6aaa10ef6191f819a83d2e1c5a50d546c5d2fdddcdcfaf39512a3b",
+    "backend/src/main/resources/db/migration/V16__seed_five_real_events.sql": "2b868b343a7f03a6c38842524fbbb5b63ba8a97fc1676683d4e8ce53451f993c",
+    "backend/src/main/resources/db/migration/V17__create_merch_images.sql": "1c4c765112b5d73c142a8c3a85f32a24911f438b873a1aebced0ad7a12be0cf1",
+    "backend/src/main/resources/db/migration/V18__drop_merch_item_image_url.sql": "8dea1e5e2884560e3bfbde5146fcb7ab1ae9b2cf57f80a0314341e8d289ed1d0",
+    "backend/src/main/resources/db/migration/V19__allow_multiple_orgs_per_owner.sql": "f95730b2add4a4ae7be28c31620a0938e5aa693f012b3b2a0d42f8566b43a63a",
+    "backend/src/main/resources/db/migration/V1__init_enums.sql": "8135ae0ef68c8171e4a1c88e94889c7cd5b5f76a5f67c68884538580621696cc",
+    "backend/src/main/resources/db/migration/V20__seed_org_logo_urls.sql": "8774052af147c02e86c1bc92ed375ae7759431853fb096b0cf8bbd7bd0f54924",
+    "backend/src/main/resources/db/migration/V21__fix_org_logo_urls_domain.sql": "608fab97a5e6e04977664add05bd25239140ac60678dabf952387ac89bcfac0e",
+    "backend/src/main/resources/db/migration/V22__seed_vo_thuat_logo.sql": "0d8b79c03b32dd9022007f9d149c88604c32c66f58d018412ccef5cb9f7ac53d",
+    "backend/src/main/resources/db/migration/V23__create_invalidated_tokens.sql": "819f2c54f550fa4d2944793145e7f39ceedeb8a10259e95961b3b460fad48f15",
+    "backend/src/main/resources/db/migration/V24__add_users_is_active.sql": "9c04e0c90773bfbc9cf3a9c1af6708c861a1f92a0418172a5594522e62405d75",
+    "backend/src/main/resources/db/migration/V25__rename_order_status_values.sql": "72caa5a2ab6fda96e233ea5792f79be96868b4aa741df6aa3a9c36d9be2a666c",
+    "backend/src/main/resources/db/migration/V26__add_order_cancel_fields.sql": "05284344ec84b8253219caf3634aa2061802830bef9d888ba2106d208b04e7d4",
+    "backend/src/main/resources/db/migration/V27__create_pickup_schedules.sql": "a2e7af29fc5914918bbc5ef25dd6a95b568fcb246d94425177ba04b41b1f0cc4",
+    "backend/src/main/resources/db/migration/V28__create_notifications.sql": "7ad7cf4ba4e62f56e4eaebb2fd9e03588670ad32d1b584d1ace281c8c227f167",
+    "backend/src/main/resources/db/migration/V29__merch_embeddings.sql": "bf2ade143068e7e4d90879f613500be2bd82140c9584a3bcabfe4247f4c82ef3",
+    "backend/src/main/resources/db/migration/V2__create_users.sql": "aaf7ae73f1522c25421fb7c1788dcd986404f6b8efcb848ef00bed362f633f8e",
+    "backend/src/main/resources/db/migration/V30__add_order_placed_notification_type.sql": "c401d9e5a2e56d36a20fe702208298accf80cc8cb6cc0a275a9d3dd295b82fc1",
+    "backend/src/main/resources/db/migration/V31__add_new_order_notification_type.sql": "f10c3784091f94a02af03252b9db7c21b9fc2ee4b4aa6aff69e1ba367ace1545",
+    "backend/src/main/resources/db/migration/V32__add_cancelled_event_status.sql": "3f6797f61b489a77a2e228a1fd995dbafb9a85b48dd0091b54aed6186bb7e309",
+    "backend/src/main/resources/db/migration/V33__authentication_sessions_and_otp_purpose.sql": "38c3d59ff9cf2330f3c41ff0de5f7a8a9504ec735dba143ab8edc1f426a33bb1",
+    "backend/src/main/resources/db/migration/V34__durable_background_delivery.sql": "bbeecfd06379536ef6efd53d3b11323454d688c04bc5ec9467c3b079dd1275c2",
+    "backend/src/main/resources/db/migration/V35__restock_notification_type.sql": "e52aebfc47a13b695582a00c709aa5061d2e1b9952822a8a860bb955a07db240",
+    "backend/src/main/resources/db/migration/V36__restock_subscriptions_and_announcements.sql": "b0d959dc2a9995251b689a5b02e7d7da52d5bf42b107b5861230860a7cd4fc16",
+    "backend/src/main/resources/db/migration/V37__pickup_credentials_and_order_history.sql": "497888338b96078d883ae70849f24b51149d6e48f3256488d1a6314e486717eb",
+    "backend/src/main/resources/db/migration/V38__organization_publication_notification_types.sql": "2590507f71d135f16f6388e903abfe4df572c656d3cfb0d3cfb4c6ea0647d92d",
+    "backend/src/main/resources/db/migration/V39__organization_following.sql": "73d399d6f5cd526ef4219bf80b6e7a9daa162554b493fd0dfe54a3da941a8531",
+    "backend/src/main/resources/db/migration/V3__create_organizations.sql": "f985d6d7cd468ada69061a11d17b4b65f9fcba4e0c8ec54a39f2ab4b1c02bc23",
+    "backend/src/main/resources/db/migration/V40__organization_analytics_indexes.sql": "fc7faf81f43a7431d3a09cbf268f4ae6e12483aefdc4c5cb03c314456f3c0a1a",
+    "backend/src/main/resources/db/migration/V41__preorder_campaigns.sql": "ae0daef2ce947e327a4d30fb54975a24a5b3108945ee23b09f38017473bcdd01",
+    "backend/src/main/resources/db/migration/V4__create_merchs.sql": "f297aeefeef3f94a3bec49594e5735cb6f1d5d7bf4a26cf3c17d2babe98f5304",
+    "backend/src/main/resources/db/migration/V5__create_events.sql": "b70e7e7109e0fe1d394b9d4e6985f9e3a67950ad28acc6afd7af134c29f09b49",
+    "backend/src/main/resources/db/migration/V6__create_carts.sql": "892fa91f299330556d5a687738f20bd950256c1f4d6ae24dbea770bca2d7e8f9",
+    "backend/src/main/resources/db/migration/V7__create_orders.sql": "5582d8576060356a1cc6a9854b87bb26a7cf4a3d86178491f26ad55327cd852d",
+    "backend/src/main/resources/db/migration/V8__create_wishlists.sql": "f27e5e30977a27bc1f58e2dad76ae1292b355f6d1730c0ff4b285cd92299d584",
+    "backend/src/main/resources/db/migration/V9__create_indexes.sql": "7d59b7782b83c38a9bc00dc01d5348f078c0903b4d364123a4ff753ec9e4901e",
+    "backend/src/main/resources/logback-spring.xml": "3a7a7d096cbb087449279f03e504dbf96747f4981b09783edab939d82e781ddd",
+    "backend/src/test/java/com/uitmerch/backend/BackendApplicationTests.java": "0fa6fc040e8ff404f94222be54d8cf711c9cc7219b9c5468f4e43a8e616269ed",
+    "backend/src/test/java/com/uitmerch/backend/admin/service/AdminServiceTest.java": "887c90f12c7ce318f2bda409b4849aa2a1675c0e6d254d0416f9b76862095798",
+    "backend/src/test/java/com/uitmerch/backend/auth/service/AuthServiceTest.java": "e2b2fbfaab672bb47de4ce8349e89a401f6478e98e774ecbb8cea82a7005ff4e",
+    "backend/src/test/java/com/uitmerch/backend/cart/service/CartServiceTest.java": "78317cbf8dc4fa4bf8595736e4d7bb1df68f245ff75ffa03b0c9f5091c7599bf",
+    "backend/src/test/java/com/uitmerch/backend/common/security/JwtTokenProviderTest.java": "331c64ed2224ffad0ddc01216cd48eb5b25f5f2a96d5c83201cf9f49084c415c",
+    "backend/src/test/java/com/uitmerch/backend/common/service/RateLimiterServiceTest.java": "d6d426024d4f597a18b3d808d9397c1d4e31916c74451b8ef1384202e7eaa3f0",
+    "backend/src/test/java/com/uitmerch/backend/common/service/TokenBlacklistServiceTest.java": "f1040ef7a14925bbd85829e58e70d016983cfaeb131afba3731b803542c8c014",
+    "backend/src/test/java/com/uitmerch/backend/event/service/EventServiceTest.java": "f3c27adac8a576e2fe975f140317db7c68d1522ada196782c44b94f0d4faff87",
+    "backend/src/test/java/com/uitmerch/backend/features/AnalyticsFeatureTest.java": "fc8e816888a311b50f22a6ee68cd8993f317f3303157c88515fc33495807fb08",
+    "backend/src/test/java/com/uitmerch/backend/features/ApiBoundaryFeatureTest.java": "51f45837eae6101a771045c1f99c2cf792edc714453b37128151b4c038f3d42b",
+    "backend/src/test/java/com/uitmerch/backend/features/BackendFeatureTest.java": "af5021ead7bd65bdf2bcebca07c0ca44a80d27b17a4db497da69d0b61f6057b2",
+    "backend/src/test/java/com/uitmerch/backend/features/CampaignFeatureTest.java": "328cb537f8280fb0919ac1448144dadec0ea4b9746f5c511211b5d980e85e153",
+    "backend/src/test/java/com/uitmerch/backend/features/FollowingFeatureTest.java": "e70478ff03ab43668e45db44285ffd6341b5903b220c73ac10c2b823b6432fc5",
+    "backend/src/test/java/com/uitmerch/backend/features/LockingFeatureTest.java": "4b4ad8b4fd1f71f83a835b82270965a990ee620e1e6b5c7db69f3c642dd8ac12",
+    "backend/src/test/java/com/uitmerch/backend/features/MigrationUpgradeFeatureTest.java": "9d73f5383ace7cbf36cb996ce049c1689ef58f264138d1d18cab78ea78da2494",
+    "backend/src/test/java/com/uitmerch/backend/features/PickupFeatureTest.java": "e8806e12c78bc8314d8bfaf11a70b8b9bf7c2222274d8a857c769a668f5925d9",
+    "backend/src/test/java/com/uitmerch/backend/features/RestockFeatureTest.java": "1a6a0d960b43e7504b799d2a85177bb319184068b74abfe951f96ac2cfb8e2be",
+    "backend/src/test/java/com/uitmerch/backend/merch/repository/MerchItemRepositoryTest.java": "41f7f45761e7bea206d8aaac1f0cf663c751c74d2392d2312968975bca52fd05",
+    "backend/src/test/java/com/uitmerch/backend/merch/service/MerchServiceTest.java": "ea280b77a7a158df68c0749a4c20499bcd38e12c263b129beac146dcb3810fa9",
+    "backend/src/test/java/com/uitmerch/backend/order/service/OrderServiceTest.java": "b7c502124c213fc29c06d3aba5b3b548c8c6c0285bd08b10a8da13bfaf852183",
+    "backend/src/test/java/com/uitmerch/backend/organization/service/OrganizationServiceTest.java": "60aabd82f3b5088b4499cb42add1ead923f3d24fd2904f87539482abcb8eef19",
+    "backend/src/test/java/com/uitmerch/backend/regression/AiResourceRegressionTest.java": "909c39150f478302ddff3d02729ca0212df842b48bf7797af0959224dc08ab8d",
+    "backend/src/test/java/com/uitmerch/backend/regression/DeliveryRegressionTest.java": "388c20fd8cc8f4147aa61870129e8c2f8deb1db09c3704346463bf835546773d",
+    "backend/src/test/java/com/uitmerch/backend/regression/DevAuthRegressionTest.java": "14ea6221c624b6c669efda5ea8953550f97898984cbae3c20e81fcb9cde8b7aa",
+    "backend/src/test/java/com/uitmerch/backend/regression/PostgresRegressionTest.java": "fa659765dda4f5a98b95ed3474557b865bc7d0e0fe83fecd1b40ed17d93acc7f",
+    "backend/src/test/java/com/uitmerch/backend/regression/SecurityAndMailRegressionTest.java": "adf910a44b04f1ca4b6ed237655114896e072676617161210a210989ac7bc513",
+    "backend/src/test/java/com/uitmerch/backend/user/service/UserServiceTest.java": "499c1bba6e068297bd42d04b13c8a6045eca9c9db8f761168699935644e08c06",
+    "backend/src/test/java/com/uitmerch/backend/wishlist/service/WishlistServiceTest.java": "21f5aa12862c07c2a389f198271c1bfc3c684b6c7378afb69c2d2280e6c37d25",
+    "backend/src/test/resources/application.properties": "570969e289cd4daedfe7758550bb92325a7922bb33b185e6715c2899d5bee0a0"
+  },
+  "gitnexusDetectChanges": {
+    "changed_count": 634,
+    "affected_count": 119,
+    "changed_files": 85,
+    "risk_level": "critical",
+    "affectedProcesses": [
+      "Detail \u2192 CampaignResponse",
+      "CheckIn \u2192 FindByIdAndOwnerId",
+      "GuestToken \u2192 OrderHistory",
+      "GuestToken \u2192 Matches",
+      "Cancel \u2192 OrderIds",
+      "Cancel \u2192 FindByCampaignIdOrderById",
+      "Cancel \u2192 FindAllLockedByIds",
+      "Cancel \u2192 FindLockedById",
+      "Cancel \u2192 Lock",
+      "Detail \u2192 ActiveOrg",
+      "Detail \u2192 Quantities",
+      "Reservations \u2192 ReservationResponse",
+      "Reserve \u2192 LoadPickupSchedule",
+      "Checkout \u2192 DeductStock",
+      "Restore \u2192 AnnouncementEvent",
+      "Restore \u2192 ExistsByDedupeKey",
+      "GetNotifications \u2192 IsRead",
+      "CreateInstantOrder \u2192 FindLockedById",
+      "GuestToken \u2192 Generate",
+      "Report \u2192 AnalyticsResponse",
+      "Create \u2192 MerchId",
+      "Create \u2192 ActiveCampaigns",
+      "List \u2192 FindPublic",
+      "Own \u2192 FindByOrgId",
+      "Reservations \u2192 FindByUserId",
+      "Reserve \u2192 FindByUserIdAndRequestId",
+      "Reserve \u2192 FindByCampaignIdAndMerchId",
+      "SendMail \u2192 Escape",
+      "SendMail \u2192 SendMail",
+      "CreateEvent \u2192 From",
+      "UpdateEvent \u2192 FindLockedById",
+      "Follow \u2192 FollowResponse",
+      "Follow \u2192 OrganizationFollow",
+      "Follow \u2192 FindByUserIdAndOrgId",
+      "List \u2192 FindByUserIdAndEnabledTrue",
+      "Preferences \u2192 Apply",
+      "CreateMerch \u2192 StoreAsync",
+      "CreateMerch \u2192 StoreAsync",
+      "CreateMerch \u2192 StoreAsync",
+      "DeliverBatch \u2192 Audience",
+      "DeliverBatch \u2192 Audience",
+      "CreatePickupSchedule \u2192 From",
+      "Customer \u2192 FindByOrderIdOrderByCreatedAtAscIdAsc",
+      "CheckIn \u2192 FindOrderIdByTokenHash",
+      "Verify \u2192 FindByTokenHash",
+      "List \u2192 SubscriptionResponse",
+      "List \u2192 FindByUserIdAndEnabledTrue",
+      "Subscribe \u2192 FindByUserIdAndMerchId",
+      "Checkout \u2192 From",
+      "List \u2192 CampaignResponse",
+      "Report \u2192 FindByIdAndOwnerId",
+      "Issue \u2192 OrderHistory",
+      "Issue \u2192 Matches",
+      "Reserve \u2192 FindByOrderId",
+      "Detail \u2192 FindByCampaignIdOrderById",
+      "Checkout \u2192 FindAllLockedByIds",
+      "CheckIn \u2192 FindLockedById",
+      "List \u2192 Quantities",
+      "Reserve \u2192 ReservationResponse",
+      "CreateInstantOrder \u2192 DeductStock",
+      "MarkRead \u2192 IsRead",
+      "Issue \u2192 Generate",
+      "UpdateEvent \u2192 From",
+      "List \u2192 FollowResponse",
+      "Preferences \u2192 FindByUserIdAndOrgId",
+      "UpdateMerch \u2192 StoreAsync",
+      "UpdateMerch \u2192 StoreAsync",
+      "Subscribe \u2192 FindPublicByIds",
+      "Organizer \u2192 FindByOrderIdOrderByCreatedAtAscIdAsc",
+      "Subscribe \u2192 SubscriptionResponse",
+      "Unsubscribe \u2192 FindByUserIdAndMerchId",
+      "GuestToken \u2192 AppException",
+      "CreateInstantOrder \u2192 From",
+      "Own \u2192 CampaignResponse",
+      "Cancel \u2192 FindByIdAndOwnerId",
+      "CheckIn \u2192 Matches",
+      "CheckIn \u2192 FindByOrderId",
+      "GuestCheckout \u2192 FindAllLockedByIds",
+      "GuestToken \u2192 FindLockedById",
+      "Own \u2192 Quantities",
+      "GuestCheckout \u2192 DeductStock",
+      "GetNotifications \u2192 IsRead",
+      "UpdateMerch \u2192 FindLockedById",
+      "Receipt \u2192 Generate",
+      "Issue \u2192 IsAllowed",
+      "Preferences \u2192 FollowResponse",
+      "Unfollow \u2192 FindByUserIdAndOrgId",
+      "Issue \u2192 AppException",
+      "Restore \u2192 BackgroundJob",
+      "SendMail \u2192 MailPayload",
+      "GuestCheckout \u2192 From",
+      "Create \u2192 FindByIdAndOwnerId",
+      "Receipt \u2192 Matches",
+      "CancelOrder \u2192 FindByOrderId",
+      "Create \u2192 FindAllLockedByIds",
+      "Issue \u2192 FindLockedById",
+      "MarkRead \u2192 IsRead",
+      "SendMail \u2192 BackgroundJob",
+      "Reserve \u2192 From",
+      "Own \u2192 FindByIdAndOwnerId",
+      "Verify \u2192 Matches",
+      "CancelOrder \u2192 FindLockedById",
+      "CancelOrder \u2192 From",
+      "Follow \u2192 FindLockedById",
+      "CancelOrder \u2192 FindLockedById",
+      "Report \u2192 GetTraceId",
+      "Cancel \u2192 AppException",
+      "Receipt \u2192 MailPayload",
+      "CancelOrder \u2192 From",
+      "Preferences \u2192 FindLockedById",
+      "CreateEvent \u2192 FindByIdAndOwnerId",
+      "CancelOrder \u2192 FindByOrderId",
+      "CreatePickupSchedule \u2192 FindLockedById",
+      "Receipt \u2192 BackgroundJob",
+      "CheckIn \u2192 From",
+      "Unfollow \u2192 FindLockedById",
+      "UpdateOrderStatus \u2192 FindLockedById",
+      "Receipt \u2192 FindLockedById",
+      "Subscribe \u2192 FindLockedById"
+    ],
+    "newFilesIncludedUsingTemporaryGitIndex": true,
+    "realGitIndexUnchanged": true,
+    "riskInterpretation": "Aggregate CRITICAL: shared order/notification flows changed. Upstream symbol impacts were reviewed before edits; full backend suite passed. Graph coverage is incomplete and does not replace runtime checks."
+  },
+  "reviewedHighImpactBoundaries": [
+    {
+      "symbol": "listPublished",
+      "file": "backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 3,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "getPublishedMerchByIds",
+      "file": "backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 3,
+        "modules_affected": 1
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "loadImages",
+      "file": "backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 3,
+        "modules_affected": 1
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "buildImageMap",
+      "file": "backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 5,
+        "processes_affected": 7,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "buildCategoryMap",
+      "file": "backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 5,
+        "processes_affected": 7,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "requirePositiveQuantity",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 3,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "loadPickupSchedule",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 7,
+        "processes_affected": 7,
+        "modules_affected": 2
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "notifyOrganizer",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 7,
+        "processes_affected": 7,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "notifyCustomerOrderPlaced",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 3,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "notifyCustomerInApp",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 3,
+        "modules_affected": 1
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "resolveCustomerEmail",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 4,
+        "processes_affected": 9,
+        "modules_affected": 4
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "from",
+      "file": "backend/src/main/java/com/uitmerch/backend/notification/dto/NotificationResponse.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 12,
+        "modules_affected": 3
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "2 call sites invoking `from` were dropped at index time because the receiver's type could not be established (e.g. an unresolved constructor, factory or chained expression). Those callers are absent from this result \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "saveOnly",
+      "file": "backend/src/main/java/com/uitmerch/backend/notification/service/NotificationService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 7,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "push",
+      "file": "backend/src/main/java/com/uitmerch/backend/notification/service/NotificationService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 8,
+        "modules_affected": 4
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "sendOtp",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/DevEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 5,
+        "modules_affected": 3
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "8 call sites invoking `sendOtp` were dropped at index time because the receiver's type could not be established (e.g. an unresolved constructor, factory or chained expression). Those callers are absent from this result \u2014 actual impact may be higher.",
+        "sendOtp is an interface with 3 implementations and 9 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendPasswordReset",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/DevEmailService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 3,
+        "modules_affected": 2
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "1 call site invoking `sendPasswordReset` was dropped at index time because the receiver's type could not be established (e.g. an unresolved constructor, factory or chained expression). Those callers are absent from this result \u2014 actual impact may be higher.",
+        "sendPasswordReset is an interface with 3 implementations and 2 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendOrderPlacedConfirmation",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/DevEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 5,
+        "modules_affected": 3
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendOrderPlacedConfirmation is an interface with 3 implementations and 2 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendOrderStatusUpdate",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/DevEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 5,
+        "modules_affected": 1
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendOrderStatusUpdate is an interface with 3 implementations and 2 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendPickupScheduleNotification",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/DevEmailService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 4,
+        "modules_affected": 2
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendPickupScheduleNotification is an interface with 3 implementations and 2 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendOrderCancelledNotification",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/DevEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 5,
+        "modules_affected": 1
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendOrderCancelledNotification is an interface with 3 implementations and 3 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendOtp",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 5,
+        "modules_affected": 3
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "8 call sites invoking `sendOtp` were dropped at index time because the receiver's type could not be established (e.g. an unresolved constructor, factory or chained expression). Those callers are absent from this result \u2014 actual impact may be higher.",
+        "sendOtp is an interface with 3 implementations and 9 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendPasswordReset",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 3,
+        "modules_affected": 2
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "1 call site invoking `sendPasswordReset` was dropped at index time because the receiver's type could not be established (e.g. an unresolved constructor, factory or chained expression). Those callers are absent from this result \u2014 actual impact may be higher.",
+        "sendPasswordReset is an interface with 3 implementations and 2 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendOrderPlacedConfirmation",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 5,
+        "modules_affected": 3
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendOrderPlacedConfirmation is an interface with 3 implementations and 2 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendOrderStatusUpdate",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 5,
+        "modules_affected": 1
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendOrderStatusUpdate is an interface with 3 implementations and 2 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendPickupScheduleNotification",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 4,
+        "modules_affected": 2
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendPickupScheduleNotification is an interface with 3 implementations and 2 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendOrderCancelledNotification",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 5,
+        "modules_affected": 1
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendOrderCancelledNotification is an interface with 3 implementations and 3 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "sendMail",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 6,
+        "processes_affected": 16,
+        "modules_affected": 4
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "escape",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 9,
+        "modules_affected": 2
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "buildOtpHtml",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 6,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "buildHtml",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 5,
+        "modules_affected": 2
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "MailPayload",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 1,
+        "processes_affected": 7,
+        "modules_affected": 2
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "enqueueEmail",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 6,
+        "processes_affected": 16,
+        "modules_affected": 4
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "enqueue",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/delivery/BackgroundJobService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 7,
+        "modules_affected": 2
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "fetchMerchForEvent",
+      "file": "backend/src/main/java/com/uitmerch/backend/event/service/EventService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 3,
+        "modules_affected": 2
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "completePickup",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 2,
+        "processes_affected": 2,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "notifyOrganizer",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "CRITICAL",
+      "summary": {
+        "direct": 7,
+        "processes_affected": 8,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    },
+    {
+      "symbol": "sendOrderCancelledNotification",
+      "file": "backend/src/main/java/com/uitmerch/backend/common/service/JavaMailEmailService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 4,
+        "modules_affected": 1
+      },
+      "epistemic": "lower-bound",
+      "boundaries": [
+        "sendOrderCancelledNotification is an interface with 3 implementations and 3 interface-level consumers; callers that bind via the interface (e.g. a DI container or dynamic dispatch) are not traced to the concrete symbol \u2014 actual impact may be higher."
+      ]
+    },
+    {
+      "symbol": "restoreStockForItems",
+      "file": "backend/src/main/java/com/uitmerch/backend/order/service/OrderService.java",
+      "risk": "HIGH",
+      "summary": {
+        "direct": 3,
+        "processes_affected": 3,
+        "modules_affected": 3
+      },
+      "epistemic": "exact",
+      "boundaries": []
+    }
+  ],
+  "commitOrganization": {
+    "branch": "feat/new-features-20261001",
+    "codeAndTestCommits": [
+      {
+        "number": 1,
+        "hash": "7f0dd67f46e15cafdffa12c42e6e107ad96c5a1e",
+        "title": "fix(api): return 400 for malformed input and 403 for denied access"
+      },
+      {
+        "number": 2,
+        "hash": "2e189d16f41a94788b06170d4d7a421d13191e5b",
+        "title": "feat(restock): add subscriptions and durable stock-cycle alerts"
+      },
+      {
+        "number": 3,
+        "hash": "d7b0e4af1aadaf2bbccc41334cc97cd6624dcb25",
+        "title": "feat(pickup): add one-time QR credentials and order history"
+      },
+      {
+        "number": 4,
+        "hash": "16026bbbe2991c2bb0b85b9f321c2461bcb05632",
+        "title": "feat(following): notify customers about organization publications"
+      },
+      {
+        "number": 5,
+        "hash": "c125c8129885e8f9878d974cb1bb92b848aa4c58",
+        "title": "feat(analytics): add organization-scoped sales and pickup reports"
+      },
+      {
+        "number": 6,
+        "hash": "62a399b0e222d6548f726063656be996e9d5714d",
+        "title": "feat(preorder): add campaign reservations and deadline finalization"
+      },
+      {
+        "number": 7,
+        "hash": "a669202bc84cc189f1e547f79c48201f9fe9dec8",
+        "title": "test(backend): cover request errors, pickup reissue races and upgrades"
+      }
+    ],
+    "documentationCommittedSeparately": true,
+    "perCommitChecks": [
+      {
+        "number": 1,
+        "title": "fix(api): return 400 for malformed input and 403 for denied access",
+        "validation": {
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "reusedAfterExactStagedSourceComparison": false,
+        "gitnexusStaged": {
+          "changed_count": 3,
+          "affected_count": 0,
+          "changed_files": 1,
+          "risk_level": "low"
+        }
+      },
+      {
+        "number": 2,
+        "title": "feat(restock): add subscriptions and durable stock-cycle alerts",
+        "validation": {
+          "tests": 55,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "reusedAfterExactStagedSourceComparison": false,
+        "gitnexusStaged": {
+          "changed_count": 169,
+          "affected_count": 26,
+          "changed_files": 31,
+          "risk_level": "critical"
+        }
+      },
+      {
+        "number": 3,
+        "title": "feat(pickup): add one-time QR credentials and order history",
+        "validation": {
+          "tests": 40,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "reusedAfterExactStagedSourceComparison": false,
+        "gitnexusStaged": {
+          "changed_count": 127,
+          "affected_count": 39,
+          "changed_files": 16,
+          "risk_level": "critical"
+        }
+      },
+      {
+        "number": 4,
+        "title": "feat(following): notify customers about organization publications",
+        "validation": {
+          "tests": 39,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "reusedAfterExactStagedSourceComparison": false,
+        "gitnexusStaged": {
+          "changed_count": 88,
+          "affected_count": 23,
+          "changed_files": 18,
+          "risk_level": "critical"
+        }
+      },
+      {
+        "number": 5,
+        "title": "feat(analytics): add organization-scoped sales and pickup reports",
+        "validation": {
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "reusedAfterExactStagedSourceComparison": false,
+        "gitnexusStaged": {
+          "changed_count": 63,
+          "affected_count": 3,
+          "changed_files": 5,
+          "risk_level": "medium"
+        }
+      },
+      {
+        "number": 6,
+        "title": "feat(preorder): add campaign reservations and deadline finalization",
+        "validation": {
+          "tests": 44,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "reusedAfterExactStagedSourceComparison": false,
+        "gitnexusStaged": {
+          "changed_count": 186,
+          "affected_count": 46,
+          "changed_files": 18,
+          "risk_level": "critical"
+        }
+      },
+      {
+        "number": 7,
+        "title": "test(backend): cover request errors, pickup reissue races and upgrades",
+        "validation": {
+          "tests": 253,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "reusedAfterExactStagedSourceComparison": true,
+        "gitnexusStaged": {
+          "changed_count": 12,
+          "affected_count": 0,
+          "changed_files": 3,
+          "risk_level": "low"
+        }
+      }
+    ]
+  }
+}
