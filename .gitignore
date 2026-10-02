@@ -23,3 +23,10 @@ build/
 Thumbs.db
 
 .github/agents
+# Frontend test artifacts
+frontend/test-results/
+frontend/playwright-report/
+frontend/coverage/
+
+# TypeScript incremental compiler cache
+*.tsbuildinfo
