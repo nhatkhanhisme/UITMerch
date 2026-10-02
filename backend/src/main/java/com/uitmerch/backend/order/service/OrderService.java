@@ -42,6 +42,7 @@ public class OrderService {
     private final com.uitmerch.backend.merch.service.InventoryService inventoryService;
     private final com.uitmerch.backend.order.history.OrderHistoryService historyService;
 
+    private final com.uitmerch.backend.campaign.CampaignOrderPolicy campaignPolicy;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final MerchItemRepository merchItemRepository;
@@ -71,6 +72,7 @@ public class OrderService {
                 String name = merch != null ? merch.getName() : cartItem.getMerchId().toString();
                 throw new ValidationException("Item is no longer available: " + name);
             }
+            campaignPolicy.validateMerch(merch.getId(), null);
             if (merch.getStock() < cartItem.getQuantity()) {
                 throw new ValidationException(
                     "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock()
@@ -138,6 +140,15 @@ public class OrderService {
 
     @Transactional
     public OrderResponse createInstantOrder(UUID userId, InstantOrderRequest request) {
+        return createSingleOrder(userId, request, null);
+    }
+
+    @Transactional
+    public OrderResponse createCampaignOrder(UUID userId, InstantOrderRequest request, UUID campaignId) {
+        return createSingleOrder(userId, request, campaignId);
+    }
+
+    private OrderResponse createSingleOrder(UUID userId, InstantOrderRequest request, UUID campaignId) {
         requirePositiveQuantity(request.getQuantity());
         MerchItem merch = merchItemRepository.findLockedById(request.getMerchId())
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", request.getMerchId().toString()));
@@ -145,13 +156,15 @@ public class OrderService {
         if (merch.getStatus() != MerchItemStatus.PUBLISHED) {
             throw new ValidationException("This item is not available for purchase.");
         }
+        campaignPolicy.validateMerch(merch.getId(), campaignId);
         if (merch.getStock() < request.getQuantity()) {
             throw new ValidationException(
                 "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock()
             );
         }
 
-        BigDecimal subtotal = merch.getPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
+        BigDecimal unitPrice = campaignId == null ? merch.getPrice() : campaignPolicy.price(campaignId, merch.getId());
+        BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(request.getQuantity()));
 
         if (merchItemRepository.deductStock(merch.getId(), request.getQuantity()) == 0) {
             throw new ValidationException(
@@ -171,7 +184,7 @@ public class OrderService {
             .orderId(order.getId())
             .merchId(merch.getId())
             .merchName(merch.getName())
-            .unitPrice(merch.getPrice())
+            .unitPrice(unitPrice)
             .quantity(request.getQuantity())
             .subtotal(subtotal)
             .build();
@@ -208,6 +221,7 @@ public class OrderService {
                 String name = merch != null ? merch.getName() : item.getMerchId().toString();
                 throw new ValidationException("Item is no longer available: " + name);
             }
+            campaignPolicy.validateMerch(merch.getId(), null);
             if (merch.getStock() < item.getQuantity()) {
                 throw new ValidationException(
                     "Insufficient stock for \"" + merch.getName() + "\". Available: " + merch.getStock()
@@ -352,6 +366,7 @@ public class OrderService {
             throw new ResourceNotFoundException("Order", orderId.toString());
         }
 
+        campaignPolicy.ensureCanProgress(order.getId());
         validateStatusTransition(order.getStatus(), newStatus);
 
         OrderStatus previous = order.getStatus();
@@ -389,6 +404,7 @@ public class OrderService {
             throw new ResourceNotFoundException("Order", orderId.toString());
         }
 
+        campaignPolicy.ensureCanProgress(order.getId());
         if (order.getStatus() != OrderStatus.READY) {
             throw new ValidationException(
                 "Only READY orders can be checked in. Current status: " + order.getStatus()
@@ -431,6 +447,7 @@ public class OrderService {
             .toList();
 
         for (Order order : orders) {
+            campaignPolicy.ensureCanProgress(order.getId());
             if (!org.getId().equals(order.getOrgId())) {
                 throw new ValidationException("Order " + order.getId() + " does not belong to this organization.");
             }
@@ -565,6 +582,21 @@ public class OrderService {
     }
 
     // ------------------------------------------------------------------ //
+    @Transactional
+    public void cancelCampaignOrder(UUID orderId, UUID actor, String reason) {
+        Order order = orderRepository.findLockedById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+        if (order.getStatus() == OrderStatus.CANCELLED) return;
+        if (order.getStatus() != OrderStatus.PENDING) throw new ValidationException("Only pending campaign reservations can be released.");
+        applyCancel(order, "campaign", reason, null);
+        orderRepository.saveAndFlush(order);
+        historyService.record(order, actor, OrderStatus.PENDING, "CAMPAIGN");
+        restoreStockForItems(orderItemRepository.findByOrderId(orderId));
+        sendCancelEmail(order, "campaign");
+        notifyCustomerInApp(order, OrderStatus.CANCELLED);
+        notifyOrganizer(order.getOrgId(), order, "ORDER_CANCELLED");
+    }
+
     //  GUEST ORDER TRACKING
     // ------------------------------------------------------------------ //
 
@@ -665,7 +697,7 @@ public class OrderService {
                     org.getOwnerId(),
                     "Đơn hàng bị huỷ",
                     "Đơn hàng #" + shortId + " đã bị huỷ bởi "
-                        + ("customer".equals(order.getCancelledBy()) ? "khách hàng." : "ban tổ chức."),
+                        + ("customer".equals(order.getCancelledBy()) ? "khách hàng." : "campaign".equals(order.getCancelledBy()) ? "chiến dịch preorder." : "ban tổ chức."),
                     NotificationType.ORDER_CANCELLED,
                     order.getId()
                 );

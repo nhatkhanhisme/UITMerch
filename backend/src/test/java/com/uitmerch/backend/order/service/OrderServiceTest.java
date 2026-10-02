@@ -54,6 +54,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
+    @Mock private com.uitmerch.backend.campaign.CampaignOrderPolicy campaignPolicy;
     @Mock private OrderRepository orderRepository;
     @Mock private OrderItemRepository orderItemRepository;
     @Mock private MerchItemRepository merchItemRepository;

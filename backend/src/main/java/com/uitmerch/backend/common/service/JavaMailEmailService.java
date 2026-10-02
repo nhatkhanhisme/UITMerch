@@ -125,7 +125,7 @@ public class JavaMailEmailService implements EmailService {
     @Override
     public void sendOrderCancelledNotification(String toEmail, String orderId,
                                                String cancelReason, String cancelledBy) {
-        String cancelledByVi = "customer".equalsIgnoreCase(cancelledBy) ? "Khách hàng" : "Ban tổ chức";
+        String cancelledByVi = "customer".equalsIgnoreCase(cancelledBy) ? "Khách hàng" : "campaign".equalsIgnoreCase(cancelledBy) ? "Hệ thống preorder" : "Ban tổ chức";
         String body = """
             <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px;
                         background:#f9f9f9;border-radius:8px;border:1px solid #e0e0e0">
