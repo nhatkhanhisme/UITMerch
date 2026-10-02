@@ -64,6 +64,7 @@ class OrderServiceTest {
     @Mock private SseEmitterManager sseEmitterManager;
     @Mock private PickupScheduleRepository pickupScheduleRepository;
     @Mock private com.uitmerch.backend.merch.service.InventoryService inventoryService;
+    @Mock private com.uitmerch.backend.order.history.OrderHistoryService historyService;
 
     @InjectMocks private OrderService orderService;
 

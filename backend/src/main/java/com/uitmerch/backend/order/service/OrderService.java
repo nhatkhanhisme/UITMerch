@@ -39,8 +39,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-
     private final com.uitmerch.backend.merch.service.InventoryService inventoryService;
+    private final com.uitmerch.backend.order.history.OrderHistoryService historyService;
+
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final MerchItemRepository merchItemRepository;
@@ -353,8 +354,10 @@ public class OrderService {
 
         validateStatusTransition(order.getStatus(), newStatus);
 
+        OrderStatus previous = order.getStatus();
         order.setStatus(newStatus);
         order = orderRepository.save(order);
+        historyService.record(order, ownerId, previous, newStatus == OrderStatus.COMPLETED ? "MANUAL" : "ORGANIZER");
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
         PickupSchedule schedule = loadPickupSchedule(order);
@@ -371,6 +374,12 @@ public class OrderService {
 
     @Transactional
     public OrderResponse checkInOrder(UUID ownerId, UUID orgId, UUID orderId) {
+        return completePickup(ownerId, orgId, orderId, "MANUAL");
+    }
+
+    @Transactional
+    public OrderResponse completePickup(UUID ownerId, UUID orgId, UUID orderId, String source) {
+        if (!Set.of("MANUAL", "QR").contains(source)) throw new ValidationException("Invalid pickup source.");
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
 
         Order order = orderRepository.findLockedById(orderId)
@@ -388,6 +397,7 @@ public class OrderService {
 
         order.setStatus(OrderStatus.COMPLETED);
         order = orderRepository.save(order);
+        historyService.record(order, ownerId, OrderStatus.READY, source);
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
         PickupSchedule schedule = loadPickupSchedule(order);
@@ -445,6 +455,7 @@ public class OrderService {
             order.setStatus(OrderStatus.READY);
             order.setPickupScheduleId(schedule.getId());
             orderRepository.save(order);
+            historyService.record(order, ownerId, OrderStatus.CONFIRMED, "SCHEDULE");
 
             sendPickupNotification(order, schedule, pickupDateStr);
         }
@@ -505,6 +516,7 @@ public class OrderService {
         // @Modifying(clearAutomatically = true), which would otherwise evict the pending
         // order UPDATE from Hibernate's action queue via session.clear().
         order = orderRepository.saveAndFlush(order);
+        historyService.record(order, userId, OrderStatus.PENDING, "CUSTOMER");
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
         restoreStockForItems(items);
@@ -537,8 +549,10 @@ public class OrderService {
             );
         }
 
+        OrderStatus previous = order.getStatus();
         applyCancel(order, "organizer", request.getCancelReason(), request.getCancelReasonNote());
         order = orderRepository.saveAndFlush(order);
+        historyService.record(order, ownerId, previous, "ORGANIZER");
 
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
         restoreStockForItems(items);

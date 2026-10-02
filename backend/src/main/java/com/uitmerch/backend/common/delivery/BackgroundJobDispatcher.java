@@ -61,10 +61,12 @@ public class BackgroundJobDispatcher {
     private void sendMail(BackgroundJob job) throws Exception {
         var mail = json.readValue(job.getPayload(), BackgroundJobService.MailPayload.class);
         var args = mail.arguments();
-        if (("OTP".equals(mail.template()) || "RESET".equals(mail.template()))
+        if (("OTP".equals(mail.template()) || "RESET".equals(mail.template()) || "PICKUP_RECEIPT".equals(mail.template()))
             && job.getCreatedAt().plusSeconds(15 * 60).isBefore(Instant.now())) return;
         switch (mail.template()) {
             case "ANNOUNCEMENT" -> transport.sendAnnouncement(mail.recipient(), args.get(0), args.get(1));
+            case "PICKUP_RECEIPT" -> transport.sendAnnouncement(mail.recipient(), "Xác minh nhận hàng",
+                "Mã xác minh cho đơn #" + args.get(1) + ": " + args.get(0) + ". Mã hết hạn sau 15 phút.");
             case "OTP" -> transport.sendOtp(mail.recipient(), args.get(0));
             case "RESET" -> transport.sendPasswordReset(mail.recipient(), args.get(0));
             case "PLACED" -> transport.sendOrderPlacedConfirmation(mail.recipient(), args.get(0));
