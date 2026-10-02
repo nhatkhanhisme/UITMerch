@@ -220,7 +220,6 @@ public class DevDataInitializer implements ApplicationRunner {
                 .orgId(orgId)
                 .guestName(guestName)
                 .guestPhone(guestPhone)
-                .guestAddress(guestAddress)
                 .guestEmail(guestEmail)
                 .totalAmount(total)
                 .status(OrderStatus.PENDING)

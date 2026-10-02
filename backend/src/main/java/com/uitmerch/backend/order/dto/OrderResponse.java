@@ -89,7 +89,8 @@ public class OrderResponse {
             .guestName(order.getGuestName())
             .guestEmail(order.getGuestEmail())
             .guestPhone(order.getGuestPhone())
-            .guestAddress(order.getGuestAddress())
+            // Kept as a null response field for clients using the old pickup contract.
+            .guestAddress(null)
             .totalAmount(order.getTotalAmount())
             .status(order.getStatus())
             .paymentMethod(order.getPaymentMethod())

@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 
-/** Exercises an actual V34 -> V41 upgrade in a separate disposable database. */
+/** Exercises an actual deployed V34 -> V43 upgrade in a separate disposable database. */
 @EnabledIfEnvironmentVariable(named="UITMERCH_TEST_DATABASE_URL",matches="jdbc:postgresql:.*")
 class MigrationUpgradeFeatureTest {
     @Test void upgradesBugFixSchemaWithoutChangingStockOrSendingHistoricalPublicationAlerts() throws Exception {
@@ -20,11 +20,15 @@ class MigrationUpgradeFeatureTest {
                 Flyway old=Flyway.configure().dataSource(upgrade,"postgres","uitmerch_test_only").target("34").load(); old.migrate();
                 long stock;
                 try(Connection db=DriverManager.getConnection(upgrade,"postgres","uitmerch_test_only");Statement sql=db.createStatement()) {
+                    try(ResultSet rs=sql.executeQuery("SELECT to_regclass('auth_sessions') IS NULL, to_regclass('background_jobs') IS NULL")){rs.next();assertThat(rs.getBoolean(1)).isTrue();assertThat(rs.getBoolean(2)).isTrue();}
+                    try(ResultSet rs=sql.executeQuery("SELECT purpose FROM otp_tokens LIMIT 1")){if(rs.next())assertThat(rs.getString(1)).isEqualTo("VERIFY_EMAIL");}
+                }
+                try(Connection db=DriverManager.getConnection(upgrade,"postgres","uitmerch_test_only");Statement sql=db.createStatement()) {
                     try(ResultSet rs=sql.executeQuery("SELECT SUM(stock) FROM merch_items")){rs.next();stock=rs.getLong(1);}
                 }
                 Flyway current=Flyway.configure().dataSource(upgrade,"postgres","uitmerch_test_only").load();
-                assertThat(current.migrate().migrationsExecuted).isEqualTo(7); current.validate();
-                assertThat(current.info().current().getVersion().getVersion()).isEqualTo("41");
+                assertThat(current.migrate().migrationsExecuted).isEqualTo(9); current.validate();
+                assertThat(current.info().current().getVersion().getVersion()).isEqualTo("43");
                 try(Connection db=DriverManager.getConnection(upgrade,"postgres","uitmerch_test_only");Statement sql=db.createStatement()) {
                     try(ResultSet rs=sql.executeQuery("SELECT SUM(stock) FROM merch_items")){rs.next();assertThat(rs.getLong(1)).isEqualTo(stock);}
                     try(ResultSet rs=sql.executeQuery("SELECT COUNT(*) FROM merch_items WHERE status='PUBLISHED' AND NOT publication_announced")){rs.next();assertThat(rs.getLong(1)).isZero();}
