@@ -179,3 +179,19 @@ body.home-scroll-lock {
     transform: translate(-50%, -50%) rotate(360deg);
   }
 }
+
+/* Shared surfaces for backend feature workflows. */
+.feature-page { position: relative; max-width: 1100px; margin: auto; padding: 7rem 1.25rem 3rem; }
+.feature-page h1 { font-family: Fredoka, sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; }
+.feature-panel { border: 1px solid rgba(255,255,255,.7); background: rgba(255,255,255,.7); border-radius: 24px; padding: 1.25rem; margin: 1rem 0; box-shadow: 0 8px 30px rgba(26,58,74,.06); }
+.feature-panel h2, .feature-panel h3 { font-weight: 700; margin-bottom: .75rem; }
+.feature-panel input:not([type=checkbox]), .feature-panel select, .feature-panel textarea { width: 100%; border: 1px solid #9ab9c3; border-radius: 10px; padding: .7rem; margin: .35rem 0 .85rem; background: white; }
+.feature-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: .75rem; }
+.feature-actions button, .feature-actions a, .feature-button { border-radius: 24px; background: #1a3a4a; color: white; padding: .65rem 1.2rem; font-weight: 600; }
+.feature-panel button:disabled, .feature-actions button:disabled { opacity: .45; cursor: not-allowed; }
+.feature-panel :focus-visible, .feature-actions :focus-visible { outline: 3px solid #008b9b; outline-offset: 3px; }
+.feature-error { background: #ffe2d4; color: #1a3a4a; padding: .8rem; border-radius: 10px; margin: .75rem 0; }
+.feature-error button { text-decoration: underline; font-weight: 700; }
+.feature-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.feature-table th, .feature-table td { text-align: left; padding: .65rem; border-bottom: 1px solid #c7dbe0; }
+.feature-panel label { display: block; margin: .5rem 0; }

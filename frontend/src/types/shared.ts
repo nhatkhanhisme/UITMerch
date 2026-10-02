@@ -200,6 +200,9 @@ export type NotificationResponse = {
   type: string;
   isRead: boolean;
   relatedOrderId?: string;
+  relatedMerchId?: string;
+  relatedOrgId?: string;
+  relatedEventId?: string;
   createdAt?: string;
 };
 
