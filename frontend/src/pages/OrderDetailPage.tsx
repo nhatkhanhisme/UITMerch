@@ -1,3 +1,5 @@
+import { CustomerPickup, OrderHistoryPanel } from "../features/Pickup";
+import { CampaignOrderNotice } from "../features/Campaigns";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
@@ -497,6 +499,7 @@ export function OrderDetailPage() {
           onConfirm={handleCancel}
         />
       )}
+      {order && <div className="relative mx-auto max-w-4xl"><CampaignOrderNotice orderId={order.id} />{order.status === "READY" && <CustomerPickup key={order.id} orderId={order.id} />}<OrderHistoryPanel key={order.id} orderId={order.id} /></div>}
     </main>
   );
 }

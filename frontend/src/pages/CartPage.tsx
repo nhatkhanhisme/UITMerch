@@ -1,3 +1,5 @@
+import { invalidateFeatures } from "../lib/queryClient";
+import { getPurchaseContext } from "../api/campaigns";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
@@ -61,7 +63,7 @@ function OrderSuccess({
         ✓
       </div>
       <h2 className="mt-6 font-fredoka text-4xl font-bold text-black-blue">
-        Đặt trước thành công!
+        Đặt hàng thành công!
       </h2>
       <p className="mt-3 text-sm leading-7 text-ink/70">
         {orders.length === 1
@@ -188,13 +190,15 @@ export function CartPage() {
     setIsCheckingOut(true);
     setShowAddressForm(false);
     try {
+      const contexts = await Promise.all((cart?.items ?? []).map(item => getPurchaseContext(item.merch.id)));
+      if (contexts.some(c => c.reservationRequired)) { toast.error("Giỏ có vật phẩm thuộc chiến dịch đặt trước. Mở trang vật phẩm để giữ chỗ, rồi bỏ vật phẩm đó khỏi giỏ."); return; }
       const res = await checkoutCart({
         note: checkoutNote.trim() || undefined,
         shippingName: shippingName.trim(),
         shippingPhone: shippingPhone.trim(),
       });
       setPlacedOrders(res.data);
-      window.dispatchEvent(new CustomEvent("order-status-changed"));
+      invalidateFeatures();
       toast.success("Đặt hàng thành công!");
     } catch (err) {
       toast.error(getApiErrorMessage(err, "Thanh toán thất bại. Vui lòng thử lại."));
@@ -361,7 +365,7 @@ export function CartPage() {
                       onClick={openAddressForm}
                       type="button"
                     >
-                      {isCheckingOut ? "Đang xử lý..." : "Đặt trước"}
+                      {isCheckingOut ? "Đang xử lý..." : "Đặt hàng"}
                     </button>
 
                     <p className="mt-3 text-center text-xs text-ink/45">
@@ -372,7 +376,7 @@ export function CartPage() {
                   <form className="mt-4 space-y-3" onSubmit={handleCheckout}>
                     <div className="flex items-center justify-between border-b border-ink/10 pb-3 mb-1">
                       <p className="font-fredoka font-bold text-black-blue text-base">
-                        Thông tin đặt trước
+                        Thông tin đặt hàng
                       </p>
                       <button
                         className="text-xs text-ink/50 hover:text-black-blue"
@@ -420,7 +424,7 @@ export function CartPage() {
                       disabled={isCheckingOut}
                       type="submit"
                     >
-                      {isCheckingOut ? "Đang xử lý..." : "Xác nhận đặt trước"}
+                      {isCheckingOut ? "Đang xử lý..." : "Xác nhận đặt hàng"}
                     </button>
                   </form>
                 )}

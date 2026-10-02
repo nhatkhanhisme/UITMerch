@@ -37,7 +37,7 @@ const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Quản trị viên",
 };
 
-const ORG_STATUS_OPTIONS = ["PENDING", "ACTIVE", "INACTIVE", "SUSPENDED"];
+const ORG_STATUS_OPTIONS = ["PENDING", "ACTIVE", "INACTIVE"];
 const ORG_STATUS_LABELS: Record<string, string> = {
   PENDING: "Chờ duyệt",
   ACTIVE: "Hoạt động",

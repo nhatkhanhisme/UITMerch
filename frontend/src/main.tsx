@@ -1,6 +1,13 @@
 import React from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
+import { RestockPage, FollowingPage } from "./features/Subscriptions";
+import { GuestOrdersPage } from "./features/Pickup";
+import {
+  CampaignsPage,
+  CampaignDetailPage,
+  ReservationsPage,
+} from "./features/Campaigns";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { HomeFixedChrome } from "./components/home/HomeFixedChrome";
@@ -29,6 +36,25 @@ function AppRouter() {
     <BrowserRouter>
       <ToastContainer />
       <Routes>
+        {[
+          { path: "/restock-subscriptions", element: <RestockPage /> },
+          { path: "/following", element: <FollowingPage /> },
+          { path: "/guest-orders", element: <GuestOrdersPage /> },
+          { path: "/campaigns", element: <CampaignsPage /> },
+          { path: "/campaigns/:id", element: <CampaignDetailPage /> },
+          { path: "/reservations", element: <ReservationsPage /> },
+        ].map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <>
+                <HomeFixedChrome showSlideBar={false} />
+                {route.element}
+              </>
+            }
+          />
+        ))}
         <Route element={<HomePage />} path="/" />
         <Route
           element={

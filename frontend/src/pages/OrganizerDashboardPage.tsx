@@ -1,5 +1,9 @@
+import { AnalyticsPanel } from "../features/Analytics";
+import { CampaignManagement, CampaignOrderNotice } from "../features/Campaigns";
+import { PickupScanner, OrderHistoryPanel } from "../features/Pickup";
+import { getCampaignOrderContext } from "../api/campaigns";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
 import { cacheDelete, cacheKey } from "../lib/sessionCache";
 import {
@@ -64,7 +68,7 @@ function formatDate(d?: string) {
   return new Date(d).toLocaleDateString("vi-VN");
 }
 
-type Tab = "merch" | "events" | "orders" | "pickup" | "profile";
+type Tab = "merch" | "events" | "orders" | "pickup" | "profile" | "analytics" | "campaigns" | "scanner";
 
 // Only non-cancel transitions here; cancel uses dedicated modal
 const ORDER_STATUS_TRANSITIONS: Record<string, string[]> = {
@@ -1296,17 +1300,17 @@ function OrgOrdersTab({ orgId, refreshTrigger }: { orgId: string; refreshTrigger
                       {currencyFormatter.format(order.totalAmount)}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {nextStatuses.map(nextStatus => (
+                      <CampaignOrderNotice orderId={order.id} orgId={orgId}>{allowed => nextStatuses.map(nextStatus => (
                         <button
                           className="rounded-full border border-aqua/60 bg-aqua/20 px-4 py-1.5 text-xs font-bold text-black-blue transition hover:bg-aqua/40 disabled:opacity-50"
-                          disabled={updatingId === order.id}
+                          disabled={updatingId === order.id || !allowed}
                           key={nextStatus}
                           onClick={() => handleStatusUpdate(order.id, nextStatus)}
                           type="button"
                         >
                           {ORDER_NEXT_LABELS[nextStatus] ?? nextStatus}
                         </button>
-                      ))}
+                      ))}</CampaignOrderNotice>
                       {canCancel && (
                         <button
                           className="rounded-full border border-peach/60 bg-peach/20 px-4 py-1.5 text-xs font-bold text-black-blue transition hover:bg-peach/40 disabled:opacity-50"
@@ -1319,6 +1323,7 @@ function OrgOrdersTab({ orgId, refreshTrigger }: { orgId: string; refreshTrigger
                       )}
                     </div>
                   </div>
+                  <details><summary>Lịch sử đơn</summary><OrderHistoryPanel orderId={order.id} orgId={orgId} /></details>
                 </div>
               );
             })}
@@ -1357,9 +1362,10 @@ function PickupTab({ orgId }: { orgId: string }) {
       getPickupSchedules(orgId, { size: 50 }),
       getOrgOrders(orgId, { status: "CONFIRMED", size: 100 }),
     ])
-      .then(([schedRes, ordRes]) => {
+      .then(async ([schedRes, ordRes]) => {
         setSchedules(schedRes.data ?? []);
-        setConfirmedOrders(ordRes.data ?? []);
+        const available = await Promise.all((ordRes.data ?? []).map(async order => ({order, context: await getCampaignOrderContext(order.id, orgId)})));
+        setConfirmedOrders(available.filter(row => row.context.fulfillmentAllowed).map(row => row.order));
       })
       .catch(() => toast.error("Không thể tải dữ liệu lịch nhận hàng."))
       .finally(() => setIsLoading(false));
@@ -1855,11 +1861,13 @@ function ProfileTab({ org, onUpdated }: { org: OrganizationResponse; onUpdated: 
 // ─── Main Dashboard Page ───────────────────────────────────────────────────────
 
 export function OrganizerDashboardPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab") as Tab;
   const user = useAuthStore((s) => s.user);
   const [orgs, setOrgs] = useState<OrganizationResponse[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>("merch");
+  const [activeTab, setActiveTab] = useState<Tab>(["merch","events","orders","pickup","profile","analytics","campaigns","scanner"].includes(requestedTab) ? requestedTab : "merch");
   const [showCreateOrg, setShowCreateOrg] = useState(false);
   const [orderRefreshTrigger, setOrderRefreshTrigger] = useState(0);
 
@@ -1878,16 +1886,19 @@ export function OrganizerDashboardPage() {
   useEffect(() => {
     if (!user || user.role !== "ORGANIZER") return;
 
+    let active = true;
     setIsLoadingOrgs(true);
     getOwnOrganizations()
       .then(res => {
+        if (!active) return;
         const list = res.data ?? [];
         setOrgs(list);
-        if (list.length > 0) setSelectedOrgId(list[0].id);
+        if (list.length > 0) setSelectedOrgId(list.find(o => o.id === searchParams.get("orgId"))?.id ?? list[0].id);
       })
       .catch(() => toast.error("Không thể tải danh sách tổ chức."))
-      .finally(() => setIsLoadingOrgs(false));
-  }, [user]);
+      .finally(() => { if (active) setIsLoadingOrgs(false); });
+    return () => { active = false; };
+  }, [user?.id]);
 
   if (!user) {
     return <Navigate replace state={{ from: "/organizer" }} to="/auth" />;
@@ -1905,6 +1916,9 @@ export function OrganizerDashboardPage() {
     { id: "orders", label: "Đơn hàng" },
     { id: "pickup", label: "Lịch nhận" },
     { id: "profile", label: "Hồ sơ" },
+    { id: "analytics", label: "Thống kê" },
+    { id: "campaigns", label: "Đặt trước" },
+    { id: "scanner", label: "Quét QR" },
   ];
 
   return (
@@ -1984,7 +1998,7 @@ export function OrganizerDashboardPage() {
             {selectedOrgId && selectedOrg ? (
               <>
                 {/* Tab Bar */}
-                <div className="mb-5 flex gap-1 rounded-full border border-white/50 bg-white/40 p-1 w-fit shadow-glass backdrop-blur-xl">
+                <div className="mb-5 flex flex-wrap gap-1 rounded-2xl border border-white/50 bg-white/40 p-1 w-fit shadow-glass backdrop-blur-xl">
                   {TABS.map(tab => (
                     <button
                       className={[
@@ -1994,7 +2008,7 @@ export function OrganizerDashboardPage() {
                           : "text-black-blue hover:bg-white/50",
                       ].join(" ")}
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => {setActiveTab(tab.id);setSearchParams({tab:tab.id,orgId:selectedOrgId});}}
                       type="button"
                     >
                       {tab.label}
@@ -2003,10 +2017,13 @@ export function OrganizerDashboardPage() {
                 </div>
 
                 {/* Tab Content */}
+                {activeTab === "analytics" && <AnalyticsPanel key={selectedOrgId} orgId={selectedOrgId} />}
+                {activeTab === "campaigns" && <CampaignManagement key={selectedOrgId} orgId={selectedOrgId} />}
+                {activeTab === "scanner" && <PickupScanner key={selectedOrgId} orgId={selectedOrgId} />}
                 {activeTab === "merch" && <MerchTab orgId={selectedOrgId} />}
                 {activeTab === "events" && <EventsTab orgId={selectedOrgId} />}
-                {activeTab === "orders" && <OrgOrdersTab orgId={selectedOrgId} refreshTrigger={orderRefreshTrigger} />}
-                {activeTab === "pickup" && <PickupTab orgId={selectedOrgId} />}
+                {activeTab === "orders" && <OrgOrdersTab key={selectedOrgId} orgId={selectedOrgId} refreshTrigger={orderRefreshTrigger} />}
+                {activeTab === "pickup" && <PickupTab key={selectedOrgId} orgId={selectedOrgId} />}
                 {activeTab === "profile" && (
                   <ProfileTab
                     key={selectedOrg.id}

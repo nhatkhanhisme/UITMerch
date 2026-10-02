@@ -1,3 +1,8 @@
+import { invalidateFeatures } from "../lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { getPurchaseContext } from "../api/campaigns";
+import { RestockButton } from "../features/Subscriptions";
+import { FeatureError, FeatureLoading } from "../features/FeatureUI";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { findProductById, MOCK_PRODUCTS } from "../mocks/merchData";
@@ -6,9 +11,14 @@ import { getPublicMerchDetail } from "../api/merch";
 import { getPublicOrganizationDetail } from "../api/organization";
 import { createGuestCheckoutOrder, createInstantOrder } from "../api/order";
 import { addCartItem } from "../api/cart";
-import { addToWishlist, getWishlist, removeFromWishlist } from "../api/wishlist";
+import {
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist,
+} from "../api/wishlist";
 import { getCustomerProfile } from "../api/profile";
 import { getApiErrorMessage } from "../api/auth";
+import type { OrderResponse } from "../types/shared";
 import { mapMerchToMockProduct } from "../types/shared";
 import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
@@ -59,15 +69,14 @@ function ProductNotFound() {
   );
 }
 
-function Gallery({
-  images,
-  name,
-}: {
-  images: string[];
-  name: string;
-}) {
+function Gallery({ images, name }: { images: string[]; name: string }) {
   const [selected, setSelected] = useState(0);
-  const safeImages = images.length > 0 ? images : ["https://placehold.co/900x900/e9feff/1a3a4a?font=montserrat&text=MERCH"];
+  const safeImages =
+    images.length > 0
+      ? images
+      : [
+          "https://placehold.co/900x900/e9feff/1a3a4a?font=montserrat&text=MERCH",
+        ];
   const activeImage = safeImages[Math.min(selected, safeImages.length - 1)];
 
   return (
@@ -152,11 +161,7 @@ function QuantityStepper({
   );
 }
 
-function PurchasePanel({
-  product,
-}: {
-  product: MockProduct;
-}) {
+function PurchasePanel({ product }: { product: MockProduct }) {
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
   const isCustomer = user?.role === "CUSTOMER";
@@ -178,7 +183,9 @@ function PurchasePanel({
         }
       })
       .catch(() => {});
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [isCustomer, product.id]);
 
   // Checkout Flow States
@@ -189,6 +196,20 @@ function PurchasePanel({
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrders, setPlacedOrders] = useState<OrderResponse[]>([]);
+  useEffect(() => {
+    setOrderPlaced(false);
+    setPlacedOrders([]);
+    setShowCheckout(false);
+    setGuestName(user?.fullName ?? "");
+    setGuestEmail(user?.email ?? "");
+    setGuestPhone("");
+    setShippingPrefilled(false);
+  }, [user?.id]);
+  const context = useQuery({
+    queryKey: ["purchase-context", product.id],
+    queryFn: () => getPurchaseContext(product.id),
+  });
   const [shippingPrefilled, setShippingPrefilled] = useState(false);
 
   useEffect(() => {
@@ -197,7 +218,11 @@ function PurchasePanel({
     getCustomerProfile()
       .then((res) => {
         if (!active || !res.data) return;
-        const { fullName, phone, email } = res.data as { fullName?: string; phone?: string | null; email?: string };
+        const { fullName, phone, email } = res.data as {
+          fullName?: string;
+          phone?: string | null;
+          email?: string;
+        };
         setGuestName(fullName ?? user?.fullName ?? "");
         setGuestEmail(email ?? user?.email ?? "");
         if (phone) {
@@ -209,17 +234,22 @@ function PurchasePanel({
         setGuestName(user?.fullName ?? "");
         setGuestEmail(user?.email ?? "");
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [isCustomer, user?.fullName, user?.email]);
 
   const handleBuyNow = async () => {
     setIsBuyingNow(true);
     try {
       await createInstantOrder({ merchId: product.id, quantity });
+      invalidateFeatures();
       toast.success("Đặt hàng thành công!");
       navigate("/orders");
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Không thể đặt hàng. Vui lòng thử lại."));
+      toast.error(
+        getApiErrorMessage(err, "Không thể đặt hàng. Vui lòng thử lại."),
+      );
     } finally {
       setIsBuyingNow(false);
     }
@@ -272,9 +302,10 @@ function PurchasePanel({
       return;
     }
 
+    const checkoutUserId = user?.id;
     setIsSubmitting(true);
     try {
-      await createGuestCheckoutOrder({
+      const result = await createGuestCheckoutOrder({
         guestEmail: guestEmail.trim() || undefined,
         guestName: guestName.trim(),
         guestPhone: guestPhone.trim(),
@@ -282,15 +313,42 @@ function PurchasePanel({
         note: note.trim() || undefined,
       });
 
+      if (useAuthStore.getState().user?.id !== checkoutUserId) return;
+      setPlacedOrders(result.data);
       setOrderPlaced(true);
-      toast.success("Đặt trước thành công!");
+      invalidateFeatures();
+      toast.success("Đặt hàng thành công!");
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Không thể tạo đơn hàng. Vui lòng thử lại."));
+      toast.error(
+        getApiErrorMessage(err, "Không thể tạo đơn hàng. Vui lòng thử lại."),
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (
+    !orderPlaced &&
+    (context.isPending || context.isError || context.data?.reservationRequired)
+  ) {
+    return (
+      <aside className="feature-panel">
+        <h1>{product.name}</h1>
+        {context.isPending && <FeatureLoading />}
+        {context.isError && (
+          <FeatureError error={context.error} retry={() => context.refetch()} />
+        )}
+        {context.data?.campaignId && (
+          <p>
+            Vật phẩm thuộc chiến dịch đặt trước.{" "}
+            <Link to={`/campaigns/${context.data.campaignId}`}>
+              Chọn phiên bản và giữ chỗ
+            </Link>
+          </p>
+        )}
+      </aside>
+    );
+  }
   if (orderPlaced) {
     return (
       <aside className="scrollbar-hide max-h-none self-start overflow-y-auto rounded-[24px] border border-aqua/60 bg-white/70 p-4 shadow-glass backdrop-blur-xl sm:rounded-panel sm:p-6 lg:fixed lg:right-16 lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:w-[430px] xl:right-[max(4rem,calc((100vw-1320px)/2))] xl:w-[480px]">
@@ -299,7 +357,7 @@ function PurchasePanel({
             ✓
           </div>
           <h2 className="font-fredoka text-2xl font-bold text-black-blue sm:text-3xl">
-            Đặt trước thành công!
+            Đặt hàng thành công!
           </h2>
           <p className="mt-3 text-sm leading-6 text-ink/70">
             Cảm ơn <strong>{guestName}</strong> đã ủng hộ sản phẩm của{" "}
@@ -308,7 +366,7 @@ function PurchasePanel({
 
           <div className="mt-6 rounded-2xl bg-white/50 p-4 text-left border border-white/60 space-y-2 text-xs">
             <p className="font-semibold text-black-blue border-b pb-2 text-sm">
-              Thông tin đặt trước
+              Thông tin đặt hàng
             </p>
             <p>
               <span className="text-ink/60">Vật phẩm:</span> {product.name}
@@ -324,10 +382,37 @@ function PurchasePanel({
             </p>
             <p className="pt-2 font-bold text-black-blue border-t mt-2 flex justify-between text-sm">
               <span>Tổng thanh toán:</span>
-              <span>{formatPrice((product.price ?? 0) * quantity)}</span>
+              <span>
+                {formatPrice(
+                  placedOrders.reduce(
+                    (sum, order) => sum + order.totalAmount,
+                    0,
+                  ),
+                )}
+              </span>
             </p>
           </div>
 
+          {placedOrders.map((order) => (
+            <p key={order.id}>
+              Đơn #{order.id} ·{" "}
+              <Link
+                to={
+                  order.userId
+                    ? `/orders/${order.id}`
+                    : `/guest-orders?orderId=${order.id}`
+                }
+              >
+                {order.userId ? "Xem đơn hàng" : "Tra cứu đơn và nhận hàng"}
+              </Link>
+            </p>
+          ))}
+          {placedOrders.some((order) => !order.userId) && (
+            <p>
+              Lưu mã đơn hàng. Muốn tra cứu và nhận hướng dẫn qua email, cần sử
+              dụng email đã nhập lúc đặt hàng.
+            </p>
+          )}
           <button
             className="mt-6 w-full rounded-full bg-black-blue py-3 text-sm font-bold text-white transition hover:bg-ink"
             onClick={() => {
@@ -345,6 +430,7 @@ function PurchasePanel({
 
   return (
     <aside className="scrollbar-hide max-h-none self-start overflow-y-auto rounded-[24px] border border-white/55 bg-white/45 p-4 shadow-glass backdrop-blur-xl sm:rounded-panel sm:p-6 lg:fixed lg:right-16 lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:w-[430px] xl:right-[max(4rem,calc((100vw-1320px)/2))] xl:w-[480px]">
+      {product.stock === 0 && <RestockButton merchId={product.id} />}
       <div className="border-b border-ink/10 pb-6">
         <Link
           className="inline-flex items-center rounded-full border border-white/70 bg-white/65 px-5 py-2.5 text-sm font-bold text-black-blue shadow-glass-inset transition hover:-translate-y-0.5 hover:border-aqua hover:bg-white"
@@ -358,7 +444,9 @@ function PurchasePanel({
         <h1 className="mt-2 font-fredoka text-3xl font-bold leading-tight text-black-blue sm:text-5xl lg:text-4xl xl:text-5xl">
           {product.name}
         </h1>
-        <p className="mt-4 text-sm leading-7 text-ink/65">{product.description}</p>
+        <p className="mt-4 text-sm leading-7 text-ink/65">
+          {product.description}
+        </p>
       </div>
 
       <div className="space-y-7 py-7">
@@ -367,7 +455,9 @@ function PurchasePanel({
             {formatPrice(product.price)}
           </p>
           <p className="mt-2 text-sm text-ink/55">
-            {product.stock > 0 ? `Còn ${product.stock} sản phẩm` : "Tạm hết hàng"}
+            {product.stock > 0
+              ? `Còn ${product.stock} sản phẩm`
+              : "Tạm hết hàng"}
           </p>
         </div>
 
@@ -387,7 +477,7 @@ function PurchasePanel({
                 onClick={() => setShowCheckout(true)}
                 type="button"
               >
-                Đặt trước
+                Đặt hàng
               </button>
             </div>
             {isCustomer && (
@@ -402,7 +492,8 @@ function PurchasePanel({
             )}
             {product.stock <= 0 && (
               <div className="rounded-xl border border-peach/40 bg-peach/10 px-4 py-3 text-sm text-black-blue/70">
-                Sản phẩm này hiện đã hết hàng và chưa có lịch nhập kho mới. Bạn có thể thêm vào danh sách yêu thích để theo dõi.
+                Sản phẩm này hiện đã hết hàng và chưa có lịch nhập kho mới. Bạn
+                có thể thêm vào danh sách yêu thích để theo dõi.
               </div>
             )}
           </div>
@@ -413,7 +504,7 @@ function PurchasePanel({
           >
             <div className="flex items-center justify-between border-b pb-2">
               <p className="font-fredoka font-bold text-black-blue">
-                Xác nhận đặt trước
+                Xác nhận đặt hàng
               </p>
               <button
                 className="text-xs text-ink/50 hover:text-black-blue"
@@ -425,7 +516,9 @@ function PurchasePanel({
             </div>
 
             <div className="rounded-xl bg-white/50 border border-white/70 p-3 space-y-1 text-sm">
-              <p className="text-xs font-semibold text-ink/50 uppercase mb-2">Thông tin nhận hàng</p>
+              <p className="text-xs font-semibold text-ink/50 uppercase mb-2">
+                Thông tin nhận hàng
+              </p>
               <p className="text-black-blue font-semibold">{guestName}</p>
               <p className="text-ink/70">{guestPhone}</p>
             </div>
@@ -448,7 +541,7 @@ function PurchasePanel({
                 disabled={isSubmitting}
                 type="submit"
               >
-                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt trước"}
+                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt hàng"}
               </button>
             </div>
           </form>
@@ -459,7 +552,7 @@ function PurchasePanel({
           >
             <div className="flex items-center justify-between border-b pb-2">
               <p className="font-fredoka font-bold text-black-blue">
-                Thông tin đặt trước
+                Thông tin đặt hàng
               </p>
               <button
                 className="text-xs text-ink/50 hover:text-black-blue"
@@ -528,7 +621,7 @@ function PurchasePanel({
                 disabled={isSubmitting}
                 type="submit"
               >
-                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt trước"}
+                {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt hàng"}
               </button>
             </div>
           </form>
@@ -547,7 +640,11 @@ function PurchasePanel({
           onClick={handleWishlistToggle}
           type="button"
         >
-          {isWishlistLoading ? "Đang xử lý..." : isWishlisted ? "♥ Đã yêu thích" : "♡ Yêu thích"}
+          {isWishlistLoading
+            ? "Đang xử lý..."
+            : isWishlisted
+              ? "♥ Đã yêu thích"
+              : "♡ Yêu thích"}
         </button>
         <button
           className="rounded-full border border-ink/15 bg-white/35 px-4 py-3 text-sm font-semibold text-black-blue transition hover:border-aqua hover:bg-white/55"
@@ -578,6 +675,7 @@ export function ProductDetailPage() {
 
     let isActive = true;
     setIsLoading(true);
+    setLiveProduct(null);
 
     async function fetchProduct() {
       try {
@@ -594,7 +692,7 @@ export function ProductDetailPage() {
           }
 
           const mapped = mapMerchToMockProduct(res.data, orgMap);
-          setLiveProduct(mapped);
+          if (isActive) setLiveProduct(mapped);
         }
       } catch {
         // Fall back gracefully to local static mock product if missing
@@ -618,7 +716,8 @@ export function ProductDetailPage() {
     () =>
       product
         ? MOCK_PRODUCTS.filter(
-            (item) => item.id !== product.id && item.category === product.category,
+            (item) =>
+              item.id !== product.id && item.category === product.category,
           ).slice(0, 3)
         : [],
     [product],
@@ -638,10 +737,7 @@ export function ProductDetailPage() {
         {product ? (
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_430px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_480px]">
             <section className="overflow-hidden rounded-[24px] border border-white/50 bg-white/30 p-3 shadow-glass backdrop-blur-xl sm:rounded-panel sm:p-5">
-              <Gallery
-                images={product.gallery}
-                name={product.name}
-              />
+              <Gallery images={product.gallery} name={product.name} />
 
               <section className="mt-6 border-t border-white/50 px-2 py-7 sm:px-3">
                 <p className="text-sm font-bold uppercase text-ink/45">
@@ -699,13 +795,22 @@ export function ProductDetailPage() {
               ) : null}
             </section>
 
-            <PurchasePanel
-              key={product.id}
-              product={product}
-            />
+            {liveProduct && liveProduct.id === id ? (
+              <PurchasePanel key={liveProduct.id} product={liveProduct} />
+            ) : (
+              <aside className="feature-panel">
+                <p>
+                  {isLoading
+                    ? "Đang tải dữ liệu mua hàng…"
+                    : "Chưa tải được vật phẩm từ backend. Không thể đặt hàng."}
+                </p>
+              </aside>
+            )}
           </div>
         ) : (
-          <div className="py-24 text-center">Đang tải thông tin vật phẩm...</div>
+          <div className="py-24 text-center">
+            Đang tải thông tin vật phẩm...
+          </div>
         )}
       </div>
     </main>

@@ -1,3 +1,5 @@
+import { RestockButton } from "../features/Subscriptions";
+import { getPurchaseContext } from "../api/campaigns";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
@@ -64,6 +66,7 @@ function WishlistCard({
           <p className="mt-1 text-sm font-semibold text-ink/65">
             {formatPrice(merch.price)}
           </p>
+          {merch.stock <= 0 && <RestockButton merchId={merch.id} />}
           {merch.stock <= 0 && (
             <span className="mt-1 inline-block rounded-full bg-peach/30 px-2 py-0.5 text-[10px] font-semibold text-black-blue">
               Hết hàng
@@ -147,6 +150,8 @@ export function WishlistPage() {
   const handleAddToCart = async (merchId: string) => {
     setAddingToCartId(merchId);
     try {
+      const context = await getPurchaseContext(merchId);
+      if (context.reservationRequired) { toast.info("Vật phẩm thuộc chiến dịch đặt trước. Hãy mở trang vật phẩm để giữ chỗ."); return; }
       await addCartItem({ merchId, quantity: 1 });
       toast.success("Đã thêm vào giỏ hàng!");
     } catch (err) {
