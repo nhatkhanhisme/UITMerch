@@ -34,7 +34,6 @@ const navItems = [
   { label: "Vật phẩm", href: "/merch" },
   { label: "Tổ chức", href: "/organization" },
   { label: "Sự kiện", href: "/events" },
-  { label: "Đặt trước", href: "/campaigns" },
 ];
 
 const getInitials = (fullName: string) => {

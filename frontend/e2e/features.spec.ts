@@ -267,8 +267,13 @@ test("following preferences are partial updates", async ({ page }) => {
     await route.fulfill({ json: { success: true, data: {} } });
   });
   await page.goto("/following");
-  await page.getByRole("checkbox", { name: "Email", exact: true }).check();
+  const email = page.getByRole("checkbox", { name: "Email", exact: true });
+  await expect(email).not.toBeChecked();
+  // React restores a controlled checkbox before the async optimistic update.
+  await email.click();
   await expect.poll(() => body).toEqual({ emailEnabled: true });
+  await expect(email).toBeChecked();
+  await expect(email).toBeEnabled();
 });
 test("READY customer orders expose QR and an API history", async ({ page }) => {
   await setup(page, "CUSTOMER");

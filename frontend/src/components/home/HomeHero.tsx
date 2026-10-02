@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { BackgroundEffect } from "../ui";
+import { PreorderSpotlight } from "../features/PreorderSpotlight";
 import { ScrollDownButton } from "./ScrollDownButton";
 
 const logoTitleUrl = "/assets/figma/logo-title.svg";
@@ -200,7 +201,7 @@ export function HomeHero() {
             style={{ top: isResponsiveHero ? undefined : desktopHeroRowTop }}
           >
             <div
-              className="relative mx-auto flex w-full max-w-[472px] flex-col items-center text-center lg:mx-0 lg:w-[472px] lg:max-w-none lg:gap-[129px]"
+              className="relative mx-auto flex w-full max-w-[472px] flex-col items-center text-center lg:mx-0 lg:w-[472px] lg:max-w-none lg:gap-16"
               data-node-id="57:1325"
             >
               <img
@@ -209,12 +210,15 @@ export function HomeHero() {
                 data-node-id="17:4228"
                 src={logoTitleUrl}
               />
-              <p
-                className="relative mt-5 max-w-[472px] text-center font-sans text-sm leading-6 text-gray sm:mt-10 sm:text-[16px] sm:leading-7 lg:mt-0 lg:w-[472px] lg:text-[16px] lg:leading-[1.45]"
-                data-node-id="17:4943"
-              >
-                {heroParagraph}
-              </p>
+              <div className="mt-5 w-full sm:mt-10 lg:mt-0">
+                <p
+                  className="relative max-w-[472px] text-center font-sans text-sm leading-6 text-gray sm:text-[16px] sm:leading-7 lg:w-[472px] lg:text-[16px] lg:leading-[1.45]"
+                  data-node-id="17:4943"
+                >
+                  {heroParagraph}
+                </p>
+                <PreorderSpotlight />
+              </div>
             </div>
 
             <div
@@ -234,7 +238,9 @@ export function HomeHero() {
       <div className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 animate-bounce sm:bottom-8">
         <ScrollDownButton
           onClick={() => {
-            document.getElementById("home-item")?.scrollIntoView({ behavior: "smooth" });
+            document
+              .getElementById("home-item")
+              ?.scrollIntoView({ behavior: "smooth" });
           }}
         />
       </div>

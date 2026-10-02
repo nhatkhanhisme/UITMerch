@@ -2,6 +2,8 @@
 
 Nhánh: `refactor/fe`, sau commit tích hợp `0aa4e6e`.
 
+**Cập nhật tiếp theo:** mục Đặt trước đã chuyển khỏi hàng điều hướng sang khu giới thiệu riêng trên trang chủ và trang vật phẩm. Xem [bố trí đặt trước](2026-10-02-preorder-placement.md) cho giao diện hiện tại; ảnh và kết quả bên dưới ghi lại lần sửa navbar trước đó.
+
 Nav trước đó chật vì thêm “Đơn khách” vào hàng chính trong khi giữ width cố định, khoảng cách lớn và scale trên tablet. Bản sửa giữ phong cách glass hiện có, bố trí lại theo nhiệm vụ:
 
 - Hàng chính: Trang chủ, Vật phẩm, Tổ chức, Sự kiện, Đặt trước.

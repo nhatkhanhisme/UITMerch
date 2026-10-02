@@ -106,6 +106,21 @@ export function HomePage() {
       // Ignore zero-delta events (pure horizontal or neutral).
       if (event.deltaY === 0) return;
 
+      // Allow the content of a tall section to be read before snapping away.
+      // This keeps the preorder entry reachable on short screens.
+      if (!isSnappingRef.current) {
+        const current = sections[activeSectionIndexRef.current];
+        const bounds = current?.getBoundingClientRect();
+        const viewport = scrollRoot.getBoundingClientRect();
+        if (bounds && bounds.height > viewport.height + 2) {
+          const hasMoreContent =
+            event.deltaY > 0
+              ? bounds.bottom > viewport.bottom + 2
+              : bounds.top < viewport.top - 2;
+          if (hasMoreContent) return;
+        }
+      }
+
       event.preventDefault();
 
       if (isSnappingRef.current) {

@@ -5,6 +5,7 @@ import { FeaturedSlider } from "../components/features/FeaturedSlider";
 import type { FeaturedItem } from "../components/features/FeaturedSlider";
 import { MerchToolbar } from "../components/features/MerchToolbar";
 import type { FilterOption } from "../components/features/MerchToolbar";
+import { PreorderSpotlight } from "../components/features/PreorderSpotlight";
 import { ProductGrid } from "../components/features/ProductGrid";
 import type { MockProduct } from "../mocks/merchData";
 import { getPublicMerchList, getPopularMerch, getCategories } from "../api/merch";
@@ -215,6 +216,8 @@ export function MerchPage() {
               )}
             </p>
           </header>
+
+          <PreorderSpotlight compact />
 
           {popularProducts === null ? (
             <div className="relative mb-6 flex h-56 w-full items-center justify-center overflow-hidden rounded-[24px] border border-white/30 bg-white/10 shadow-glass backdrop-blur-md sm:mb-10 sm:h-80 sm:rounded-[32px]">

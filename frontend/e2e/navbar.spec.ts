@@ -102,7 +102,7 @@ for (const width of [1440, 1280, 1024, 768, 375, 320]) {
         exact: true,
       });
       await expect(
-        compact.getByRole("link", { name: "Đặt trước", exact: true }),
+        compact.getByRole("link", { name: "Vật phẩm", exact: true }),
       ).toBeVisible();
       await expect(
         page.getByRole("link", { name: "Tra cứu đơn khách", exact: true }),
@@ -187,7 +187,7 @@ for (const role of ["CUSTOMER", "ORGANIZER", "ADMIN"] as const) {
   });
 }
 
-test("campaign details keep the parent navigation item active", async ({
+test("campaign details do not add a campaign item to primary navigation", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -196,7 +196,7 @@ test("campaign details keep the parent navigation item active", async ({
   const link = page
     .getByRole("navigation", { name: "Điều hướng chính", exact: true })
     .getByRole("link", { name: "Đặt trước", exact: true });
-  await expect(link).toHaveAttribute("aria-current", "page");
+  await expect(link).toHaveCount(0);
 });
 
 test("switching breakpoints closes hidden menus", async ({ page }) => {
