@@ -36,6 +36,8 @@ const uploadImage = async (file: File, bucket: string, filePath: string) => {
     throw new Error("Image size must be 10MB or smaller.");
   }
 
+  if (!supabase) throw new Error("Chưa cấu hình Supabase Storage. Vui lòng liên hệ quản trị viên.");
+
   const { error } = await supabase.storage.from(bucket).upload(filePath, file, {
     contentType: file.type,
     upsert: false,
