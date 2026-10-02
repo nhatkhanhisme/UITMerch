@@ -47,6 +47,7 @@ public class MerchService {
     private final OrderItemRepository orderItemRepository;
     private final MerchEmbeddingService merchEmbeddingService;
     private final com.uitmerch.backend.restock.RestockService restockService;
+    private final com.uitmerch.backend.following.PublicationService publicationService;
 
     // ------------------------------------------------------------------ //
     //  ORGANIZER
@@ -73,6 +74,7 @@ public class MerchService {
 
         MerchItem saved = merchItemRepository.save(item);
         List<String> images = saveImages(saved.getId(), request.getImageUrls());
+        publicationService.merchPublished(saved);
         merchEmbeddingService.storeAsync(saved.getId(), embeddingText(saved));
         return MerchResponse.from(saved, category, images);
     }
@@ -133,6 +135,7 @@ public class MerchService {
 
         MerchItem saved = merchItemRepository.save(item);
         restockService.stockIncreased(saved, previousStock);
+        publicationService.merchPublished(saved);
         merchEmbeddingService.storeAsync(saved.getId(), embeddingText(saved));
 
         List<String> images;

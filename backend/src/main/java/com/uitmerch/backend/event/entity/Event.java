@@ -45,6 +45,9 @@ public class Event {
     @Column(nullable = false)
     private EventStatus status = EventStatus.DRAFT;
 
+    @Column(name = "publication_announced", nullable = false)
+    private boolean publicationAnnounced;
+
     @Column(name = "starts_at")
     private LocalDateTime startsAt;
 

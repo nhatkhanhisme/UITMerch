@@ -43,6 +43,7 @@ public class EventService {
     private final MerchImageRepository merchImageRepository;
     private final CategoryRepository categoryRepository;
     private final OrganizationService organizationService;
+    private final com.uitmerch.backend.following.PublicationService publicationService;
 
     @Transactional
     public EventResponse createEvent(UUID ownerId, UUID orgId, CreateEventRequest request) {
@@ -68,7 +69,9 @@ public class EventService {
             .status(status)
             .build();
 
-        return EventResponse.from(eventRepository.save(event));
+        Event saved = eventRepository.save(event);
+        publicationService.eventPublished(saved);
+        return EventResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
@@ -90,7 +93,7 @@ public class EventService {
     @Transactional
     public EventResponse updateEvent(UUID ownerId, UUID orgId, UUID eventId, UpdateEventRequest request) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
-        Event event = eventRepository.findByIdAndOrgId(eventId, org.getId())
+        Event event = eventRepository.findLockedById(eventId).filter(e -> e.getOrgId().equals(org.getId()))
             .orElseThrow(() -> new ResourceNotFoundException("Event", eventId.toString()));
 
         if ((request.getStatus() == EventStatus.PUBLISHED || event.getStatus() == EventStatus.PUBLISHED)
@@ -120,7 +123,9 @@ public class EventService {
 
         validateDates(event.getStartsAt(), event.getEndsAt());
 
-        return EventResponse.from(eventRepository.save(event));
+        Event saved = eventRepository.save(event);
+        publicationService.eventPublished(saved);
+        return EventResponse.from(saved);
     }
 
     @Transactional

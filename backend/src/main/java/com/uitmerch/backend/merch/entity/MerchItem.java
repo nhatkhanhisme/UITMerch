@@ -46,6 +46,9 @@ public class MerchItem {
     @Column(name = "restock_cycle", nullable = false)
     private long restockCycle;
 
+    @Column(name = "publication_announced", nullable = false)
+    private boolean publicationAnnounced;
+
     @Column(name = "category_id")
     private UUID categoryId;
 

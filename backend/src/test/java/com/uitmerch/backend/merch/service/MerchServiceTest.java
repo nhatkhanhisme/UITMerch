@@ -59,6 +59,7 @@ class MerchServiceTest {
     @Mock private OrderItemRepository orderItemRepository;
     @Mock private MerchEmbeddingService merchEmbeddingService;
     @Mock private com.uitmerch.backend.restock.RestockService restockService;
+    @Mock private com.uitmerch.backend.following.PublicationService publicationService;
 
     @InjectMocks private MerchService merchService;
 

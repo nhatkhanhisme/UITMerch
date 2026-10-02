@@ -46,6 +46,7 @@ class EventServiceTest {
     @Mock private MerchImageRepository merchImageRepository;
     @Mock private CategoryRepository categoryRepository;
     @Mock private OrganizationService organizationService;
+    @Mock private com.uitmerch.backend.following.PublicationService publicationService;
 
     @InjectMocks private EventService eventService;
 
@@ -84,7 +85,7 @@ class EventServiceTest {
     @CsvSource({"DRAFT,PUBLISHED", "DRAFT,CANCELLED", "PUBLISHED,ENDED", "PUBLISHED,DRAFT", "PUBLISHED,CANCELLED"})
     void updateEvent_validStatusTransition_succeeds(EventStatus from, EventStatus to) {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(org());
-        when(eventRepository.findByIdAndOrgId(eventId, orgId)).thenReturn(Optional.of(event(from)));
+        when(eventRepository.findLockedById(eventId)).thenReturn(Optional.of(event(from)));
         when(eventRepository.save(any())).thenReturn(event(to));
 
         UpdateEventRequest req = new UpdateEventRequest();
@@ -97,7 +98,7 @@ class EventServiceTest {
     @CsvSource({"DRAFT,ENDED", "ENDED,DRAFT", "ENDED,PUBLISHED", "CANCELLED,DRAFT", "CANCELLED,PUBLISHED"})
     void updateEvent_invalidStatusTransition_throwsValidation(EventStatus from, EventStatus to) {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(org());
-        when(eventRepository.findByIdAndOrgId(eventId, orgId)).thenReturn(Optional.of(event(from)));
+        when(eventRepository.findLockedById(eventId)).thenReturn(Optional.of(event(from)));
 
         UpdateEventRequest req = new UpdateEventRequest();
         req.setStatus(to);
@@ -109,7 +110,7 @@ class EventServiceTest {
     @Test
     void updateEvent_eventNotOwned_throwsResourceNotFound() {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(org());
-        when(eventRepository.findByIdAndOrgId(eventId, orgId)).thenReturn(Optional.empty());
+        when(eventRepository.findLockedById(eventId)).thenReturn(Optional.empty());
 
         UpdateEventRequest req = new UpdateEventRequest();
         req.setTitle("New Title");
@@ -121,7 +122,7 @@ class EventServiceTest {
     @Test
     void updateEvent_endBeforeStart_throwsValidation() {
         when(organizationService.getOwnOrganizationEntity(ownerId, orgId)).thenReturn(org());
-        when(eventRepository.findByIdAndOrgId(eventId, orgId)).thenReturn(Optional.of(event(EventStatus.DRAFT)));
+        when(eventRepository.findLockedById(eventId)).thenReturn(Optional.of(event(EventStatus.DRAFT)));
 
         UpdateEventRequest req = new UpdateEventRequest();
         req.setStartsAt(LocalDateTime.of(2026, 6, 2, 10, 0));
