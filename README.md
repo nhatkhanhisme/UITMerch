@@ -81,7 +81,7 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 - Create and manage an organization profile (subject to admin approval)
 - Publish, edit, and remove merchandise with multi-image gallery support
 - Create and manage events linked to their organization
-- Confirm and manage orders: PENDING → CONFIRMED → READY (via pickup schedule) → COMPLETED (check-in scan)
+- Confirm and manage orders: PENDING → CONFIRMED → READY (via pickup schedule) → COMPLETED (campus check-in)
 - Create pickup schedule slots that batch-transition CONFIRMED orders to READY and notify customers
 - Cancel PENDING or CONFIRMED orders with a reason
 - In-app notifications (SSE real-time) — notified on new orders and customer cancellations; persisted across page refreshes
@@ -90,6 +90,20 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 - Approve or reject organization registration requests
 - Assign and revoke user roles
 - Platform-wide content oversight
+
+### New backend APIs
+
+The backend also supports the following features. Their API implementation is complete; frontend integration is separate from the pages listed above.
+
+| Feature | Behavior |
+|---|---|
+| Restock subscriptions | Customers subscribe to products and receive in-app alerts, with optional email, when stock changes from zero to positive |
+| QR pickup and order history | One-time pickup credentials for customers and guests, organizer verification/check-in, and an ownership-protected order audit trail |
+| Organization following | Customers choose merchandise/event alerts and receive notifications on an organization's first publication of each item |
+| Organizer analytics | Organization-scoped order, stock, product sales, daily activity, and pickup workload reports |
+| Preorder campaigns | Organizers set variants, a minimum quantity, and a deadline; customer reservations deduct stock and become fulfillable when the campaign succeeds |
+
+See the [backend API reference](backend/README.md#new-feature-apis) and [implementation notes](docs/reviews/2026-10-02-backend-features.md) for request bodies and workflow details.
 
 ---
 
@@ -109,9 +123,10 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 | Technology | Purpose |
 |---|---|
 | Java 21 + Spring Boot 3.3 | Core API framework (modular monolith) |
-| Spring Security + JWT | Authentication and role-based access control |
-| PostgreSQL + Flyway | Relational database with versioned migrations |
+| Spring Security + JWT | Persisted authentication sessions, refresh rotation, revocation, and role/ownership checks |
+| PostgreSQL + pgvector + Flyway | Relational database and migrations V1–V41; pgvector supports AI visual search |
 | Supabase Storage | Image hosting for merch and organization logos |
+| Database outbox + SMTP | Durable email and announcement delivery with retries |
 | Swagger / OpenAPI | Auto-generated API documentation |
 
 ### Frontend
@@ -129,8 +144,12 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 
 ## Architecture & Docs
 
-- Backend SRS and architecture: [docs/UITMERCH_SRSv2.0.md](docs/UITMERCH_SRSv2.0.md)
-- Backend env setup: [backend/ENV_SETUP.md](backend/ENV_SETUP.md)
+- Backend SRS and architecture: [backend/docs/UITMERCH_SRSv2.0.md](backend/docs/UITMERCH_SRSv2.0.md)
+- Backend setup and API reference: [backend/README.md](backend/README.md)
+- Backend feature plan: [docs/reviews/2026-10-01-backend-plan.md](docs/reviews/2026-10-01-backend-plan.md)
+- Implemented backend features: [docs/reviews/2026-10-02-backend-features.md](docs/reviews/2026-10-02-backend-features.md)
+- Recorded backend validation: [docs/reviews/2026-10-02-backend-feature-validation.json](docs/reviews/2026-10-02-backend-feature-validation.json)
+- Backend environment reference: [environment variables](backend/README.md#environment-variables)
 - Backend build config: [backend/pom.xml](backend/pom.xml)
 - Frontend entry point: [frontend/src/main.tsx](frontend/src/main.tsx)
 - Frontend scripts: [frontend/package.json](frontend/package.json)
@@ -144,19 +163,22 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 **Prerequisites:**
 - Java 21
 - Node.js 18+ and npm 9+
-- PostgreSQL (local or managed)
-- Docker (optional, recommended for backend)
+- PostgreSQL with the `vector` extension available (for PostgreSQL runs)
+- Docker (optional for the application; required for the isolated PostgreSQL test harness)
 
-### Backend — Docker (recommended)
+### Backend — Docker (configured PostgreSQL)
 
 ```bash
 cd backend
+cp .env.example .env
+# Fill in database, JWT, mail, storage, and CORS values.
+# Set SWAGGER_ENABLED=true in .env to use local Swagger.
 docker compose up --build
 ```
 
 - API → `http://localhost:8080`
-- Swagger UI → `http://localhost:8080/swagger-ui.html`
-- No `.env` file required — sample data is seeded automatically.
+- Swagger UI → `http://localhost:8080/swagger-ui.html` when enabled
+- Compose runs the backend container and connects to the PostgreSQL database configured in `.env`; it does not create a database container. Flyway applies migrations on startup.
 
 ### Backend — Dev profile (local, H2 in-memory)
 
@@ -166,15 +188,19 @@ cd backend
 # Windows: .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-No env vars required. Schema is generated by Hibernate and data resets on every restart.
+No external database or `.env` is required. Hibernate generates the H2 schema and sample data resets on every restart. Mail and storage use development substitutes. Flyway is disabled in this profile.
 
-### Backend — Production (PostgreSQL + Supabase)
+Swagger UI: `http://localhost:8080/swagger-ui.html` (enabled automatically in `dev`).
+
+### Backend — Default profile (PostgreSQL + Supabase)
 
 ```bash
 cd backend
-cp .env.example .env   # fill in values per backend/ENV_SETUP.md
+cp .env.example .env   # fill in values per backend/README.md
 ./mvnw spring-boot:run
 ```
+
+The default profile uses PostgreSQL, real SMTP, and Supabase Storage. The database must support pgvector and allow Flyway to create the `vector` extension, including when AI API keys are omitted. Swagger defaults to disabled; set `SWAGGER_ENABLED=true` for local API exploration.
 
 ### Frontend
 
@@ -197,14 +223,22 @@ npm run build      # production build to dist/
 | `GET` | `/api/v1/public/organizations` | Public | List active organizations |
 | `GET` | `/api/v1/public/events` | Public | List events |
 | `GET` | `/api/v1/categories` | Public | List all categories |
-| `GET/POST` | `/api/v1/customer/cart` | Customer | Cart management |
-| `GET/POST/PATCH` | `/api/v1/customer/orders` | Customer | Order history, instant order, cancel with reason |
-| `GET/PATCH` | `/api/v1/customer/notifications` | Customer | In-app notifications (unread count, mark read) |
-| `GET/PATCH` | `/api/v1/organizer/notifications` | Organizer | In-app notifications — new orders, customer cancellations |
+| `POST` | `/api/v1/customer/cart/checkout` | Customer | Checkout cart, grouped by organization |
+| `POST` | `/api/v1/customer/orders/instant` | Customer | Place a single-item order |
+| `PATCH` | `/api/v1/customer/orders/{id}/cancel` | Customer | Cancel own PENDING order and restore stock |
+| `GET` | `/api/v1/customer/notifications/stream` | Customer | Real-time notification stream |
+| `GET` | `/api/v1/organizer/notifications` | Organizer | Own persisted notifications |
 | `CRUD` | `/api/v1/organizations/{orgId}/merchs` | Organizer | Merch management |
 | `CRUD` | `/api/v1/organizations/{orgId}/events` | Organizer | Event management |
-| `GET/PATCH` | `/api/v1/organizations/{orgId}/orders` | Organizer | Order management, checkin, cancel, pickup schedules |
-| `GET/PATCH` | `/api/v1/admin/organizations` | Admin | Organization approval |
+| `GET` | `/api/v1/organizations/{orgId}/orders` | Organizer | Own organization orders |
+| `POST` | `/api/v1/customer/restock-subscriptions` | Customer | Subscribe to restock alerts |
+| `POST` | `/api/v1/customer/orders/{orderId}/pickup-token` | Customer | Issue a pickup credential for an owned READY order |
+| `POST` | `/api/v1/organizations/{orgId}/orders/pickup/checkin` | Organizer | Consume a pickup credential and complete its order |
+| `POST` | `/api/v1/customer/following/{orgId}` | Customer | Follow an organization with notification preferences |
+| `GET` | `/api/v1/organizations/{orgId}/analytics` | Organizer | Report for an owned organization, filtered by date |
+| `GET` | `/api/v1/public/campaigns` | Public | Discover preorder campaigns |
+| `POST` | `/api/v1/customer/campaigns/{id}/reservations` | Customer | Reserve a campaign variant using a unique request ID |
+| `PATCH` | `/api/v1/admin/organizations/{id}/status` | Admin | Approve or deactivate an organization |
 
 Full API reference: [backend/README.md](backend/README.md)
 
@@ -214,7 +248,7 @@ Full API reference: [backend/README.md](backend/README.md)
 
 > For local development only. **Do not use in production.**
 
-**Docker / dev profile (auto-seeded):**
+**Dev profile (auto-seeded):**
 
 | Email | Password | Role |
 |---|---|---|
@@ -224,7 +258,7 @@ Full API reference: [backend/README.md](backend/README.md)
 | `cust1@uit.edu.vn` | `Cust1234` | CUSTOMER |
 | `cust2@uit.edu.vn` | `Cust1234` | CUSTOMER |
 
-**PostgreSQL real seed (V12–V15 migrations):**
+**PostgreSQL demonstration seed (V12–V16 migrations, including default Compose startup):**
 
 | Email | Password | Role |
 |---|---|---|
@@ -239,9 +273,11 @@ Full API reference: [backend/README.md](backend/README.md)
 ```
 UITMerch/
 ├── backend/                        # Spring Boot application
-│   └── src/main/java/              # Domain modules (auth, merch, org, event, order)
-│   └── src/main/resources/
-│       └── db/migration/           # Flyway SQL migrations
+│   ├── src/main/java/              # Core domains + restock, pickup, following, analytics, campaign
+│   ├── src/main/resources/
+│   │   └── db/migration/           # Flyway migrations V1–V41
+│   ├── src/test/                   # Unit, H2, PostgreSQL, migration and concurrency tests
+│   └── scripts/test-postgres.sh    # Isolated full-suite test runner
 ├── frontend/                       # React + TypeScript SPA
 │   └── src/
 │       ├── api/                    # API client functions
@@ -260,11 +296,19 @@ UITMerch/
 
 **Backend:**
 
-```powershell
+```bash
 cd backend
 ./mvnw test
 ./mvnw clean package
 ```
+
+PostgreSQL-dependent suites are skipped without a test database. To run the complete backend suite using a disposable PostgreSQL container, from the repository root:
+
+```bash
+backend/scripts/test-postgres.sh -q
+```
+
+The harness requires Bash, Docker, and Java 21, copies the backend into a temporary directory, and prints the retained report location. It creates and removes its own test database container. The [recorded validation on 2 October 2026](docs/reviews/2026-10-02-backend-feature-validation.json) contains **253 tests across 27 classes, with no failures, errors, or skips**.
 
 **Frontend:**
 
@@ -282,7 +326,7 @@ npm run build
 - The `frontend/vercel.json` catch-all rewrite ensures React Router handles all client-side routes correctly on page refresh.
 - No additional build configuration is needed — Vite outputs to `dist/` and Vercel serves it automatically.
 
-**Backend** requires a Java 21 runtime with PostgreSQL and (optionally) a Supabase project for image storage. Refer to [backend/ENV_SETUP.md](backend/ENV_SETUP.md) for full configuration.
+**Backend** requires a Java 21 runtime, PostgreSQL with pgvector, SMTP configuration, and Supabase Storage configuration for the default profile. Refer to the [backend environment reference](backend/README.md#environment-variables) for configuration.
 
 ---
 
