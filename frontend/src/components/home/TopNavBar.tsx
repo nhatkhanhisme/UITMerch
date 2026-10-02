@@ -1,13 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { logout } from "../../api/auth";
 import { getCustomerProfile, getOrganizerProfile } from "../../api/profile";
-import { getNotifications, getUnreadCount, markAllNotificationsRead, markNotificationRead } from "../../api/notifications";
-import { getOrgNotifications, getOrgUnreadCount, markAllOrgNotificationsRead } from "../../api/orgNotifications";
-import type { NotificationResponse } from "../../types/shared";
-import { useNotificationStream } from "../../hooks/useNotificationStream";
+import { NotificationBell } from "../../features/NotificationBell";
 import { VisualSearchModal } from "../features/VisualSearchModal";
 
 const logoHeaderUrl = "/assets/figma/logo-header.svg";
@@ -15,18 +12,29 @@ const accountIconUrl = "/assets/figma/account-icon.svg";
 
 function SparkleIcon() {
   return (
-    <svg className="size-[15px] shrink-0" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+    <svg
+      className="size-[15px] shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.2}
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"
+      />
     </svg>
   );
 }
-
 
 const navItems = [
   { label: "Trang chủ", href: "/" },
   { label: "Vật phẩm", href: "/merch" },
   { label: "Tổ chức", href: "/organization" },
   { label: "Sự kiện", href: "/events" },
+  { label: "Đặt trước", href: "/campaigns" },
+  { label: "Đơn khách", href: "/guest-orders" },
 ];
 
 const getInitials = (fullName: string) => {
@@ -43,15 +51,7 @@ const getInitials = (fullName: string) => {
 export function TopNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [visualSearchOpen, setVisualSearchOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
-  const notifRef = useRef<HTMLDivElement | null>(null);
-  const [orgNotifications, setOrgNotifications] = useState<NotificationResponse[]>([]);
-  const [orgUnreadCount, setOrgUnreadCount] = useState(0);
-  const [isOrgNotifOpen, setIsOrgNotifOpen] = useState(false);
-  const orgNotifRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
@@ -140,129 +140,8 @@ export function TopNavBar() {
 
   useEffect(() => {
     setIsAccountMenuOpen(false);
-    setIsNotifOpen(false);
-    setIsOrgNotifOpen(false);
     setVisualSearchOpen(false);
   }, [location.pathname, location.search, location.hash]);
-
-  // Load initial unread count for CUSTOMER role
-  useEffect(() => {
-    if (!user || user.role !== "CUSTOMER") return;
-    getUnreadCount()
-      .then((r) => setUnreadCount(r.data?.unreadCount ?? 0))
-      .catch(() => {});
-  }, [user]);
-
-  // Load initial unread count for ORGANIZER role
-  useEffect(() => {
-    if (!user || user.role !== "ORGANIZER") return;
-    getOrgUnreadCount()
-      .then((r) => setOrgUnreadCount(r.data?.unreadCount ?? 0))
-      .catch(() => {});
-  }, [user]);
-
-  const handleIncomingNotification = useCallback((data: unknown) => {
-    const n = data as NotificationResponse;
-    setUnreadCount((c) => c + 1);
-    setNotifications((prev) => [n, ...prev]);
-    window.dispatchEvent(new CustomEvent("order-status-changed"));
-  }, []);
-
-  useNotificationStream({
-    path: "/api/v1/customer/notifications/stream",
-    enabled: !!user && user.role === "CUSTOMER",
-    onMessage: handleIncomingNotification,
-  });
-
-  const handleOrgIncomingNotification = useCallback((data: unknown) => {
-    const event = data as { type?: string; orderId?: string; shortId?: string; totalAmount?: number };
-    if (event.type === "NEW_ORDER" || event.type === "ORDER_CANCELLED") {
-      const notif: NotificationResponse = {
-        id: event.orderId ?? crypto.randomUUID(),
-        userId: "",
-        title: event.type === "NEW_ORDER" ? "Đơn hàng mới" : "Đơn hàng bị huỷ",
-        message: event.type === "NEW_ORDER"
-          ? `#${event.shortId} — ${(event.totalAmount ?? 0).toLocaleString("vi-VN")}đ`
-          : `#${event.shortId} đã bị khách huỷ`,
-        type: event.type,
-        isRead: false,
-        relatedOrderId: event.orderId,
-        createdAt: new Date().toISOString(),
-      };
-      setOrgNotifications((prev) => [notif, ...prev.slice(0, 19)]);
-      setOrgUnreadCount((c) => c + 1);
-    }
-    window.dispatchEvent(new CustomEvent("org-order-event", { detail: event }));
-  }, []);
-
-  useNotificationStream({
-    path: "/api/v1/organizer/notifications/stream",
-    enabled: !!user && user.role === "ORGANIZER",
-    onMessage: handleOrgIncomingNotification,
-  });
-
-  // Close notif panel on outside click
-  useEffect(() => {
-    if (!isNotifOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setIsNotifOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isNotifOpen]);
-
-  // Close org notif panel on outside click
-  useEffect(() => {
-    if (!isOrgNotifOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (orgNotifRef.current && !orgNotifRef.current.contains(e.target as Node)) {
-        setIsOrgNotifOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOrgNotifOpen]);
-
-  const openNotifications = async () => {
-    setIsNotifOpen((v) => !v);
-    if (!isNotifOpen) {
-      try {
-        const res = await getNotifications({ size: 20 });
-        setNotifications(res.data ?? []);
-        setUnreadCount(0);
-        await markAllNotificationsRead();
-      } catch {
-        // ignore
-      }
-    }
-  };
-
-  const openOrgNotifications = async () => {
-    setIsOrgNotifOpen((v) => !v);
-    if (!isOrgNotifOpen) {
-      try {
-        const res = await getOrgNotifications({ size: 20 });
-        setOrgNotifications(res.data ?? []);
-        setOrgUnreadCount(0);
-        await markAllOrgNotificationsRead();
-      } catch {
-        // non-critical — panel still opens with any in-memory SSE notifications
-      }
-    }
-  };
-
-  const handleMarkRead = async (id: string) => {
-    try {
-      await markNotificationRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
-      );
-    } catch {
-      // ignore
-    }
-  };
 
   const handleLogout = async () => {
     if (accessToken) {
@@ -312,413 +191,352 @@ export function TopNavBar() {
 
   return (
     <>
-    <div className="relative h-[52px] w-full sm:h-16 lg:w-[1280.41px]">
-      <nav
-        className="relative z-10 flex h-[52px] w-full items-center justify-between rounded-full border border-white/70 bg-white/20 px-3 py-2 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px] sm:h-16 sm:px-[33px] sm:py-[11px] lg:w-[1280.41px]"
-        data-node-id="17:4918"
-        data-name="TopNavBar Component"
-      >
-        <Link
-          aria-label="UITMerch — về trang chủ"
-          data-node-id="17:4151"
-          onClick={handleNavClick}
-          to="/"
+      <div className="relative h-[52px] w-full sm:h-16 lg:w-[1280.41px]">
+        <nav
+          className="relative z-10 flex h-[52px] w-full items-center justify-between rounded-full border border-white/70 bg-white/20 px-3 py-2 shadow-[0_10px_30px_rgba(82,128,145,0.10),inset_1.5px_1.5px_5px_rgba(255,255,255,0.95),inset_-1px_-1px_3px_rgba(255,255,255,0.35)] backdrop-blur-[6px] sm:h-16 sm:px-[33px] sm:py-[11px] lg:w-[1280.41px]"
+          data-node-id="17:4918"
+          data-name="TopNavBar Component"
         >
-          <img
-            alt="UITMerch"
-            className="h-[24px] w-[116px] shrink-0 sm:h-[30px] sm:w-[145px]"
-            src={logoHeaderUrl}
-          />
-        </Link>
+          <Link
+            aria-label="UITMerch — về trang chủ"
+            data-node-id="17:4151"
+            onClick={handleNavClick}
+            to="/"
+          >
+            <img
+              alt="UITMerch"
+              className="h-[24px] w-[116px] shrink-0 sm:h-[30px] sm:w-[145px]"
+              src={logoHeaderUrl}
+            />
+          </Link>
 
-        {/* RESPONSIVE */}
-        <div
-          className="hidden min-w-0 flex-1 items-center justify-center gap-6 whitespace-nowrap font-sans text-[15px] font-medium leading-5 text-gray md:flex lg:gap-10"
-          data-node-id="I17:4918;17:4888"
-        >
-          {navItems.map((item) => (
+          {/* RESPONSIVE */}
+          <div
+            className="hidden min-w-0 flex-1 items-center justify-center gap-6 whitespace-nowrap font-sans text-[15px] font-medium leading-5 text-gray md:flex lg:gap-10"
+            data-node-id="I17:4918;17:4888"
+          >
+            {navItems.map((item) => (
+              <Link
+                className={linkClassName(item.href)}
+                key={item.label}
+                onClick={handleNavClick}
+                to={item.href}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* AI Visual Search — special feature */}
+          <button
+            aria-label="Tìm kiếm bằng ảnh AI"
+            className="hidden md:flex items-center gap-2 rounded-full bg-brand-gradient px-4 py-2 text-sm font-bold text-black-blue whitespace-nowrap shrink-0 mr-1 animate-ai-glow transition-transform duration-200 hover:scale-105 active:scale-95"
+            onClick={() => setVisualSearchOpen(true)}
+            type="button"
+          >
+            <SparkleIcon />
+            Tìm bằng AI
+          </button>
+
+          {user?.role === "CUSTOMER" && (
             <Link
-              className={linkClassName(item.href)}
-              key={item.label}
-              onClick={handleNavClick}
-              to={item.href}
+              aria-label="Theo dõi và báo hàng"
+              title="Theo dõi và báo hàng"
+              className="rounded-full p-2"
+              to="/following"
             >
-              {item.label}
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z" />
+              </svg>
             </Link>
-          ))}
-        </div>
-
-        {/* AI Visual Search — special feature */}
-        <button
-          aria-label="Tìm kiếm bằng ảnh AI"
-          className="hidden md:flex items-center gap-2 rounded-full bg-brand-gradient px-4 py-2 text-sm font-bold text-black-blue whitespace-nowrap shrink-0 mr-1 animate-ai-glow transition-transform duration-200 hover:scale-105 active:scale-95"
-          onClick={() => setVisualSearchOpen(true)}
-          type="button"
-        >
-          <SparkleIcon />
-          Tìm bằng AI
-        </button>
-
-        {/* Notification Bell — CUSTOMER only */}
-        {user?.role === "CUSTOMER" && (
-          <div className="relative mr-2" ref={notifRef}>
-            <button
-              aria-label="Thông báo"
-              className="relative flex size-10 items-center justify-center rounded-full transition hover:bg-white/35"
-              onClick={openNotifications}
-              type="button"
-            >
-              <svg className="size-5 text-slate" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              {unreadCount > 0 && (
-                <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-peach text-[10px] font-bold text-white">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </button>
-
-            {isNotifOpen && (
-              <div className="absolute right-0 top-[calc(100%+10px)] z-20 w-[min(320px,calc(100vw-24px))] rounded-[24px] border border-white/70 bg-white/90 shadow-[0_18px_45px_rgba(82,128,145,0.18)] backdrop-blur-xl">
-                <div className="flex items-center justify-between border-b border-white/40 px-4 py-3">
-                  <p className="font-fredoka text-base font-bold text-black-blue">Thông báo</p>
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <p className="px-4 py-6 text-center text-sm text-ink/50">Chưa có thông báo nào.</p>
-                  ) : (
-                    notifications.map((n) => (
-                      <button
-                        className={[
-                          "w-full px-4 py-3 text-left transition hover:bg-white/60",
-                          n.isRead ? "opacity-70" : "bg-aqua/5",
-                        ].join(" ")}
-                        key={n.id}
-                        onClick={() => handleMarkRead(n.id)}
-                        type="button"
+          )}
+          <NotificationBell />
+          <div
+            className="hidden shrink-0 items-center pr-[1.01px] md:flex"
+            data-node-id="I17:4918;17:4808"
+          >
+            {user ? (
+              <div className="relative min-w-0" ref={accountMenuRef}>
+                <button
+                  aria-expanded={isAccountMenuOpen}
+                  aria-haspopup="menu"
+                  aria-label={accountLabel}
+                  className={[
+                    "flex min-h-11 min-w-0 items-center gap-3 rounded-full py-0.5 pl-2 pr-3 transition duration-200",
+                    "max-w-[180px] sm:max-w-[180px]",
+                    isAccountMenuActive
+                      ? "bg-white/70 shadow-[0_8px_20px_rgba(82,128,145,0.12)]"
+                      : "hover:bg-white/35",
+                  ].join(" ")}
+                  data-node-id="I17:4918;17:4809"
+                  onClick={() => setIsAccountMenuOpen((open) => !open)}
+                  type="button"
+                >
+                  <span className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-white/80 shadow-[0_6px_16px_rgba(82,128,145,0.16)]">
+                    {user.avatarUrl ? (
+                      <img
+                        alt=""
+                        className="size-full object-cover"
+                        data-node-id="I17:4918;17:4811"
+                        src={user.avatarUrl}
+                      />
+                    ) : (
+                      <span className="font-fredoka text-xs font-bold text-black-blue">
+                        {avatarFallback}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className="min-w-0 max-w-[140px] truncate font-sans text-sm font-medium text-black-blue sm:max-w-[180px]"
+                    title={user.fullName}
+                  >
+                    {user.fullName}
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    className="ml-1 size-3 text-slate"
+                    fill="none"
+                    viewBox="0 0 12 8"
+                  >
+                    <path
+                      d="M1 1.5L6 6.5L11 1.5"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                    />
+                  </svg>
+                </button>
+                {isAccountMenuOpen ? (
+                  <div
+                    className="absolute right-0 top-[calc(100%+10px)] z-20 w-[220px] rounded-[24px] border border-white/70 bg-white/80 p-2 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl"
+                    role="menu"
+                  >
+                    <Link
+                      className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      role="menuitem"
+                      to="/profile"
+                    >
+                      Hồ sơ
+                      <span className="text-xs text-gray">Xem</span>
+                    </Link>
+                    {user.role === "CUSTOMER" && (
+                      <>
+                        <Link
+                          className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                          onClick={() => setIsAccountMenuOpen(false)}
+                          role="menuitem"
+                          to="/cart"
+                        >
+                          Giỏ hàng
+                          <span className="text-xs text-gray">🛒</span>
+                        </Link>
+                        <Link
+                          className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                          onClick={() => setIsAccountMenuOpen(false)}
+                          role="menuitem"
+                          to="/orders"
+                        >
+                          Đơn hàng
+                          <span className="text-xs text-gray">📦</span>
+                        </Link>
+                        <Link
+                          className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                          onClick={() => setIsAccountMenuOpen(false)}
+                          role="menuitem"
+                          to="/wishlist"
+                        >
+                          Yêu thích
+                          <span className="text-xs text-gray">♡</span>
+                        </Link>
+                      </>
+                    )}
+                    {user.role === "ORGANIZER" && (
+                      <Link
+                        className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        role="menuitem"
+                        to="/organizer"
                       >
-                        <p className={["text-xs font-semibold text-black-blue", !n.isRead ? "font-bold" : ""].join(" ")}>
-                          {n.title}
-                        </p>
-                        <p className="mt-0.5 text-xs text-ink/60 line-clamp-2">{n.message}</p>
-                        {n.createdAt && (
-                          <p className="mt-1 text-[10px] text-ink/40">
-                            {new Date(n.createdAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                          </p>
-                        )}
-                      </button>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Notification Bell — ORGANIZER only */}
-        {user?.role === "ORGANIZER" && (
-          <div className="relative mr-2" ref={orgNotifRef}>
-            <button
-              aria-label="Thông báo BTC"
-              className="relative flex size-10 items-center justify-center rounded-full transition hover:bg-white/35"
-              onClick={openOrgNotifications}
-              type="button"
-            >
-              <svg className="size-5 text-slate" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              {orgUnreadCount > 0 && (
-                <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-peach text-[10px] font-bold text-white">
-                  {orgUnreadCount > 9 ? "9+" : orgUnreadCount}
-                </span>
-              )}
-            </button>
-
-            {isOrgNotifOpen && (
-              <div className="absolute right-0 top-[calc(100%+10px)] z-20 w-[min(320px,calc(100vw-24px))] rounded-[24px] border border-white/70 bg-white/90 shadow-[0_18px_45px_rgba(82,128,145,0.18)] backdrop-blur-xl">
-                <div className="border-b border-white/40 px-4 py-3">
-                  <p className="font-fredoka text-base font-bold text-black-blue">Thông báo BTC</p>
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {orgNotifications.length === 0 ? (
-                    <p className="px-4 py-6 text-center text-sm text-ink/50">Chưa có thông báo nào.</p>
-                  ) : (
-                    orgNotifications.map((n, i) => (
-                      <div
-                        className={["w-full px-4 py-3", !n.isRead ? "bg-aqua/5" : ""].join(" ")}
-                        key={`${n.id}-${i}`}
+                        Quản lý BTC
+                        <span className="text-xs text-gray">Dashboard</span>
+                      </Link>
+                    )}
+                    {user.role === "ADMIN" && (
+                      <Link
+                        className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                        role="menuitem"
+                        to="/admin"
                       >
-                        <p className={["text-xs text-black-blue", !n.isRead ? "font-bold" : "font-semibold"].join(" ")}>
-                          {n.title}
-                        </p>
-                        <p className="mt-0.5 text-xs text-ink/60 line-clamp-2">{n.message}</p>
-                        {n.createdAt && (
-                          <p className="mt-1 text-[10px] text-ink/40">
-                            {new Date(n.createdAt).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                          </p>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
+                        Quản trị
+                        <span className="text-xs text-gray">Admin</span>
+                      </Link>
+                    )}
+                    <button
+                      className="mt-1 flex w-full items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
+                      onClick={handleLogout}
+                      role="menuitem"
+                      type="button"
+                    >
+                      Đăng xuất
+                      <span className="text-xs text-gray">Thoát</span>
+                    </button>
+                  </div>
+                ) : null}
               </div>
-            )}
-          </div>
-        )}
-
-        <div
-          className="hidden shrink-0 items-center pr-[1.01px] md:flex"
-          data-node-id="I17:4918;17:4808"
-        >
-          {user ? (
-            <div className="relative min-w-0" ref={accountMenuRef}>
-              <button
-                aria-expanded={isAccountMenuOpen}
-                aria-haspopup="menu"
+            ) : (
+              <Link
                 aria-label={accountLabel}
                 className={[
-                  "flex min-h-11 min-w-0 items-center gap-3 rounded-full py-0.5 pl-2 pr-3 transition duration-200",
-                  "max-w-[240px] sm:max-w-[280px]",
-                  isAccountMenuActive
+                  "flex min-h-11 min-w-0 items-center gap-3 rounded-full py-0.5 pl-2 pr-4 transition duration-200",
+                  "max-w-[220px] sm:max-w-[260px]",
+                  isAccountActive
                     ? "bg-white/70 shadow-[0_8px_20px_rgba(82,128,145,0.12)]"
                     : "hover:bg-white/35",
                 ].join(" ")}
                 data-node-id="I17:4918;17:4809"
-                onClick={() => setIsAccountMenuOpen((open) => !open)}
-                type="button"
+                state={accountState}
+                to={accountTarget}
               >
                 <span className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-white/80 shadow-[0_6px_16px_rgba(82,128,145,0.16)]">
-                  {user.avatarUrl ? (
-                    <img
-                      alt=""
-                      className="size-full object-cover"
-                      data-node-id="I17:4918;17:4811"
-                      src={user.avatarUrl}
-                    />
-                  ) : (
-                    <span className="font-fredoka text-xs font-bold text-black-blue">
-                      {avatarFallback}
-                    </span>
-                  )}
-                </span>
-                <span
-                  className="min-w-0 max-w-[140px] truncate font-sans text-sm font-medium text-black-blue sm:max-w-[180px]"
-                  title={user.fullName}
-                >
-                  {user.fullName}
-                </span>
-                <svg
-                  aria-hidden="true"
-                  className="ml-1 size-3 text-slate"
-                  fill="none"
-                  viewBox="0 0 12 8"
-                >
-                  <path
-                    d="M1 1.5L6 6.5L11 1.5"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
+                  <img
+                    alt=""
+                    className="size-4"
+                    data-node-id="I17:4918;17:4811"
+                    src={accountIconUrl}
                   />
-                </svg>
-              </button>
-              {isAccountMenuOpen ? (
-                <div
-                  className="absolute right-0 top-[calc(100%+10px)] z-20 w-[220px] rounded-[24px] border border-white/70 bg-white/80 p-2 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl"
-                  role="menu"
-                >
-                  <Link
-                    className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
-                    onClick={() => setIsAccountMenuOpen(false)}
-                    role="menuitem"
-                    to="/profile"
-                  >
-                    Hồ sơ
-                    <span className="text-xs text-gray">Xem</span>
-                  </Link>
-                  {user.role === "CUSTOMER" && (
-                    <>
-                      <Link
-                        className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
-                        onClick={() => setIsAccountMenuOpen(false)}
-                        role="menuitem"
-                        to="/cart"
-                      >
-                        Giỏ hàng
-                        <span className="text-xs text-gray">🛒</span>
-                      </Link>
-                      <Link
-                        className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
-                        onClick={() => setIsAccountMenuOpen(false)}
-                        role="menuitem"
-                        to="/orders"
-                      >
-                        Đơn hàng
-                        <span className="text-xs text-gray">📦</span>
-                      </Link>
-                      <Link
-                        className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
-                        onClick={() => setIsAccountMenuOpen(false)}
-                        role="menuitem"
-                        to="/wishlist"
-                      >
-                        Yêu thích
-                        <span className="text-xs text-gray">♡</span>
-                      </Link>
-                    </>
-                  )}
-                  {user.role === "ORGANIZER" && (
-                    <Link
-                      className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      role="menuitem"
-                      to="/organizer"
-                    >
-                      Quản lý BTC
-                      <span className="text-xs text-gray">Dashboard</span>
-                    </Link>
-                  )}
-                  {user.role === "ADMIN" && (
-                    <Link
-                      className="flex items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      role="menuitem"
-                      to="/admin"
-                    >
-                      Quản trị
-                      <span className="text-xs text-gray">Admin</span>
-                    </Link>
-                  )}
-                  <button
-                    className="mt-1 flex w-full items-center justify-between rounded-2xl px-4 py-3 font-semibold text-black-blue transition hover:bg-white"
-                    onClick={handleLogout}
-                    role="menuitem"
-                    type="button"
-                  >
-                    Đăng xuất
-                    <span className="text-xs text-gray">Thoát</span>
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <Link
-              aria-label={accountLabel}
-              className={[
-                "flex min-h-11 min-w-0 items-center gap-3 rounded-full py-0.5 pl-2 pr-4 transition duration-200",
-                "max-w-[220px] sm:max-w-[260px]",
-                isAccountActive
-                  ? "bg-white/70 shadow-[0_8px_20px_rgba(82,128,145,0.12)]"
-                  : "hover:bg-white/35",
-              ].join(" ")}
-              data-node-id="I17:4918;17:4809"
-              state={accountState}
-              to={accountTarget}
-            >
-              <span className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-white/80 shadow-[0_6px_16px_rgba(82,128,145,0.16)]">
-                <img
-                  alt=""
-                  className="size-4"
-                  data-node-id="I17:4918;17:4811"
-                  src={accountIconUrl}
-                />
-              </span>
-              <span className="font-sans text-sm font-medium text-black-blue">
-                Tài khoản
-              </span>
-            </Link>
-          )}
-        </div>
+                </span>
+                <span className="font-sans text-sm font-medium text-black-blue">
+                  Tài khoản
+                </span>
+              </Link>
+            )}
+          </div>
 
-        {/* RESPONSIVE */}
-        <button
-          aria-expanded={isMenuOpen}
-          aria-label="Mở điều hướng"
-          className="grid size-10 place-items-center rounded-full font-sans text-2xl leading-none text-slate transition duration-200 ease-out hover:bg-white/35 md:hidden"
-          onClick={() => setIsMenuOpen((open) => !open)}
-          type="button"
-        >
-          ☰
-        </button>
-      </nav>
-
-      {/* RESPONSIVE */}
-      {isMenuOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-[24px] border border-white/70 bg-white/85 p-3 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl md:hidden">
+          {/* RESPONSIVE */}
           <button
-            className="flex w-full items-center gap-2 rounded-full bg-brand-gradient px-4 py-3 font-bold text-black-blue mb-2 animate-ai-glow"
-            onClick={() => { setVisualSearchOpen(true); setIsMenuOpen(false); }}
+            aria-expanded={isMenuOpen}
+            aria-label="Mở điều hướng"
+            className="grid size-10 place-items-center rounded-full font-sans text-2xl leading-none text-slate transition duration-200 ease-out hover:bg-white/35 md:hidden"
+            onClick={() => setIsMenuOpen((open) => !open)}
             type="button"
           >
-            <SparkleIcon />
-            Tìm kiếm bằng AI
+            ☰
           </button>
-          {navItems.map((item) => (
-            <Link
-              className={linkClassName(item.href)}
-              key={item.label}
-              onClick={handleNavClick}
-              to={item.href}
+        </nav>
+
+        {/* RESPONSIVE */}
+        {isMenuOpen && (
+          <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 max-h-[calc(100svh-5rem)] overflow-y-auto rounded-[24px] border border-white/70 bg-white/85 p-3 font-sans text-sm text-slate shadow-[0_18px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl md:hidden">
+            <button
+              className="flex w-full items-center gap-2 rounded-full bg-brand-gradient px-4 py-3 font-bold text-black-blue mb-2 animate-ai-glow"
+              onClick={() => {
+                setVisualSearchOpen(true);
+                setIsMenuOpen(false);
+              }}
+              type="button"
             >
-              {item.label}
-            </Link>
-          ))}
-          {user ? (
-            <>
+              <SparkleIcon />
+              Tìm kiếm bằng AI
+            </button>
+            {navItems.map((item) => (
               <Link
-                className={linkClassName("/profile")}
-                onClick={() => setIsMenuOpen(false)}
-                to="/profile"
+                className={linkClassName(item.href)}
+                key={item.label}
+                onClick={handleNavClick}
+                to={item.href}
               >
-                Hồ sơ
+                {item.label}
               </Link>
-              {user.role === "CUSTOMER" && (
-                <>
-                  <Link className={linkClassName("/cart")} onClick={() => setIsMenuOpen(false)} to="/cart">
-                    Giỏ hàng
-                  </Link>
-                  <Link className={linkClassName("/orders")} onClick={() => setIsMenuOpen(false)} to="/orders">
-                    Đơn hàng
-                  </Link>
-                  <Link className={linkClassName("/wishlist")} onClick={() => setIsMenuOpen(false)} to="/wishlist">
-                    Yêu thích
-                  </Link>
-                </>
-              )}
-              {user.role === "ORGANIZER" && (
-                <Link className={linkClassName("/organizer")} onClick={() => setIsMenuOpen(false)} to="/organizer">
-                  Quản lý BTC
+            ))}
+            {user ? (
+              <>
+                <Link
+                  className={linkClassName("/profile")}
+                  onClick={() => setIsMenuOpen(false)}
+                  to="/profile"
+                >
+                  Hồ sơ
                 </Link>
-              )}
-              {user.role === "ADMIN" && (
-                <Link className={linkClassName("/admin")} onClick={() => setIsMenuOpen(false)} to="/admin">
-                  Quản trị
-                </Link>
-              )}
-              <button
-                className={`${linkClassName("/logout")} w-full text-left`}
-                onClick={handleLogout}
-                type="button"
+                {user.role === "CUSTOMER" && (
+                  <>
+                    <Link
+                      className={linkClassName("/cart")}
+                      onClick={() => setIsMenuOpen(false)}
+                      to="/cart"
+                    >
+                      Giỏ hàng
+                    </Link>
+                    <Link
+                      className={linkClassName("/orders")}
+                      onClick={() => setIsMenuOpen(false)}
+                      to="/orders"
+                    >
+                      Đơn hàng
+                    </Link>
+                    <Link
+                      className={linkClassName("/wishlist")}
+                      onClick={() => setIsMenuOpen(false)}
+                      to="/wishlist"
+                    >
+                      Yêu thích
+                    </Link>
+                  </>
+                )}
+                {user.role === "ORGANIZER" && (
+                  <Link
+                    className={linkClassName("/organizer")}
+                    onClick={() => setIsMenuOpen(false)}
+                    to="/organizer"
+                  >
+                    Quản lý BTC
+                  </Link>
+                )}
+                {user.role === "ADMIN" && (
+                  <Link
+                    className={linkClassName("/admin")}
+                    onClick={() => setIsMenuOpen(false)}
+                    to="/admin"
+                  >
+                    Quản trị
+                  </Link>
+                )}
+                <button
+                  className={`${linkClassName("/logout")} w-full text-left`}
+                  onClick={handleLogout}
+                  type="button"
+                >
+                  Đăng xuất
+                </button>
+              </>
+            ) : (
+              <Link
+                className={linkClassName(accountTarget)}
+                onClick={() => setIsMenuOpen(false)}
+                state={accountState}
+                to={accountTarget}
               >
-                Đăng xuất
-              </button>
-            </>
-          ) : (
-            <Link
-              className={linkClassName(accountTarget)}
-              onClick={() => setIsMenuOpen(false)}
-              state={accountState}
-              to={accountTarget}
-            >
-              Tài khoản
-            </Link>
-          )}
-        </div>
-      )}
-    </div>
+                Tài khoản
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
 
       {createPortal(
-        <VisualSearchModal open={visualSearchOpen} onClose={() => setVisualSearchOpen(false)} />,
+        <VisualSearchModal
+          open={visualSearchOpen}
+          onClose={() => setVisualSearchOpen(false)}
+        />,
         document.body,
       )}
     </>

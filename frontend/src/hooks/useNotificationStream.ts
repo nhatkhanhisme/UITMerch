@@ -1,63 +1,95 @@
 import { useEffect, useRef } from "react";
 import { useAuthStore } from "../stores/authStore";
-
+import { refreshSession } from "../api/client";
 type Options = {
   path: string;
   onMessage: (data: unknown) => void;
   enabled: boolean;
+  onOpen?: () => void;
 };
-
-export function useNotificationStream({ path, onMessage, enabled }: Options) {
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const onMessageRef = useRef(onMessage);
-  const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const esRef = useRef<EventSource | null>(null);
-
+export function tokenExpiresAt(token: string): number {
+  try {
+    return (
+      JSON.parse(
+        atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")),
+      ).exp * 1000
+    );
+  } catch {
+    return 0;
+  }
+}
+export function useNotificationStream({
+  path,
+  onMessage,
+  enabled,
+  onOpen,
+}: Options) {
+  const token = useAuthStore((s) => s.accessToken);
+  const handlers = useRef({ onMessage, onOpen });
+  handlers.current = { onMessage, onOpen };
   useEffect(() => {
-    onMessageRef.current = onMessage;
-  }, [onMessage]);
-
-  useEffect(() => {
-    if (!enabled || !accessToken) return;
-
-    const baseUrl = ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "").replace(/\/$/, "");
-    let attempt = 0;
+    if (!enabled || !token) return;
     let active = true;
-
-    const connect = () => {
+    let stream: EventSource | undefined;
+    let retry: ReturnType<typeof setTimeout> | undefined;
+    let expiry: ReturnType<typeof setTimeout> | undefined;
+    let attempt = 0;
+    const base = (
+      (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ""
+    ).replace(/\/$/, "");
+    async function connect() {
       if (!active) return;
-
-      const url = `${baseUrl}${path}?token=${encodeURIComponent(accessToken)}`;
-      const es = new EventSource(url);
-      esRef.current = es;
-
-      es.addEventListener("notification", (e: MessageEvent) => {
+      clearTimeout(expiry);
+      stream?.close();
+      let current = useAuthStore.getState().accessToken;
+      if (!current) return;
+      try {
+        if (tokenExpiresAt(current) < Date.now() + 30000) {
+          await refreshSession();
+          return;
+        }
+      } catch {
+        if (active)
+          retry = setTimeout(connect, Math.min(2000 * 2 ** attempt++, 30000));
+        return;
+      }
+      if (!active) return;
+      stream = new EventSource(
+        `${base}${path}?token=${encodeURIComponent(current)}`,
+      );
+      stream.onopen = () => {
+        attempt = 0;
+        handlers.current.onOpen?.();
+      };
+      stream.addEventListener("notification", (event: MessageEvent) => {
+        if (!active) return;
         try {
-          onMessageRef.current(JSON.parse(e.data as string));
-          attempt = 0;
+          handlers.current.onMessage(JSON.parse(event.data));
         } catch {
-          // ignore parse errors
+          /* Ignore malformed frames. */
         }
       });
-
-      es.onerror = () => {
-        es.close();
-        esRef.current = null;
-        if (!active) return;
-        // Exponential backoff: 2 s → 4 s → 8 s … max 30 s
-        const delay = Math.min(2_000 * 2 ** attempt, 30_000);
-        attempt++;
-        retryRef.current = setTimeout(connect, delay);
+      stream.onerror = () => {
+        stream?.close();
+        if (active)
+          retry = setTimeout(connect, Math.min(2000 * 2 ** attempt++, 30000));
       };
-    };
-
-    connect();
-
+      expiry = setTimeout(
+        () => {
+          stream?.close();
+          void refreshSession().catch(() => {
+            if (active) retry = setTimeout(connect, 2000);
+          });
+        },
+        Math.max(0, tokenExpiresAt(current) - Date.now() - 30000),
+      );
+    }
+    void connect();
     return () => {
       active = false;
-      if (retryRef.current !== null) clearTimeout(retryRef.current);
-      esRef.current?.close();
-      esRef.current = null;
+      stream?.close();
+      clearTimeout(retry);
+      clearTimeout(expiry);
     };
-  }, [enabled, accessToken, path]);
+  }, [enabled, token, path]);
 }
