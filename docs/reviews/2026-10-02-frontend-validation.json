@@ -1,0 +1,491 @@
+{
+  "date": "2026-10-02",
+  "branch": "refactor/fe",
+  "base_commit": "7b1ab1fcb635bc21788e24acad4e3f2aad356eb2",
+  "implementation_head": "cffcb3b0a4a605bfc7990a6f8767aaab656df903",
+  "backend": {
+    "tests": 257,
+    "classes": 28,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "database": "PostgreSQL 17 + pgvector (isolated)",
+    "package": "passed",
+    "suites": [
+      {
+        "class": "com.uitmerch.backend.BackendApplicationTests",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.admin.service.AdminServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.auth.service.AuthServiceTest",
+        "tests": 35,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.cart.service.CartServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.security.JwtTokenProviderTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.service.RateLimiterServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.service.TokenBlacklistServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.event.service.EventServiceTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.AnalyticsFeatureTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.ApiBoundaryFeatureTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.CampaignContextFeatureTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.CampaignFeatureTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.FollowingFeatureTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.LockingFeatureTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.MigrationUpgradeFeatureTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.PickupFeatureTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.RestockFeatureTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.merch.repository.MerchItemRepositoryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.merch.service.MerchServiceTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.order.service.OrderServiceTest",
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.organization.service.OrganizationServiceTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.AiResourceRegressionTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.DeliveryRegressionTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.DevAuthRegressionTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.PostgresRegressionTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.SecurityAndMailRegressionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.user.service.UserServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.wishlist.service.WishlistServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "frontend": {
+    "unit_component_tests": 40,
+    "test_files": 6,
+    "build": "passed",
+    "browser_scenarios": 17,
+    "browser_full_run_passed": 16,
+    "browser_corrected_fixture_rerun_passed": 1,
+    "browser_api": "Playwright intercepted contract fixtures; no live backend integration",
+    "node_local": "26.10.0",
+    "node_ci": "22 (workflow not run remotely)"
+  },
+  "deployment": {
+    "changes_pushed": false,
+    "production_redeploy_triggered": false,
+    "vercel": {
+      "observed_status": "success",
+      "sha": "7b1ab1fcb635bc21788e24acad4e3f2aad356eb2",
+      "alias": "https://uitmerch.vercel.app",
+      "private_logs_checked": false
+    },
+    "render": {
+      "base_url": "https://uitmerch-backend.onrender.com",
+      "events_http": 200,
+      "campaigns_http": 404,
+      "production_origin_cors": "passed",
+      "deployed_sha": null,
+      "migrations_confirmed": false,
+      "private_logs_checked": false,
+      "connector_error": "requires reauthentication"
+    }
+  },
+  "ci_actionlint": "passed",
+  "gitnexus_staged_scope_checks": [
+    {
+      "commit_group": "01",
+      "summary": {
+        "changed_count": 41,
+        "affected_count": 11,
+        "changed_files": 3,
+        "risk_level": "high"
+      },
+      "flows": [
+        "Customer → FindByOrderId",
+        "Customer → OrderContext",
+        "Purchase → ActiveOrg",
+        "Purchase → ActiveCampaigns",
+        "Purchase → PurchaseContext",
+        "Organizer → FindByOrderId",
+        "Organizer → OrderContext",
+        "Detail → FindByIdAndOwnerId",
+        "Detail → FindByCampaignIdOrderById",
+        "Detail → CampaignResponse",
+        "Organizer → FindByIdAndOwnerId"
+      ]
+    },
+    {
+      "commit_group": "02",
+      "summary": {
+        "changed_count": 216,
+        "affected_count": 17,
+        "changed_files": 22,
+        "risk_level": "critical"
+      },
+      "flows": [
+        "HomePage → WithRefreshLock",
+        "HomePage → ReadSession",
+        "HomePage → FeatureError",
+        "HomePage → DateTime",
+        "AppRouter → RemoveToast",
+        "AppRouter → UseToastStore",
+        "AppRouter → TrackGuestOrder",
+        "AppRouter → FeatureFrame",
+        "AppRouter → FeatureLoading",
+        "OrgOrdersTab → PageControls",
+        "HandleBuyNow → CacheClear",
+        "WishlistPage → FeatureError",
+        "AppRouter → DateTime",
+        "OrgOrdersTab → FeatureLoading",
+        "AppRouter → FeatureError",
+        "OrgOrdersTab → DateTime",
+        "OrgOrdersTab → FeatureError"
+      ]
+    },
+    {
+      "commit_group": "03",
+      "summary": {
+        "changed_count": 5,
+        "affected_count": 12,
+        "changed_files": 4,
+        "risk_level": "high"
+      },
+      "flows": [
+        "HandleAvatarUpload → From",
+        "HandleAvatarUpload → Upload",
+        "HandleCoverUpload → From",
+        "HandleCoverUpload → Upload",
+        "HandleImageFileUpload → From",
+        "HandleImageFileUpload → Upload",
+        "Handle → From",
+        "Handle → Upload",
+        "HandleOrganizerCoverUpload → From",
+        "HandleOrganizerCoverUpload → Upload",
+        "HandleOrganizerLogoUpload → From",
+        "HandleOrganizerLogoUpload → Upload"
+      ]
+    },
+    {
+      "commit_group": "04",
+      "summary": {
+        "changed_count": 41,
+        "affected_count": 11,
+        "changed_files": 4,
+        "risk_level": "high"
+      },
+      "flows": [
+        "HomePage → WithRefreshLock",
+        "HomePage → ReadSession",
+        "HomePage → FindProductById",
+        "HomePage → Refresh",
+        "HomePage → TokenExpiresAt",
+        "HomePage → SparkleIcon",
+        "HomePage → ProductCard",
+        "HomePage → FeatureError",
+        "HomePage → CameraIcon",
+        "HomePage → DateTime",
+        "HomePage → SparkleIcon"
+      ]
+    },
+    {
+      "commit_group": "05",
+      "summary": {
+        "changed_count": 31,
+        "affected_count": 9,
+        "changed_files": 2,
+        "risk_level": "high"
+      },
+      "flows": [
+        "OrganizationDetailPage → FindOrganizationById",
+        "AppRouter → FeatureLoading",
+        "OrganizationDetailPage → GetPublicOrgMerch",
+        "OrganizationDetailPage → ShaderBackground",
+        "WishlistPage → FeatureError",
+        "AppRouter → DateTime",
+        "OrganizationDetailPage → GetPublicOrganizationDetail",
+        "OrganizationDetailPage → GetPublicOrganizations",
+        "AppRouter → FeatureError"
+      ]
+    },
+    {
+      "commit_group": "06",
+      "summary": {
+        "changed_count": 14,
+        "affected_count": 5,
+        "changed_files": 1,
+        "risk_level": "medium"
+      },
+      "flows": [
+        "AppRouter → TrackGuestOrder",
+        "AppRouter → FeatureFrame",
+        "OrgOrdersTab → PageControls",
+        "OrgOrdersTab → FeatureLoading",
+        "OrgOrdersTab → DateTime"
+      ]
+    },
+    {
+      "commit_group": "07",
+      "summary": {
+        "changed_count": 3,
+        "affected_count": 0,
+        "changed_files": 1,
+        "risk_level": "low"
+      },
+      "flows": []
+    },
+    {
+      "commit_group": "08",
+      "summary": {
+        "changed_count": 38,
+        "affected_count": 1,
+        "changed_files": 1,
+        "risk_level": "medium"
+      },
+      "flows": [
+        "OrgOrdersTab → FeatureError"
+      ]
+    },
+    {
+      "commit_group": "09",
+      "summary": {
+        "changed_count": 92,
+        "affected_count": 18,
+        "changed_files": 10,
+        "risk_level": "critical"
+      },
+      "flows": [
+        "AppRouter → RemoveToast",
+        "AppRouter → UseToastStore",
+        "AppRouter → TrackGuestOrder",
+        "AppRouter → FeatureFrame",
+        "AppRouter → FeatureLoading",
+        "OrgOrdersTab → PageControls",
+        "ProductDetailPage → GetPublicMerchDetail",
+        "ProductDetailPage → ShaderBackground",
+        "HandleBuyNow → CacheClear",
+        "WishlistPage → FormatPrice",
+        "ProductDetailPage → FindProductById",
+        "WishlistPage → FeatureError",
+        "AppRouter → DateTime",
+        "OrgOrdersTab → FeatureLoading",
+        "AppRouter → FeatureError",
+        "OrgOrdersTab → DateTime",
+        "ProductDetailPage → GetPublicOrganizationDetail",
+        "OrgOrdersTab → FeatureError"
+      ]
+    },
+    {
+      "commit_group": "10",
+      "summary": {
+        "changed_count": 0,
+        "affected_count": 0,
+        "changed_files": 3,
+        "risk_level": "low"
+      },
+      "flows": []
+    }
+  ],
+  "source_sha256": {
+    ".github/workflows/maven.yml": "249a422aaaa763068fe7fa5c28f78a4ee24fe0ab6f3a8d7346b483bc57ffb68c",
+    "backend/Dockerfile": "57e331f62939cd17926775c93631625d8b048a46dba848ec3a4e400d5f0bfef4",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignContextController.java": "b197044163bfbc9980fcd4697fc248e2d3a5be077ab143f4df7abb1f34ba2584",
+    "backend/src/main/java/com/uitmerch/backend/campaign/CampaignReadService.java": "df83f1bfc75a2552f5d77cd08844237c41437702689f2ce39843e6f23bbfd1bf",
+    "backend/src/test/java/com/uitmerch/backend/features/CampaignContextFeatureTest.java": "c688038445adde274e67bf4c11df4a5bdc8c720efa7c8d03ce91adccde47a90b",
+    "frontend/.env.example": "1bc448bc1a502c2ab613f8c2b8dd2ac20c7aa610ee00ccb24954e21040261f72",
+    "frontend/e2e/features.spec.ts": "86c771a84713b2cb5bfec5010b5fc644c81f882b2a2c9d9b366897d985c2fc80",
+    "frontend/package-lock.json": "dea2337ee8d198726a423ca51fbd88a5b835d3b3e514e379461ed092af847fbc",
+    "frontend/package.json": "44b6350a8f46e77cb73129c6caad3bcf6be4da59251bb6664106cc16270523b3",
+    "frontend/playwright.config.ts": "39f921bbfeb905669750b7143451c8f68c23add2629fccae64c51d5fe6cfa629",
+    "frontend/src/api/analytics.ts": "696f06053d84674892fa7ceb6feaed79bf7c9e2a43bfcfbaca2df720327cbea0",
+    "frontend/src/api/campaigns.ts": "d64b2ee86916b2fda7594080fe645a45caf3d2ab4c4ff14d4f76673211627cdc",
+    "frontend/src/api/client.ts": "1782b57085766f6c04916ed79d6a8576bdbfb8cdacd40b634c33afb732f9c8e7",
+    "frontend/src/api/following.ts": "f04dcef20dd7d626c85af268aa7d20f06ac2cad2dd2ab67da8df536ba3436902",
+    "frontend/src/api/pickup.ts": "c96693310dc518e4ea072a8ba69d04905121e0fe6761d513b44d5d8ad5ba6ba6",
+    "frontend/src/api/restock.ts": "48b6324976e1f187b7e3484c9ecdc5abfe93de73436f482db3a8d5b8758cfba6",
+    "frontend/src/api/storage.ts": "ab9fb57322889f3ed53b24168249afe8f4b2654c8af799cb569b04498380c871",
+    "frontend/src/api/supabaseClient.ts": "783219fcef9f0db73073ae8cad9a3b9a48631a23abea58f262b1165933e7b15b",
+    "frontend/src/components/home/TopNavBar.tsx": "8c502653c6cb46c60cb09958122ff0f35177bde7ff294ec40c8e5641bc1cd1bc",
+    "frontend/src/features/Analytics.tsx": "ee36310e53608db763689824484d304d011872da1bfa4c1e7a67b4a26d811812",
+    "frontend/src/features/Campaigns.tsx": "eb1b728990f31a171adf601238c5314aadade77fbe35a979a664d9115fa4d6c9",
+    "frontend/src/features/FeatureUI.tsx": "4d0f2ca415989c7e69a16251fb11f4a5737bc60db1a4727f5b0743714ce9f81a",
+    "frontend/src/features/NotificationBell.tsx": "0be47e510e5e70886f8f49646d9f3429141aa002d9bd73cc5d48f7169490c25b",
+    "frontend/src/features/Pickup.tsx": "3b994a7ea5ee8a8fe55941e891ea5441bd2d9f14b268cd0547ae1ff848be5922",
+    "frontend/src/features/Subscriptions.tsx": "c542a0a042ff939ac31734547366b15539892d68155078cf80b7129548ce1ccf",
+    "frontend/src/hooks/useNotificationStream.ts": "24c94d4e4659b320fc43fde2d4d9089be68ca3015037f8093c0f4cd5c1434a22",
+    "frontend/src/lib/featureUtils.ts": "5c578c637bb12f1d805df3d7ba204e4c2923720243ab6e457206c043957ba8c6",
+    "frontend/src/lib/queryClient.ts": "ea9b649a0c2b8224319ab27b2c79ff5cf4e037ac613b443c71a0ce18c0b2d040",
+    "frontend/src/lib/refreshLock.ts": "456af5dbc438f53cdb3072466132879251786301ecc2e714077ba350c0424a38",
+    "frontend/src/main.tsx": "e684dabffcfecbba68fa7420bf61d13bb12ce289a620861b2bd92e0660ee303a",
+    "frontend/src/pages/AdminDashboardPage.tsx": "317f8be8543d5a5738e9cd941104aae6ee8d968e98425b5f8cf709ffe6c4e25f",
+    "frontend/src/pages/CartPage.tsx": "9b3337dac10a2121b0ae491a9204a1ee12ab5fcdbd71099d6b40406516e2df66",
+    "frontend/src/pages/OrderDetailPage.tsx": "d2173e5d28886c224d144822d1b6ef4562e774028128c1bd32757c449a2844f7",
+    "frontend/src/pages/OrganizationDetailPage.tsx": "c31746f6c2a5733571d2d83105ccd93d326fa02188fe550c75d89e8ceac61c3b",
+    "frontend/src/pages/OrganizerDashboardPage.tsx": "ac3980c78fe6b036652153278805a38347c87ba62aa3b38d5b0fdc891457d5c9",
+    "frontend/src/pages/ProductDetailPage.tsx": "b8ed6b10bef946b9e6bb42fecc54d7d3cb916d42486edec45ce79b8a5998dde9",
+    "frontend/src/pages/WishlistPage.tsx": "2aa64afcc10605248df8c072f867598cba08f3ba8fc7f1c69fd0863f5e1233e1",
+    "frontend/src/stores/authStore.ts": "7407f90b77a43b132e16550580c27fa0f25df92ef71daa9d03af95e8912d209b",
+    "frontend/src/styles.css": "c2526e4d22d1c08f3856590a4fa5f940f9bb4ec6201fc58fac8d3c5308893238",
+    "frontend/src/test/authClient.test.ts": "0b3be21fbd53ed97060c1a89c23e24ef5dca913ba5285fb139d6228c0ee11838",
+    "frontend/src/test/authState.test.ts": "5455c0416c6ba062135b9f991e787bffe758dc65817a361d62bf6ded91a70762",
+    "frontend/src/test/featureComponents.test.tsx": "333f9bf2465045193bdf55678ec87f9aad7ee45383a357450f4a32ef62496a62",
+    "frontend/src/test/featureUtils.test.ts": "a6269ba41137479aaf2ba49c17bda2d4711fd4d8780ba4aeb8ab83535d99d2bc",
+    "frontend/src/test/notificationStream.test.tsx": "bec6e6ad1c5837b194eb876faefe9c47cfdf32b6aafb3d28ee64d9dc6e1b37a2",
+    "frontend/src/test/setup.ts": "21f46b4188ce935bc8d4f3bccfb47ff2f8ebe05a5fb2572b4b6f4f6ebe875aec",
+    "frontend/src/test/storage.test.ts": "39079d463feaba696dfcdfbdcae53c8921007b3f4b7e93ef306ed05fa71e1ad4",
+    "frontend/src/types/features.ts": "bc6d4a72392811bc2be8e533e0be5ce271c032c47c5c269c95f01b380c10f679",
+    "frontend/src/types/shared.ts": "807ed2d42b31a80fd8a7de58e937813c210e0060150b74c2743c8670eea3a3b5",
+    "frontend/tsconfig.tsbuildinfo": "562d5b4ba5e3c2ab312e2320d2b5109875148a650d8fb64475e307dc2274aca6",
+    "frontend/vitest.config.ts": "944c05a13c7cc2e01697ef24f3087bff9c982039edfac2143b1c1adbc58577f3"
+  }
+}

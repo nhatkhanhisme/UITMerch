@@ -703,3 +703,18 @@ The rate limiter, caches, and SSE connections are process-local. Multiple backen
 ## Project Conventions
 
 See [`CLAUDE.md`](./CLAUDE.md) for the full coding conventions used throughout this project (response shape, exception handling, HTTP status codes, Swagger requirements, pagination, etc.).
+
+## Frontend campaign context integration
+
+The frontend integration adds four read-only APIs. No migration beyond V41 is required.
+
+| GET endpoint | Access and purpose |
+|---|---|
+| `/api/v1/public/merch/{merchId}/purchase-context` | Published merch from an ACTIVE organization; indicates the current ACTIVE campaign and whether reservation is required |
+| `/api/v1/customer/orders/{orderId}/campaign-context` | Customer owning the order; links the actual reservation/campaign |
+| `/api/v1/organizations/{orgId}/orders/{orderId}/campaign-context` | Organizer owning the organization and its order |
+| `/api/v1/organizations/{orgId}/campaigns/{campaignId}` | Owner campaign detail, including variants when the organization is INACTIVE |
+
+Order context joins the reservation by order ID, never by a shared SKU. `fulfillmentAllowed` checks the campaign condition only: reserved orders require SUCCEEDED; ordinary orders pass this condition. Existing mutation APIs still enforce ownership, order status and every other restriction. An overdue ACTIVE campaign remains blocked until the server finalizes it.
+
+The [combined validation](../docs/reviews/2026-10-02-frontend-validation.md) ran 257 backend tests across 28 classes, including four new PostgreSQL context/ownership tests, with no failures, errors or skips. The Docker healthcheck respects Render's `PORT`, then `SERVER_PORT`, then 8080.

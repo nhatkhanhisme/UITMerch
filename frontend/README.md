@@ -1,92 +1,53 @@
 # UITMerch Frontend
 
-React 18 + TypeScript SPA for the UIT merchandise platform.
+React 18 + TypeScript + Vite SPA. Backend must include migrations through V41 and the campaign context APIs described in [backend README](../backend/README.md).
 
----
-
-## Quick Start
+## Local development
 
 ```bash
-npm install
-npm run dev       # dev server at http://localhost:5173
-npm run build     # type-check + production bundle
-npm run preview   # preview production build locally
+npm ci
+cp .env.example .env.local
+npm run dev
 ```
 
-Requires the backend running at `http://localhost:8080` (Docker or dev profile).  
-Set `VITE_API_BASE_URL` in `.env.local` if the backend runs elsewhere.
+Open `http://localhost:5173`. Set `VITE_API_BASE_URL` to your backend origin (default `http://localhost:8080`, without `/api/v1`). Optional Supabase public URL/anon key and existing bucket names enable image uploads. Missing storage configuration leaves browsing available and shows an error when uploading. Never put server credentials in `VITE_*`.
 
----
+## Routes and features
 
-## Tech Stack
-
-| Technology | Purpose |
-|---|---|
-| React 18 + TypeScript | Component-based SPA |
-| Vite | Build tool and dev server |
-| Tailwind CSS | Utility-first styling |
-| React Router v6 | Client-side routing |
-| Zustand | Lightweight global state (`authStore`, `cartStore`) |
-| React Query (`@tanstack/react-query`) | Server state, caching, background refetch |
-| Axios | HTTP client — `src/api/client.ts` points at `VITE_API_BASE_URL` |
-| Three.js / `@react-three/fiber` | 3D animations on the landing page |
-| EventSource (SSE) | Real-time in-app notifications for customers and organizers |
-
----
-
-## Project Structure
-
-```
-src/
-├── api/            # Axios wrappers per domain (merch, orders, notifications, …)
-├── components/     # Shared UI components (TopNavBar, modals, cards)
-│   └── home/       # Landing-page sections (Hero, FeaturedMerch, OrgGrid, …)
-├── lib/            # Utilities (sessionCache, formatters)
-├── pages/          # Route-level page components (MerchPage, CartPage, OrdersPage, …)
-├── stores/         # Zustand stores (authStore, cartStore)
-└── types/          # Shared TypeScript types (NotificationResponse, OrderResponse, …)
-```
-
----
-
-## State Management
-
-- **`authStore`** — current user (id, email, role, token). Persisted to `localStorage`.
-- **`cartStore`** — cart item count badge. Synced with backend on login.
-- **React Query** — server state for merch lists, orders, notifications. Cache invalidated on mutations.
-
----
-
-## Real-time Notifications
-
-Both customers and organizers receive real-time push via SSE:
-
-- **Customer** — `GET /api/v1/customer/notifications/stream` — notified on ORDER_PLACED (checkout confirmation), ORDER_READY (pickup schedule), etc.
-- **Organizer** — `GET /api/v1/organizer/notifications/stream` — notified on NEW_ORDER and ORDER_CANCELLED.
-
-The `EventSource` connection is opened in `TopNavBar` after login and closed on logout. Unread count badge updates in real time; the notification panel fetches persisted history from the DB on open.
-
----
-
-## Key Pages
-
-| Route | Page | Role |
+| Route | Access | Behavior |
 |---|---|---|
-| `/` | Home | Public |
-| `/merch` | Merch store (search, filter, sort) | Public |
-| `/merch/:id` | Merch detail + AI visual search suggestions | Public |
-| `/organization` | Organization grid | Public |
-| `/event` | Event listing | Public |
-| `/auth` | Login / Register / OTP / Reset password | Public |
-| `/cart` | Cart and checkout | Customer |
-| `/orders` | Order history + status tracking | Customer |
-| `/organizer` | Organizer dashboard (orders, merchs, events, pickup) | Organizer |
-| `/admin` | Admin panel (users, orgs) | Admin |
+| `/merch`, `/merch/:id` | Public | Catalog, ordinary checkout, restock CTA and active campaign link |
+| `/organization`, `/organization/:id` | Public | Organization discovery and customer follow |
+| `/events`, `/event/:id` | Public | Events and event details |
+| `/auth` | Public | Login, registration, OTP and reset |
+| `/campaigns`, `/campaigns/:id` | Public | Campaign discovery; customers reserve real variants |
+| `/guest-orders` | Guest | Email/receipt tracking and emailed pickup receipt exchange |
+| `/cart`, `/wishlist`, `/orders`, `/orders/:id` | Customer | Checkout, order history, campaign context and READY pickup QR |
+| `/restock-subscriptions`, `/following`, `/reservations` | Customer | Subscriptions, preferences and campaign reservations |
+| `/organizer?orgId=…&tab=analytics` | Organizer | Date-filtered metrics and tables |
+| `/organizer?orgId=…&tab=campaigns` | Organizer | Create, inspect and cancel campaigns |
+| `/organizer?orgId=…&tab=scanner` | Organizer | Camera/manual credential verification, then explicit check-in |
+| `/admin` | Admin | Organization approvals and user roles |
 
----
+## State and retry behavior
 
-## Environment Variables
+`api/client.ts` coordinates one refresh per tab and uses Web Locks across tabs, with a storage lease fallback. Logout/account changes clear private queries, session cache, cart and reservation intents. Failed authorization clears the current session; network failure preserves it. Protected requests retry once after refresh; ambiguous checkout/network failures are not automatically replayed.
 
-| Variable | Default | Description |
-|---|---|---|
-| `VITE_API_BASE_URL` | `http://localhost:8080` | Backend base URL |
+React Query keys include user/org for the new feature data. Older catalog/dashboard views still use existing state/cache. Notification REST records are authoritative; SSE reconnect reloads records/counts, follows rotated tokens and invalidates matching domains. Opening the panel does not mark all notifications read.
+
+Reservation intents freeze request ID and payload in user-scoped sessionStorage for an explicit retry after ambiguous failure or reload. Pickup tokens and guest receipt credentials stay in component memory; receipt query parameters are stripped after initialization. Issuing a new pickup token invalidates the old one on the server. Camera denial leaves manual input available.
+
+## Tests and production build
+
+```bash
+npm test
+npm run build
+npx playwright install --with-deps chromium
+npm run test:e2e
+```
+
+Vitest covers auth races, adapters, SSE lifecycle and component behavior. Playwright starts Vite on port 5189 and intercepts API calls with contract fixtures; it does not send test orders to production. To use an already installed Chromium, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to its executable path. See [validation](../docs/reviews/2026-10-02-frontend-validation.md) for results and integration limits.
+
+## Vercel
+
+Use project root `frontend`, build `npm run build`, output `dist`, install `npm ci`. `vercel.json` rewrites deep links to the SPA. Configure `VITE_API_BASE_URL` per production/preview environment before building. Backend CORS must list each allowed frontend origin. Deploy the compatible backend before enabling these frontend routes; Vercel Git integration runs independently of the Render workflow.

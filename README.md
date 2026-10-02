@@ -66,7 +66,7 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 | `/` | **Trang chủ** (Home) | Scroll-snap homepage with featured merch slider, organization grid, and campus info section |
 | `/merch` | **Kho Vật Phẩm** (Merch Store) | Full catalog with keyword search, category filters (Đồ lưu niệm, Trang phục, Đồ dùng), sorting, and pagination (16 items/page) |
 | `/organization` | **Tổ Chức** (Organizations) | Grid of 30+ clubs and faculties with search-all and sort |
-| `/event` | **Sự Kiện & Hoạt Động** (Events) | Event listing with status badges (Sắp diễn ra / Đang diễn ra / Đã kết thúc), filter by Newest or Upcoming |
+| `/events` | **Sự Kiện & Hoạt Động** (Events) | Event listing with status badges (Sắp diễn ra / Đang diễn ra / Đã kết thúc), filter by Newest or Upcoming |
 | `/auth` | **Tài Khoản** (Account) | Login / Register portal with role selection (Customer / Organizer), OTP email verification, and forgot-password / reset-password flow |
 
 ### Customer (login required)
@@ -91,9 +91,9 @@ The backend is a **modular monolith** built on Spring Boot, cleanly separating d
 - Assign and revoke user roles
 - Platform-wide content oversight
 
-### New backend APIs
+### Integrated features
 
-The backend also supports the following features. Their API implementation is complete; frontend integration is separate from the pages listed above.
+The backend and frontend implement the following features. Customer settings, guest tracking, campaign discovery and organizer tabs are documented in the [frontend reference](frontend/README.md). Local changes are distinct from the currently deployed version; see [combined validation](docs/reviews/2026-10-02-frontend-validation.md).
 
 | Feature | Behavior |
 |---|---|
@@ -162,7 +162,7 @@ See the [backend API reference](backend/README.md#new-feature-apis) and [impleme
 
 **Prerequisites:**
 - Java 21
-- Node.js 18+ and npm 9+
+- Node.js 22 LTS and npm
 - PostgreSQL with the `vector` extension available (for PostgreSQL runs)
 - Docker (optional for the application; required for the isolated PostgreSQL test harness)
 
@@ -206,7 +206,8 @@ The default profile uses PostgreSQL, real SMTP, and Supabase Storage. The databa
 
 ```bash
 cd frontend
-npm install
+npm ci
+cp .env.example .env.local
 npm run dev        # development server at http://localhost:5173
 npm run build      # production build to dist/
 ```
@@ -308,12 +309,15 @@ PostgreSQL-dependent suites are skipped without a test database. To run the comp
 backend/scripts/test-postgres.sh -q
 ```
 
-The harness requires Bash, Docker, and Java 21, copies the backend into a temporary directory, and prints the retained report location. It creates and removes its own test database container. The [recorded validation on 2 October 2026](docs/reviews/2026-10-02-backend-feature-validation.json) contains **253 tests across 27 classes, with no failures, errors, or skips**.
+The harness requires Bash, Docker, and Java 21, copies the backend into a temporary directory, and prints the retained report location. It creates and removes its own test database container. The [recorded validation on 2 October 2026](docs/reviews/2026-10-02-backend-feature-validation.json) contains **253 tests across 27 classes, with no failures, errors, or skips**. The [latest combined validation](docs/reviews/2026-10-02-frontend-validation.md) includes the campaign context APIs: **257 backend tests, 40 frontend unit/component tests and 17 browser scenarios**.
 
 **Frontend:**
 
 ```bash
 cd frontend
+npm test
+npx playwright install --with-deps chromium
+npm run test:e2e
 npm run build
 ```
 
@@ -324,7 +328,10 @@ npm run build
 **Frontend** is deployed on **Vercel**: [https://uitmerch.vercel.app](https://uitmerch.vercel.app)
 
 - The `frontend/vercel.json` catch-all rewrite ensures React Router handles all client-side routes correctly on page refresh.
-- No additional build configuration is needed — Vite outputs to `dist/` and Vercel serves it automatically.
+- Configure root `frontend`, install `npm ci`, build `npm run build`, output `dist`, and environment-specific `VITE_API_BASE_URL`.
+- Deploy backend V41 and the campaign context endpoints before this frontend. List exact production/preview origins in backend CORS.
+- GitHub CI runs isolated PostgreSQL backend tests plus frontend unit/browser/build checks before triggering Render on `main`. Vercel Git deployments are independent; its private settings must be checked separately.
+- See [combined validation and deploy findings](docs/reviews/2026-10-02-frontend-validation.md) for the current production mismatch and local results.
 
 **Backend** requires a Java 21 runtime, PostgreSQL with pgvector, SMTP configuration, and Supabase Storage configuration for the default profile. Refer to the [backend environment reference](backend/README.md#environment-variables) for configuration.
 
