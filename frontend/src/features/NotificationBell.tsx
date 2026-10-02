@@ -135,12 +135,12 @@ export function NotificationBell() {
   });
   if (!enabled) return null;
   return (
-    <div ref={ref} className="relative mr-2">
+    <div ref={ref} className="relative shrink-0">
       <button
         type="button"
         aria-label="Thông báo"
         aria-expanded={open}
-        className="rounded-full p-2"
+        className="relative flex size-11 items-center justify-center rounded-full text-black-blue hover:bg-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700"
         onClick={() => setOpen((v) => !v)}
       >
         <svg
@@ -154,7 +154,13 @@ export function NotificationBell() {
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M9 21h6" />
         </svg>
         {(count.data ?? 0) > 0 && (
-          <span aria-label="Chưa đọc"> {count.data}</span>
+          <span
+            aria-label="Chưa đọc"
+            title={`${count.data} thông báo chưa đọc`}
+            className="absolute right-0 top-0.5 min-w-4 rounded-full bg-cyan-800 px-1 text-center text-[10px] font-semibold leading-4 text-white"
+          >
+            {(count.data ?? 0) > 99 ? "99+" : count.data}
+          </span>
         )}
       </button>
       {open && (

@@ -8,13 +8,11 @@ type HomeFixedChromeProps = {
 
 export function HomeFixedChrome({ showSlideBar = true }: HomeFixedChromeProps) {
   const [scale, setScale] = useState(1);
-  const [viewportWidth, setViewportWidth] = useState(1440);
   const [activeIndex, setActiveIndex] = useState<0 | 1 | 2 | 3>(0);
   const visibilityRef = useRef(new Map<number, number>());
 
   useEffect(() => {
     const updateScale = () => {
-      setViewportWidth(window.innerWidth);
       setScale(Math.min(window.innerWidth / 1440, 1));
     };
 
@@ -75,17 +73,7 @@ export function HomeFixedChrome({ showSlideBar = true }: HomeFixedChromeProps) {
 
   return (
     <>
-      <div
-        className="fixed left-1/2 top-3 z-50 w-[calc(100vw-24px)] max-w-[1280.41px] -translate-x-1/2 sm:top-[18px] sm:w-[calc(100vw-64px)] lg:w-[1280.41px]"
-        style={{
-          // RESPONSIVE
-          transform:
-            viewportWidth >= 1024 && scale < 1
-              ? `translateX(-50%) scale(${scale})`
-              : "translateX(-50%)",
-          transformOrigin: "top center",
-        }}
-      >
+      <div className="fixed left-1/2 top-3 z-50 w-[calc(100%-24px)] max-w-[1180px] -translate-x-1/2 sm:top-[18px] sm:w-[calc(100%-48px)]">
         <TopNavBar />
       </div>
 

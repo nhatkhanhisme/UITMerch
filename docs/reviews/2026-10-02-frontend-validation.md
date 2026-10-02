@@ -108,3 +108,5 @@ Chưa push, redeploy hoặc thay cấu hình cloud trong lượt này. Phần ki
 - Commit tài liệu cuối cập nhật plan, README và báo cáo này.
 
 Hash source/config và summary kiểm tra: [validation JSON](2026-10-02-frontend-validation.json).
+
+Navbar được điều chỉnh trong lượt review tiếp theo; xem [navbar follow-up](2026-10-02-navbar-review.md) với ảnh desktop/mobile và lượt kiểm tra frontend mới: 40 unit/component tests, 30 browser tests và production build đạt. Hash source trong JSON phía trên ghi nhận bản tích hợp trước lượt sửa navbar này.
