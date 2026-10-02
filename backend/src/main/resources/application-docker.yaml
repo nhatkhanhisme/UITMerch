@@ -23,8 +23,8 @@ spring:
 app:
   jwt:
     secret: ${APP_JWT_SECRET}
-    expiration: 86400000
-    refresh-expiration: 604800000
+    expiration: ${APP_JWT_EXPIRATION:86400000}
+    refresh-expiration: ${APP_JWT_REFRESH_EXPIRATION:604800000}
 
 logging:
   level:

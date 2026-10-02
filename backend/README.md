@@ -58,7 +58,7 @@ cp .env.example .env
 # Windows: .\mvnw.cmd spring-boot:run
 ```
 
-The database must have pgvector available and allow Flyway to create the `vector` extension used by V29, even when AI keys are omitted. Flyway applies migrations through V41 at startup. Configure SMTP and Supabase Storage using [.env.example](.env.example); set `SWAGGER_ENABLED=true` to explore the API locally.
+The database must have pgvector available and allow Flyway to create the `vector` extension used by V29, even when AI keys are omitted. Flyway applies migrations through V43 at startup. Configure SMTP and Supabase Storage using [.env.example](.env.example); set `SWAGGER_ENABLED=true` to explore the API locally.
 
 If Java fails with `libjli.so: invalid ELF header` before Maven starts, check `java -version` and `./mvnw -version`. Repair or select a working Java 21 installation and set `JAVA_HOME`/`PATH` to it; that error comes from the Java runtime installation.
 
@@ -69,7 +69,7 @@ If Java fails with `libjli.so: invalid ELF header` before Maven starts, check `j
 | Layer | Technology |
 |---|---|
 | Framework | Spring Boot 3.3.5, Java 21 |
-| Database | PostgreSQL with pgvector, Flyway migrations V1–V41; full-suite validation uses PostgreSQL 17 |
+| Database | PostgreSQL with pgvector, Flyway migrations V1–V43; full-suite validation uses PostgreSQL 17 |
 | Auth | JWT via JJWT 0.12.x — type-checked access/refresh tokens backed by persisted `auth_sessions`, rotation, and revocation |
 | Token blacklist | PostgreSQL-backed `invalidated_tokens` table — survives restarts |
 | Rate limiting | Process-local sliding-window (`RateLimiterService`) — authentication, OTP submissions, guest checkout, pickup, visual search |
@@ -606,7 +606,7 @@ Flyway manages schema versions in `src/main/resources/db/migration/`.
 Flyway is **disabled** in the `dev` profile (Hibernate generates schema from entities via `create-drop`).
 Never modify existing migration files — add a new `VN+1__description.sql` instead.
 
-Current schema version: **V41**. PostgreSQL must support pgvector and extension creation. Upgrade validation covers both empty → V41 and V34 → V41, preserving stock and suppressing announcements for historical publications.
+Current schema version: **V43**. Deployed V33/V34 are restored; see [migration recovery](ENV_SETUP.md#migration-recovery) for the guarded V16 checksum repair. PostgreSQL must support pgvector and extension creation. Upgrade validation covers both empty → V43 and V34 → V43, preserving stock and suppressing announcements for historical publications.
 
 | Migration | Contents |
 |---|---|
@@ -640,15 +640,17 @@ Current schema version: **V41**. PostgreSQL must support pgvector and extension 
 | V30 | Add `ORDER_PLACED` to `notification_type` enum |
 | V31 | Add `NEW_ORDER` to `notification_type` enum (organizer notifications) |
 | V32 | Add CANCELLED event status |
-| V33 | `auth_sessions`, account authentication version, and OTP purpose separation |
-| V34 | Durable `background_jobs` outbox for email and embeddings |
-| V35 | Add `MERCH_RESTOCKED` notification type |
-| V36 | Restock subscriptions, announcement events/deliveries, stock cycles, notification links, ANNOUNCEMENT jobs |
-| V37 | Pickup and guest-receipt credential hashes; order history |
-| V38 | Add `MERCH_PUBLISHED` and `EVENT_PUBLISHED` notification types |
-| V39 | Organization follows/preferences and historical publication backfill |
-| V40 | Organization/date indexes for order and pickup analytics |
-| V41 | Preorder campaigns, variants, reservations, and request-ID uniqueness |
+| V33 | Drop obsolete guest address (restored deployed migration) |
+| V34 | OTP purpose (restored deployed migration) |
+| V35 | `auth_sessions`, account authentication version, and OTP purpose separation |
+| V36 | Durable `background_jobs` outbox for email and embeddings |
+| V37 | Add `MERCH_RESTOCKED` notification type |
+| V38 | Restock subscriptions, announcement events/deliveries, stock cycles, notification links, ANNOUNCEMENT jobs |
+| V39 | Pickup and guest-receipt credential hashes; order history |
+| V40 | Add `MERCH_PUBLISHED` and `EVENT_PUBLISHED` notification types |
+| V41 | Organization follows/preferences and historical publication backfill |
+| V42 | Organization/date indexes for order and pickup analytics |
+| V43 | Preorder campaigns, variants, reservations, and request-ID uniqueness |
 
 ---
 
@@ -671,6 +673,8 @@ Full suite using a disposable PostgreSQL database (Bash, Docker, and Java 21 req
 
 The harness copies backend sources/build configuration into `/tmp/uitmerch-backend-test.*`, creates a fresh database container on a random localhost port, and supplies `UITMERCH_TEST_DATABASE_URL`. It uses `pgvector/pgvector:pg17` by default; override `UITMERCH_TEST_POSTGRES_IMAGE` with a compatible image if needed. The temporary build excludes the project's `.env`. The container is removed on exit, while test reports remain under the printed temporary path in `target/surefire-reports/`.
 
+The latest full suite passed **264 tests across 30 classes**, with zero failures, errors and skips on isolated PostgreSQL 18.6 + pgvector 0.8.2. Environment fixes, migration recovery and full-suite results are recorded in [the environment fix review](../docs/reviews/2026-10-02-backend-environment-fixes.md). The earlier feature-only baseline below is retained for comparison.
+
 The [recorded validation on 2 October 2026](../docs/reviews/2026-10-02-backend-feature-validation.json) ran **253 tests across 27 classes, with 0 failures, 0 errors, and 0 skips**, using PostgreSQL 17. The feature-specific suites include:
 
 | Suite | Tests | Notes |
@@ -681,7 +685,7 @@ The [recorded validation on 2 October 2026](../docs/reviews/2026-10-02-backend-f
 | `AnalyticsFeatureTest` | 4 | Ownership, date bounds, order aggregation, and pickup workload |
 | `CampaignFeatureTest` | 11 | Reservations, retries, deadlines, cancellation, and fulfillment restrictions |
 | `LockingFeatureTest` | 2 | Concurrent campaign reservation/finalization |
-| `MigrationUpgradeFeatureTest` | 1 | V34 → V41 migration with stock preserved and historical alerts suppressed |
+| `MigrationUpgradeFeatureTest` | 1 | V34 → V43 migration with stock preserved and historical alerts suppressed |
 | `ApiBoundaryFeatureTest` | 2 | Invalid input and forbidden API responses |
 
 Remaining suites cover authentication, JWT/session revocation, catalog, checkout, stock contention, email/outbox recovery, AI resource limits, and Spring context startup. See the validation artifact for the full per-class results.
@@ -706,7 +710,7 @@ See [`CLAUDE.md`](./CLAUDE.md) for the full coding conventions used throughout t
 
 ## Frontend campaign context integration
 
-The frontend integration adds four read-only APIs. No migration beyond V41 is required.
+The frontend integration adds four read-only APIs. No migration beyond V43 is required.
 
 | GET endpoint | Access and purpose |
 |---|---|

@@ -8,13 +8,15 @@ services:
       dockerfile: Dockerfile
     container_name: uitmerch-backend
     ports:
-      - "8080:8080"
+      - "${PORT:-${SERVER_PORT:-8080}}:${PORT:-${SERVER_PORT:-8080}}"
     env_file: .env
     environment:
+      PORT: ${PORT:-${SERVER_PORT:-8080}}
+      SERVER_PORT: ${PORT:-${SERVER_PORT:-8080}}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
     restart: on-failure
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/v1/public/events?size=1 || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- \"http://localhost:$${PORT:-$${SERVER_PORT:-8080}}/api/v1/public/events?size=1\" || exit 1"]
       interval: 30s
       timeout: 5s
       start_period: 60s

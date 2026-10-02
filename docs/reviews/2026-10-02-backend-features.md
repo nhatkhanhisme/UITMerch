@@ -132,15 +132,15 @@ No payment gateway or automatic refund is introduced. PAID is not set automatica
 
 | Version | Change |
 | --- | --- |
-| V35 | MERCH_RESTOCKED enum value |
-| V36 | Restock subscriptions, durable announcement events, notification links, stock cycles, ANNOUNCEMENT jobs |
-| V37 | Pickup/guest credential hashes and order history |
-| V38 | MERCH_PUBLISHED and EVENT_PUBLISHED enum values |
-| V39 | Following preferences and publication backfill flags |
-| V40 | Organization/date analytics indexes |
-| V41 | Preorder campaigns, variants, reservations and request uniqueness |
+| V37 | MERCH_RESTOCKED enum value |
+| V38 | Restock subscriptions, durable announcement events, notification links, stock cycles, ANNOUNCEMENT jobs |
+| V39 | Pickup/guest credential hashes and order history |
+| V40 | MERCH_PUBLISHED and EVENT_PUBLISHED enum values |
+| V41 | Following preferences and publication backfill flags |
+| V42 | Organization/date analytics indexes |
+| V43 | Preorder campaigns, variants, reservations and request uniqueness |
 
-Apply all new Flyway migrations before using the new writers. Enum additions are separate versions from subsequent writes. Migrations V1–V34 remain unchanged. Migration tests validate empty → V41 and V34 → V41 with stock preserved and no historical announcement jobs. All runtime database checks used disposable PostgreSQL databases; no configured development/hosted database was migrated.
+Apply all new Flyway migrations before using the new writers. Enum additions are separate versions from subsequent writes. Deployed V33/V34 are preserved; authentication sessions and durable delivery now occupy V35/V36. V16 retains its reviewed semicolon fix and requires the guarded metadata repair described in [environment fixes](2026-10-02-backend-environment-fixes.md) when upgrading the original deployed checksum. Migration tests validate empty → V43 and V34 → V43 with stock preserved and no historical announcement jobs. All runtime database checks used disposable PostgreSQL databases; no configured development/hosted database was migrated.
 
 In-app alert persistence is deduplicated. SMTP transport retains the outbox's at-least-once semantics; a crash after an email is sent but before the job is marked DONE can cause a duplicate email. The existing rate limiter is process-local. These implementation limits remain relevant when deploying multiple instances.
 

@@ -1,0 +1,4 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.uitmerch.backend.common.config.DevDatasourceEnvironmentPostProcessor
+org.springframework.boot.SpringApplicationRunListener=\
+com.uitmerch.backend.common.config.ServerPortApplicationRunListener

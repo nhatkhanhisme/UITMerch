@@ -1,3 +1,5 @@
+**Follow-up:** configuration, migration and order-mapping fixes are recorded in [the fix review](2026-10-02-backend-environment-fixes.md). The findings below describe the pre-fix state.
+
 # Backend environment/profile audit — 02/10/2026
 
 Nhánh `refactor/fe`, HEAD `f160346`. Kiểm tra chỉ đọc; không sửa schema, lịch sử Flyway, gửi email hoặc upload/delete object trên dịch vụ thật. Giá trị secret không nằm trong báo cáo.

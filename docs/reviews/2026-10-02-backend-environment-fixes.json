@@ -1,0 +1,407 @@
+{
+  "date": "2026-10-02",
+  "source_branch": "refactor/fe",
+  "backend_suite": {
+    "database": "PostgreSQL 18.6 + pgvector 0.8.2, isolated /tmp cluster",
+    "totals": {
+      "tests": 264,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "classes": [
+      {
+        "class": "com.uitmerch.backend.BackendApplicationTests",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.admin.service.AdminServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.auth.service.AuthServiceTest",
+        "tests": 35,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.cart.service.CartServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.security.JwtTokenProviderTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.service.RateLimiterServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.service.TokenBlacklistServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.event.service.EventServiceTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.AnalyticsFeatureTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.ApiBoundaryFeatureTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.CampaignContextFeatureTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.CampaignFeatureTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.FollowingFeatureTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.LockingFeatureTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.MigrationUpgradeFeatureTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.PickupFeatureTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.RestockFeatureTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.merch.repository.MerchItemRepositoryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.merch.service.MerchServiceTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.order.service.OrderServiceTest",
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.organization.service.OrganizationServiceTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.AiResourceRegressionTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.DeliveryRegressionTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.DevAuthRegressionTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.DevDatasourceEnvironmentRegressionTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.PostgresRegressionTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.SecurityAndMailRegressionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.ServerPortEnvironmentRegressionTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.user.service.UserServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.wishlist.service.WishlistServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "upgrade_clone": {
+    "before": {
+      "users": 40,
+      "orders": 22,
+      "events": 7,
+      "merch_items": 43,
+      "stock": 1391
+    },
+    "validate_before": [
+      "Validation: false",
+      "Invalid V16: CHECKSUM_MISMATCH"
+    ],
+    "additional_mismatch_rejected": true,
+    "unknown_checksum_rejected": true,
+    "known_repair": [
+      "Known V16 checksum repaired; application tables were not changed."
+    ],
+    "migrate": [
+      "Applied migrations: 9; schema version: 43"
+    ],
+    "idempotent_migrate": [
+      "Applied migrations: 0; schema version: null"
+    ],
+    "after": {
+      "users": 40,
+      "orders": 22,
+      "events": 7,
+      "merch_items": 43,
+      "stock": 1391
+    },
+    "counts_and_stock_preserved": true,
+    "latest_schema": "43",
+    "historical_announcements": 0,
+    "validate_after": [
+      "Validation: true"
+    ]
+  },
+  "configured_database": {
+    "latest_migration": "43",
+    "migration_success": true,
+    "pgvector_available": true,
+    "known_v16_repair_applied": true,
+    "new_migrations_applied": 9,
+    "backup_persisted_outside_git": true
+  },
+  "configuration": [
+    {
+      "profile": "default",
+      "startup": "PASS",
+      "raw_matches": 17,
+      "effective_matches": 17,
+      "jwt_ttl_override": true
+    },
+    {
+      "profile": "dev",
+      "startup": "PASS",
+      "raw_matches": 17,
+      "effective_matches": 7,
+      "jwt_ttl_override": true
+    },
+    {
+      "profile": "docker",
+      "startup": "PASS",
+      "raw_matches": 17,
+      "effective_matches": 17,
+      "jwt_ttl_override": true
+    },
+    {
+      "profile": "prod",
+      "startup": "PASS",
+      "raw_matches": 17,
+      "effective_matches": 17,
+      "jwt_ttl_override": true
+    }
+  ],
+  "real_database_read_only_smokes": [
+    {
+      "profiles": [],
+      "startup": "PASS",
+      "mail_transport": "JavaMailEmailService",
+      "storage_service": "SupabaseStorageServiceImpl",
+      "s3_client_active": true,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 200,
+      "/v3/api-docs": 401,
+      "mode": "default"
+    },
+    {
+      "profiles": [
+        "docker"
+      ],
+      "startup": "PASS",
+      "mail_transport": "DevEmailService",
+      "storage_service": "DevStorageService",
+      "s3_client_active": false,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 200,
+      "/v3/api-docs": 401,
+      "mode": "docker"
+    },
+    {
+      "profiles": [
+        "prod"
+      ],
+      "startup": "PASS",
+      "mail_transport": "JavaMailEmailService",
+      "storage_service": "SupabaseStorageServiceImpl",
+      "s3_client_active": true,
+      "delivery_scheduler_active": false,
+      "campaign_scheduler_active": false,
+      "/api/v1/public/events?size=1": 200,
+      "/v3/api-docs": 401,
+      "mode": "prod"
+    }
+  ],
+  "packaged_dev_system_environment": {
+    "port": 19090,
+    "startup": "PASS",
+    "h2_connection": true,
+    "/api/v1/public/events?size=1": 200,
+    "/v3/api-docs": 200
+  },
+  "packaged_dev_dotenv_file": {
+    "port": 19191,
+    "startup": "PASS",
+    "h2_connection": true,
+    "/api/v1/public/events?size=1": 200,
+    "/v3/api-docs": 200
+  },
+  "compose_configuration": [
+    {
+      "PORT": null,
+      "SERVER_PORT": null,
+      "expected": 8080,
+      "mapping_and_both_app_ports_match": true,
+      "dynamic_healthcheck": true
+    },
+    {
+      "PORT": null,
+      "SERVER_PORT": "18080",
+      "expected": 18080,
+      "mapping_and_both_app_ports_match": true,
+      "dynamic_healthcheck": true
+    },
+    {
+      "PORT": "19090",
+      "SERVER_PORT": "18080",
+      "expected": 19090,
+      "mapping_and_both_app_ports_match": true,
+      "dynamic_healthcheck": true
+    }
+  ],
+  "artifact": {
+    "dotenv_embedded": false,
+    "real_secret_matches": {
+      "APP_JWT_SECRET": false,
+      "SPRING_DATASOURCE_PASSWORD": false,
+      "MAIL_PASSWORD": false,
+      "SUPABASE_STORAGE_S3_ACCESS_KEY_ID": false,
+      "SUPABASE_STORAGE_S3_SECRET_KEY": false
+    },
+    "migration_files": 43,
+    "dev_processor_registered": true,
+    "platform_port_listener_registered": true
+  },
+  "docker_runtime": {
+    "status": "BLOCKED",
+    "reason": "Host root filesystem full; daemon metadata writes fail with ENOSPC",
+    "fresh_image_verified": false,
+    "container_healthcheck_verified": false
+  },
+  "ai": {
+    "keys_configured": false,
+    "normal_startup_requires_ai_keys": false
+  },
+  "verification_limits": [
+    "Isolated full suite uses native PostgreSQL 18.6, not a Docker PostgreSQL 17 container.",
+    "Configured-database API smokes disable scheduled work and development seeding; no email or storage mutation exercised.",
+    "Concurrent JVM smokes initially hit timeouts; final reduced-concurrency bounded-resource runs passed."
+  ]
+}

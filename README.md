@@ -124,7 +124,7 @@ See the [backend API reference](backend/README.md#new-feature-apis) and [impleme
 |---|---|
 | Java 21 + Spring Boot 3.3 | Core API framework (modular monolith) |
 | Spring Security + JWT | Persisted authentication sessions, refresh rotation, revocation, and role/ownership checks |
-| PostgreSQL + pgvector + Flyway | Relational database and migrations V1–V41; pgvector supports AI visual search |
+| PostgreSQL + pgvector + Flyway | Relational database and migrations V1–V43; pgvector supports AI visual search |
 | Supabase Storage | Image hosting for merch and organization logos |
 | Database outbox + SMTP | Durable email and announcement delivery with retries |
 | Swagger / OpenAPI | Auto-generated API documentation |
@@ -276,7 +276,7 @@ UITMerch/
 ├── backend/                        # Spring Boot application
 │   ├── src/main/java/              # Core domains + restock, pickup, following, analytics, campaign
 │   ├── src/main/resources/
-│   │   └── db/migration/           # Flyway migrations V1–V41
+│   │   └── db/migration/           # Flyway migrations V1–V43
 │   ├── src/test/                   # Unit, H2, PostgreSQL, migration and concurrency tests
 │   └── scripts/test-postgres.sh    # Isolated full-suite test runner
 ├── frontend/                       # React + TypeScript SPA
@@ -309,7 +309,7 @@ PostgreSQL-dependent suites are skipped without a test database. To run the comp
 backend/scripts/test-postgres.sh -q
 ```
 
-The harness requires Bash, Docker, and Java 21, copies the backend into a temporary directory, and prints the retained report location. It creates and removes its own test database container. The [recorded validation on 2 October 2026](docs/reviews/2026-10-02-backend-feature-validation.json) contains **253 tests across 27 classes, with no failures, errors, or skips**. The [latest combined validation](docs/reviews/2026-10-02-frontend-validation.md) includes the campaign context APIs: **257 backend tests, 40 frontend unit/component tests and 17 browser scenarios**.
+The harness requires Bash, Docker, and Java 21, copies the backend into a temporary directory, and prints the retained report location. It creates and removes its own test database container. The [recorded validation on 2 October 2026](docs/reviews/2026-10-02-backend-feature-validation.json) contains **253 tests across 27 classes, with no failures, errors, or skips**. The [earlier combined validation](docs/reviews/2026-10-02-frontend-validation.md) includes the campaign context APIs: **257 backend tests, 40 frontend unit/component tests and 17 browser scenarios**. The [latest backend environment fixes](docs/reviews/2026-10-02-backend-environment-fixes.md) pass **264 backend tests across 30 classes**, restore the deployed migration lineage through V43, and verify runtime environment bindings.
 
 **Frontend:**
 
@@ -329,7 +329,7 @@ npm run build
 
 - The `frontend/vercel.json` catch-all rewrite ensures React Router handles all client-side routes correctly on page refresh.
 - Configure root `frontend`, install `npm ci`, build `npm run build`, output `dist`, and environment-specific `VITE_API_BASE_URL`.
-- Deploy backend V41 and the campaign context endpoints before this frontend. List exact production/preview origins in backend CORS.
+- Deploy backend V43 and the campaign context endpoints before this frontend. List exact production/preview origins in backend CORS.
 - GitHub CI runs isolated PostgreSQL backend tests plus frontend unit/browser/build checks before triggering Render on `main`. Vercel Git deployments are independent; its private settings must be checked separately.
 - See [combined validation and deploy findings](docs/reviews/2026-10-02-frontend-validation.md) for the current production mismatch and local results.
 
