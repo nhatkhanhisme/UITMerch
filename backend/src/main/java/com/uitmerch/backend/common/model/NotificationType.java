@@ -7,5 +7,6 @@ public enum NotificationType {
     ORDER_READY,
     ORDER_COMPLETED,
     ORDER_CANCELLED,
-    PICKUP_SCHEDULED
+    PICKUP_SCHEDULED,
+    MERCH_RESTOCKED
 }

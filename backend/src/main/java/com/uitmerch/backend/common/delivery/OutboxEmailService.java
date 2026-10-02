@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OutboxEmailService implements EmailService {
     private final BackgroundJobService jobs;
+    @Override public void sendAnnouncement(String email, String title, String message) {
+        jobs.enqueueEmail("ANNOUNCEMENT", email, title, message);
+    }
     @Override public void sendOtp(String email, String code) { jobs.enqueueEmail("OTP", email, code); }
     @Override public void sendPasswordReset(String email, String code) { jobs.enqueueEmail("RESET", email, code); }
     @Override public void sendOrderPlacedConfirmation(String email, String id) { jobs.enqueueEmail("PLACED", email, id); }

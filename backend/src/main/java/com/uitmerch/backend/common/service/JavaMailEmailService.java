@@ -27,6 +27,13 @@ public class JavaMailEmailService implements EmailService {
     private String fromName;
 
     @Override
+    public void sendAnnouncement(String email, String title, String message) {
+        sendMail(email, "UITMerch — " + title.replaceAll("[\\r\\n]", " "),
+            "<div style=\"font-family:Arial,sans-serif\"><h2>" + escape(title)
+                + "</h2><p>" + escape(message) + "</p></div>");
+    }
+
+    @Override
     public void sendOtp(String toEmail, String otpCode) {
         sendMail(toEmail, "Your UITMerch verification code", buildHtml(otpCode));
     }

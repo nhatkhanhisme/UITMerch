@@ -1,6 +1,7 @@
 package com.uitmerch.backend.common.service;
 
 public interface EmailService {
+    void sendAnnouncement(String toEmail, String title, String message);
     void sendOtp(String toEmail, String otpCode);
     void sendPasswordReset(String toEmail, String otpCode);
     void sendOrderPlacedConfirmation(String toEmail, String orderId);

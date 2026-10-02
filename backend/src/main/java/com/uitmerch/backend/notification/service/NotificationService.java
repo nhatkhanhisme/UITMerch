@@ -20,6 +20,17 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SseEmitterManager sseEmitterManager;
 
+    @Transactional
+    public boolean pushAnnouncement(UUID userId, com.uitmerch.backend.notification.announcement.AnnouncementEvent event) {
+        if (notificationRepository.existsByUserIdAndDeliveryEventId(userId, event.getId())) return false;
+        Notification saved = notificationRepository.saveAndFlush(Notification.builder().userId(userId)
+            .title(event.getTitle()).message(event.getMessage()).type(event.getKind())
+            .relatedMerchId(event.getMerchId()).relatedOrgId(event.getOrgId()).relatedEventId(event.getEventId())
+            .deliveryEventId(event.getId()).build());
+        sseEmitterManager.send(userId, NotificationResponse.from(saved));
+        return true;
+    }
+
     /** Persist to DB only — caller is responsible for sending the SSE event separately. */
     @Transactional
     public void saveOnly(UUID userId, String title, String message, NotificationType type, UUID relatedOrderId) {

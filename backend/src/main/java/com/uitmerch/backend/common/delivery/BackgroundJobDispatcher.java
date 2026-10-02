@@ -20,11 +20,14 @@ public class BackgroundJobDispatcher {
     private final MerchEmbeddingService merchEmbedding;
     private final MerchItemRepository merch;
     private final ObjectMapper json;
+    private final com.uitmerch.backend.notification.announcement.AnnouncementDispatcher announcements;
 
     public BackgroundJobDispatcher(BackgroundJobClaimService claims, @Qualifier("mailTransport") EmailService transport,
-        EmbeddingService embedding, MerchEmbeddingService merchEmbedding, MerchItemRepository merch, ObjectMapper json) {
+        EmbeddingService embedding, MerchEmbeddingService merchEmbedding, MerchItemRepository merch, ObjectMapper json,
+        com.uitmerch.backend.notification.announcement.AnnouncementDispatcher announcements) {
         this.claims = claims; this.transport = transport; this.embedding = embedding;
         this.merchEmbedding = merchEmbedding; this.merch = merch; this.json = json;
+        this.announcements = announcements;
     }
 
     // Claim and result transactions are separate; no database transaction is held while doing provider I/O.
@@ -36,6 +39,7 @@ public class BackgroundJobDispatcher {
         try {
             switch (job.getKind()) {
                 case "EMAIL" -> sendMail(job);
+                case "ANNOUNCEMENT" -> announcements.deliverBatch(UUID.fromString(job.getPayload()));
                 case "EMBEDDING" -> {
                     UUID id = UUID.fromString(job.getPayload());
                     var item = merch.findById(id);
@@ -60,6 +64,7 @@ public class BackgroundJobDispatcher {
         if (("OTP".equals(mail.template()) || "RESET".equals(mail.template()))
             && job.getCreatedAt().plusSeconds(15 * 60).isBefore(Instant.now())) return;
         switch (mail.template()) {
+            case "ANNOUNCEMENT" -> transport.sendAnnouncement(mail.recipient(), args.get(0), args.get(1));
             case "OTP" -> transport.sendOtp(mail.recipient(), args.get(0));
             case "RESET" -> transport.sendPasswordReset(mail.recipient(), args.get(0));
             case "PLACED" -> transport.sendOrderPlacedConfirmation(mail.recipient(), args.get(0));

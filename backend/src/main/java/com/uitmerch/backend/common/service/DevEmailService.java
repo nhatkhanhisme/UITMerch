@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 @Service("mailTransport")
 @Profile("dev | docker")
 public class DevEmailService implements EmailService {
+    @Override public void sendAnnouncement(String email, String title, String message) {
+        log.info("[DEV] Announcement '{}' to {}", title, email);
+    }
 
     @Override
     public void sendOtp(String toEmail, String otpCode) {

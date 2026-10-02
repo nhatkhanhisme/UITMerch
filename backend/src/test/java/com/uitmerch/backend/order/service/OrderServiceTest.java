@@ -63,6 +63,7 @@ class OrderServiceTest {
     @Mock private NotificationService notificationService;
     @Mock private SseEmitterManager sseEmitterManager;
     @Mock private PickupScheduleRepository pickupScheduleRepository;
+    @Mock private com.uitmerch.backend.merch.service.InventoryService inventoryService;
 
     @InjectMocks private OrderService orderService;
 
@@ -300,7 +301,7 @@ class OrderServiceTest {
 
         orderService.cancelCustomerOrder(userId, orderId, cancelRequest());
 
-        verify(merchItemRepository).restoreStock(merchId, 2);
+        verify(inventoryService).restore(merchId, 2);
     }
 
     @Test
@@ -311,7 +312,7 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.cancelCustomerOrder(userId, orderId, cancelRequest()))
             .isInstanceOf(ValidationException.class)
             .hasMessageContaining("PENDING");
-        verify(merchItemRepository, never()).restoreStock(any(), anyInt());
+        verify(inventoryService, never()).restore(any(), anyInt());
     }
 
     @Test

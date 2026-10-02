@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
+    boolean existsByUserIdAndDeliveryEventId(UUID userId, UUID eventId);
 
     Page<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
 

@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderService {
 
+    private final com.uitmerch.backend.merch.service.InventoryService inventoryService;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final MerchItemRepository merchItemRepository;
@@ -623,8 +624,8 @@ public class OrderService {
     }
 
     private void restoreStockForItems(List<OrderItem> items) {
-        items.stream().sorted(Comparator.comparing(OrderItem::getMerchId))
-            .forEach(item -> merchItemRepository.restoreStock(item.getMerchId(), item.getQuantity()));
+        items.stream().sorted(Comparator.comparing(item -> item.getMerchId().toString()))
+            .forEach(item -> inventoryService.restore(item.getMerchId(), item.getQuantity()));
     }
 
     private PickupSchedule loadPickupSchedule(Order order) {

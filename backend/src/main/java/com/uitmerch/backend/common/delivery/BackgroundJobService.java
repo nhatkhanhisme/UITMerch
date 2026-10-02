@@ -15,6 +15,9 @@ public class BackgroundJobService {
     public record MailPayload(String template, String recipient, List<String> arguments) {}
 
     @Transactional
+    public void enqueueAnnouncement(UUID id) { enqueue("ANNOUNCEMENT", id.toString()); }
+
+    @Transactional
     public void enqueueEmail(String template, String recipient, String... arguments) {
         try {
             enqueue("EMAIL", json.writeValueAsString(new MailPayload(template, recipient, Arrays.asList(arguments))));

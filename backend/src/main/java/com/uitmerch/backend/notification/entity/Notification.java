@@ -48,6 +48,11 @@ public class Notification {
     @Column(name = "related_order_id")
     private UUID relatedOrderId;
 
+    @Column(name = "related_merch_id") private UUID relatedMerchId;
+    @Column(name = "related_org_id") private UUID relatedOrgId;
+    @Column(name = "related_event_id") private UUID relatedEventId;
+    @Column(name = "delivery_event_id") private UUID deliveryEventId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

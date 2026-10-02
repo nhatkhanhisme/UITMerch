@@ -46,6 +46,7 @@ public class MerchService {
     private final OrganizationService organizationService;
     private final OrderItemRepository orderItemRepository;
     private final MerchEmbeddingService merchEmbeddingService;
+    private final com.uitmerch.backend.restock.RestockService restockService;
 
     // ------------------------------------------------------------------ //
     //  ORGANIZER
@@ -101,6 +102,7 @@ public class MerchService {
         MerchItem item = merchItemRepository.findLockedById(merchId)
             .filter(m -> m.getOrgId().equals(org.getId()))
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", merchId.toString()));
+        int previousStock = item.getStock();
 
         if (request.getName() != null && !request.getName().isBlank()) {
             item.setName(request.getName());
@@ -130,6 +132,7 @@ public class MerchService {
         }
 
         MerchItem saved = merchItemRepository.save(item);
+        restockService.stockIncreased(saved, previousStock);
         merchEmbeddingService.storeAsync(saved.getId(), embeddingText(saved));
 
         List<String> images;

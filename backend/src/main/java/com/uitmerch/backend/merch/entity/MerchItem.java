@@ -43,6 +43,9 @@ public class MerchItem {
     @Column(nullable = false)
     private int stock;
 
+    @Column(name = "restock_cycle", nullable = false)
+    private long restockCycle;
+
     @Column(name = "category_id")
     private UUID categoryId;
 

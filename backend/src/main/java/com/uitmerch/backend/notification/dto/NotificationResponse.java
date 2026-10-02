@@ -19,6 +19,9 @@ public class NotificationResponse {
     private NotificationType type;
     private boolean isRead;
     private UUID relatedOrderId;
+    private UUID relatedMerchId;
+    private UUID relatedOrgId;
+    private UUID relatedEventId;
     private LocalDateTime createdAt;
 
     public static NotificationResponse from(Notification n) {
@@ -30,6 +33,9 @@ public class NotificationResponse {
             .type(n.getType())
             .isRead(n.isRead())
             .relatedOrderId(n.getRelatedOrderId())
+            .relatedMerchId(n.getRelatedMerchId())
+            .relatedOrgId(n.getRelatedOrgId())
+            .relatedEventId(n.getRelatedEventId())
             .createdAt(n.getCreatedAt())
             .build();
     }
