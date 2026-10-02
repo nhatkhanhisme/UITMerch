@@ -106,7 +106,7 @@ for (const width of [1440, 1280, 1024, 768, 375, 320]) {
       ).toBeVisible();
       await expect(
         page.getByRole("link", { name: "Tra cứu đơn khách", exact: true }),
-      ).toBeVisible();
+      ).toHaveCount(0);
       await page.keyboard.press("Escape");
       await expect(
         nav.getByRole("button", { name: "Mở điều hướng" }),
@@ -125,23 +125,52 @@ for (const width of [1440, 1280, 1024, 768, 375, 320]) {
   });
 }
 
-test("guest order lookup remains accessible through the desktop account menu", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await setupNav(page);
-  const account = page.getByRole("button", { name: "Tài khoản", exact: true });
-  await account.click();
-  const secondary = page.getByRole("navigation", {
-    name: "Tài khoản và tiện ích",
-  });
-  await expect(
-    secondary.getByRole("link", { name: "Đăng nhập / Đăng ký" }),
-  ).toHaveAttribute("href", "/auth");
-  await secondary.getByRole("link", { name: "Tra cứu đơn khách" }).click();
-  await expect(page).toHaveURL(/\/guest-orders$/);
-  await expect(account).toHaveAttribute("aria-expanded", "false");
-});
+for (const width of [1440, 375]) {
+  for (const role of [undefined, "CUSTOMER", "ORGANIZER", "ADMIN"] as const) {
+    test(`guest lookup account link is role-scoped for ${role ?? "guest"} at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await setupNav(page, role);
+      const opener =
+        width < 1280
+          ? page.getByRole("button", { name: "Mở điều hướng" })
+          : page.getByRole("button", {
+              name: role ? /Nguyễn Thị Khánh Linh/ : "Tài khoản",
+              exact: !role,
+            });
+      await opener.click();
+      const menu = page.getByRole("navigation", {
+        name:
+          width < 1280
+            ? "Tài khoản trên màn hình nhỏ"
+            : "Tài khoản và tiện ích",
+        exact: true,
+      });
+      const lookup = menu.getByRole("link", {
+        name: "Tra cứu đơn khách",
+        exact: true,
+      });
+      if (role === "ORGANIZER") {
+        await expect(lookup).toBeVisible();
+        await expect(lookup).toHaveAttribute("href", "/guest-orders");
+        await lookup.click();
+        await expect(page).toHaveURL(/\/guest-orders$/);
+        await expect(menu).toHaveCount(0);
+      } else {
+        await expect(lookup).toHaveCount(0);
+        if (!role)
+          await expect(
+            menu.getByRole("link", { name: "Đăng nhập / Đăng ký" }),
+          ).toHaveAttribute("href", "/auth");
+        if (role === "CUSTOMER")
+          await expect(
+            menu.getByRole("link", { name: "Đơn hàng của tôi" }),
+          ).toHaveAttribute("href", "/orders");
+      }
+    });
+  }
+}
 
 for (const role of ["CUSTOMER", "ORGANIZER", "ADMIN"] as const) {
   test(`account navigation scopes actions to ${role}`, async ({ page }) => {

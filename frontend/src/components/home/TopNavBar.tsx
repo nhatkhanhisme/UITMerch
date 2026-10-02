@@ -221,7 +221,10 @@ export function TopNavBar() {
         ]
       : []),
     ...(user?.role === "ORGANIZER"
-      ? [{ label: "Quản lý BTC", href: "/organizer" }]
+      ? [
+          { label: "Quản lý BTC", href: "/organizer" },
+          { label: "Tra cứu đơn khách", href: "/guest-orders" },
+        ]
       : []),
     ...(user?.role === "ADMIN" ? [{ label: "Quản trị", href: "/admin" }] : []),
   ];
@@ -330,26 +333,18 @@ export function TopNavBar() {
                 >
                   <nav aria-label="Tài khoản và tiện ích">
                     {renderAccountLinks()}
-                    <div className="my-2 border-t border-slate/15" />
-                    <Link
-                      to="/guest-orders"
-                      onClick={handleNavClick}
-                      aria-current={
-                        isCurrent("/guest-orders") ? "page" : undefined
-                      }
-                      className={`${linkClassName("/guest-orders")} rounded-xl text-sm`}
-                    >
-                      Tra cứu đơn khách
-                    </Link>
                     {user && (
-                      <button
-                        type="button"
-                        className="flex min-h-11 w-full items-center gap-2 rounded-xl px-4 text-left text-sm font-medium hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700"
-                        onClick={handleLogout}
-                      >
-                        <LogOut className="size-4" aria-hidden="true" />
-                        Đăng xuất
-                      </button>
+                      <>
+                        <div className="my-2 border-t border-slate/15" />
+                        <button
+                          type="button"
+                          className="flex min-h-11 w-full items-center gap-2 rounded-xl px-4 text-left text-sm font-medium hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700"
+                          onClick={handleLogout}
+                        >
+                          <LogOut className="size-4" aria-hidden="true" />
+                          Đăng xuất
+                        </button>
+                      </>
                     )}
                   </nav>
                 </div>
@@ -405,13 +400,6 @@ export function TopNavBar() {
               className="grid grid-cols-1 gap-1 min-[400px]:grid-cols-2"
             >
               {renderAccountLinks()}
-              <Link
-                className={`${linkClassName("/guest-orders")} rounded-xl text-sm`}
-                onClick={handleNavClick}
-                to="/guest-orders"
-              >
-                Tra cứu đơn khách
-              </Link>
               {user && (
                 <button
                   type="button"

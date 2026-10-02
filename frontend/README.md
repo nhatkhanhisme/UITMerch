@@ -31,6 +31,8 @@ Open `http://localhost:5173`. Set `VITE_API_BASE_URL` to your backend origin (de
 
 Primary navigation contains Home, Merch, Organizations and Events. Preorder campaigns have a dedicated spotlight below the homepage introduction and a compact banner in the catalog. Customer reservations remain accessible through the account menu. See the [preorder placement review](../docs/reviews/2026-10-02-preorder-placement.md) for screenshots and validation.
 
+The account-menu **Tra cứu đơn khách** shortcut is shown only for `ORGANIZER`, on desktop and mobile. Guests see the login/register action and customers use **Đơn hàng của tôi**. Direct guest order links from checkout and emailed pickup receipts still use `/guest-orders`. See the [account menu role review](../docs/reviews/2026-10-02-account-menu-roles.md).
+
 ## State and retry behavior
 
 `api/client.ts` coordinates one refresh per tab and uses Web Locks across tabs, with a storage lease fallback. Logout/account changes clear private queries, session cache, cart and reservation intents. Failed authorization clears the current session; network failure preserves it. Protected requests retry once after refresh; ambiguous checkout/network failures are not automatically replayed.
