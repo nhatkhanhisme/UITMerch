@@ -38,6 +38,32 @@ class CampaignFeatureTest extends BackendFeatureTest {
     }
     private CampaignRequests.Reserve request(MerchItem item,int quantity) { return new CampaignRequests.Reserve(item.getId(),quantity,UUID.randomUUID(),null); }
     private void due(UUID id) { jdbc.update("UPDATE preorder_campaigns SET deadline=? WHERE id=?",java.sql.Timestamp.from(Instant.now().minusSeconds(5)),id); }
+    @Test
+    @org.springframework.transaction.annotation.Transactional
+    void publicCampaignPaginationUsesDatabaseEnumAndExcludesInactiveOrganizations() throws Exception {
+        long existing = jdbc.queryForObject("""
+            SELECT COUNT(*) FROM preorder_campaigns c JOIN organizations o ON o.id=c.org_id
+            WHERE o.status='ACTIVE'
+            """, Long.class);
+        var active = organization();
+        var first = campaign(active, product(active,10), 2);
+        var second = campaign(active, product(active,10), 2);
+        var inactive = organization();
+        campaign(inactive, product(inactive,10), 2);
+        inactive.setStatus(OrganizationStatus.INACTIVE);
+        organizations.saveAndFlush(inactive);
+
+        // A full one-item page forces both the content query and its count query.
+        mvc.perform(get("/api/v1/public/campaigns").param("size","1").param("sort","createdAt,desc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.totalElements").value(existing+2))
+            .andExpect(jsonPath("$.data.content.length()").value(1))
+            .andExpect(jsonPath("$.data.content[0].id").value(second.id().toString()));
+        mvc.perform(get("/api/v1/public/campaigns").param("page","1").param("size","1").param("sort","createdAt,desc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.totalElements").value(existing+2))
+            .andExpect(jsonPath("$.data.content[0].id").value(first.id().toString()));
+    }
     @Test void concurrentReplayCreatesOneOrderAndUsesCampaignPriceSnapshot() throws Exception {
         var org=organization(); var item=product(org,10); var c=campaign(org,item,2); var user=user(UserRole.CUSTOMER);
         item.setPrice(new BigDecimal("200000")); merch.saveAndFlush(item);
