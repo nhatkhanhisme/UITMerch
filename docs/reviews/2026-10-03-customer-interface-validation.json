@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-03",
+  "branch": "refactor/fe",
+  "scope": [
+    "Customer order detail",
+    "Pickup QR and order history",
+    "Notification dropdown",
+    "Customer profile",
+    "Following and restock pages",
+    "Shared feature page headings and surfaces"
+  ],
+  "validation": {
+    "frontend_unit_tests": 40,
+    "full_browser_suite": 55,
+    "new_presentation_scenarios": 10,
+    "final_presentation_rerun": {
+      "passed": 10,
+      "failed": 0
+    },
+    "production_build": "PASS",
+    "build_warning": "Existing minified chunks larger than 500 kB",
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "width": 375,
+        "height": 900
+      },
+      {
+        "width": 320,
+        "height": 900
+      },
+      {
+        "width": 375,
+        "height": 812
+      },
+      {
+        "width": 667,
+        "height": 375
+      }
+    ],
+    "checked": [
+      "QR creation and long manual token fit",
+      "Profile edit retains values and saves",
+      "Notification list scrolls within viewport",
+      "Escape dismisses notifications",
+      "Following/restock empty-state discovery links",
+      "No horizontal page overflow"
+    ]
+  },
+  "screenshots": [
+    "docs/reviews/assets/2026-10-03-customer-order-1440.png",
+    "docs/reviews/assets/2026-10-03-customer-order-375.png",
+    "docs/reviews/assets/2026-10-03-customer-profile-1440.png",
+    "docs/reviews/assets/2026-10-03-customer-profile-375.png",
+    "docs/reviews/assets/2026-10-03-customer-notifications-1440.png",
+    "docs/reviews/assets/2026-10-03-customer-notifications-375.png",
+    "docs/reviews/assets/2026-10-03-customer-following-empty.png"
+  ],
+  "limits": [
+    "UI tests use synthetic customer/order fixtures and mocked API transports.",
+    "No authenticated write against the configured external backend; no real token, email, image upload or Gemini request is used.",
+    "Backend source and environment configuration are unchanged by this UI task."
+  ],
+  "impact": {
+    "individual_components": "LOW",
+    "FeatureFrame": "MEDIUM, six direct consumers",
+    "shared_QR_consumers": [
+      "CustomerPickup",
+      "GuestOrdersPage"
+    ],
+    "shared_history_consumers": [
+      "OrderDetailPage",
+      "PickupScanner",
+      "OrgOrdersTab"
+    ],
+    "shared_profile_info_consumers": [
+      "CustomerProfilePage",
+      "OrganizerProfilePage"
+    ],
+    "staged_aggregate_risk": "CRITICAL; warned and reviewed shared UI consumers and expected execution flows",
+    "unchanged_logic_verified": [
+      "PickupScanner",
+      "CancelOrderModal",
+      "FeatureError",
+      "formatPrice",
+      "formatDateTime",
+      "profile formatting helpers",
+      "API transport and authentication"
+    ]
+  }
+}
