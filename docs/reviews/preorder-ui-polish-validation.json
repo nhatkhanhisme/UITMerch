@@ -1,0 +1,76 @@
+{
+  "branch": "refactor/fe",
+  "scope": "frontend preorder, reservation information, notification read controls, public organization followers",
+  "unit": {
+    "command": "npm test",
+    "passed": 42,
+    "failed": 0
+  },
+  "browser": {
+    "command": "npm run test:e2e -- --workers=2",
+    "passed": 90,
+    "failed": 0,
+    "new_cases": 17,
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "width": 375,
+        "height": 812
+      },
+      {
+        "width": 320,
+        "height": 812
+      },
+      {
+        "width": 667,
+        "height": 375
+      }
+    ]
+  },
+  "build": {
+    "command": "npm run build",
+    "result": "pass",
+    "existing_warning": "Three.js / ShaderBackground bundle above 500 kB"
+  },
+  "live_read_only_smoke": {
+    "frontend": "http://localhost:5173",
+    "backend": "http://localhost:8080",
+    "container": "uitmerch-backend",
+    "health": "healthy",
+    "public_campaigns_http": 200,
+    "public_organization_http": 200,
+    "campaign_cards": 3,
+    "goal_sections": 3,
+    "guest_demo_org_follower_count": 1
+  },
+  "gitnexus": {
+    "before_edit_risk": "LOW per component",
+    "staged_summary": {
+      "changed_count": 27,
+      "affected_count": 12,
+      "changed_files": 6,
+      "risk_level": "high"
+    },
+    "affected_processes": [
+      "HomePage → WithRefreshLock",
+      "HomePage → ReadSession",
+      "HomePage → Refresh",
+      "HomePage → TokenExpiresAt",
+      "HomePage → FeatureError",
+      "HomePage → NotificationTarget",
+      "HomePage → DateTime",
+      "OrganizationDetailPage → FindOrganizationById",
+      "OrganizationDetailPage → GetPublicOrgMerch",
+      "OrganizationDetailPage → ShaderBackground",
+      "OrganizationDetailPage → GetPublicOrganizationDetail",
+      "OrganizationDetailPage → GetPublicOrganizations"
+    ],
+    "limitation": "Analyzer caps execution flows; graph supplemented with source review and browser tests."
+  },
+  "backend_tests_rerun": false,
+  "deployment": "local verification only",
+  "screenshots": "artifacts/preorder-ui-polish; synthetic API fixtures except public-followers-live-demo.png (public demo data)"
+}
