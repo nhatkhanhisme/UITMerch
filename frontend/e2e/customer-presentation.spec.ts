@@ -188,7 +188,9 @@ for (const viewport of [
     expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
     expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
     await expect(
-      page.getByRole("button", { name: /Lịch nhận hàng đã được cập nhật/ }),
+      panel
+        .locator(".notification-open")
+        .filter({ hasText: "Lịch nhận hàng đã được cập nhật" }),
     ).toHaveCount(12);
     expect(
       await panel

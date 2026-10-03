@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState, useId } from "react";
-import { CheckCheck, ChevronLeft, ChevronRight, Inbox } from "lucide-react";
+import {
+  Check,
+  CheckCheck,
+  ChevronLeft,
+  ChevronRight,
+  Inbox,
+  ArrowUpRight,
+} from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "../stores/toastStore";
@@ -36,6 +43,7 @@ export function NotificationBell() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(0);
+  const [readFeedback, setReadFeedback] = useState("");
   const ref = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const seen = useRef(new Set<string>());
@@ -119,12 +127,47 @@ export function NotificationBell() {
       );
     },
   });
+  function updateReadCache(id?: string) {
+    qc.setQueriesData<{ items: NotificationResponse[] }>(
+      { queryKey: key },
+      (data) =>
+        data && typeof data === "object" && "items" in data
+          ? {
+              ...data,
+              items: data.items.map((n) =>
+                !id || n.id === id ? { ...n, isRead: true } : n,
+              ),
+            }
+          : data,
+    );
+  }
   const read = useMutation({
-    mutationFn: async (n: NotificationResponse) => {
-      if (!n.isRead) await apiClient.patch(`${prefix}/${n.id}/read`);
-      return notificationTarget(n, organizer);
+    mutationFn: async ({
+      notification,
+      openTarget,
+    }: {
+      notification: NotificationResponse;
+      openTarget: boolean;
+      userId: string;
+      role: string;
+    }) => {
+      if (!notification.isRead)
+        await apiClient.patch(`${prefix}/${notification.id}/read`);
+      return openTarget
+        ? notificationTarget(notification, organizer)
+        : undefined;
     },
-    onSuccess: (target) => {
+    onSuccess: (target, request) => {
+      const current = useAuthStore.getState().user;
+      if (current?.id !== request.userId || current.role !== request.role)
+        return;
+      updateReadCache(request.notification.id);
+      if (!request.notification.isRead) {
+        qc.setQueryData<number>([...key, "count"], (value) =>
+          typeof value === "number" ? Math.max(0, value - 1) : value,
+        );
+        setReadFeedback("Đã đánh dấu thông báo là đã đọc.");
+      }
       refresh();
       if (target) {
         setOpen(false);
@@ -133,13 +176,15 @@ export function NotificationBell() {
     },
   });
   const all = useMutation({
-    mutationFn: () => apiClient.patch(`${prefix}/read-all`),
-    onSuccess: () => {
-      if (useAuthStore.getState().user?.id !== user?.id) return;
-      qc.setQueriesData<{ items: NotificationResponse[] }>({ queryKey: key }, (data) =>
-        data && typeof data === "object" && "items" in data ? { ...data, items: data.items.map((n) => ({ ...n, isRead: true })) } : data,
-      );
+    mutationFn: (_request: { userId: string; role: string }) =>
+      apiClient.patch(`${prefix}/read-all`),
+    onSuccess: (_result, request) => {
+      const current = useAuthStore.getState().user;
+      if (current?.id !== request.userId || current.role !== request.role)
+        return;
+      updateReadCache();
       qc.setQueryData([...key, "count"], 0);
+      setReadFeedback("Đã đánh dấu tất cả là đã đọc.");
       toast.success("Đã đánh dấu tất cả thông báo là đã đọc.");
       refresh();
     },
@@ -153,7 +198,10 @@ export function NotificationBell() {
         aria-expanded={open}
         aria-controls={panelId}
         className="relative flex size-11 items-center justify-center rounded-full text-black-blue hover:bg-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setReadFeedback("");
+          setOpen((v) => !v);
+        }}
       >
         <svg
           aria-hidden="true"
@@ -194,23 +242,51 @@ export function NotificationBell() {
             <div>
               <h2>Thông báo</h2>
               <p>
-                {(count.data ?? 0) > 0
-                  ? `${count.data} thông báo chưa đọc`
-                  : "Bạn đã xem hết thông báo"}
+                {count.isPending
+                  ? "Đang kiểm tra thông báo…"
+                  : count.isError
+                    ? "Chưa tải được trạng thái đã đọc"
+                    : (count.data ?? 0) > 0
+                      ? `${count.data} thông báo chưa đọc`
+                      : "Không còn thông báo chưa đọc"}
               </p>
             </div>
+            <Inbox aria-hidden="true" size={23} />
+          </header>
+          <div className="notification-toolbar">
+            <span>Mở thông báo để xem chi tiết.</span>
             <button
+              type="button"
               className="notification-read-all"
-              disabled={all.isPending || count.isPending || count.isError || (count.data ?? 0) === 0}
-              onClick={() => all.mutate()}
+              disabled={
+                all.isPending ||
+                read.isPending ||
+                count.isPending ||
+                count.isError ||
+                (count.data ?? 0) === 0
+              }
+              onClick={() => all.mutate({ userId: user!.id, role: user!.role })}
               title="Đánh dấu tất cả đã đọc"
               aria-label="Đánh dấu tất cả đã đọc"
             >
-              <CheckCheck aria-hidden="true" size={18} />
-              <span>{all.isPending ? "Đang đánh dấu…" : (count.data ?? 0) === 0 ? "Đã đọc tất cả" : "Đánh dấu đã đọc"}</span>
+              <CheckCheck aria-hidden="true" size={17} />
+              <span>
+                {all.isPending
+                  ? "Đang đánh dấu…"
+                  : !count.isPending &&
+                      !count.isError &&
+                      (count.data ?? 0) === 0
+                    ? "Đã đọc tất cả"
+                    : "Đọc tất cả"}
+              </span>
             </button>
-          </header>
-          {all.isSuccess && (count.data ?? 0) === 0 && <p className="notification-confirmation" role="status"><CheckCheck aria-hidden="true" size={16} /> Đã đánh dấu tất cả là đã đọc.</p>}
+          </div>
+          {readFeedback && (
+            <p className="notification-confirmation" role="status">
+              <CheckCheck aria-hidden="true" size={16} />
+              {readFeedback}
+            </p>
+          )}
           {(q.isError || count.isError) && (
             <FeatureError error={q.error ?? count.error} retry={refresh} />
           )}
@@ -232,30 +308,81 @@ export function NotificationBell() {
                 </div>
               )}
               {q.data?.items.map((n) => (
-                <button
-                  type="button"
-                  disabled={read.isPending}
+                <article
                   className={`notification-item ${n.isRead ? "is-read" : "is-unread"}`}
                   key={n.id}
-                  onClick={() => read.mutate(n)}
                 >
-                  <span className="notification-dot" aria-hidden="true" />
-                  <span className="min-w-0">
-                    <span className="notification-title">{n.title}</span>
-                    <span className="notification-message">{n.message}</span>
-                    {n.createdAt && (
-                      <time
-                        className="notification-time"
-                        dateTime={n.createdAt}
-                      >
-                        {dateTime(n.createdAt)}
-                      </time>
-                    )}
-                  </span>
-                </button>
+                  <button
+                    className="notification-open"
+                    type="button"
+                    disabled={read.isPending || all.isPending}
+                    onClick={() =>
+                      read.mutate({
+                        notification: n,
+                        openTarget: true,
+                        userId: user!.id,
+                        role: user!.role,
+                      })
+                    }
+                  >
+                    <span className="notification-dot" aria-hidden="true" />
+                    <span className="min-w-0 notification-content">
+                      <span className="notification-title">{n.title}</span>
+                      <span className="notification-message">{n.message}</span>
+                      <span className="notification-meta">
+                        <span
+                          className={`notification-read-state ${n.isRead ? "read" : "unread"}`}
+                        >
+                          {n.isRead ? (
+                            <Check aria-hidden="true" size={13} />
+                          ) : (
+                            <span aria-hidden="true" />
+                          )}
+                          {n.isRead ? "Đã đọc" : "Chưa đọc"}
+                        </span>
+                        {n.createdAt && (
+                          <time
+                            className="notification-time"
+                            dateTime={n.createdAt}
+                          >
+                            {dateTime(n.createdAt)}
+                          </time>
+                        )}
+                      </span>
+                      {notificationTarget(n, organizer) && (
+                        <span className="notification-open-hint">
+                          Xem chi tiết{" "}
+                          <ArrowUpRight aria-hidden="true" size={13} />
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                  {!n.isRead && (
+                    <button
+                      className="notification-read-one"
+                      type="button"
+                      aria-label={`Đánh dấu đã đọc: ${n.title}`}
+                      title="Đánh dấu đã đọc"
+                      disabled={read.isPending || all.isPending}
+                      onClick={() =>
+                        read.mutate({
+                          notification: n,
+                          openTarget: false,
+                          userId: user!.id,
+                          role: user!.role,
+                        })
+                      }
+                    >
+                      <Check aria-hidden="true" size={18} />
+                    </button>
+                  )}
+                </article>
               ))}
             </div>
           )}
+          <p className="notification-reading-note">
+            Mở hoặc đánh dấu một thông báo sẽ chuyển nó sang đã đọc.
+          </p>
           {(page > 0 || q.data?.meta?.hasNext) && (
             <nav
               className="notification-pagination"

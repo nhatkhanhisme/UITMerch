@@ -1,4 +1,5 @@
 import { FollowButton } from "../features/Subscriptions";
+import { Users } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { GlassContainer } from "../components/common/GlassContainer";
@@ -306,7 +307,10 @@ export function OrganizationDetailPage() {
                 <h1 className="mt-5 font-fredoka text-3xl font-bold leading-tight text-black-blue sm:text-5xl">
                   {organization.name}
                 </h1>
-                {liveOrg?.id === id && !hasApiError && <FollowButton orgId={id!} onChanged={(following) => setLiveOrg((org) => org ? { ...org, followerCount: Math.max(0, (org.followerCount ?? 0) + (following ? 1 : -1)) } : org)} />}
+                <div className="organization-social-row">
+                  <p className="organization-public-followers" aria-label="Số người theo dõi tổ chức"><Users aria-hidden="true" size={19} /><strong>{(liveOrg?.followerCount ?? organization.followerCount ?? 0).toLocaleString("vi-VN")}</strong> người theo dõi</p>
+                  {liveOrg?.id === id && !hasApiError && <FollowButton orgId={id!} onChanged={(following) => setLiveOrg((org) => org ? { ...org, followerCount: Math.max(0, (org.followerCount ?? 0) + (following ? 1 : -1)) } : org)} />}
+                </div>
                 <p className="mx-auto mt-3 max-w-3xl font-sans text-sm leading-7 text-ink/65 sm:mt-4 sm:text-base sm:leading-8 lg:mx-0">
                   {organization.description || "Chưa có mô tả chi tiết cho tổ chức này."}
                 </p>
@@ -328,7 +332,6 @@ export function OrganizationDetailPage() {
                       {liveEvents.length}
                     </p>
                   </div>
-                  <div className="organization-follower-count"><p>Người theo dõi</p><strong>{liveOrg?.followerCount ?? 0}</strong></div>
                 </div>
               </div>
             </section>
