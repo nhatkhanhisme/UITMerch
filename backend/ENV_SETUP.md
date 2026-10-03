@@ -39,6 +39,16 @@ Required for real services:
 
 For example, with `SERVER_PORT=18080`, Compose exposes `http://localhost:18080` and checks the same port internally. With `PORT=19090` as well, all three use `19090`. Shell environment variables take precedence over the Compose `.env` file. When selecting a separate env file, use `docker compose --env-file <path>` for interpolation and override the service's `env_file` to that path as well.
 
+`APP_CORS_ALLOWED_ORIGINS` replaces the default list when set. Include the exact origin where you open the frontend: `http://localhost:5173` and `http://127.0.0.1:5173` are different origins. Origins contain scheme, hostname and optional port; omit paths and the trailing `/`. For local development alongside Vercel, append your deployed origin to the localhost entries in `.env.example`, for example `https://your-frontend-domain.vercel.app`. A backend healthcheck can pass while browser API requests fail with CORS 403 because healthchecks do not send the frontend's `Origin` header.
+
+After editing `backend/.env`, recreate the backend container from `backend/` so Compose injects the updated values:
+
+```bash
+docker compose up -d --no-build --force-recreate backend
+```
+
+Changing runtime CORS configuration requires container recreation; no image rebuild is needed. For direct API calls, set frontend `VITE_API_BASE_URL=http://localhost:8080` in local `.env`; Vercel builds require the externally reachable backend URL. Restart Vite after changing its environment file, and rebuild a deployed frontend after changing its build variables.
+
 ## Safe local development
 
 The `dev` profile always binds its datasource and Hikari connection settings to in-memory H2, even if your shell contains production `SPRING_DATASOURCE_*` values. This prevents the H2/PostgreSQL driver mismatch and keeps development schema creation away from the remote database. To choose a different in-memory database, set `UITMERCH_DEV_DATASOURCE_URL=jdbc:h2:mem:other;MODE=PostgreSQL;DB_CLOSE_DELAY=-1`; quote this value in a shell. Persistent or PostgreSQL URLs are rejected for this setting. Use the default profile to exercise PostgreSQL/Flyway.

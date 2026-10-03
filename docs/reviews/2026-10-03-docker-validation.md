@@ -2,6 +2,8 @@
 
 Follow-up to [the backend environment fixes](2026-10-02-backend-environment-fixes.md). Docker build and startup are now verified after host disk space was freed. Both `GEMINI_API_KEY` and `GEMINI_API_KEYS` remain empty as requested. The rebuilt `uitmerch-backend` container is left running at **http://localhost:8080**, healthy with zero restarts.
 
+Subsequent [live frontend integration verification](2026-10-03-frontend-data-cors.md) discovered and corrected the configured CORS allowlist. The HTTP checks below omit browser Origin headers, and their success alone does not establish frontend connectivity. The follow-up verifies actual browser data loading without API mocks.
+
 ## Runtime bug fixed
 
 The actual container returned 500 for `GET /api/v1/public/campaigns?size=1`. Hibernate rendered the Java enum literal as `'ACTIVE'::OrganizationStatus`, while Flyway creates the PostgreSQL type `organization_status`. PostgreSQL consequently reported that type `organizationstatus` does not exist.

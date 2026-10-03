@@ -1,0 +1,188 @@
+{
+  "date": "2026-10-03",
+  "root_cause": {
+    "served_frontend_api_base": "http://localhost:8080",
+    "previous_allowed_origin": "https://uitmerch.vercel.app/",
+    "local_origin_status_before": 403,
+    "browser_cors_error_reproduced": true
+  },
+  "fix": {
+    "local_dotenv_updated": true,
+    "container_recreated": true,
+    "image_rebuild_needed": false,
+    "allowed_origins": [
+      "https://uitmerch.vercel.app",
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "http://127.0.0.1:5173"
+    ],
+    "audited_variables": 17,
+    "matching_container_variables": 17,
+    "gemini_keys_still_empty": true,
+    "restarts": 0
+  },
+  "http": {
+    "date": "2026-10-03",
+    "health": "healthy",
+    "checks": [
+      {
+        "origin": "http://localhost:5173",
+        "method": "GET",
+        "status": 200,
+        "allowed_origin": "http://localhost:5173",
+        "passed": true
+      },
+      {
+        "origin": "http://localhost:5173",
+        "method": "OPTIONS",
+        "status": 200,
+        "allowed_origin": "http://localhost:5173",
+        "passed": true
+      },
+      {
+        "origin": "http://127.0.0.1:5173",
+        "method": "GET",
+        "status": 200,
+        "allowed_origin": "http://127.0.0.1:5173",
+        "passed": true
+      },
+      {
+        "origin": "http://127.0.0.1:5173",
+        "method": "OPTIONS",
+        "status": 200,
+        "allowed_origin": "http://127.0.0.1:5173",
+        "passed": true
+      },
+      {
+        "origin": "http://localhost:3000",
+        "method": "GET",
+        "status": 200,
+        "allowed_origin": "http://localhost:3000",
+        "passed": true
+      },
+      {
+        "origin": "http://localhost:3000",
+        "method": "OPTIONS",
+        "status": 200,
+        "allowed_origin": "http://localhost:3000",
+        "passed": true
+      },
+      {
+        "origin": "https://uitmerch.vercel.app",
+        "method": "GET",
+        "status": 200,
+        "allowed_origin": "https://uitmerch.vercel.app",
+        "passed": true
+      },
+      {
+        "origin": "https://uitmerch.vercel.app",
+        "method": "OPTIONS",
+        "status": 200,
+        "allowed_origin": "https://uitmerch.vercel.app",
+        "passed": true
+      },
+      {
+        "origin": "https://unapproved.example",
+        "method": "GET",
+        "status": 403,
+        "allowed_origin": null,
+        "passed": true
+      },
+      {
+        "origin": "https://unapproved.example",
+        "method": "OPTIONS",
+        "status": 403,
+        "allowed_origin": null,
+        "passed": true
+      }
+    ],
+    "all_passed": true
+  },
+  "browser": {
+    "date": "2026-10-03",
+    "transport": "Real browser to Vite localhost:5173 and Docker localhost:8080; no route mocks",
+    "results": [
+      {
+        "route": "/merch",
+        "api": [
+          {
+            "path": "/api/v1/public/organizations",
+            "status": 200,
+            "rows": 35
+          },
+          {
+            "path": "/api/v1/categories",
+            "status": 200,
+            "rows": 7
+          },
+          {
+            "path": "/api/v1/public/organizations",
+            "status": 200,
+            "rows": 35
+          },
+          {
+            "path": "/api/v1/categories",
+            "status": 200,
+            "rows": 7
+          },
+          {
+            "path": "/api/v1/public/organizations",
+            "status": 200,
+            "rows": 35
+          },
+          {
+            "path": "/api/v1/public/merch/popular",
+            "status": 200,
+            "rows": 10
+          },
+          {
+            "path": "/api/v1/public/merch",
+            "status": 200,
+            "rows": 16
+          },
+          {
+            "path": "/api/v1/public/merch/popular",
+            "status": 200,
+            "rows": 10
+          }
+        ],
+        "cors_errors": 0,
+        "rendered_items": 16
+      },
+      {
+        "route": "/organization",
+        "api": [
+          {
+            "path": "/api/v1/public/organizations",
+            "status": 200,
+            "rows": 35
+          }
+        ],
+        "cors_errors": 0,
+        "rendered_items": 16
+      },
+      {
+        "route": "/events",
+        "api": [
+          {
+            "path": "/api/v1/public/organizations",
+            "status": 200,
+            "rows": 35
+          },
+          {
+            "path": "/api/v1/public/events",
+            "status": 200,
+            "rows": 7
+          }
+        ],
+        "cors_errors": 0,
+        "rendered_items": 7
+      }
+    ]
+  },
+  "limits": [
+    "Browser validation covers the local Vite frontend and running Docker backend.",
+    "Vercel origin is verified with HTTP Origin/preflight headers; no hosted frontend deployment is changed.",
+    "No authenticated mutation, email, Storage or Gemini request is performed."
+  ]
+}
