@@ -33,6 +33,7 @@ class OrganizationServiceTest {
 
     @Mock private OrganizationRepository organizationRepository;
     @Mock private MerchItemRepository merchItemRepository;
+    @Mock private com.uitmerch.backend.following.FollowRepository followRepository;
 
     @InjectMocks private OrganizationService organizationService;
 

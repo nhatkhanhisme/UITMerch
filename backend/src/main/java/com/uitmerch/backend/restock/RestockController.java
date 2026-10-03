@@ -27,8 +27,8 @@ public class RestockController {
         return ApiResponse.success("Restock subscription saved.", SubscriptionResponse.from(service.subscribe(UUID.fromString(userId), request.getMerchId(), request.isEmailEnabled())));
     }
     @GetMapping @Operation(summary = "List your enabled restock subscriptions")
-    public ApiResponse<Page<SubscriptionResponse>> list(@RequestAttribute("userId") String userId, Pageable page) {
-        return ApiResponse.success("Restock subscriptions.", service.list(UUID.fromString(userId), page).map(SubscriptionResponse::from));
+    public ApiResponse<Page<RestockDetails>> list(@RequestAttribute("userId") String userId, Pageable page) {
+        return ApiResponse.success("Restock subscriptions.", service.listDetails(UUID.fromString(userId), page));
     }
     @DeleteMapping("/{merchId}") @Operation(summary = "Unsubscribe from future restock alerts")
     public ApiResponse<Void> unsubscribe(@RequestAttribute("userId") String userId, @PathVariable UUID merchId) {

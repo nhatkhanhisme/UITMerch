@@ -27,7 +27,7 @@ public class FollowController {
         service.unfollow(UUID.fromString(user), orgId); return ApiResponse.success("Unfollowed.", null);
     }
     @GetMapping @Operation(summary = "List your followed organizations and preferences")
-    public ApiResponse<Page<FollowResponse>> list(@RequestAttribute("userId") String user, Pageable page) {
-        return ApiResponse.success("Following.", service.list(UUID.fromString(user), page).map(FollowResponse::from));
+    public ApiResponse<Page<FollowDetails>> list(@RequestAttribute("userId") String user, Pageable page) {
+        return ApiResponse.success("Following.", service.listDetails(UUID.fromString(user), page));
     }
 }

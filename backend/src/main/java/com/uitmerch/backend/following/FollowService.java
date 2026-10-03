@@ -37,6 +37,8 @@ public class FollowService {
     }
     @Transactional(readOnly = true)
     public Page<OrganizationFollow> list(UUID user, Pageable page) { return follows.findByUserIdAndEnabledTrue(user, page); }
+    @Transactional(readOnly = true)
+    public Page<FollowDetails> listDetails(UUID user, Pageable page) { return follows.findDetails(user, page); }
     private void lockUser(UUID user) {
         users.findLockedById(user).filter(u -> u.isActive() && u.isVerified() && u.getRole() == UserRole.CUSTOMER)
             .orElseThrow(() -> new AuthenticationException("Invalid account"));

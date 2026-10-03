@@ -43,6 +43,8 @@ public class RestockService {
     public Page<RestockSubscription> list(UUID userId, Pageable page) {
         return subscriptions.findByUserIdAndEnabledTrue(userId, page);
     }
+    @Transactional(readOnly = true)
+    public Page<RestockDetails> listDetails(UUID user, Pageable page) { return subscriptions.findDetails(user, page); }
     // Called with the merchandise row locked, inside the stock writer's transaction.
     public void stockIncreased(MerchItem item, int previousStock) {
         if (previousStock != 0 || item.getStock() <= 0) return;

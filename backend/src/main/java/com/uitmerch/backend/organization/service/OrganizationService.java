@@ -26,6 +26,7 @@ public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final MerchItemRepository merchItemRepository;
+    private final com.uitmerch.backend.following.FollowRepository followRepository;
 
     @Transactional
     public OrganizationResponse createOrganization(UUID ownerId, CreateOrganizationRequest request) {
@@ -42,7 +43,8 @@ public class OrganizationService {
     public Page<OrganizationResponse> getOwnOrganizations(UUID ownerId, Pageable pageable) {
         Page<Organization> page = organizationRepository.findByOwnerId(ownerId, pageable);
         Map<UUID, Long> counts = batchCountPublishedMerch(page.getContent().stream().map(Organization::getId).toList());
-        return page.map(org -> OrganizationResponse.from(org, counts.getOrDefault(org.getId(), 0L)));
+        Map<UUID, Long> followers = batchCountFollowers(page.getContent().stream().map(Organization::getId).toList());
+        return page.map(org -> withFollowers(OrganizationResponse.from(org, counts.getOrDefault(org.getId(), 0L)), followers));
     }
 
     @Transactional
@@ -64,21 +66,22 @@ public class OrganizationService {
         }
 
         Organization saved = organizationRepository.save(org);
-        return OrganizationResponse.from(saved, countPublishedMerch(saved.getId()));
+        return withFollowers(OrganizationResponse.from(saved, countPublishedMerch(saved.getId())), batchCountFollowers(List.of(saved.getId())));
     }
 
     @Transactional(readOnly = true)
     public OrganizationResponse getOrganization(UUID orgId) {
         Organization org = organizationRepository.findById(orgId)
             .orElseThrow(() -> new ResourceNotFoundException("Organization", orgId.toString()));
-        return OrganizationResponse.from(org, countPublishedMerch(org.getId()));
+        return withFollowers(OrganizationResponse.from(org, countPublishedMerch(org.getId())), batchCountFollowers(List.of(org.getId())));
     }
 
     @Transactional(readOnly = true)
     public Page<OrganizationResponse> listActiveOrganizations(Pageable pageable) {
         Page<Organization> page = organizationRepository.findByStatus(OrganizationStatus.ACTIVE, pageable);
         Map<UUID, Long> counts = batchCountPublishedMerch(page.getContent().stream().map(Organization::getId).toList());
-        return page.map(org -> OrganizationResponse.from(org, counts.getOrDefault(org.getId(), 0L)));
+        Map<UUID, Long> followers = batchCountFollowers(page.getContent().stream().map(Organization::getId).toList());
+        return page.map(org -> withFollowers(OrganizationResponse.from(org, counts.getOrDefault(org.getId(), 0L)), followers));
     }
 
     // Used by other modules (merch, event, order) to verify ownership and org exists
@@ -93,6 +96,16 @@ public class OrganizationService {
     public Organization getOrganizationEntityById(UUID orgId) {
         return organizationRepository.findById(orgId)
             .orElseThrow(() -> new ResourceNotFoundException("Organization", orgId.toString()));
+    }
+
+    private OrganizationResponse withFollowers(OrganizationResponse response, Map<UUID, Long> followers) {
+        response.setFollowerCount(followers.getOrDefault(response.getId(), 0L));
+        return response;
+    }
+    private Map<UUID, Long> batchCountFollowers(List<UUID> orgIds) {
+        if (orgIds.isEmpty()) return Map.of();
+        return followRepository.countFollowers(orgIds).stream()
+            .collect(Collectors.toMap(row -> (UUID) row[0], row -> ((Number) row[1]).longValue()));
     }
 
     private long countPublishedMerch(UUID orgId) {

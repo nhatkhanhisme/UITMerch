@@ -20,6 +20,7 @@ public class OrganizationResponse {
     private String coverUrl;
     private OrganizationStatus status;
     private long totalMerch;
+    private long followerCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
