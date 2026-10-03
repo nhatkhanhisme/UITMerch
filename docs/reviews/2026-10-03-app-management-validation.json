@@ -1,0 +1,169 @@
+{
+  "date": "2026-10-03",
+  "backend": {
+    "tests": 269,
+    "failures": 0,
+    "errors": 0,
+    "database": "isolated PostgreSQL 17"
+  },
+  "frontend": {
+    "unitTests": 42,
+    "browserTests": 73,
+    "productionBuild": "passed",
+    "viewports": [
+      1440,
+      375,
+      320
+    ]
+  },
+  "docker": {
+    "service": "uitmerch-backend",
+    "port": 8080,
+    "health": "healthy",
+    "rebuiltAndRecreated": true,
+    "geminiKeys": "empty"
+  },
+  "demo": {
+    "users": 4,
+    "organizations": 3,
+    "products": 6,
+    "events": 2,
+    "campaigns": 3,
+    "orders": 7,
+    "seedIdempotent": true,
+    "privateCredentialsIgnored": true
+  },
+  "liveApi": [
+    {
+      "role": "customer",
+      "path": "/api/v1/customer/orders",
+      "success": true
+    },
+    {
+      "role": "customer",
+      "path": "/api/v1/customer/following",
+      "success": true
+    },
+    {
+      "role": "customer",
+      "path": "/api/v1/customer/restock-subscriptions",
+      "success": true
+    },
+    {
+      "role": "customer",
+      "path": "/api/v1/customer/campaign-reservations",
+      "success": true
+    },
+    {
+      "role": "customer",
+      "path": "/api/v1/customer/notifications",
+      "success": true
+    },
+    {
+      "role": "customer",
+      "path": "/api/v1/customer/notifications/unread-count",
+      "success": true
+    },
+    {
+      "role": "organizer",
+      "path": "/api/v1/organizations/mine",
+      "success": true
+    },
+    {
+      "role": "organizer",
+      "path": "/api/v1/organizations/f0200000-0000-4000-8000-000000000001/merchs",
+      "success": true
+    },
+    {
+      "role": "organizer",
+      "path": "/api/v1/organizations/f0200000-0000-4000-8000-000000000001/campaigns",
+      "success": true
+    },
+    {
+      "role": "admin",
+      "path": "/api/v1/admin/users?size=200",
+      "success": true
+    },
+    {
+      "role": "admin",
+      "path": "/api/v1/admin/organizations?size=200",
+      "success": true
+    },
+    {
+      "role": "admin",
+      "path": "/api/v1/admin/orders?size=200",
+      "success": true
+    },
+    {
+      "role": "public",
+      "path": "/api/v1/public/campaigns",
+      "success": true
+    },
+    {
+      "role": "public",
+      "path": "/api/v1/public/organizations/f0200000-0000-4000-8000-000000000001",
+      "success": true
+    },
+    {
+      "role": "public",
+      "path": "/api/v1/public/events/f0400000-0000-4000-8000-000000000001",
+      "success": true
+    }
+  ],
+  "liveFrontend": [
+    {
+      "role": "customer",
+      "path": "/orders",
+      "heading": "Đơn hàng của tôi",
+      "fits": true
+    },
+    {
+      "role": "customer",
+      "path": "/following",
+      "heading": "Tổ chức bạn theo dõi",
+      "fits": true
+    },
+    {
+      "role": "customer",
+      "path": "/restock-subscriptions",
+      "heading": "Nhắc khi có hàng",
+      "fits": true
+    },
+    {
+      "role": "customer",
+      "path": "/campaigns",
+      "heading": "Bộ sưu tập mở đặt trước",
+      "fits": true
+    },
+    {
+      "role": "customer",
+      "path": "/event/f0400000-0000-4000-8000-000000000001",
+      "heading": "Ngày hội Sáng tạo UIT · Demo",
+      "fits": true
+    },
+    {
+      "role": "customer",
+      "path": "/organization/f0200000-0000-4000-8000-000000000001",
+      "heading": "UIT Creative Lab · Demo",
+      "fits": true
+    },
+    {
+      "role": "organizer",
+      "path": "/profile/organizer",
+      "heading": "UIT Creative Lab · Demo",
+      "fits": true
+    },
+    {
+      "role": "organizer",
+      "path": "/organizer?orgId=f0200000-0000-4000-8000-000000000001",
+      "heading": "Quản lý tổ chức",
+      "fits": true
+    },
+    {
+      "role": "admin",
+      "path": "/admin",
+      "heading": "Quản trị hệ thống",
+      "fits": true
+    }
+  ]
+}

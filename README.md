@@ -247,6 +247,8 @@ Full API reference: [backend/README.md](backend/README.md)
 
 ## Sample Development Credentials
 
+For the updated following, stock reminders, free products, order statuses, and preorder collections, use the opt-in [feature demo guide](docs/reviews/2026-10-03-app-management-refactor.md). Run `python3 backend/scripts/seed-feature-demo.py --database configured` from root. The generated password for `demo.customer@uitmerch.test`, `demo.organizer@uitmerch.test`, and `demo.admin@uitmerch.test` stays in private, ignored `backend/.demo-credentials.json`.
+
 > For local development only. **Do not use in production.**
 
 **Dev profile (auto-seeded):**
@@ -310,6 +312,8 @@ backend/scripts/test-postgres.sh -q
 ```
 
 The harness requires Bash, Docker, and Java 21, copies the backend into a temporary directory, and prints the retained report location. It creates and removes its own test database container. The [recorded validation on 2 October 2026](docs/reviews/2026-10-02-backend-feature-validation.json) contains **253 tests across 27 classes, with no failures, errors, or skips**. The [earlier combined validation](docs/reviews/2026-10-02-frontend-validation.md) includes the campaign context APIs: **257 backend tests, 40 frontend unit/component tests and 17 browser scenarios**. The [backend environment fixes](docs/reviews/2026-10-02-backend-environment-fixes.md) restore the deployed migration lineage through V43 and verify runtime environment bindings. The [3 October Docker validation](docs/reviews/2026-10-03-docker-validation.md) passes **265 backend tests across 30 classes, 40 frontend tests and 45 browser scenarios**, verifies a healthy rebuilt container and fixes public campaign pagination.
+
+The [latest interface and management validation](docs/reviews/2026-10-03-app-management-refactor.md) verifies **269 backend tests, 42 frontend tests, 73 browser cases across the full and expanded management runs**, plus 15 live API endpoints and 9 frontend screens against a healthy rebuilt Docker backend.
 
 **Frontend:**
 

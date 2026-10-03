@@ -312,7 +312,7 @@ These features are implemented in the backend. Frontend screens and QR rendering
 | Method | Path | Access | Description |
 |---|---|---|---|
 | POST | `/customer/restock-subscriptions` | CUSTOMER | Subscribe, or update an existing subscription's email preference |
-| GET | `/customer/restock-subscriptions` | CUSTOMER | List own enabled subscriptions, paginated |
+| GET | `/customer/restock-subscriptions` | CUSTOMER | List own enabled subscriptions with product/organization names and current availability, paginated |
 | DELETE | `/customer/restock-subscriptions/{merchId}` | CUSTOMER | Disable own subscription |
 
 ```json
@@ -471,6 +471,8 @@ Existing list endpoints typically return an array in `data` and pagination in `m
 }
 ```
 
+Following entries include `orgName`, `logoUrl`, and `orgStatus`; stock reminder entries include `merchName`, `orgName`, and `available`. Public and own organization responses include `followerCount`, counting enabled follows from active, verified customer accounts.
+
 The new restock, following, history, campaign, and reservation lists return a Spring `Page` in `data` instead, with entries in `data.content` and pagination fields inside `data`. Use `?page=0&size=20`; the configured default size is 20 and maximum is 200.
 
 SSE endpoints return `text/event-stream`. They accept a bearer header or `?token=<access-token>` on the two notification stream routes for browser EventSource clients. Streams are bound to session validity/access expiry; reconnect with current credentials. Authentication-filter failures may use a smaller JSON error body than controller errors.
@@ -480,6 +482,19 @@ Controller errors have `success: false`, a descriptive `message`, and optional v
 ---
 
 ## Sample Data
+
+### Feature workflow demo (opt-in)
+
+From the repository root, run:
+
+```sh
+python3 backend/scripts/seed-feature-demo.py --database configured
+```
+
+This reads `backend/.env` and adds isolated demo accounts and data to that database: 3 organizations, 6 products (including free and sold-out items), 2 events, 3 preorder collections, 7 orders, follows, a stock reminder, and read/unread notifications. It requires `psql` and the database's existing `pgcrypto` extension. Passwords are generated locally and saved in ignored `backend/.demo-credentials.json` with mode `0600`; they are not published in this README.
+
+Accounts: `demo.customer@uitmerch.test`, `demo.organizer@uitmerch.test`, `demo.admin@uitmerch.test`; an inactive/unverified demo account is also available for admin inspection. Re-running preserves edits and read state. The runner is outside Flyway and never resets existing data. See the [workflow guide and verified screenshots](../docs/reviews/2026-10-03-app-management-refactor.md) for routes, reservation states, and test results.
+
 
 ### Dev / Docker profile (DevDataInitializer)
 
