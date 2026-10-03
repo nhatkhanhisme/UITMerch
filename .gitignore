@@ -30,3 +30,6 @@ frontend/coverage/
 
 # TypeScript incremental compiler cache
 *.tsbuildinfo
+
+# Local demo account credentials
+backend/.demo-credentials.json
