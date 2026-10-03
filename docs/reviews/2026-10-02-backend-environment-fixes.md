@@ -1,6 +1,6 @@
 # Backend environment fixes — 2 October 2026
 
-Follow-up to [the environment audit](2026-10-02-backend-environment-audit.md). Source fixes and database recovery are implemented on `refactor/fe`; Docker runtime verification still needs free host disk space.
+Follow-up to [the environment audit](2026-10-02-backend-environment-audit.md). Source fixes and database recovery are implemented on `refactor/fe`. Docker verification was initially blocked by host disk space; the [3 October follow-up](2026-10-03-docker-validation.md) verifies the rebuilt image, healthy startup and 265 backend tests after fixing public campaign pagination. Results below record the original 2 October validation.
 
 ## Fixes
 
@@ -33,7 +33,9 @@ The final suite passed **264 tests across 30 classes**, with zero failures, erro
 
 The packaged dev JAR starts with production datasource environment values present, uses H2, and returns 200 for public events and OpenAPI. Direct environment values select port 19090 despite SERVER_PORT=18080; a local dotenv fixture selects port 19191 despite SERVER_PORT=18181. Concurrent startup probes initially exceeded their timeouts under host load; the final probes run with fewer JVMs and bounded JVM resources. Environment checks load all 17 audited variables; deployed profiles bind all 17 expected values. Dev intentionally replaces datasource, mail and storage settings. TTL overrides are honored in every profile. The JAR excludes `.env` and contains no configured JWT, database, SMTP or S3 secrets in application classes/resources.
 
-## Remaining external blockers
+## External blockers at the time of this review
+
+The full-disk Docker blocker below is resolved in the [3 October validation](2026-10-03-docker-validation.md). Gemini keys remain intentionally empty.
 
 - `/` is full on Btrfs. `/var/cache/pacman/pkg` contains approximately 31 GB of package cache. Clearing system cache requires the user's sudo access: `sudo paccache -rk2` retains two versions of each package. Docker build/create/prune metadata writes fail with ENOSPC, so a fresh image and container healthcheck cannot yet be verified.
 - The previous audit's four build-cache IDs remain pending cleanup: `jx58ehtbsw7arv1z45vblu5yq`, `a001t29k90kb5vtiuumcifwow`, `x1upcx7lvnawi6oy7jn9cvsr2`, `gzt8bpkpgge20s2h7ranij65i`. Cleanup is scoped to these IDs. No user images or database volumes were removed. Two package build-cache directories were preserved at `/tmp/uitmerch-package-cache-backup/`; moving them did not free usable Btrfs space.

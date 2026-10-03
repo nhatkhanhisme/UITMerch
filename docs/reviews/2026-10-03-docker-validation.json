@@ -1,0 +1,429 @@
+{
+  "date": "2026-10-03",
+  "branch": "refactor/fe",
+  "backend_fix_commit": "8403266",
+  "backend_suite": {
+    "database": "PostgreSQL 17.6 + pgvector in isolated Docker container",
+    "totals": {
+      "tests": 265,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "classes": [
+      {
+        "class": "com.uitmerch.backend.BackendApplicationTests",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.admin.service.AdminServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.auth.service.AuthServiceTest",
+        "tests": 35,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.cart.service.CartServiceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.security.JwtTokenProviderTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.service.RateLimiterServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.common.service.TokenBlacklistServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.event.service.EventServiceTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.AnalyticsFeatureTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.ApiBoundaryFeatureTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.CampaignContextFeatureTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.CampaignFeatureTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.FollowingFeatureTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.LockingFeatureTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.MigrationUpgradeFeatureTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.PickupFeatureTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.features.RestockFeatureTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.merch.repository.MerchItemRepositoryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.merch.service.MerchServiceTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.order.service.OrderServiceTest",
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.organization.service.OrganizationServiceTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.AiResourceRegressionTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.DeliveryRegressionTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.DevAuthRegressionTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.DevDatasourceEnvironmentRegressionTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.PostgresRegressionTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.SecurityAndMailRegressionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.regression.ServerPortEnvironmentRegressionTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.user.service.UserServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "class": "com.uitmerch.backend.wishlist.service.WishlistServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "regression": {
+    "name": "publicCampaignPaginationUsesDatabaseEnumAndExcludesInactiveOrganizations",
+    "before_fix_status": 500,
+    "after_fix_passed": true,
+    "pagination_content_and_count_checked": true,
+    "inactive_organization_excluded": true
+  },
+  "docker": {
+    "date": "2026-10-03",
+    "container": {
+      "name": "uitmerch-backend",
+      "running": true,
+      "health": "healthy",
+      "restarts": 0,
+      "image": "sha256:e9ab3e47b0d93ffde5f95ed4203c0b55be29d73da5ab02e815113e3e13150101",
+      "user": "spring",
+      "url": "http://localhost:8080"
+    },
+    "requests": [
+      {
+        "path": "/api/v1/public/events?size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/events?page=1&size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/merch?size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/merch?page=1&size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/organizations?size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/organizations?page=1&size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/campaigns?size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/campaigns?page=1&size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/merch/popular",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/merch?keyword=UIT&size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/categories",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/events/{id}",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/merch/{id}",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/merch/{id}/purchase-context",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/organizations/{id}",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/organizations/{id}/merch?size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/public/organizations/{id}/events?size=1",
+        "status": 200,
+        "expected": 200,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/customer/orders",
+        "status": 401,
+        "expected": 401,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/customer/campaign-reservations",
+        "status": 401,
+        "expected": 401,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/customer/following",
+        "status": 401,
+        "expected": 401,
+        "passed": true
+      },
+      {
+        "path": "/api/v1/admin/users",
+        "status": 401,
+        "expected": 401,
+        "passed": true
+      },
+      {
+        "path": "/v3/api-docs",
+        "status": 401,
+        "expected": 401,
+        "passed": true
+      },
+      {
+        "path": "/swagger-ui/index.html",
+        "status": 401,
+        "expected": 401,
+        "passed": true
+      }
+    ],
+    "all_passed": true,
+    "campaign_list_rows": 0,
+    "checks_are_read_only": true
+  },
+  "environment": {
+    "audited_variables": 17,
+    "matches": 17,
+    "mismatched_names": [],
+    "gemini_api_keys_empty": true,
+    "gemini_api_key_empty": true,
+    "profile": "default",
+    "port": "8080",
+    "server_port": "8080"
+  },
+  "image": {
+    "dotenv_embedded": false,
+    "configured_secret_matches_in_application_resources": {
+      "APP_JWT_SECRET": false,
+      "SPRING_DATASOURCE_PASSWORD": false,
+      "MAIL_PASSWORD": false,
+      "SUPABASE_STORAGE_S3_ACCESS_KEY_ID": false,
+      "SUPABASE_STORAGE_S3_SECRET_KEY": false
+    },
+    "migration_files": 43,
+    "image_build_passed": true,
+    "runtime_user": "spring"
+  },
+  "frontend": {
+    "unit_tests": 40,
+    "unit_test_files": 6,
+    "browser_tests": 45,
+    "browser_workers": 1,
+    "browser_api_transport": "Playwright route mocks",
+    "production_build": "PASS",
+    "build_warning": "Existing minified chunks exceed 500 kB",
+    "earlier_browser_run": "44/45 passed; Web Locks checkbox timed out under concurrent build/test load",
+    "subsequent_targeted_repeats": 3,
+    "final_full_browser_run": "45/45 passed"
+  },
+  "limits": [
+    "Both Gemini keys remain empty as requested; real Gemini requests are not exercised.",
+    "SMTP delivery and Storage mutations are mocked in isolated backend tests; no hosted test email or upload is performed.",
+    "Configured-database HTTP checks use GET only. Its campaign list is empty; seeded content/count and visibility regression is verified in the isolated PostgreSQL suite.",
+    "No remote Render/Vercel deployment is triggered."
+  ]
+}

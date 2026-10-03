@@ -78,7 +78,7 @@ If Java fails with `libjli.so: invalid ELF header` before Maven starts, check `j
 | Real-time | SSE (`SseEmitter`) — per-user streams with 25-second heartbeat to prevent proxy idle-timeout disconnections |
 | Cache | Spring `ConcurrentMapCache` — categories, popular merch |
 | API Docs | springdoc-openapi 2.6 — Swagger UI at `/swagger-ui.html` (disabled by default in prod) |
-| Tests | Recorded full-suite validation: 253 tests across 27 classes — unit, H2, PostgreSQL, migrations, and concurrency |
+| Tests | Latest full-suite validation: 265 tests across 30 classes — unit, H2, PostgreSQL, migrations, and concurrency |
 | Logging | Logback — human-readable (dev/docker), structured JSON via logstash-logback-encoder (prod) |
 
 ---
@@ -673,7 +673,7 @@ Full suite using a disposable PostgreSQL database (Bash, Docker, and Java 21 req
 
 The harness copies backend sources/build configuration into `/tmp/uitmerch-backend-test.*`, creates a fresh database container on a random localhost port, and supplies `UITMERCH_TEST_DATABASE_URL`. It uses `pgvector/pgvector:pg17` by default; override `UITMERCH_TEST_POSTGRES_IMAGE` with a compatible image if needed. The temporary build excludes the project's `.env`. The container is removed on exit, while test reports remain under the printed temporary path in `target/surefire-reports/`.
 
-The latest full suite passed **264 tests across 30 classes**, with zero failures, errors and skips on isolated PostgreSQL 18.6 + pgvector 0.8.2. Environment fixes, migration recovery and full-suite results are recorded in [the environment fix review](../docs/reviews/2026-10-02-backend-environment-fixes.md). The earlier feature-only baseline below is retained for comparison.
+The latest full suite passed **265 tests across 30 classes**, with zero failures, errors and skips on isolated PostgreSQL 17 in Docker. The [3 October validation](../docs/reviews/2026-10-03-docker-validation.md) verifies the rebuilt image, healthy Compose startup, all 17 audited environment variables and the public campaign pagination fix. Environment fixes and migration recovery are recorded in [the environment fix review](../docs/reviews/2026-10-02-backend-environment-fixes.md). The earlier feature-only baseline below is retained for comparison.
 
 The [recorded validation on 2 October 2026](../docs/reviews/2026-10-02-backend-feature-validation.json) ran **253 tests across 27 classes, with 0 failures, 0 errors, and 0 skips**, using PostgreSQL 17. The feature-specific suites include:
 
