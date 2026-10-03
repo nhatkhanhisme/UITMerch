@@ -404,7 +404,7 @@ export function CustomerProfilePage() {
                 </Link>
                 <Link to="/restock-subscriptions">
                   <Bell aria-hidden="true" size={20} />
-                  <span>Thông báo có hàng</span>
+                  <span>Nhắc khi có hàng</span>
                   <ArrowRight aria-hidden="true" size={18} />
                 </Link>
               </nav>

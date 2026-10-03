@@ -44,6 +44,7 @@ export function OrgCard({ org }: OrgCardProps) {
       <p className="line-clamp-2 text-center font-fredoka text-sm font-bold leading-tight text-black-blue sm:text-base">
         {org.name}
       </p>
+      <p className="text-center text-sm font-medium text-slate">{(org.followerCount ?? 0).toLocaleString("vi-VN")} người theo dõi</p>
     </Link>
   );
 }

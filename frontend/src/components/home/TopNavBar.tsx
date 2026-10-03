@@ -67,7 +67,7 @@ export function TopNavBar() {
   const currentPath = normalizePath(location.pathname);
   const accountReturnPath = `${location.pathname}${location.search}${location.hash}`;
   const isAccountActive =
-    currentPath === "/auth" || currentPath.startsWith("/profile");
+    ["/auth", "/profile", "/orders", "/cart", "/wishlist", "/following", "/restock-subscriptions", "/reservations", "/organizer", "/admin", "/guest-orders"].some((path) => currentPath === path || currentPath.startsWith(`${path}/`));
   const accountLabel = user ? user.fullName : "Tài khoản";
   const avatarFallback = useMemo(
     () => (user?.fullName ? getInitials(user.fullName) : "U"),
@@ -197,12 +197,15 @@ export function TopNavBar() {
 
   const isCurrent = (href: string) =>
     currentPath === href ||
-    (href !== "/" && currentPath.startsWith(`${href}/`));
+    (href !== "/" && currentPath.startsWith(`${href}/`)) ||
+    (href === "/events" && currentPath.startsWith("/event/")) ||
+    (href === "/merch" && currentPath.startsWith("/campaigns")) ||
+    (href === "/profile" && currentPath.startsWith("/profile/"));
   const linkClassName = (href: string) =>
     [
       "flex min-h-11 items-center rounded-full px-4 py-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700",
       isCurrent(href)
-        ? "bg-white/75 text-black-blue shadow-sm"
+        ? "bg-black-blue text-white shadow-sm font-semibold"
         : "text-slate hover:bg-white/50 hover:text-black-blue",
     ].join(" ");
   const accountLinks = [
@@ -217,7 +220,7 @@ export function TopNavBar() {
           { label: "Đặt trước của tôi", href: "/reservations" },
           { label: "Yêu thích", href: "/wishlist" },
           { label: "Tổ chức đang theo dõi", href: "/following" },
-          { label: "Báo khi có hàng", href: "/restock-subscriptions" },
+          { label: "Nhắc khi có hàng", href: "/restock-subscriptions" },
         ]
       : []),
     ...(user?.role === "ORGANIZER"
@@ -297,7 +300,7 @@ export function TopNavBar() {
                 aria-label={accountLabel}
                 aria-expanded={isAccountMenuOpen}
                 aria-controls="nav-account-panel"
-                className={`flex min-h-11 max-w-[176px] items-center gap-2 rounded-full py-1 pl-1 pr-3 font-sans text-sm font-medium text-black-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700 ${isAccountActive || isAccountMenuOpen ? "bg-white/75" : "hover:bg-white/50"}`}
+                className={`flex min-h-11 max-w-[176px] items-center gap-2 rounded-full py-1 pl-1 pr-3 font-sans text-sm font-medium text-black-blue transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700 ${isAccountActive || isAccountMenuOpen ? "bg-cyan-100 ring-2 ring-cyan-700" : "hover:bg-white/50"}`}
                 onClick={() => {
                   setIsMenuOpen(false);
                   setIsAccountMenuOpen((open) => !open);

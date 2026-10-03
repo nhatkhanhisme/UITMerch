@@ -55,23 +55,15 @@ function formatDate(isoString?: string) {
   }
 }
 
-function getStatusBadge(status?: string) {
-  switch (status?.toUpperCase()) {
-    case "PUBLISHED":
-      return (
-        <span className="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-bold text-green-700 border border-green-300 sm:px-3 sm:text-xs">
-          Đang diễn ra
-        </span>
-      );
-    case "ENDED":
-      return (
-        <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-gray-600 border border-gray-300 sm:px-3 sm:text-xs">
-          Đã kết thúc
-        </span>
-      );
-    default:
-      return null;
-  }
+function getStatusBadge(status?: string, startDate?: string, endDate?: string) {
+  if (status !== "PUBLISHED" && status !== "ENDED") return null;
+  const start = startDate ? new Date(startDate).getTime() : NaN;
+  const end = endDate ? new Date(endDate).getTime() : NaN;
+  const now = Date.now();
+  const ended = status === "ENDED" || (Number.isFinite(end) && end >= start && end < now);
+  const upcoming = !ended && start > now;
+  const label = ended ? "Đã kết thúc" : upcoming ? "Sắp diễn ra" : start <= now && end >= now ? "Đang diễn ra" : "Đã công bố";
+  return <span className={`rounded-full border px-3 py-1 text-xs font-bold shadow-sm ${ended ? "border-slate-300 bg-white text-slate-700" : upcoming ? "border-cyan-300 bg-cyan-50 text-cyan-900" : "border-emerald-300 bg-emerald-50 text-emerald-800"}`}>{label}</span>;
 }
 
 export function EventPage() {
@@ -232,7 +224,7 @@ export function EventPage() {
                         src={ev.bannerUrl}
                       />
                       <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
-                        {getStatusBadge(ev.status)}
+                        {getStatusBadge(ev.status, ev.startDate, ev.endDate)}
                       </div>
                     </div>
 

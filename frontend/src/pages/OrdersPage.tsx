@@ -1,16 +1,12 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
+import { Package, CalendarDays } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
 import { cancelCustomerOrder, getCustomerOrders } from "../api/order";
 import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
 import type { CancelOrderRequest, OrderResponse } from "../types/shared";
-
-const ShaderBackground = lazy(() =>
-  import("../components/ui/ShaderBackground").then((m) => ({
-    default: m.ShaderBackground,
-  })),
-);
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
   currency: "VND",
@@ -107,7 +103,7 @@ function CancelOrderModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
       <div className="w-full max-w-sm rounded-panel border border-white/70 bg-white/95 p-6 shadow-2xl backdrop-blur">
-        <h2 className="font-fredoka text-xl font-bold text-black-blue">Huỷ đơn hàng</h2>
+        <h2 className="text-xl font-bold text-black-blue">Huỷ đơn hàng</h2>
         <p className="mt-1 text-sm text-ink/60">Vui lòng cho biết lý do huỷ đơn.</p>
 
         <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
@@ -247,25 +243,24 @@ export function OrdersPage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
-      <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
-        <ShaderBackground />
-      </Suspense>
+    <main className="relative min-h-screen bg-canvas px-5 pb-16 pt-28 sm:px-8 lg:px-16">
+      <AmbientBackgroundGradients />
 
       <div className="relative z-10 mx-auto max-w-4xl">
         <div className="mb-6 flex items-center gap-4">
-          <h1 className="font-fredoka text-4xl font-bold text-black-blue">Đơn hàng của tôi</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-black-blue">Đơn hàng của tôi</h1>
         </div>
 
-        <div className="mb-5 flex flex-wrap gap-2">
+        <nav className="status-filters mb-5" aria-label="Lọc trạng thái đơn hàng">
           {STATUS_TABS.map((tab) => (
             <button
               className={[
                 "rounded-full border px-4 py-1.5 text-sm font-semibold transition",
                 activeStatus === tab.value
                   ? "border-black-blue bg-black-blue text-white"
-                  : "border-white/60 bg-white/50 text-black-blue hover:border-black-blue",
+                  : "border-gray/25 bg-white text-black-blue hover:border-cyan-700",
               ].join(" ")}
+              aria-pressed={activeStatus === tab.value}
               key={tab.value}
               onClick={() => setActiveStatus(tab.value)}
               type="button"
@@ -273,13 +268,13 @@ export function OrdersPage() {
               {tab.label}
             </button>
           ))}
-        </div>
+        </nav>
 
         {isLoading ? (
           <div className="py-20 text-center text-sm text-ink/60">Đang tải đơn hàng...</div>
         ) : orders.length === 0 ? (
-          <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-panel border border-white/50 bg-white/35 px-8 py-16 text-center shadow-glass backdrop-blur-xl">
-            <p className="font-fredoka text-5xl">📦</p>
+          <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-panel border border-gray/20 bg-white px-8 py-16 text-center shadow-glass backdrop-blur-xl">
+            <Package aria-hidden="true" size={40} />
             <h2 className="mt-4 font-fredoka text-2xl font-bold text-black-blue">Chưa có đơn hàng nào</h2>
             <Link
               className="mt-6 rounded-full bg-black-blue px-8 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-ink"
@@ -292,18 +287,18 @@ export function OrdersPage() {
           <div className="flex flex-col gap-4">
             {orders.map((order) => (
               <div
-                className="rounded-panel border border-white/50 bg-white/45 p-5 shadow-glass backdrop-blur-xl"
+                className="order-list-card"
                 key={order.id}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase text-ink/50">
+                    <p className="text-base font-bold text-black-blue">
                       Đơn hàng #{order.id.slice(0, 8).toUpperCase()}
                     </p>
-                    <p className="mt-1 text-xs text-ink/50">{formatDate(order.createdAt)}</p>
+                    <p className="mt-2 text-sm text-slate">{formatDate(order.createdAt)}</p>
                     {order.status === "READY" && order.pickupSchedule && (
-                      <p className="mt-1 text-xs font-semibold text-green-700">
-                        📍 {order.pickupSchedule.pickupDate
+                      <p className="order-list-pickup">
+                        <CalendarDays aria-hidden="true" size={16} /> {order.pickupSchedule.pickupDate
                           ? new Date(order.pickupSchedule.pickupDate).toLocaleDateString("vi-VN")
                           : ""}{" "}
                         · {order.pickupSchedule.pickupTimeSlot}
@@ -313,12 +308,12 @@ export function OrdersPage() {
                   <StatusBadge status={order.status} />
                 </div>
 
-                <div className="mt-3 border-t border-white/40 pt-3">
+                <div className="order-list-items">
                   {order.items && order.items.length > 0 ? (
                     <div className="space-y-1">
                       {order.items.map((item) => (
-                        <div className="flex justify-between text-sm" key={item.id}>
-                          <span className="text-ink/70">{item.merchName} × {item.quantity}</span>
+                        <div className="order-item text-sm" key={item.id}>
+                          <span className="text-slate">{item.merchName} × {item.quantity}</span>
                           <span className="font-semibold text-black-blue">{formatPrice(item.subtotal)}</span>
                         </div>
                       ))}
@@ -329,13 +324,13 @@ export function OrdersPage() {
                 </div>
 
                 {order.status === "CANCELLED" && order.cancelReason && (
-                  <div className="mt-3 rounded-xl border border-peach/30 bg-peach/10 px-3 py-2 text-xs text-ink/60">
+                  <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-slate">
                     Đã huỷ: {order.cancelReason}
                   </div>
                 )}
 
-                <div className="mt-4 flex items-center justify-between border-t border-white/40 pt-4">
-                  <p className="font-fredoka text-xl font-bold text-black-blue">{formatPrice(order.totalAmount)}</p>
+                <div className="order-list-footer">
+                  <p className="text-xl font-bold text-black-blue">{formatPrice(order.totalAmount)}</p>
                   <div className="flex gap-2">
                     {order.status === "PENDING" && (
                       <button
@@ -347,7 +342,7 @@ export function OrdersPage() {
                       </button>
                     )}
                     <Link
-                      className="rounded-full border border-white/60 bg-white/60 px-4 py-1.5 text-xs font-semibold text-black-blue transition hover:border-aqua hover:bg-white"
+                      className="feature-button"
                       to={`/orders/${order.id}`}
                     >
                       Chi tiết →

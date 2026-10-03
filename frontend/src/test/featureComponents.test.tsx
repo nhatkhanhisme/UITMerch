@@ -80,7 +80,7 @@ it("does not allow subscription changes when subscription loading fails", async 
   expect(
     (
       screen.getByRole("button", {
-        name: "Báo tôi khi có hàng",
+        name: "Nhắc tôi khi có hàng",
       }) as HTMLButtonElement
     ).disabled,
   ).toBe(true);
@@ -103,7 +103,7 @@ it("reads a subscription on a later page and unsubscribes it", async () => {
   }));
   vi.mocked(restock.unsubscribeRestock).mockResolvedValue();
   mount(<RestockButton merchId="m" />);
-  const button = await screen.findByRole("button", { name: "Huỷ báo có hàng" });
+  const button = await screen.findByRole("button", { name: "Tắt nhắc có hàng" });
   fireEvent.click(button);
   await waitFor(() =>
     expect(restock.unsubscribeRestock).toHaveBeenCalledWith("m"),
@@ -123,7 +123,7 @@ it("updates only the changed follow preference", async () => {
   );
   vi.mocked(following.updateFollowing).mockResolvedValue({} as never);
   mount(<FollowingPage />);
-  fireEvent.click(await screen.findByRole("checkbox", { name: "Email" }));
+  fireEvent.click(await screen.findByRole("checkbox", { name: "Gửi thêm qua email" }));
   await waitFor(() =>
     expect(following.updateFollowing).toHaveBeenCalledWith("o", {
       emailEnabled: true,
@@ -294,7 +294,7 @@ it("rolls back a follow preference when the server rejects it", async () => {
   );
   vi.mocked(following.updateFollowing).mockRejectedValue(new Error("Rejected"));
   mount(<FollowingPage />);
-  const checkbox = await screen.findByRole("checkbox", { name: "Email" });
+  const checkbox = await screen.findByRole("checkbox", { name: "Gửi thêm qua email" });
   fireEvent.click(checkbox);
   await screen.findByText("Rejected");
   await waitFor(() =>

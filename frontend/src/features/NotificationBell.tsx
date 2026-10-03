@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useId } from "react";
 import { CheckCheck, ChevronLeft, ChevronRight, Inbox } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { toast } from "../stores/toastStore";
 import { apiClient } from "../api/client";
 import { useAuthStore } from "../stores/authStore";
 import { useNotificationStream } from "../hooks/useNotificationStream";
@@ -133,7 +134,15 @@ export function NotificationBell() {
   });
   const all = useMutation({
     mutationFn: () => apiClient.patch(`${prefix}/read-all`),
-    onSuccess: refresh,
+    onSuccess: () => {
+      if (useAuthStore.getState().user?.id !== user?.id) return;
+      qc.setQueriesData<{ items: NotificationResponse[] }>({ queryKey: key }, (data) =>
+        data && typeof data === "object" && "items" in data ? { ...data, items: data.items.map((n) => ({ ...n, isRead: true })) } : data,
+      );
+      qc.setQueryData([...key, "count"], 0);
+      toast.success("Đã đánh dấu tất cả thông báo là đã đọc.");
+      refresh();
+    },
   });
   if (!enabled) return null;
   return (
@@ -192,15 +201,16 @@ export function NotificationBell() {
             </div>
             <button
               className="notification-read-all"
-              disabled={all.isPending}
+              disabled={all.isPending || count.isPending || count.isError || (count.data ?? 0) === 0}
               onClick={() => all.mutate()}
               title="Đánh dấu tất cả đã đọc"
               aria-label="Đánh dấu tất cả đã đọc"
             >
               <CheckCheck aria-hidden="true" size={18} />
-              <span>Đọc tất cả</span>
+              <span>{all.isPending ? "Đang đánh dấu…" : (count.data ?? 0) === 0 ? "Đã đọc tất cả" : "Đánh dấu đã đọc"}</span>
             </button>
           </header>
+          {all.isSuccess && (count.data ?? 0) === 0 && <p className="notification-confirmation" role="status"><CheckCheck aria-hidden="true" size={16} /> Đã đánh dấu tất cả là đã đọc.</p>}
           {(q.isError || count.isError) && (
             <FeatureError error={q.error ?? count.error} retry={refresh} />
           )}

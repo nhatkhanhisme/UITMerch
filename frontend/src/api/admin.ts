@@ -3,45 +3,55 @@ import type { ApiResponse, OrderResponse, OrganizationResponse, UserSummaryRespo
 
 export type ListUsersParams = {
   role?: string;
+  sort?: string;
   page?: number;
   size?: number;
 };
 
 export type ListOrgsParams = {
   status?: string;
+  sort?: string;
   page?: number;
   size?: number;
 };
 
 export type ListOrdersParams = {
   status?: string;
+  sort?: string;
   page?: number;
   size?: number;
 };
 
+type WireUserSummary = Omit<UserSummaryResponse, "isActive" | "isVerified"> & {
+  isActive?: boolean; isVerified?: boolean; active?: boolean; verified?: boolean;
+};
+export function normalizeUserSummary(user: WireUserSummary): UserSummaryResponse {
+  return { ...user, isActive: user.isActive ?? user.active ?? false, isVerified: user.isVerified ?? user.verified ?? false };
+}
+
 export async function adminListUsers(params?: ListUsersParams) {
-  const { data } = await apiClient.get<ApiResponse<UserSummaryResponse[]>>(
+  const { data } = await apiClient.get<ApiResponse<WireUserSummary[]>>(
     "/api/v1/admin/users",
     { params },
   );
-  return data;
+  return { ...data, data: data.data.map(normalizeUserSummary) };
 }
 
 export async function adminUpdateUserRole(userId: string, role: string) {
-  const { data } = await apiClient.patch<ApiResponse<UserSummaryResponse>>(
+  const { data } = await apiClient.patch<ApiResponse<WireUserSummary>>(
     `/api/v1/admin/users/${userId}/role`,
     { role },
   );
-  return data;
+  return { ...data, data: normalizeUserSummary(data.data) };
 }
 
 export async function adminSetUserActive(userId: string, active: boolean) {
-  const { data } = await apiClient.patch<ApiResponse<UserSummaryResponse>>(
+  const { data } = await apiClient.patch<ApiResponse<WireUserSummary>>(
     `/api/v1/admin/users/${userId}/active`,
     null,
     { params: { active } },
   );
-  return data;
+  return { ...data, data: normalizeUserSummary(data.data) };
 }
 
 export async function adminListOrganizations(params?: ListOrgsParams) {

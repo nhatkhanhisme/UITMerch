@@ -49,13 +49,13 @@ for (const width of [1440, 375, 320]) {
       await page.keyboard.press("Escape");
     }
     const spotlight = page.getByRole("region", {
-      name: "Đợt đặt trước đặc biệt",
+      name: "Bộ sưu tập mở đặt trước",
     });
     await expect(
-      spotlight.getByRole("heading", { name: "Đợt đặt trước đặc biệt" }),
+      spotlight.getByRole("heading", { name: "Bộ sưu tập mở đặt trước" }),
     ).toBeVisible();
     const link = spotlight.getByRole("link", {
-      name: "Khám phá các đợt đặt trước",
+      name: "Khám phá bộ sưu tập",
     });
     const box = await link.boundingBox();
     const nav = await primary.boundingBox();
@@ -69,7 +69,7 @@ for (const width of [1440, 375, 320]) {
     await link.click();
     await expect(page).toHaveURL(/\/campaigns$/);
     await expect(
-      page.getByRole("heading", { name: "Chiến dịch đặt trước", exact: true }),
+      page.getByRole("heading", { name: "Bộ sưu tập mở đặt trước", exact: true }),
     ).toBeVisible();
   });
 }
@@ -82,14 +82,14 @@ for (const width of [1440, 375]) {
     await publicFixtures(page);
     await page.goto("/merch");
     const spotlight = page.getByRole("region", {
-      name: "Đợt đặt trước đặc biệt",
+      name: "Bộ sưu tập mở đặt trước",
     });
     await expect(spotlight).toBeVisible();
     const box = await spotlight.boundingBox();
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(width);
     await spotlight
-      .getByRole("link", { name: "Khám phá các đợt đặt trước" })
+      .getByRole("link", { name: "Khám phá bộ sưu tập" })
       .click();
     await expect(page).toHaveURL(/\/campaigns$/);
   });
@@ -102,7 +102,7 @@ for (const width of [1440, 375]) {
     await page.setViewportSize({ width, height: 640 });
     await publicFixtures(page);
     await page.goto("/");
-    const link = page.getByRole("link", { name: "Khám phá các đợt đặt trước" });
+    const link = page.getByRole("link", { name: "Khám phá bộ sưu tập" });
     await link.waitFor();
     await page.mouse.move(width / 2, 350);
     await page.mouse.wheel(0, 200);
@@ -124,7 +124,7 @@ test("homepage still snaps between sections when the current section fits", asyn
   await page.setViewportSize({ width: 1440, height: 1024 });
   await publicFixtures(page);
   await page.goto("/");
-  await page.getByRole("region", { name: "Đợt đặt trước đặc biệt" }).waitFor();
+  await page.getByRole("region", { name: "Bộ sưu tập mở đặt trước" }).waitFor();
   await page.mouse.move(720, 400);
   await page.mouse.wheel(0, 200);
   await expect(page).toHaveURL(/#home-item$/);

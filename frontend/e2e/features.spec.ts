@@ -166,7 +166,7 @@ test("campaign discovery works for anonymous visitors", async ({ page }) => {
   await setup(page);
   await page.goto("/campaigns");
   await expect(page.getByText("UIT Preorder")).toBeVisible();
-  await page.getByRole("link", { name: "Xem chiến dịch" }).click();
+  await page.getByRole("link", { name: "Khám phá bộ sưu tập" }).click();
   await expect(
     page.getByRole("link", { name: "Đăng nhập để đặt trước" }),
   ).toBeVisible();
@@ -239,7 +239,7 @@ test("restock preferences and unsubscribe send the correct mutations", async ({
   await page.getByRole("checkbox", { name: "Nhận qua email" }).uncheck();
   await expect.poll(() => email).toEqual({ merchId: "m", emailEnabled: false });
   await page.getByRole("button", { name: "Huỷ đăng ký" }).click();
-  await expect(page.getByText("Bạn chưa đăng ký báo có hàng.")).toBeVisible();
+  await expect(page.getByText("Bạn chưa đăng ký nhắc khi có hàng.")).toBeVisible();
 });
 test("following preferences are partial updates", async ({ page }) => {
   await setup(page, "CUSTOMER");
@@ -267,7 +267,7 @@ test("following preferences are partial updates", async ({ page }) => {
     await route.fulfill({ json: { success: true, data: {} } });
   });
   await page.goto("/following");
-  const email = page.getByRole("checkbox", { name: "Email", exact: true });
+  const email = page.getByRole("checkbox", { name: "Gửi thêm qua email", exact: true });
   await expect(email).not.toBeChecked();
   // React restores a controlled checkbox before the async optimistic update.
   await email.click();
@@ -403,10 +403,10 @@ test("two tabs coordinate one refresh rotation through Web Locks", async ({
     });
   await Promise.all([page.reload(), second.reload()]);
   await expect(
-    page.getByRole("checkbox", { name: "Email", exact: true }),
+    page.getByRole("checkbox", { name: "Gửi thêm qua email", exact: true }),
   ).toBeVisible();
   await expect(
-    second.getByRole("checkbox", { name: "Email", exact: true }),
+    second.getByRole("checkbox", { name: "Gửi thêm qua email", exact: true }),
   ).toBeVisible();
   expect(rotations).toBe(1);
   await expect
@@ -578,7 +578,7 @@ test("customer feature settings fit a mobile viewport", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/following");
   await expect(
-    page.getByRole("checkbox", { name: "Email", exact: true }),
+    page.getByRole("checkbox", { name: "Gửi thêm qua email", exact: true }),
   ).toBeVisible();
   expect(
     await page.evaluate(

@@ -5,6 +5,7 @@ export interface MockOrganization {
   shortName: string;
   category: string;
   memberCount: number;
+  followerCount?: number;
   logo: string;
   description: string;
 }

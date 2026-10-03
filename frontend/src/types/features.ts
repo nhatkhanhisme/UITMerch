@@ -9,11 +9,17 @@ export type SpringPage<T> = {
 };
 export type RestockSubscription = {
   merchId: string;
+  merchName?: string;
+  orgName?: string;
+  available?: boolean;
   emailEnabled: boolean;
   subscribedAt: string;
 };
 export type Follow = {
   orgId: string;
+  orgName?: string;
+  logoUrl?: string;
+  orgStatus?: string;
   notifyMerch: boolean;
   notifyEvents: boolean;
   emailEnabled: boolean;

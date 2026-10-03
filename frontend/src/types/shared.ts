@@ -109,6 +109,7 @@ export type OrganizationResponse = {
   coverUrl?: string;
   status: string;
   totalMerch?: number;
+  followerCount?: number;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -445,6 +446,7 @@ export function mapOrgToMockOrganization(
     shortName: shortName,
     category: existingMock?.category || "Cộng đồng",
     memberCount: existingMock?.memberCount || 50,
+    followerCount: org.followerCount ?? 0,
     logo: fallbackLogo,
     description:
       org.description ||

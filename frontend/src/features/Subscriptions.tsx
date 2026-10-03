@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Bell, Building2, ArrowRight } from "lucide-react";
+import { Bell, Building2, ArrowRight, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "../stores/toastStore";
 import { useAuthStore } from "../stores/authStore";
 import {
   listRestock,
@@ -46,7 +47,7 @@ export function RestockButton({ merchId }: { merchId: string }) {
         disabled={q.isPending || q.isError || m.isPending}
         onClick={() => m.mutate()}
       >
-        {found ? "Huỷ báo có hàng" : "Báo tôi khi có hàng"}
+        {found ? "Tắt nhắc có hàng" : "Nhắc tôi khi có hàng"}
       </button>
       {q.isError && <FeatureError error={q.error} retry={() => q.refetch()} />}
       {m.isError && <FeatureError error={m.error} />}
@@ -92,7 +93,7 @@ export function RestockPage() {
   });
   return (
     <FeatureFrame
-      title="Thông báo có hàng"
+      title="Nhắc khi có hàng"
       description="Quản lý các vật phẩm bạn muốn nhận thông báo khi có hàng trở lại."
       customer
     >
@@ -102,9 +103,9 @@ export function RestockPage() {
       {q.data?.length === 0 && (
         <section className="feature-empty-state">
           <Bell aria-hidden="true" />
-          <h2>Bạn chưa đăng ký báo có hàng.</h2>
+          <h2>Bạn chưa đăng ký nhắc khi có hàng.</h2>
           <p>
-            Khi vật phẩm hết hàng, chọn “Báo tôi khi có hàng” để nhận thông báo
+            Khi vật phẩm hết hàng, chọn “Nhắc tôi khi có hàng” để nhận thông báo
             lúc có thể đặt mua.
           </p>
           <Link className="feature-button" to="/merch">
@@ -114,7 +115,7 @@ export function RestockPage() {
       )}
       {q.data?.map((s) => (
         <section className="feature-panel subscription-card" key={s.merchId}>
-          <Link to={`/merch/${s.merchId}`}>Xem vật phẩm</Link>
+          <div className="subscription-identity"><Link to={`/merch/${s.merchId}`}>{s.merchName || "Vật phẩm đang theo dõi"}</Link><p>{s.orgName || "Tổ chức UIT"}</p><span>{s.available ? "Đã có hàng · Xem vật phẩm để đặt mua" : "Đang chờ có hàng trở lại"}</span></div>
           <span>Đăng ký {dateTime(s.subscribedAt)}</span>
           <label>
             <input
@@ -143,7 +144,7 @@ const defaultFollow = {
   notifyEvents: true,
   emailEnabled: false,
 };
-export function FollowButton({ orgId }: { orgId: string }) {
+export function FollowButton({ orgId, onChanged }: { orgId: string; onChanged?: (following: boolean) => void }) {
   const user = useAuthStore((s) => s.user);
   const qc = useQueryClient();
   const key = ["following", user?.id];
@@ -158,7 +159,12 @@ export function FollowButton({ orgId }: { orgId: string }) {
       found
         ? unfollowOrganization(orgId)
         : followOrganization(orgId, defaultFollow),
-    onSuccess: () => qc.invalidateQueries({ queryKey: key }),
+    onSuccess: () => {
+      if (useAuthStore.getState().user?.id !== user?.id) return;
+      onChanged?.(!found);
+      toast.success(found ? "Đã bỏ theo dõi tổ chức." : "Đã theo dõi. Bạn sẽ nhận cập nhật vật phẩm và sự kiện mới.");
+      return qc.invalidateQueries({ queryKey: key });
+    },
   });
   if (!user)
     return (
@@ -168,12 +174,12 @@ export function FollowButton({ orgId }: { orgId: string }) {
     );
   if (user.role !== "CUSTOMER") return null;
   return (
-    <div className="feature-actions">
-      <button
+    <div className="follow-control">
+      <button aria-pressed={!!found} title={found ? "Bấm để bỏ theo dõi tổ chức" : "Nhận cập nhật của tổ chức"}
         disabled={q.isPending || q.isError || m.isPending}
         onClick={() => m.mutate()}
       >
-        {found ? "Bỏ theo dõi" : "Theo dõi tổ chức"}
+        {found && <Check aria-hidden="true" size={18} />} {m.isPending ? "Đang cập nhật…" : found ? "Đang theo dõi" : "Theo dõi tổ chức"}
       </button>
       {q.isError && <FeatureError error={q.error} retry={() => q.refetch()} />}
       {m.isError && <FeatureError error={m.error} />}
@@ -216,12 +222,12 @@ export function FollowingPage() {
   });
   return (
     <FeatureFrame
-      title="Tổ chức đang theo dõi"
+      title="Tổ chức bạn theo dõi"
       description="Chọn những cập nhật bạn muốn nhận từ các khoa và câu lạc bộ yêu thích."
       customer
     >
       <nav className="subscription-navigation" aria-label="Quản lý theo dõi">
-        <Link to="/restock-subscriptions">Quản lý báo có hàng</Link>
+        <Link to="/restock-subscriptions">Nhắc khi có hàng</Link>
         <Link to="/reservations">Đơn giữ chỗ</Link>
       </nav>
       {q.isPending && <FeatureLoading />}
@@ -232,8 +238,7 @@ export function FollowingPage() {
           <Building2 aria-hidden="true" />
           <h2>Bạn chưa theo dõi tổ chức nào.</h2>
           <p>
-            Theo dõi một tổ chức để cập nhật vật phẩm mới và sự kiện của họ ngay
-            tại đây.
+            Theo dõi một tổ chức để nhận thông báo khi họ công bố vật phẩm hoặc sự kiện mới. Bạn có thể chọn loại cập nhật trên trang này.
           </p>
           <Link className="feature-button" to="/organization">
             Khám phá tổ chức <ArrowRight aria-hidden="true" size={18} />
@@ -242,12 +247,16 @@ export function FollowingPage() {
       )}
       {q.data?.map((s) => (
         <section className="feature-panel subscription-card" key={s.orgId}>
-          <Link to={`/organization/${s.orgId}`}>Xem tổ chức</Link>
+          <div className="subscription-identity organization-follow-identity">
+            {s.logoUrl ? <img src={s.logoUrl} alt="" /> : <Building2 aria-hidden="true" size={40} />}
+            <div><Link to={`/organization/${s.orgId}`}>{s.orgName || "Tổ chức đang theo dõi"}</Link><p>{s.orgStatus && s.orgStatus !== "ACTIVE" ? "Tổ chức hiện chưa hoạt động" : "Đang theo dõi"}</p></div>
+          </div>
+          <fieldset className="subscription-preferences"><legend>Nhận cập nhật về</legend>
           {(
             [
               ["notifyMerch", "Vật phẩm mới"],
               ["notifyEvents", "Sự kiện mới"],
-              ["emailEnabled", "Email"],
+              ["emailEnabled", "Gửi thêm qua email"],
             ] as const
           ).map(([field, label]) => (
             <label key={field}>
@@ -265,7 +274,8 @@ export function FollowingPage() {
               {label}
             </label>
           ))}
-          <button
+          </fieldset>
+          <button className="subscription-unfollow"
             disabled={m.isPending}
             onClick={() => m.mutate({ id: s.orgId })}
           >

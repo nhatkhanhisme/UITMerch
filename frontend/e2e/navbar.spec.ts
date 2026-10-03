@@ -191,7 +191,7 @@ for (const role of ["CUSTOMER", "ORGANIZER", "ADMIN"] as const) {
         menu.getByRole("link", { name: "Tổ chức đang theo dõi" }),
       ).toHaveAttribute("href", "/following");
       await expect(
-        menu.getByRole("link", { name: "Báo khi có hàng" }),
+        menu.getByRole("link", { name: "Nhắc khi có hàng" }),
       ).toHaveAttribute("href", "/restock-subscriptions");
       await expect(menu.getByRole("link", { name: "Quản lý BTC" })).toHaveCount(
         0,
@@ -210,7 +210,7 @@ for (const role of ["CUSTOMER", "ORGANIZER", "ADMIN"] as const) {
     await expect(account).toBeFocused();
     await account.click();
     await page
-      .getByRole("heading", { name: "Chiến dịch đặt trước", exact: true })
+      .getByRole("heading", { name: "Bộ sưu tập mở đặt trước", exact: true })
       .click();
     await expect(account).toHaveAttribute("aria-expanded", "false");
   });

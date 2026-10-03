@@ -41,14 +41,16 @@ function CampaignCard({
   own?: boolean;
 }) {
   return (
-    <section className="feature-panel">
+    <section className="feature-panel campaign-card">
+      <p className="order-eyebrow">Bộ sưu tập UIT</p>
       <h2>{campaign.title}</h2>
       <p>
         {labels[campaign.state]} · {campaign.reservedQuantity}/
         {campaign.minimumQuantity} sản phẩm
       </p>
+      <progress aria-label="Tiến độ đặt trước" max={campaign.minimumQuantity} value={Math.min(campaign.reservedQuantity, campaign.minimumQuantity)} />
       <p>Hạn đặt: {dateTime(campaign.deadline)}</p>
-      {!own && <Link to={`/campaigns/${campaign.id}`}>Xem chiến dịch</Link>}
+      {!own && <Link to={`/campaigns/${campaign.id}`}>Khám phá bộ sưu tập</Link>}
     </section>
   );
 }
@@ -59,10 +61,10 @@ export function CampaignsPage() {
     queryFn: () => listCampaigns(page),
   });
   return (
-    <FeatureFrame title="Chiến dịch đặt trước">
+    <FeatureFrame title="Bộ sưu tập mở đặt trước" description="Giữ chỗ cho mẫu bạn yêu thích. Đợt đặt trước được triển khai khi đạt đủ số lượng đăng ký.">
       {q.isPending && <FeatureLoading />}
       {q.isError && <FeatureError error={q.error} retry={() => q.refetch()} />}
-      {q.data?.content.length === 0 && <p>Chưa có chiến dịch.</p>}
+      {q.data?.content.length === 0 && <p>Chưa có bộ sưu tập mở đặt trước.</p>}
       {q.data?.content.map((c) => (
         <CampaignCard key={c.id} campaign={c} />
       ))}
@@ -136,7 +138,7 @@ export function CampaignDetailPage() {
     q.data?.state === "ACTIVE" && Date.parse(q.data.deadline) > Date.now();
   const selected = q.data?.variants.find((v) => v.merchId === variant);
   return (
-    <FeatureFrame title={q.data?.title ?? "Chiến dịch đặt trước"}>
+    <FeatureFrame title={q.data?.title ?? "Đợt mở đặt trước"}>
       {q.isPending && <FeatureLoading />}
       {q.isError && <FeatureError error={q.error} retry={() => q.refetch()} />}
       {q.data && (
@@ -253,7 +255,7 @@ export function ReservationsPage() {
           <p>
             Số lượng {r.quantity} · {dateTime(r.createdAt)}
           </p>
-          <Link to={`/campaigns/${r.campaignId}`}>Chiến dịch</Link>
+          <Link to={`/campaigns/${r.campaignId}`}>Đợt đặt trước</Link>
           <Link to={`/orders/${r.orderId}`}>Trạng thái / huỷ đơn</Link>
         </section>
       ))}
@@ -284,7 +286,7 @@ export function CampaignOrderNotice({
       {q.isError && <FeatureError error={q.error} retry={() => q.refetch()} />}
       {q.data?.campaignId && (
         <p>
-          Chiến dịch:{" "}
+          Đợt đặt trước:{" "}
           {q.data.campaignState
             ? labels[q.data.campaignState]
             : "Đang kiểm tra"}
@@ -357,14 +359,14 @@ export function CampaignManagement({ orgId }: { orgId: string }) {
   return (
     <>
       <section className="feature-panel">
-        <h2>Tạo chiến dịch</h2>
+        <h2>Tạo đợt đặt trước</h2>
         <p>
           Giờ đóng chiến dịch theo múi giờ Việt Nam. Chọn 1–20 SKU đã công bố,
           đặt tên phiên bản rõ ràng.
         </p>
         <div className="feature-fields">
           <label>
-            Tên chiến dịch
+            Tên đợt đặt trước
             <input
               maxLength={200}
               value={title}
@@ -444,7 +446,7 @@ export function CampaignManagement({ orgId }: { orgId: string }) {
             }
             onClick={() => create.mutate()}
           >
-            Tạo chiến dịch
+            Tạo đợt đặt trước
           </button>
         </div>
         {merch.isPending && <FeatureLoading />}

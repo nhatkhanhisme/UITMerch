@@ -2,7 +2,8 @@ import { AnalyticsPanel } from "../features/Analytics";
 import { CampaignManagement, CampaignOrderNotice } from "../features/Campaigns";
 import { PickupScanner, OrderHistoryPanel } from "../features/Pickup";
 import { getCampaignOrderContext } from "../api/campaigns";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
 import { cacheDelete, cacheKey } from "../lib/sessionCache";
@@ -48,12 +49,6 @@ import type {
   OrganizationResponse,
   PickupScheduleResponse,
 } from "../types/shared";
-
-const ShaderBackground = lazy(() =>
-  import("../components/ui/ShaderBackground").then((m) => ({
-    default: m.ShaderBackground,
-  })),
-);
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
   currency: "VND",
@@ -230,13 +225,19 @@ function MerchTab({ orgId }: { orgId: string }) {
     setForm(f => {
       const current = parseFloat(f.price) || 0;
       const next = Math.max(0, current + delta);
-      return { ...f, price: next === 0 ? "" : String(next) };
+      return { ...f, price: String(next) };
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
+    const price = Number(form.price);
+    const stock = Number(form.stock);
+    if (!form.price.trim() || !Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0) {
+      toast.error("Nhập giá từ 0đ và số lượng tồn kho là số nguyên không âm.");
+      return;
+    }
     setIsSubmitting(true);
     // The select stores the category UUID; backend expects the slug.
     const categorySlug = form.categoryId
@@ -247,19 +248,19 @@ function MerchTab({ orgId }: { orgId: string }) {
         await updateMerch(orgId, editingItem.id, {
           name: form.name.trim(),
           description: form.description.trim() || undefined,
-          price: form.price ? parseFloat(form.price) : undefined,
-          stock: parseInt(form.stock, 10),
+          price,
+          stock,
           status: form.status,
           categorySlug,
-          imageUrls: form.imageUrls.length > 0 ? form.imageUrls : undefined,
+          imageUrls: form.imageUrls,
         });
         toast.success("Đã cập nhật vật phẩm.");
       } else {
         await createMerch(orgId, {
           name: form.name.trim(),
           description: form.description.trim() || undefined,
-          price: form.price ? parseFloat(form.price) : undefined,
-          stock: parseInt(form.stock, 10),
+          price,
+          stock,
           categorySlug,
           imageUrls: form.imageUrls.length > 0 ? form.imageUrls : undefined,
         });
@@ -302,7 +303,7 @@ function MerchTab({ orgId }: { orgId: string }) {
       </div>
 
       {showForm && (
-        <form className="rounded-panel border border-aqua/50 bg-white/60 p-6 shadow-glass backdrop-blur-xl space-y-4" onSubmit={handleSubmit}>
+        <form className="organizer-edit-form space-y-5" onSubmit={handleSubmit}>
           <h3 className="font-fredoka text-lg font-bold text-black-blue">
             {editingItem ? "Chỉnh sửa vật phẩm" : "Thêm vật phẩm mới"}
           </h3>
@@ -317,11 +318,14 @@ function MerchTab({ orgId }: { orgId: string }) {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-ink/70 mb-1">Giá (VND)</label>
+              <label htmlFor="merch-price" className="block text-sm font-semibold text-slate mb-2">Giá bán (VNĐ) *</label>
               <div className="flex items-center gap-1">
                 <button className="size-9 rounded-xl border border-white/70 bg-white/50 text-lg font-bold text-black-blue hover:bg-white/80 transition flex-none" onClick={() => adjustPrice(-1000)} type="button">−</button>
                 <input
-                  className="flex-1 rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua text-center"
+                  className="min-w-0 flex-1 rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua text-center"
+                  id="merch-price"
+                  required
+                  step="0.01"
                   min="0"
                   onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
                   placeholder="0"
@@ -330,10 +334,11 @@ function MerchTab({ orgId }: { orgId: string }) {
                 />
                 <button className="size-9 rounded-xl border border-white/70 bg-white/50 text-lg font-bold text-black-blue hover:bg-white/80 transition flex-none" onClick={() => adjustPrice(1000)} type="button">+</button>
               </div>
-              <div className="mt-1 flex gap-1">
-                {[5000,10000,50000,100000].map(v => (
-                  <button className="rounded-full border border-white/60 bg-white/40 px-2 py-0.5 text-[10px] font-semibold text-black-blue hover:bg-white/70" key={v} onClick={() => setForm(f => ({ ...f, price: String(v) }))} type="button">
-                    +{v >= 1000 ? `${v/1000}k` : v}
+              <p className="mt-2 text-sm text-slate">Nhập 0 để hiển thị vật phẩm miễn phí.</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[0,5000,10000,50000,100000].map(v => (
+                  <button className="rounded-full border border-white/60 bg-white/40 px-2 py-0.5 text-[10px] font-semibold text-black-blue hover:bg-white/70" key={v} onClick={() => setForm(f => ({ ...f, price: v === 0 ? "0" : String((Number(f.price) || 0) + v) }))} type="button">
+                    {v === 0 ? "Miễn phí (0đ)" : `+${v/1000}k`}
                   </button>
                 ))}
               </div>
@@ -430,7 +435,7 @@ function MerchTab({ orgId }: { orgId: string }) {
           <div className="flex gap-2">
             <button
               className="rounded-full bg-black-blue px-5 py-2 text-sm font-bold text-white transition hover:bg-ink disabled:opacity-50"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploadingImage}
               type="submit"
             >
               {isSubmitting ? "Đang lưu..." : "Lưu"}
@@ -1453,7 +1458,7 @@ function PickupTab({ orgId }: { orgId: string }) {
       </div>
 
       {showForm && (
-        <form className="rounded-panel border border-aqua/50 bg-white/60 p-6 shadow-glass backdrop-blur-xl space-y-4" onSubmit={handleCreate}>
+        <form className="organizer-edit-form space-y-5" onSubmit={handleCreate}>
           <h3 className="font-fredoka text-lg font-bold text-black-blue">Tạo lịch nhận hàng mới</h3>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -1730,9 +1735,9 @@ function ProfileTab({ org, onUpdated }: { org: OrganizationResponse; onUpdated: 
     try {
       const res = await updateOrganization(org.id, {
         name: form.name.trim(),
-        description: form.description.trim() || undefined,
-        logoUrl: form.logoUrl.trim() || undefined,
-        coverUrl: form.coverUrl.trim() || undefined,
+        description: form.description.trim(),
+        logoUrl: form.logoUrl.trim(),
+        coverUrl: form.coverUrl.trim(),
       });
       onUpdated(res.data);
       setIsEditing(false);
@@ -1922,18 +1927,16 @@ export function OrganizerDashboardPage() {
   ];
 
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
-      <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
-        <ShaderBackground />
-      </Suspense>
+    <main className="relative min-h-screen bg-canvas px-5 pb-16 pt-32 organizer-dashboard sm:px-8 lg:px-16">
+      <AmbientBackgroundGradients />
 
       <div className="relative z-10 mx-auto max-w-5xl">
         <div className="mb-6">
           <p className="font-sans text-xs uppercase tracking-widest text-ink/50">
-            Organizer Space
+            Không gian tổ chức
           </p>
           <h1 className="mt-1 font-fredoka text-4xl font-bold text-black-blue">
-            Dashboard
+            Quản lý tổ chức
           </h1>
         </div>
 

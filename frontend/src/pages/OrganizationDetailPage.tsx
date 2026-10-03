@@ -280,7 +280,7 @@ export function OrganizationDetailPage() {
 
       <div className="relative z-10">
         {organization ? (
-          <GlassContainer>
+          <GlassContainer className="organization-detail-surface">
             <section className="grid gap-5 border-b border-white/50 pb-7 sm:gap-8 sm:pb-10 lg:grid-cols-[minmax(220px,320px)_minmax(0,1fr)] lg:items-center">
               <div className="mx-auto flex aspect-square w-full max-w-[180px] items-center justify-center overflow-hidden rounded-full border border-white/60 bg-white/25 p-5 shadow-[inset_2px_2px_18px_rgba(255,255,255,0.72),0_16px_45px_rgba(82,128,145,0.16)] backdrop-blur-xl sm:max-w-[280px] sm:p-8 lg:mx-0">
                 {organization.logo ? (
@@ -306,7 +306,7 @@ export function OrganizationDetailPage() {
                 <h1 className="mt-5 font-fredoka text-3xl font-bold leading-tight text-black-blue sm:text-5xl">
                   {organization.name}
                 </h1>
-                {liveOrg?.id === id && !hasApiError && <FollowButton orgId={id!} />}
+                {liveOrg?.id === id && !hasApiError && <FollowButton orgId={id!} onChanged={(following) => setLiveOrg((org) => org ? { ...org, followerCount: Math.max(0, (org.followerCount ?? 0) + (following ? 1 : -1)) } : org)} />}
                 <p className="mx-auto mt-3 max-w-3xl font-sans text-sm leading-7 text-ink/65 sm:mt-4 sm:text-base sm:leading-8 lg:mx-0">
                   {organization.description || "Chưa có mô tả chi tiết cho tổ chức này."}
                 </p>
@@ -328,6 +328,7 @@ export function OrganizationDetailPage() {
                       {liveEvents.length}
                     </p>
                   </div>
+                  <div className="organization-follower-count"><p>Người theo dõi</p><strong>{liveOrg?.followerCount ?? 0}</strong></div>
                 </div>
               </div>
             </section>

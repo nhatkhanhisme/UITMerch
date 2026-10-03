@@ -5,17 +5,17 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
 import { Button, Input } from "../components/ui";
 import { getApiErrorMessage } from "../api/auth";
 import { uploadOrganizerImage } from "../api/storage";
-import { getOrganizerProfile, updateOrganizerProfile } from "../api/profile";
+import { getOwnOrganizations } from "../api/organization";
+import { updateOrganizerProfile } from "../api/profile";
 import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
 import type { OrganizerProfile } from "../types/profile";
 import {
-  formatDate,
   getInitials,
   ProfileInfoRow,
   toOptionalValue,
@@ -74,6 +74,7 @@ export function OrganizerProfilePage() {
   const [isLogoRemoved, setIsLogoRemoved] = useState(false);
   const [isCoverRemoved, setIsCoverRemoved] = useState(false);
   const [isMissingOrganization, setIsMissingOrganization] = useState(false);
+  const [organizations, setOrganizations] = useState<OrganizerProfile[]>([]);
   const [organizerProfile, setOrganizerProfile] =
     useState<OrganizerProfile | null>(null);
   const [organizerForm, setOrganizerForm] = useState(initialOrganizerForm);
@@ -102,8 +103,11 @@ export function OrganizerProfilePage() {
       setIsMissingOrganization(false);
 
       try {
-        const response = await getOrganizerProfile();
-        const profile = response.data;
+        const response = await getOwnOrganizations({ size: 100 });
+        const rows: OrganizerProfile[] = (response.data ?? []).map((row) => ({ ...row, status: row.status as OrganizerProfile["status"], createdAt: row.createdAt ?? "", updatedAt: row.updatedAt ?? "" }));
+        if (!rows.length) { setIsMissingOrganization(true); return; }
+        setOrganizations(rows);
+        const profile = rows[0];
 
         if (!profile || !isActive) {
           return;
@@ -183,7 +187,7 @@ export function OrganizerProfilePage() {
     }
   };
 
-  const handleOrganizerChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleOrganizerChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setOrganizerForm((current) => ({
       ...current,
@@ -213,7 +217,7 @@ export function OrganizerProfilePage() {
         logoUrl: publicUrl,
       }));
       setIsLogoRemoved(false);
-      toast.success("Logo uploaded. Save changes to apply it.");
+      toast.success("Đã tải logo. Lưu thay đổi để áp dụng.");
     } catch (error) {
       toast.error(getApiErrorMessage(error));
     } finally {
@@ -228,7 +232,7 @@ export function OrganizerProfilePage() {
       logoUrl: "",
     }));
     setIsLogoRemoved(true);
-    toast.info("Logo removed. Save changes to apply it.");
+    toast.info("Đã bỏ logo. Lưu thay đổi để áp dụng.");
   };
 
   const handleOrganizerCoverUpload = async (
@@ -253,7 +257,7 @@ export function OrganizerProfilePage() {
         coverUrl: publicUrl,
       }));
       setIsCoverRemoved(false);
-      toast.success("Cover uploaded. Save changes to apply it.");
+      toast.success("Đã tải ảnh bìa. Lưu thay đổi để áp dụng.");
     } catch (error) {
       toast.error(getApiErrorMessage(error));
     } finally {
@@ -268,37 +272,37 @@ export function OrganizerProfilePage() {
       coverUrl: "",
     }));
     setIsCoverRemoved(true);
-    toast.info("Cover removed. Save changes to apply it.");
+    toast.info("Đã bỏ ảnh bìa. Lưu thay đổi để áp dụng.");
   };
 
   const handleOrganizerSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isUploadingMedia) {
-      toast.error("Please wait for the image upload to finish.");
+      toast.error("Vui lòng chờ ảnh tải lên hoàn tất.");
       return;
     }
 
     const name = organizerForm.name.trim();
     if (!name) {
-      toast.error("Organization name is required.");
+      toast.error("Vui lòng nhập tên tổ chức.");
       return;
     }
 
     setIsSaving(true);
 
     try {
-      if (!organizerProfile?.id) throw new Error("Organization ID not found.");
+      if (!organizerProfile?.id) throw new Error("Không tìm thấy tổ chức.");
       const response = await updateOrganizerProfile(organizerProfile.id, {
         name,
-        description: toOptionalValue(organizerForm.description),
+        description: organizerForm.description.trim(),
         logoUrl: isLogoRemoved ? "" : toOptionalValue(organizerForm.logoUrl),
         coverUrl: isCoverRemoved ? "" : toOptionalValue(organizerForm.coverUrl),
       });
       const profile = response.data;
 
       if (!profile) {
-        throw new Error("Organization update failed.");
+        throw new Error("Không thể cập nhật hồ sơ tổ chức.");
       }
 
       setOrganizerProfile(profile);
@@ -311,7 +315,8 @@ export function OrganizerProfilePage() {
       setIsLogoRemoved(false);
       setIsCoverRemoved(false);
       updateUser({ avatarUrl: profile.logoUrl ?? null });
-      toast.success(response.message || "Organization updated.");
+      toast.success("Đã cập nhật hồ sơ tổ chức.");
+      setOrganizations((rows) => rows.map((row) => row.id === profile.id ? profile : row));
       setIsEditing(false);
     } catch (error) {
       if (
@@ -345,266 +350,48 @@ export function OrganizerProfilePage() {
     ? organizerForm.coverUrl
     : (organizerProfile?.coverUrl ?? "");
 
+  const orgStatus = ({ ACTIVE: "Đang hoạt động", PENDING: "Chờ duyệt", INACTIVE: "Tạm ngừng" } as Record<string, string>)[organizerProfile?.status ?? ""] ?? "Chưa cập nhật";
+  const dateLabel = (value?: string | null) => value ? new Date(value).toLocaleDateString("vi-VN") : "Chưa cập nhật";
   return (
-    <main className="relative min-h-screen bg-canvas pb-16 pt-28 sm:pt-32">
+    <main className="relative min-h-screen bg-canvas pb-16 pt-28 sm:pt-32 organizer-profile-page">
       <AmbientBackgroundGradients />
-
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6">
-        {/* ── Loading ── */}
-        {isLoading ? (
-          <div className="rounded-panel border border-white/60 bg-white/60 p-6 text-center font-sans text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
-            Loading your organization profile...
-          </div>
-        ) : null}
-
-        {/* ── Missing org notice ── */}
-        {!isLoading && isMissingOrganization ? (
-          <div className="rounded-panel border border-aqua bg-white/70 p-6 font-sans text-sm text-black-blue shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
-            No organization profile yet. Create one from the organizer dashboard
-            when it is available.
-          </div>
-        ) : null}
-
-        {/* ── Main unified card ── */}
-        {!isLoading && !isMissingOrganization ? (
-          <form
-            className="overflow-hidden rounded-[36px] border border-white/60 bg-white/75 shadow-[0_24px_80px_rgba(16,24,40,0.12)] backdrop-blur"
-            id="organizer-profile-form"
-            onSubmit={handleOrganizerSave}
-          >
-            <div className="grid gap-0 lg:grid-cols-2">
-              {/* ── Left: Cover hero + Logo identity ── */}
-              <div className="relative flex flex-col bg-gradient-to-br from-black-blue via-slate to-aqua/70 text-white min-w-0 min-h-[360px]">
-                {/* Cover image */}
-                <div className="relative h-48 w-full overflow-hidden sm:h-56">
-                  {displayedCoverUrl ? (
-                    <img
-                      alt="Organization cover"
-                      className="h-full w-full object-cover opacity-70"
-                      src={displayedCoverUrl}
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-black-blue via-slate to-aqua/70" />
-                  )}
-                  {/* Cover remove + choose file controls in edit mode */}
-                  {isEditing ? (
-                    <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1">
-                      {organizerForm.coverUrl ? (
-                        <button
-                          aria-label="Remove cover"
-                          className="flex size-7 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass hover:scale-110 transition z-10"
-                          disabled={isSaving || isUploadingMedia}
-                          onClick={handleOrganizerCoverRemove}
-                          type="button"
-                        >
-                          ✕
-                        </button>
-                      ) : null}
-                      <label
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/30 bg-black-blue/60 px-3 py-1 font-sans text-xs font-semibold text-white shadow-sm transition hover:bg-black-blue/80 backdrop-blur-sm"
-                        htmlFor="org-cover-upload"
-                      >
-                        <ImageIcon />
-                        <span className="text-white">{isUploadingCover ? "Uploading..." : "Change cover"}</span>
-                      </label>
-                      <input
-                        accept="image/*"
-                        className="hidden"
-                        disabled={isSaving || isUploadingMedia}
-                        id="org-cover-upload"
-                        onChange={handleOrganizerCoverUpload}
-                        type="file"
-                      />
-                    </div>
-                  ) : null}
+      <div className="relative z-10 mx-auto max-w-6xl space-y-6 px-4 sm:px-6">
+        {organizations.length > 1 && <label className="organization-selector">Tổ chức đang chỉnh sửa<select value={organizerProfile?.id ?? ""} disabled={isSaving || isUploadingMedia} onChange={(e) => {
+          const selected = organizations.find((org) => org.id === e.target.value);
+          if (!selected) return;
+          setOrganizerProfile(selected);
+          setOrganizerForm({ name: selected.name, description: selected.description ?? "", logoUrl: selected.logoUrl ?? "", coverUrl: selected.coverUrl ?? "" });
+          setIsEditing(false);setIsLogoRemoved(false);setIsCoverRemoved(false);
+        }}>{organizations.map((org) => <option value={org.id} key={org.id}>{org.name}</option>)}</select></label>}
+        {isLoading ? <section className="order-card" role="status">Đang tải hồ sơ tổ chức…</section> : isMissingOrganization ? <section className="order-card"><h1>Chưa có hồ sơ tổ chức</h1><p className="panel-description">Tạo tổ chức để quản lý vật phẩm, sự kiện và đơn hàng.</p><Link className="feature-button mt-4 inline-flex" to="/organizer">Tạo tổ chức</Link></section> : (
+          <form className="customer-profile-card" id="organizer-profile-form" onSubmit={handleOrganizerSave}>
+            <div className="customer-profile-grid">
+              <section className="customer-profile-identity organizer-profile-identity">
+                {displayedCoverUrl && <img className="organizer-profile-cover" src={displayedCoverUrl} alt="Ảnh bìa tổ chức" />}
+                <div className="flex items-start gap-4">
+                  <div className="profile-avatar">{displayedLogoUrl ? <img src={displayedLogoUrl} alt="Logo tổ chức" /> : <span>{organizerForm.name.slice(0, 2).toUpperCase() || avatarLabel}</span>}</div>
+                  <div className="min-w-0"><p className="order-eyebrow">Hồ sơ tổ chức</p><h1 className="mt-3 break-words text-2xl font-bold sm:text-3xl">{organizerProfile?.name ?? user.fullName}</h1></div>
                 </div>
-
-                {/* Logo + name area below cover */}
-                <div className="relative flex flex-1 flex-col gap-4 p-6 sm:p-8">
-                  <div className="flex flex-wrap items-end gap-4 -mt-10">
-                    {/* Logo circle stacked with chooser */}
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="relative inline-block">
-                        <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white/30 bg-white/15 shadow-[0_12px_30px_rgba(0,0,0,0.24)] backdrop-blur-sm">
-                          {displayedLogoUrl ? (
-                            <img
-                              alt={organizerForm.name || "Organization logo"}
-                              className="size-full object-cover"
-                              src={displayedLogoUrl}
-                            />
-                          ) : (
-                            <span className="font-brand text-2xl font-black text-white">
-                              {organizerForm.name
-                                ? organizerForm.name.slice(0, 2).toUpperCase()
-                                : avatarLabel}
-                            </span>
-                          )}
-                        </div>
-                        {isEditing && organizerForm.logoUrl ? (
-                          <button
-                            aria-label="Remove logo"
-                            className="absolute right-0 top-0 flex size-6 -translate-y-1/3 translate-x-1/3 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass z-10 hover:scale-110 transition"
-                            disabled={isSaving || isUploadingMedia}
-                            onClick={handleOrganizerLogoRemove}
-                            type="button"
-                          >
-                            ✕
-                          </button>
-                        ) : null}
-                      </div>
-                      {isEditing ? (
-                        <div className="flex flex-col items-center gap-1">
-                          <label
-                            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-3 py-1 font-sans text-xs font-semibold text-white shadow-sm transition hover:bg-white/25 backdrop-blur-sm"
-                            htmlFor="org-logo-upload"
-                          >
-                            <CameraIcon />
-                            <span className="text-white">{isUploadingLogo ? "Uploading..." : "Logo"}</span>
-                          </label>
-                          <input
-                            accept="image/*"
-                            className="hidden"
-                            disabled={isSaving || isUploadingMedia}
-                            id="org-logo-upload"
-                            onChange={handleOrganizerLogoUpload}
-                            type="file"
-                          />
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-white/80 backdrop-blur-sm">
-                        Organizer profile
-                      </div>
-                      {isEditing ? (
-                        <div className="mt-3 max-w-sm">
-                          <Input
-                            label="Organization name"
-                            name="name"
-                            onChange={handleOrganizerChange}
-                            placeholder="Organization name"
-                            required
-                            value={organizerForm.name}
-                            disabled={isSaving || isUploadingMedia}
-                          />
-                        </div>
-                      ) : (
-                        <h1 className="mt-3 font-brand text-3xl font-black text-white sm:text-4xl break-words">
-                          {organizerProfile?.name ?? user.fullName}
-                        </h1>
-                      )}
-
-                      {/* Minimalist metadata */}
-                      <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-white/70">
-                        <div className="flex items-center gap-1.5">
-                          <ShieldIcon />
-                          <span className="text-white/80">{organizerProfile?.status ?? "Pending"}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <CalendarIcon />
-                          <span>Since {formatDate(organizerProfile?.createdAt)}</span>
-                        </div>
-                      </div>
-                    </div>
+                <div className="mt-5 space-y-3 text-sm text-slate"><p className="flex items-center gap-2"><ShieldIcon />{orgStatus}</p><p className="flex items-center gap-2"><CalendarIcon />Tham gia từ {dateLabel(organizerProfile?.createdAt)}</p></div>
+                <nav className="profile-shortcuts" aria-label="Tiện ích tổ chức"><Link to={`/organizer?orgId=${organizerProfile?.id ?? ""}`}>Quản lý tổ chức</Link><Link to={`/organization/${organizerProfile?.id ?? ""}`}>Xem trang tổ chức</Link></nav>
+              </section>
+              <section className="customer-profile-details">
+                <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="order-eyebrow">Thông tin tổ chức</p><h2 className="mt-2 text-2xl font-bold">{isEditing ? "Chỉnh sửa hồ sơ" : "Giới thiệu tổ chức"}</h2></div><Button disabled={isSaving || isUploadingMedia} variant="outline" type="button" onClick={handleLogout}>Đăng xuất</Button></div>
+                {!isEditing && canEdit && <Button className="mt-6" type="button" variant="secondary" onClick={startEditing}>Chỉnh sửa hồ sơ</Button>}
+                <div className="mt-6">{isEditing ? <div className="organizer-profile-fields space-y-5">
+                  <Input label="Tên tổ chức" name="name" required maxLength={200} value={organizerForm.name} onChange={handleOrganizerChange} disabled={isSaving || isUploadingMedia} />
+                  <label className="edit-field">Giới thiệu tổ chức<textarea name="description" maxLength={2000} rows={5} value={organizerForm.description} onChange={handleOrganizerChange} disabled={isSaving || isUploadingMedia} placeholder="Giới thiệu hoạt động và cộng đồng của tổ chức…" /></label>
+                  <div className="profile-media-fields">
+                    <section><h3>Logo tổ chức</h3><p>Ảnh đại diện trên trang tổ chức.</p><label className="media-upload-label" htmlFor="org-logo-upload"><CameraIcon />{isUploadingLogo ? "Đang tải…" : "Chọn logo"}</label><input id="org-logo-upload" type="file" accept="image/*" className="sr-only" onChange={handleOrganizerLogoUpload} disabled={isSaving || isUploadingMedia} />{organizerForm.logoUrl && <button type="button" disabled={isSaving || isUploadingMedia} onClick={handleOrganizerLogoRemove}>Bỏ logo</button>}</section>
+                    <section><h3>Ảnh bìa</h3><p>Ảnh giới thiệu tổ chức.</p><label className="media-upload-label" htmlFor="org-cover-upload"><ImageIcon />{isUploadingCover ? "Đang tải…" : "Chọn ảnh bìa"}</label><input id="org-cover-upload" type="file" accept="image/*" className="sr-only" onChange={handleOrganizerCoverUpload} disabled={isSaving || isUploadingMedia} />{organizerForm.coverUrl && <button type="button" disabled={isSaving || isUploadingMedia} onClick={handleOrganizerCoverRemove}>Bỏ ảnh bìa</button>}</section>
                   </div>
-                </div>
-              </div>
-
-              {/* ── Right: Actions + Inline Fields ── */}
-              <div className="p-6 sm:p-8 lg:p-9 border-t border-white/60 lg:border-t-0 lg:border-l min-w-0">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
-                      Organization details
-                    </p>
-                    <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
-                      {isEditing ? "Edit mode" : "Overview"}
-                    </h2>
-                  </div>
-                  <Button
-                    className="shrink-0"
-                    disabled={isSaving}
-                    type="button"
-                    variant="outline"
-                    onClick={handleLogout}
-                  >
-                    Log out
-                  </Button>
-                </div>
-
-                {canEdit ? (
-                  <div className="mt-6 flex flex-wrap items-center gap-3">
-                    {isEditing ? (
-                      <>
-                        {hasUnsavedMediaChange ? (
-                          <div className="inline-flex items-center rounded-full border border-gold/60 bg-gold/20 px-3 py-1.5 font-sans text-xs font-semibold text-black-blue shadow-glass">
-                            ● Unsaved image change
-                          </div>
-                        ) : null}
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={cancelEditing}
-                          disabled={isSaving || isUploadingMedia}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          form="organizer-profile-form"
-                          loading={isSaving}
-                          type="submit"
-                          disabled={isSaving || isUploadingMedia}
-                        >
-                          Save changes
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={startEditing}
-                      >
-                        Edit profile
-                      </Button>
-                    )}
-                  </div>
-                ) : null}
-
-                {/* Dynamic field presentation */}
-                <div className="mt-6">
-                  {isEditing ? (
-                    <div className="grid gap-4">
-                      <Input
-                        label="Description"
-                        name="description"
-                        onChange={handleOrganizerChange}
-                        placeholder="Tell people about your organization (optional)"
-                        value={organizerForm.description}
-                        disabled={isSaving || isUploadingMedia}
-                      />
-                    </div>
-                  ) : (
-                    <div className="grid gap-3">
-                      <ProfileInfoRow
-                        label="Description"
-                        value={organizerProfile?.description ?? ""}
-                        description="About your organization."
-                        leading="D"
-                      />
-                      <ProfileInfoRow
-                        label="Updated"
-                        value={formatDate(organizerProfile?.updatedAt)}
-                        description="Last profile change."
-                        leading="U"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+                  {hasUnsavedMediaChange && <p className="panel-description" role="status">Ảnh đã thay đổi. Lưu để áp dụng.</p>}
+                  <div className="flex flex-wrap gap-3 border-t border-gray/20 pt-5"><Button type="submit" loading={isSaving} disabled={isSaving || isUploadingMedia}>Lưu thay đổi</Button><Button type="button" variant="outline" disabled={isSaving || isUploadingMedia} onClick={cancelEditing}>Hủy chỉnh sửa</Button></div>
+                </div> : <div className="space-y-4"><ProfileInfoRow label="Giới thiệu" value={organizerProfile?.description} description="Thông tin công khai trên trang tổ chức." /><ProfileInfoRow label="Cập nhật gần nhất" value={dateLabel(organizerProfile?.updatedAt)} /></div>}</div>
+              </section>
             </div>
           </form>
-        ) : null}
+        )}
       </div>
     </main>
   );
