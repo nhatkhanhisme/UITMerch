@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { QrCode, Clock3, History, Check } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
@@ -50,16 +51,22 @@ export function PickupQR({ credential }: { credential: PickupCredential }) {
     return () => clearTimeout(timer);
   }, [credential]);
   return (
-    <section>
+    <section className="pickup-credential" aria-label="Mã nhận hàng hiện tại">
       {expired ? (
         <p role="status">Mã đã hết hạn. Vui lòng tạo mã mới.</p>
       ) : (
         <>
-          <canvas ref={ref} aria-label="Mã QR nhận hàng" role="img" />
-          <p>
-            Mã nhận hàng: <code>{credential.token}</code>
+          <div className="pickup-qr-surface">
+            <canvas ref={ref} aria-label="Mã QR nhận hàng" role="img" />
+          </div>
+          <p className="pickup-expiry">
+            <Clock3 aria-hidden="true" size={16} /> Hết hạn{" "}
+            {dateTime(credential.expiresAt)}
           </p>
-          <p>Hết hạn {dateTime(credential.expiresAt)}</p>
+          <details className="pickup-manual-code">
+            <summary>Xem mã để nhập thủ công</summary>
+            <code>{credential.token}</code>
+          </details>
         </>
       )}
       {!!error && <FeatureError error={error} />}
@@ -87,14 +94,26 @@ export function CustomerPickup({ orderId }: { orderId: string }) {
     }
   }
   return (
-    <section className="feature-panel feature-actions">
-      <h2>Nhận hàng bằng QR</h2>
-      <p>
-        Mỗi lần tạo mã sẽ vô hiệu mã cũ. Chỉ đưa mã cho nhân viên nhận hàng.
+    <section
+      className="feature-panel customer-pickup"
+      aria-labelledby="customer-pickup-title"
+    >
+      <div className="panel-heading">
+        <QrCode aria-hidden="true" size={22} />
+        <h2 id="customer-pickup-title">Nhận hàng bằng QR</h2>
+      </div>
+      <p className="panel-description">
+        Đưa mã QR cho nhân viên khi đến nhận hàng. Mã chỉ có hiệu lực trong thời
+        gian hiển thị.
       </p>
-      <button disabled={busy} onClick={issue}>
-        {busy ? "Đang tạo…" : "Tạo mã nhận hàng"}
+      <button
+        className="feature-button pickup-issue"
+        disabled={busy}
+        onClick={issue}
+      >
+        {busy ? "Đang tạo…" : credential ? "Tạo mã mới" : "Tạo mã nhận hàng"}
       </button>
+      <p className="pickup-help">Mỗi lần tạo mã sẽ vô hiệu mã cũ.</p>
       {!!error && <FeatureError error={error} />}
       {credential && <PickupQR credential={credential} />}
     </section>
@@ -115,17 +134,47 @@ export function OrderHistoryPanel({
     enabled: !!user,
   });
   return (
-    <section className="feature-panel">
-      <h2>Lịch sử đơn hàng</h2>
+    <section className="feature-panel order-history">
+      <div className="panel-heading">
+        <History aria-hidden="true" size={22} />
+        <h2>Lịch sử đơn hàng</h2>
+      </div>
       {q.isPending && <FeatureLoading />}
       {q.isError && <FeatureError error={q.error} retry={() => q.refetch()} />}
-      {q.data?.content.map((h) => (
-        <p key={h.id}>
-          {dateTime(h.createdAt)} · {h.fromStatus ?? "Tạo đơn"} → {h.toStatus} ·{" "}
-          {h.source}
-          {h.actorId ? ` · Người thực hiện: ${h.actorId.slice(0, 8)}` : ""}
+      {q.data?.content.length === 0 && (
+        <p className="panel-description">
+          Chưa có cập nhật nào cho đơn hàng này.
         </p>
-      ))}
+      )}
+      <ol className="order-history-list">
+        {q.data?.content.map((h) => (
+          <li key={h.id}>
+            <span className="history-marker">
+              <Check aria-hidden="true" size={14} />
+            </span>
+            <div>
+              <p className="font-semibold text-black-blue">
+                {h.source === "PICKUP_SCHEDULE"
+                  ? "Đã cập nhật lịch nhận hàng"
+                  : h.source === "CAMPAIGN"
+                    ? "Đã cập nhật đơn đặt trước"
+                    : ((
+                        {
+                          PENDING: "Chờ xác nhận",
+                          CONFIRMED: "Đã xác nhận đơn hàng",
+                          READY: "Đơn hàng sẵn sàng nhận",
+                          COMPLETED: "Đã nhận hàng",
+                          CANCELLED: "Đã hủy đơn hàng",
+                        } as Record<string, string>
+                      )[h.toStatus] ?? "Đã cập nhật đơn hàng")}
+              </p>
+              <time className="text-sm text-slate" dateTime={h.createdAt}>
+                {dateTime(h.createdAt)}
+              </time>
+            </div>
+          </li>
+        ))}
+      </ol>
       {q.data && (
         <PageControls page={page} total={q.data.totalPages} change={setPage} />
       )}

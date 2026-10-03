@@ -1,11 +1,19 @@
 import {
+  Phone,
+  MapPin,
+  Package,
+  Building2,
+  Bell,
+  ArrowRight,
+} from "lucide-react";
+import {
   useEffect,
   useMemo,
   useState,
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
 import { Button, Input } from "../components/ui";
 import { getApiErrorMessage } from "../api/auth";
@@ -14,12 +22,7 @@ import { getCustomerProfile, updateCustomerProfile } from "../api/profile";
 import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
 import type { CustomerProfile } from "../types/profile";
-import {
-  formatDate,
-  getInitials,
-  ProfileInfoRow,
-  toOptionalValue,
-} from "./profileUtils";
+import { getInitials, ProfileInfoRow, toOptionalValue } from "./profileUtils";
 
 // ─── Custom Icons ─────────────────────────────────────────────────────────────
 function MailIcon() {
@@ -143,7 +146,8 @@ export function CustomerProfilePage() {
 
   const hasUnsavedAvatarChange =
     isEditing &&
-    (isAvatarRemoved || customerForm.avatarUrl !== (customerProfile?.avatarUrl ?? ""));
+    (isAvatarRemoved ||
+      customerForm.avatarUrl !== (customerProfile?.avatarUrl ?? ""));
 
   const startEditing = () => {
     setIsEditing(true);
@@ -189,7 +193,7 @@ export function CustomerProfilePage() {
         avatarUrl: publicUrl,
       }));
       setIsAvatarRemoved(false);
-      toast.success("Avatar uploaded. Save changes to apply it.");
+      toast.success("Ảnh đã tải lên. Lưu thay đổi để cập nhật hồ sơ.");
     } catch (error) {
       toast.error(getApiErrorMessage(error));
     } finally {
@@ -204,20 +208,20 @@ export function CustomerProfilePage() {
       avatarUrl: "",
     }));
     setIsAvatarRemoved(true);
-    toast.info("Avatar removed. Save changes to apply it.");
+    toast.info("Ảnh đã được gỡ. Lưu thay đổi để cập nhật hồ sơ.");
   };
 
   const handleCustomerSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isUploadingAvatar) {
-      toast.error("Please wait for the avatar upload to finish.");
+      toast.error("Vui lòng chờ ảnh tải lên hoàn tất.");
       return;
     }
 
     const fullName = customerForm.fullName.trim();
     if (!fullName) {
-      toast.error("Full name is required.");
+      toast.error("Vui lòng nhập họ và tên.");
       return;
     }
 
@@ -235,7 +239,7 @@ export function CustomerProfilePage() {
       const profile = response.data;
 
       if (!profile) {
-        throw new Error("Profile update failed.");
+        throw new Error("Không thể cập nhật hồ sơ.");
       }
 
       setCustomerProfile(profile);
@@ -250,7 +254,7 @@ export function CustomerProfilePage() {
         fullName: profile.fullName,
         avatarUrl: profile.avatarUrl ?? null,
       });
-      toast.success(response.message || "Profile updated.");
+      toast.success("Đã cập nhật hồ sơ.");
       setIsEditing(false);
     } catch (error) {
       toast.error(getApiErrorMessage(error));
@@ -264,23 +268,21 @@ export function CustomerProfilePage() {
     navigate("/");
   };
 
-  const displayedAvatar = isEditing
-    ? customerForm.avatarUrl
-    : user.avatarUrl;
+  const displayedAvatar = isEditing ? customerForm.avatarUrl : user.avatarUrl;
 
   return (
     <main className="relative min-h-screen bg-canvas pb-16 pt-28 sm:pt-32">
       <AmbientBackgroundGradients />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-6">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 sm:px-6">
         <form
-          className="overflow-hidden rounded-[36px] border border-white/60 bg-white/75 shadow-[0_24px_80px_rgba(16,24,40,0.12)] backdrop-blur"
+          className="customer-profile-card"
           id="customer-profile-form"
           onSubmit={handleCustomerSave}
         >
-          <div className="grid gap-0 lg:grid-cols-2">
+          <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
             {/* ── Left Identity & Minimal Info Panel ── */}
-            <div className="bg-gradient-to-br from-white via-white/90 to-aqua/20 p-6 sm:p-8 lg:p-9 min-w-0">
+            <div className="customer-profile-identity">
               <div className="flex flex-wrap items-center gap-4">
                 {/* Avatar Display & Inline Controls */}
                 <div className="relative flex flex-col items-center gap-2">
@@ -288,7 +290,9 @@ export function CustomerProfilePage() {
                     <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_12px_30px_rgba(82,128,145,0.2)]">
                       {displayedAvatar ? (
                         <img
-                          alt={isEditing ? customerForm.fullName : user.fullName}
+                          alt={
+                            isEditing ? customerForm.fullName : user.fullName
+                          }
                           className="size-full object-cover"
                           src={displayedAvatar}
                         />
@@ -300,7 +304,7 @@ export function CustomerProfilePage() {
                     </div>
                     {isEditing && customerForm.avatarUrl ? (
                       <button
-                        aria-label="Remove avatar"
+                        aria-label="Gỡ ảnh đại diện"
                         className="absolute right-0 top-0 flex size-6 -translate-y-1/3 translate-x-1/3 items-center justify-center rounded-full border border-white/70 bg-peach text-xs font-bold text-black-blue shadow-glass z-10 hover:scale-110 transition"
                         disabled={isSaving || isUploadingAvatar}
                         onClick={handleAvatarRemove}
@@ -319,7 +323,7 @@ export function CustomerProfilePage() {
                         htmlFor="inline-avatar-upload"
                       >
                         <CameraIcon />
-                        <span>Choose file</span>
+                        <span>Đổi ảnh</span>
                       </label>
                       <input
                         accept="image/*"
@@ -330,60 +334,91 @@ export function CustomerProfilePage() {
                         type="file"
                       />
                       {isUploadingAvatar ? (
-                        <span className="text-[10px] text-gray animate-pulse">Uploading...</span>
+                        <span className="text-[10px] text-gray animate-pulse">
+                          Đang tải ảnh…
+                        </span>
                       ) : null}
                     </div>
                   ) : null}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="inline-flex items-center rounded-full border border-aqua/60 bg-white/80 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-slate/70">
-                    Customer profile
+                  <div className="inline-flex items-center rounded-full border border-aqua/60 bg-white/80 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-slate">
+                    Hồ sơ của tôi
                   </div>
-                  
+
                   {/* Dynamic Heading / Inline Name Input */}
                   {isEditing ? (
                     <div className="mt-3 max-w-sm">
                       <Input
-                        label="Full name"
+                        label="Họ và tên"
                         name="fullName"
                         onChange={handleCustomerChange}
-                        placeholder="Your full name"
+                        placeholder="Nhập họ và tên"
                         required
                         value={customerForm.fullName}
                         disabled={isSaving || isUploadingAvatar}
                       />
                     </div>
                   ) : (
-                    <h1 className="mt-3 font-brand text-3xl font-black text-black-blue sm:text-4xl">
+                    <h1 className="mt-3 break-words font-brand text-2xl font-bold text-black-blue sm:text-3xl">
                       {user.fullName}
                     </h1>
                   )}
 
                   {/* Minimalist Fixed Metadata Rows */}
-                  <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray">
+                  <div className="customer-profile-meta mt-4 flex flex-col gap-3 text-sm text-gray">
                     <div className="flex items-center gap-1.5">
                       <MailIcon />
-                      <span>{customerProfile?.email ?? user.email}</span>
+                      <span className="break-all">
+                        {customerProfile?.email ?? user.email}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <CalendarIcon />
-                      <span>Member since {formatDate(customerProfile?.createdAt)}</span>
+                      <span>
+                        Tham gia từ{" "}
+                        {customerProfile?.createdAt
+                          ? new Date(
+                              customerProfile.createdAt,
+                            ).toLocaleDateString("vi-VN")
+                          : "chưa cập nhật"}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
+              <nav
+                className="profile-shortcuts"
+                aria-label="Tiện ích tài khoản"
+              >
+                <Link to="/orders">
+                  <Package aria-hidden="true" size={20} />
+                  <span>Đơn hàng của tôi</span>
+                  <ArrowRight aria-hidden="true" size={18} />
+                </Link>
+                <Link to="/following">
+                  <Building2 aria-hidden="true" size={20} />
+                  <span>Tổ chức đang theo dõi</span>
+                  <ArrowRight aria-hidden="true" size={18} />
+                </Link>
+                <Link to="/restock-subscriptions">
+                  <Bell aria-hidden="true" size={20} />
+                  <span>Thông báo có hàng</span>
+                  <ArrowRight aria-hidden="true" size={18} />
+                </Link>
+              </nav>
             </div>
 
             {/* ── Right Action Controls & Inline Fields Panel ── */}
-            <div className="p-6 sm:p-8 lg:p-9 border-t border-white/60 lg:border-t-0 lg:border-l min-w-0">
+            <div className="customer-profile-details">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate/70">
-                    Account actions
+                  <p className="font-sans text-xs uppercase tracking-[0.3em] text-slate">
+                    Thông tin tài khoản
                   </p>
                   <h2 className="mt-2 font-brand text-2xl font-black text-black-blue">
-                    {isEditing ? "Edit mode" : "Overview"}
+                    {isEditing ? "Chỉnh sửa hồ sơ" : "Thông tin liên hệ"}
                   </h2>
                 </div>
                 <Button
@@ -393,7 +428,7 @@ export function CustomerProfilePage() {
                   variant="outline"
                   onClick={handleLogout}
                 >
-                  Log out
+                  Đăng xuất
                 </Button>
               </div>
 
@@ -403,7 +438,7 @@ export function CustomerProfilePage() {
                     <>
                       {hasUnsavedAvatarChange ? (
                         <div className="inline-flex items-center rounded-full border border-gold/60 bg-gold/20 px-3 py-1.5 font-sans text-xs font-semibold text-black-blue shadow-glass">
-                          ● Unsaved image change
+                          ● Ảnh chưa được lưu
                         </div>
                       ) : null}
                       <Button
@@ -412,7 +447,7 @@ export function CustomerProfilePage() {
                         onClick={cancelEditing}
                         disabled={isSaving || isUploadingAvatar}
                       >
-                        Cancel
+                        Hủy chỉnh sửa
                       </Button>
                       <Button
                         form="customer-profile-form"
@@ -420,7 +455,7 @@ export function CustomerProfilePage() {
                         type="submit"
                         disabled={isSaving || isUploadingAvatar}
                       >
-                        Save changes
+                        Lưu thay đổi
                       </Button>
                     </>
                   ) : (
@@ -429,7 +464,7 @@ export function CustomerProfilePage() {
                       variant="secondary"
                       onClick={startEditing}
                     >
-                      Edit profile
+                      Chỉnh sửa hồ sơ
                     </Button>
                   )}
                 </div>
@@ -440,18 +475,18 @@ export function CustomerProfilePage() {
                 {isEditing ? (
                   <div className="grid gap-4">
                     <Input
-                      label="Phone"
+                      label="Số điện thoại"
                       name="phone"
                       onChange={handleCustomerChange}
-                      placeholder="Optional"
+                      placeholder="Chưa cập nhật"
                       value={customerForm.phone}
                       disabled={isSaving || isUploadingAvatar}
                     />
                     <Input
-                      label="Address"
+                      label="Địa chỉ"
                       name="address"
                       onChange={handleCustomerChange}
-                      placeholder="Optional"
+                      placeholder="Chưa cập nhật"
                       value={customerForm.address}
                       disabled={isSaving || isUploadingAvatar}
                     />
@@ -459,16 +494,16 @@ export function CustomerProfilePage() {
                 ) : (
                   <div className="grid gap-3">
                     <ProfileInfoRow
-                      label="Phone"
+                      label="Số điện thoại"
                       value={customerProfile?.phone ?? ""}
-                      description="Useful for shipping contact."
-                      leading="P"
+                      description="Dùng để liên hệ khi nhận hàng."
+                      leading={<Phone size={18} />}
                     />
                     <ProfileInfoRow
-                      label="Address"
+                      label="Địa chỉ"
                       value={customerProfile?.address ?? ""}
-                      description="Saved delivery destination."
-                      leading="A"
+                      description="Thông tin địa chỉ trong hồ sơ của bạn."
+                      leading={<MapPin size={18} />}
                     />
                   </div>
                 )}
@@ -479,7 +514,7 @@ export function CustomerProfilePage() {
 
         {isLoading ? (
           <div className="rounded-panel border border-white/60 bg-white/60 p-6 text-center font-sans text-sm text-gray shadow-[0_16px_40px_rgba(82,128,145,0.16)]">
-            Loading your profile...
+            Đang tải hồ sơ…
           </div>
         ) : null}
       </div>

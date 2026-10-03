@@ -6,10 +6,12 @@ export function FeatureFrame({
   title,
   children,
   customer = false,
+  description,
 }: {
   title: string;
   children: ReactNode;
   customer?: boolean;
+  description?: string;
 }) {
   const user = useAuthStore((s) => s.user);
   const location = useLocation();
@@ -24,7 +26,10 @@ export function FeatureFrame({
     );
   return (
     <main className="feature-page">
-      <h1>{title}</h1>
+      <header className="feature-page-heading">
+        <h1>{title}</h1>
+        {description && <p>{description}</p>}
+      </header>
       {children}
     </main>
   );

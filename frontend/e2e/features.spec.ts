@@ -282,7 +282,7 @@ test("READY customer orders expose QR and an API history", async ({ page }) => {
   await expect(
     page.getByRole("img", { name: "Mã QR nhận hàng" }),
   ).toBeVisible();
-  await expect(page.getByText(/PICKUP_SCHEDULE/)).toBeVisible();
+  await expect(page.getByText("Đã cập nhật lịch nhận hàng")).toBeVisible();
   expect(
     await page.evaluate(() =>
       Object.values(localStorage).some((v) => v.includes("x".repeat(43))),

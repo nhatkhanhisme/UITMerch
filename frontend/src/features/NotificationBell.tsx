@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
+import { CheckCheck, ChevronLeft, ChevronRight, Inbox } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { apiClient } from "../api/client";
@@ -35,6 +36,7 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  const panelId = useId();
   const seen = useRef(new Set<string>());
   const organizer = user?.role === "ORGANIZER";
   const enabled = user?.role === "CUSTOMER" || organizer;
@@ -140,6 +142,7 @@ export function NotificationBell() {
         type="button"
         aria-label="Thông báo"
         aria-expanded={open}
+        aria-controls={panelId}
         className="relative flex size-11 items-center justify-center rounded-full text-black-blue hover:bg-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700"
         onClick={() => setOpen((v) => !v)}
       >
@@ -170,55 +173,101 @@ export function NotificationBell() {
               0,
               (ref.current?.getBoundingClientRect().right ??
                 window.innerWidth) -
-                Math.min(340, window.innerWidth - 24) -
+                Math.min(380, window.innerWidth - 24) -
                 12,
             ),
           }}
-          className="absolute right-0 top-full z-50 w-[min(340px,calc(100vw-24px))] rounded-2xl bg-white p-4 shadow-xl"
+          className="notification-panel"
+          id={panelId}
+          aria-label="Danh sách thông báo"
         >
-          <h2>Thông báo</h2>
-          <div className="feature-actions">
-            <button disabled={all.isPending} onClick={() => all.mutate()}>
-              Đánh dấu tất cả đã đọc
+          <header className="notification-panel-header">
+            <div>
+              <h2>Thông báo</h2>
+              <p>
+                {(count.data ?? 0) > 0
+                  ? `${count.data} thông báo chưa đọc`
+                  : "Bạn đã xem hết thông báo"}
+              </p>
+            </div>
+            <button
+              className="notification-read-all"
+              disabled={all.isPending}
+              onClick={() => all.mutate()}
+              title="Đánh dấu tất cả đã đọc"
+              aria-label="Đánh dấu tất cả đã đọc"
+            >
+              <CheckCheck aria-hidden="true" size={18} />
+              <span>Đọc tất cả</span>
             </button>
-          </div>
+          </header>
           {(q.isError || count.isError) && (
             <FeatureError error={q.error ?? count.error} retry={refresh} />
           )}
           {read.isError && <FeatureError error={read.error} />}
           {all.isError && <FeatureError error={all.error} />}
           {q.isPending ? (
-            <p>Đang tải…</p>
+            <p className="notification-empty" role="status">
+              Đang tải thông báo…
+            </p>
           ) : (
-            <div className="max-h-72 overflow-y-auto">
-              {q.data?.items.length === 0 && <p>Chưa có thông báo.</p>}
+            <div className="notification-list">
+              {q.data?.items.length === 0 && (
+                <div className="notification-empty">
+                  <Inbox aria-hidden="true" size={28} />
+                  <p>Chưa có thông báo.</p>
+                  <span>
+                    Các cập nhật về đơn hàng và tổ chức sẽ xuất hiện tại đây.
+                  </span>
+                </div>
+              )}
               {q.data?.items.map((n) => (
                 <button
                   type="button"
                   disabled={read.isPending}
-                  className={`block w-full border-b p-3 text-left ${n.isRead ? "opacity-70" : "font-semibold"}`}
+                  className={`notification-item ${n.isRead ? "is-read" : "is-unread"}`}
                   key={n.id}
                   onClick={() => read.mutate(n)}
                 >
-                  <p>{n.title}</p>
-                  <p>{n.message}</p>
-                  {n.createdAt && <small>{dateTime(n.createdAt)}</small>}
+                  <span className="notification-dot" aria-hidden="true" />
+                  <span className="min-w-0">
+                    <span className="notification-title">{n.title}</span>
+                    <span className="notification-message">{n.message}</span>
+                    {n.createdAt && (
+                      <time
+                        className="notification-time"
+                        dateTime={n.createdAt}
+                      >
+                        {dateTime(n.createdAt)}
+                      </time>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>
           )}
-          <div className="feature-actions">
-            <button disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
-              Trước
-            </button>
-            <span>Trang {page + 1}</span>
-            <button
-              disabled={!q.data?.meta?.hasNext}
-              onClick={() => setPage((p) => p + 1)}
+          {(page > 0 || q.data?.meta?.hasNext) && (
+            <nav
+              className="notification-pagination"
+              aria-label="Phân trang thông báo"
             >
-              Sau
-            </button>
-          </div>
+              <button
+                aria-label="Trang thông báo trước"
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                <ChevronLeft aria-hidden="true" size={18} /> Trước
+              </button>
+              <span>Trang {page + 1}</span>
+              <button
+                disabled={!q.data?.meta?.hasNext}
+                aria-label="Trang thông báo sau"
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Sau <ChevronRight aria-hidden="true" size={18} />
+              </button>
+            </nav>
+          )}
         </section>
       )}
     </div>

@@ -1,18 +1,22 @@
 import { CustomerPickup, OrderHistoryPanel } from "../features/Pickup";
 import { CampaignOrderNotice } from "../features/Campaigns";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  Clock3,
+  MapPin,
+  Copy,
+  Check,
+  Package,
+} from "lucide-react";
+import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { getApiErrorMessage } from "../api/auth";
 import { cancelCustomerOrder, getCustomerOrder } from "../api/order";
 import { useAuthStore } from "../stores/authStore";
 import { toast } from "../stores/toastStore";
 import type { CancelOrderRequest, OrderResponse } from "../types/shared";
-
-const ShaderBackground = lazy(() =>
-  import("../components/ui/ShaderBackground").then((m) => ({
-    default: m.ShaderBackground,
-  })),
-);
 
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
   currency: "VND",
@@ -67,33 +71,41 @@ function OrderProgressBar({ status }: { status: string }) {
   }
   const currentIdx = STATUS_STEPS.indexOf(status);
   return (
-    <div className="relative flex items-start gap-1">
+    <ol className="order-progress" aria-label="Tiến trình đơn hàng">
       {STATUS_STEPS.map((step, idx) => (
-        <div className="relative flex flex-1 flex-col items-center" key={step}>
+        <li
+          className="relative flex flex-1 flex-col items-center"
+          key={step}
+          aria-current={idx === currentIdx ? "step" : undefined}
+        >
           <div
             className={[
-              "flex size-7 items-center justify-center rounded-full border-2 text-xs font-bold z-10",
+              "flex size-9 items-center justify-center rounded-full border-2 text-sm font-bold z-10",
               idx <= currentIdx
-                ? "border-aqua bg-aqua text-black-blue"
-                : "border-white/50 bg-white/30 text-ink/40",
+                ? "border-cyan-700 bg-cyan-700 text-white"
+                : "border-gray/25 bg-white text-gray",
             ].join(" ")}
           >
-            {idx < currentIdx ? "✓" : idx + 1}
+            {idx < currentIdx ? (
+              <Check aria-hidden="true" size={16} />
+            ) : (
+              idx + 1
+            )}
           </div>
-          <p className="mt-1 text-center text-[10px] text-ink/60 leading-tight">
+          <p className="mt-2 text-center text-xs font-medium text-slate leading-snug sm:text-sm">
             {STATUS_LABELS[step]}
           </p>
           {idx < STATUS_STEPS.length - 1 && (
             <div
               className={[
-                "absolute top-3.5 left-1/2 h-0.5 w-full",
-                idx < currentIdx ? "bg-aqua" : "bg-white/30",
+                "absolute top-[18px] left-1/2 h-0.5 w-full",
+                idx < currentIdx ? "bg-cyan-700" : "bg-gray/20",
               ].join(" ")}
             />
           )}
-        </div>
+        </li>
       ))}
-    </div>
+    </ol>
   );
 }
 
@@ -290,208 +302,252 @@ export function OrderDetailPage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-transparent px-5 pb-16 pt-28 sm:px-8 lg:px-16">
-      <Suspense fallback={<div className="fixed inset-0 bg-[#E9FEFF]" />}>
-        <ShaderBackground />
-      </Suspense>
-
-      <div className="relative z-10 mx-auto max-w-3xl">
-        <div className="mb-6 flex items-center gap-3">
-          <Link
-            className="inline-flex items-center rounded-full border border-white/70 bg-white/65 px-5 py-2.5 text-sm font-bold text-black-blue shadow-glass-inset transition hover:-translate-y-0.5 hover:border-aqua hover:bg-white"
-            to="/orders"
-          >
-            ← Đơn hàng của tôi
-          </Link>
-        </div>
-
+    <main className="customer-order-page">
+      <AmbientBackgroundGradients />
+      <div className="customer-order-shell">
+        <Link className="order-back-link" to="/orders">
+          <ArrowLeft aria-hidden="true" size={18} /> Đơn hàng của tôi
+        </Link>
         {isLoading ? (
-          <div className="py-20 text-center text-sm text-ink/60">Đang tải đơn hàng...</div>
+          <div
+            className="order-card py-16 text-center text-slate"
+            role="status"
+          >
+            Đang tải đơn hàng…
+          </div>
         ) : !order ? (
-          <div className="rounded-panel border border-white/50 bg-white/35 p-8 text-center shadow-glass backdrop-blur-xl">
-            <p className="font-fredoka text-2xl font-bold text-black-blue">Không tìm thấy đơn hàng</p>
-            <Link
-              className="mt-6 inline-block rounded-full bg-black-blue px-8 py-3 text-sm font-bold text-white"
-              to="/orders"
-            >
+          <section className="order-card text-center">
+            <h1 className="text-2xl font-bold">Không tìm thấy đơn hàng</h1>
+            <Link className="feature-button mt-6 inline-flex" to="/orders">
               Xem danh sách đơn
             </Link>
-          </div>
+          </section>
         ) : (
-          <div className="rounded-panel border border-white/50 bg-white/45 shadow-glass backdrop-blur-xl">
-
-            {/* Header — order code + status */}
-            <div className="p-6 sm:p-8">
+          <>
+            <header className="order-card order-overview">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center rounded-full border border-aqua/50 bg-aqua/10 px-2.5 py-0.5 text-xs font-bold uppercase tracking-widest text-black-blue">
-                      Pre-order · Nhận tại trường
-                    </span>
-                  </div>
-                  <p className="mt-2 font-sans text-xs font-semibold uppercase tracking-widest text-ink/50">
-                    Mã đơn hàng
-                  </p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <h1 className="font-fredoka text-3xl font-bold text-black-blue tracking-wide">
+                <div className="min-w-0">
+                  <p className="order-eyebrow">Đơn hàng · Nhận tại trường</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <h1 className="text-2xl font-bold tracking-tight text-black-blue sm:text-3xl">
                       #{order.id.slice(0, 8).toUpperCase()}
                     </h1>
                     <button
-                      className="rounded-full border border-white/60 bg-white/60 px-3 py-1 text-xs font-semibold text-black-blue transition hover:border-aqua hover:bg-white"
+                      className="order-copy"
                       onClick={handleCopyCode}
                       title="Sao chép mã đơn đầy đủ"
                       type="button"
                     >
+                      {copiedCode ? (
+                        <Check aria-hidden="true" size={16} />
+                      ) : (
+                        <Copy aria-hidden="true" size={16} />
+                      )}
                       {copiedCode ? "Đã sao chép!" : "Sao chép"}
                     </button>
                   </div>
-                  <p className="mt-1 font-mono text-xs text-ink/35 select-all">{order.id}</p>
-                  <p className="mt-1 text-xs text-ink/50">Ngày tạo: {formatDateTime(order.createdAt)}</p>
+                  <p className="mt-2 text-sm text-slate">
+                    Ngày tạo: {formatDateTime(order.createdAt)}
+                  </p>
+                  <details className="order-reference">
+                    <summary>Xem mã đơn đầy đủ</summary>
+                    <code>{order.id}</code>
+                  </details>
                 </div>
                 <span
                   className={[
-                    "inline-flex items-center rounded-full border px-4 py-1 text-sm font-semibold",
-                    STATUS_COLORS[order.status] || "bg-white/40 text-ink border-white/40",
+                    "order-status",
+                    STATUS_COLORS[order.status] ||
+                      "border-gray/20 bg-white text-slate",
                   ].join(" ")}
                 >
                   {STATUS_LABELS[order.status] || order.status}
                 </span>
               </div>
-
-              <div className="mt-6">
-                <OrderProgressBar status={order.status} />
-              </div>
-            </div>
-
-            {/* Pickup schedule info */}
-            {order.pickupSchedule && (
-              <div className="border-t border-white/40 p-6 sm:p-8">
-                <h2 className="font-fredoka text-xl font-bold text-black-blue">Lịch nhận hàng</h2>
-                <div className="mt-3 rounded-xl border border-aqua/40 bg-aqua/10 p-4 space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">📅</span>
-                    <span className="font-semibold text-black-blue">
-                      {new Date(order.pickupSchedule.pickupDate).toLocaleDateString("vi-VN", {
-                        weekday: "long", year: "numeric", month: "long", day: "numeric",
-                      })}
-                    </span>
+              <OrderProgressBar status={order.status} />
+              <CampaignOrderNotice orderId={order.id} />
+            </header>
+            <div className="customer-order-layout">
+              <aside
+                className="order-pickup-column"
+                aria-label="Thông tin nhận hàng"
+              >
+                <section className="order-card pickup-schedule">
+                  <div className="panel-heading">
+                    <CalendarDays aria-hidden="true" size={22} />
+                    <h2>Lịch nhận hàng</h2>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">🕐</span>
-                    <span className="text-black-blue">{order.pickupSchedule.pickupTimeSlot}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">📍</span>
-                    <span className="text-black-blue">{order.pickupSchedule.location}</span>
-                  </div>
-                  {order.pickupSchedule.notes && (
-                    <div className="flex items-start gap-2">
-                      <span className="text-base">📝</span>
-                      <span className="text-ink/70">{order.pickupSchedule.notes}</span>
-                    </div>
-                  )}
-                  <p className="mt-2 rounded-lg border border-aqua/30 bg-white/60 px-3 py-2 text-xs font-semibold text-black-blue">
-                    Vui lòng xuất trình mã đơn hàng khi đến nhận: <span className="font-mono font-bold">{order.id.slice(0, 8).toUpperCase()}</span>
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Cancel reason */}
-            {order.status === "CANCELLED" && order.cancelReason && (
-              <div className="border-t border-white/40 p-6 sm:p-8">
-                <h2 className="font-fredoka text-xl font-bold text-black-blue">Lý do huỷ</h2>
-                <div className="mt-3 rounded-xl border border-peach/40 bg-peach/10 p-4 text-sm">
-                  <p className="font-semibold text-black-blue">{order.cancelReason}</p>
-                  {order.cancelReasonNote && (
-                    <p className="mt-1 text-ink/60">{order.cancelReasonNote}</p>
-                  )}
-                  <p className="mt-2 text-xs text-ink/40">
-                    Huỷ bởi: {order.cancelledBy === "customer" ? "Khách hàng" : "Ban tổ chức"}
-                    {order.cancelledAt ? ` · ${formatDateTime(order.cancelledAt)}` : ""}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Items */}
-            <div className="border-t border-white/40 p-6 sm:p-8">
-              <h2 className="font-fredoka text-xl font-bold text-black-blue">Sản phẩm đặt mua</h2>
-              <div className="mt-4 space-y-3">
-                {(order.items ?? []).map((item) => (
-                  <div
-                    className="flex justify-between rounded-xl border border-white/40 bg-white/30 px-4 py-3 text-sm"
-                    key={item.id}
-                  >
-                    <div>
-                      <p className="font-semibold text-black-blue">{item.merchName}</p>
-                      <p className="text-xs text-ink/55">
-                        {formatPrice(item.unitPrice)} × {item.quantity}
+                  {order.pickupSchedule ? (
+                    <>
+                      <dl className="pickup-schedule-details">
+                        <div>
+                          <CalendarDays aria-hidden="true" size={18} />
+                          <div>
+                            <dt>Ngày nhận</dt>
+                            <dd>
+                              {new Date(
+                                order.pickupSchedule.pickupDate,
+                              ).toLocaleDateString("vi-VN", {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </dd>
+                          </div>
+                        </div>
+                        <div>
+                          <Clock3 aria-hidden="true" size={18} />
+                          <div>
+                            <dt>Khung giờ</dt>
+                            <dd>{order.pickupSchedule.pickupTimeSlot}</dd>
+                          </div>
+                        </div>
+                        <div>
+                          <MapPin aria-hidden="true" size={18} />
+                          <div>
+                            <dt>Địa điểm</dt>
+                            <dd>{order.pickupSchedule.location}</dd>
+                          </div>
+                        </div>
+                      </dl>
+                      {order.pickupSchedule.notes && (
+                        <p className="pickup-schedule-note">
+                          {order.pickupSchedule.notes}
+                        </p>
+                      )}
+                      <p className="pickup-help">
+                        Mã đơn:{" "}
+                        <strong>#{order.id.slice(0, 8).toUpperCase()}</strong>.{" "}
+                        {order.status === "READY"
+                          ? "Chuẩn bị mã QR bên dưới khi nhận hàng."
+                          : order.status === "COMPLETED"
+                            ? "Bạn đã nhận hàng."
+                            : order.status === "CANCELLED"
+                              ? "Đơn hàng đã được hủy."
+                              : "Mã QR sẽ xuất hiện khi đơn hàng sẵn sàng nhận."}
                       </p>
-                    </div>
-                    <p className="font-bold text-black-blue">{formatPrice(item.subtotal)}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 flex justify-between border-t border-white/40 pt-4 text-sm font-bold text-black-blue">
-                <span>Tổng cộng</span>
-                <span className="font-fredoka text-xl">{formatPrice(order.totalAmount)}</span>
-              </div>
-            </div>
-
-            {/* Order info */}
-            <div className="border-t border-white/40 p-6 sm:p-8">
-              <h2 className="font-fredoka text-xl font-bold text-black-blue">Thông tin đơn</h2>
-              <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
-                {order.guestName && (
-                  <div>
-                    <p className="text-xs font-semibold text-ink/50">Người đặt</p>
-                    <p className="text-black-blue">{order.guestName}</p>
-                  </div>
+                    </>
+                  ) : (
+                    <p className="panel-description">
+                      Chưa có lịch nhận hàng riêng. Liên hệ tổ chức để biết thời
+                      gian và địa điểm nhận hàng.
+                    </p>
+                  )}
+                </section>
+                {order.status === "READY" && (
+                  <CustomerPickup key={order.id} orderId={order.id} />
                 )}
-                {order.guestPhone && (
-                  <div>
-                    <p className="text-xs font-semibold text-ink/50">Số điện thoại</p>
-                    <p className="text-black-blue">{order.guestPhone}</p>
-                  </div>
-                )}
-                {order.note && (
-                  <div className="sm:col-span-2">
-                    <p className="text-xs font-semibold text-ink/50">Ghi chú</p>
-                    <p className="text-black-blue">{order.note}</p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-xs font-semibold text-ink/50">Thanh toán</p>
-                  <p className="text-black-blue">
-                    {PAYMENT_METHOD_LABELS[order.paymentMethod] ?? order.paymentMethod}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-ink/50">Trạng thái thanh toán</p>
-                  <p className="text-black-blue">
-                    {PAYMENT_STATUS_LABELS[order.paymentStatus] ?? order.paymentStatus}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Cancel button */}
-            {order.status === "PENDING" && (
-              <div className="border-t border-white/40 p-6 sm:p-8">
-                <button
-                  className="rounded-full border border-peach/60 bg-peach/20 px-6 py-2.5 text-sm font-semibold text-black-blue transition hover:bg-peach/40"
-                  onClick={() => setShowCancelModal(true)}
-                  type="button"
+              </aside>
+              <div className="order-main-column">
+                <section
+                  className="order-card"
+                  aria-labelledby="order-items-title"
                 >
-                  Huỷ đơn hàng
-                </button>
+                  <div className="panel-heading">
+                    <Package aria-hidden="true" size={22} />
+                    <h2 id="order-items-title">Sản phẩm đặt mua</h2>
+                  </div>
+                  <div className="order-items">
+                    {(order.items ?? []).map((item) => (
+                      <div className="order-item" key={item.id}>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-black-blue break-words">
+                            {item.merchName}
+                          </p>
+                          <p className="mt-1 text-sm text-slate">
+                            {formatPrice(item.unitPrice)} × {item.quantity}
+                          </p>
+                        </div>
+                        <p className="font-semibold text-black-blue">
+                          {formatPrice(item.subtotal)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="order-total">
+                    <span>Tổng cộng</span>
+                    <strong>{formatPrice(order.totalAmount)}</strong>
+                  </div>
+                </section>
+                <section
+                  className="order-card"
+                  aria-labelledby="order-contact-title"
+                >
+                  <h2 id="order-contact-title">Thông tin đơn hàng</h2>
+                  <dl className="order-info-grid">
+                    <div>
+                      <dt>Người đặt</dt>
+                      <dd>{order.guestName || user.fullName}</dd>
+                    </div>
+                    {order.guestPhone && (
+                      <div>
+                        <dt>Số điện thoại</dt>
+                        <dd>{order.guestPhone}</dd>
+                      </div>
+                    )}
+                    <div>
+                      <dt>Phương thức thanh toán</dt>
+                      <dd>
+                        {order.paymentMethod === "CASH_ON_DELIVERY"
+                          ? "Thanh toán khi nhận hàng"
+                          : (PAYMENT_METHOD_LABELS[order.paymentMethod] ??
+                            order.paymentMethod)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Trạng thái thanh toán</dt>
+                      <dd>
+                        {PAYMENT_STATUS_LABELS[order.paymentStatus] ??
+                          order.paymentStatus}
+                      </dd>
+                    </div>
+                    {order.note && (
+                      <div className="sm:col-span-2">
+                        <dt>Ghi chú</dt>
+                        <dd>{order.note}</dd>
+                      </div>
+                    )}
+                  </dl>
+                  {order.status === "PENDING" && (
+                    <div className="order-cancel-action">
+                      <button
+                        onClick={() => setShowCancelModal(true)}
+                        type="button"
+                      >
+                        Huỷ đơn hàng
+                      </button>
+                    </div>
+                  )}
+                </section>
+                {order.status === "CANCELLED" && order.cancelReason && (
+                  <section className="order-card border-orange-200 bg-orange-50">
+                    <h2>Lý do huỷ</h2>
+                    <p className="mt-3 font-semibold">{order.cancelReason}</p>
+                    {order.cancelReasonNote && (
+                      <p className="mt-2 text-slate">
+                        {order.cancelReasonNote}
+                      </p>
+                    )}
+                    <p className="mt-3 text-sm text-slate">
+                      Huỷ bởi:{" "}
+                      {order.cancelledBy === "customer"
+                        ? "Khách hàng"
+                        : String(order.cancelledBy) === "campaign"
+                          ? "Hệ thống đặt trước"
+                          : "Ban tổ chức"}
+                      {order.cancelledAt
+                        ? ` · ${formatDateTime(order.cancelledAt)}`
+                        : ""}
+                    </p>
+                  </section>
+                )}
+                <OrderHistoryPanel key={order.id} orderId={order.id} />
               </div>
-            )}
-          </div>
+            </div>
+          </>
         )}
       </div>
-
       {showCancelModal && (
         <CancelOrderModal
           isLoading={isCancelling}
@@ -499,7 +555,6 @@ export function OrderDetailPage() {
           onConfirm={handleCancel}
         />
       )}
-      {order && <div className="relative mx-auto max-w-4xl"><CampaignOrderNotice orderId={order.id} />{order.status === "READY" && <CustomerPickup key={order.id} orderId={order.id} />}<OrderHistoryPanel key={order.id} orderId={order.id} /></div>}
     </main>
   );
 }

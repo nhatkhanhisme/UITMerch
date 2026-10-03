@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Bell, Building2, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "../stores/authStore";
@@ -90,13 +91,29 @@ export function RestockPage() {
     },
   });
   return (
-    <FeatureFrame title="Thông báo có hàng" customer>
+    <FeatureFrame
+      title="Thông báo có hàng"
+      description="Quản lý các vật phẩm bạn muốn nhận thông báo khi có hàng trở lại."
+      customer
+    >
       {q.isPending && <FeatureLoading />}
       {q.isError && <FeatureError error={q.error} retry={() => q.refetch()} />}
       {m.isError && <FeatureError error={m.error} />}
-      {q.data?.length === 0 && <p>Bạn chưa đăng ký báo có hàng.</p>}
+      {q.data?.length === 0 && (
+        <section className="feature-empty-state">
+          <Bell aria-hidden="true" />
+          <h2>Bạn chưa đăng ký báo có hàng.</h2>
+          <p>
+            Khi vật phẩm hết hàng, chọn “Báo tôi khi có hàng” để nhận thông báo
+            lúc có thể đặt mua.
+          </p>
+          <Link className="feature-button" to="/merch">
+            Khám phá vật phẩm <ArrowRight aria-hidden="true" size={18} />
+          </Link>
+        </section>
+      )}
       {q.data?.map((s) => (
-        <section className="feature-panel feature-actions" key={s.merchId}>
+        <section className="feature-panel subscription-card" key={s.merchId}>
           <Link to={`/merch/${s.merchId}`}>Xem vật phẩm</Link>
           <span>Đăng ký {dateTime(s.subscribedAt)}</span>
           <label>
@@ -198,17 +215,33 @@ export function FollowingPage() {
     onSettled: () => qc.invalidateQueries({ queryKey: key }),
   });
   return (
-    <FeatureFrame title="Tổ chức đang theo dõi" customer>
-      <p>
-        <Link to="/restock-subscriptions">Quản lý báo có hàng</Link> ·{" "}
+    <FeatureFrame
+      title="Tổ chức đang theo dõi"
+      description="Chọn những cập nhật bạn muốn nhận từ các khoa và câu lạc bộ yêu thích."
+      customer
+    >
+      <nav className="subscription-navigation" aria-label="Quản lý theo dõi">
+        <Link to="/restock-subscriptions">Quản lý báo có hàng</Link>
         <Link to="/reservations">Đơn giữ chỗ</Link>
-      </p>
+      </nav>
       {q.isPending && <FeatureLoading />}
       {q.isError && <FeatureError error={q.error} retry={() => q.refetch()} />}
       {m.isError && <FeatureError error={m.error} />}
-      {q.data?.length === 0 && <p>Bạn chưa theo dõi tổ chức nào.</p>}
+      {q.data?.length === 0 && (
+        <section className="feature-empty-state">
+          <Building2 aria-hidden="true" />
+          <h2>Bạn chưa theo dõi tổ chức nào.</h2>
+          <p>
+            Theo dõi một tổ chức để cập nhật vật phẩm mới và sự kiện của họ ngay
+            tại đây.
+          </p>
+          <Link className="feature-button" to="/organization">
+            Khám phá tổ chức <ArrowRight aria-hidden="true" size={18} />
+          </Link>
+        </section>
+      )}
       {q.data?.map((s) => (
-        <section className="feature-panel feature-actions" key={s.orgId}>
+        <section className="feature-panel subscription-card" key={s.orgId}>
           <Link to={`/organization/${s.orgId}`}>Xem tổ chức</Link>
           {(
             [
