@@ -210,13 +210,14 @@ public class MerchService {
         Map<UUID, Long> allTimeOrders = toOrderCountMap(orderItemRepository.sumQuantityByMerchIds(ids));
         Map<UUID, Long> recentOrders  = toOrderCountMap(orderItemRepository.sumQuantityByMerchIdsSince(ids, thirtyDaysAgo));
 
-        Map<UUID, Category> categoryMap = buildCategoryMap();
-        Map<UUID, List<String>> imageMap = buildImageMap(published);
         LocalDateTime now = LocalDateTime.now();
-
-        return published.stream()
+        List<MerchItem> top = published.stream()
             .sorted(Comparator.comparingDouble(item -> -popularityScore(item, allTimeOrders, recentOrders, now)))
             .limit(10)
+            .toList();
+        Map<UUID, Category> categoryMap = buildCategoryMap();
+        Map<UUID, List<String>> imageMap = buildImageMap(top);
+        return top.stream()
             .map(item -> MerchResponse.from(item, categoryMap.get(item.getCategoryId()), imageMap.get(item.getId())))
             .toList();
     }

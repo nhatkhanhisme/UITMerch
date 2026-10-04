@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 
-/** Exercises an actual deployed V34 -> V43 upgrade in a separate disposable database. */
+/** Exercises an actual deployed V34 -> V45 upgrade in a separate disposable database. */
 @EnabledIfEnvironmentVariable(named="UITMERCH_TEST_DATABASE_URL",matches="jdbc:postgresql:.*")
 class MigrationUpgradeFeatureTest {
     @Test void upgradesBugFixSchemaWithoutChangingStockOrSendingHistoricalPublicationAlerts() throws Exception {
@@ -26,9 +26,12 @@ class MigrationUpgradeFeatureTest {
                 try(Connection db=DriverManager.getConnection(upgrade,"postgres","uitmerch_test_only");Statement sql=db.createStatement()) {
                     try(ResultSet rs=sql.executeQuery("SELECT SUM(stock) FROM merch_items")){rs.next();stock=rs.getLong(1);}
                 }
-                Flyway current=Flyway.configure().dataSource(upgrade,"postgres","uitmerch_test_only").load();
-                assertThat(current.migrate().migrationsExecuted).isEqualTo(9); current.validate();
-                assertThat(current.info().current().getVersion().getVersion()).isEqualTo("43");
+                var configuration=Flyway.configure().dataSource(upgrade,"postgres","uitmerch_test_only");
+                configuration.getPluginRegister().getPlugin(org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension.class)
+                    .setTransactionalLock(false);
+                Flyway current=configuration.load();
+                assertThat(current.migrate().migrationsExecuted).isEqualTo(11); current.validate();
+                assertThat(current.info().current().getVersion().getVersion()).isEqualTo("45");
                 try(Connection db=DriverManager.getConnection(upgrade,"postgres","uitmerch_test_only");Statement sql=db.createStatement()) {
                     try(ResultSet rs=sql.executeQuery("SELECT SUM(stock) FROM merch_items")){rs.next();assertThat(rs.getLong(1)).isEqualTo(stock);}
                     try(ResultSet rs=sql.executeQuery("SELECT COUNT(*) FROM merch_items WHERE status='PUBLISHED' AND NOT publication_announced")){rs.next();assertThat(rs.getLong(1)).isZero();}

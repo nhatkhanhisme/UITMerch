@@ -123,7 +123,10 @@ public class SecurityConfig {
                     .requestMatchers("/").permitAll()
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/v1/public/**").permitAll()
-                    .requestMatchers("/api/v1/categories/**").permitAll();
+                    .requestMatchers("/api/v1/categories/**").permitAll()
+                    // Actuator is framework-owned and has no app controller on
+                    // which to put @PreAuthorize. Keep operator data ADMIN-only.
+                    .requestMatchers("/actuator/**").hasRole("ADMIN");
 
                 // Swagger UI — only opened when explicitly enabled (SWAGGER_ENABLED=true)
                 if (swaggerEnabled) {

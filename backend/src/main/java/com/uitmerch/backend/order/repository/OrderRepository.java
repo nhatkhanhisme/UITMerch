@@ -29,5 +29,14 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
 
     java.util.List<Order> findByPickupScheduleId(UUID pickupScheduleId);
 
+    Page<Order> findByOrgIdAndPickupScheduleId(UUID orgId, UUID pickupScheduleId, Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Query("""
+        SELECT o.pickupScheduleId, COUNT(o) FROM Order o
+        WHERE o.pickupScheduleId IN :scheduleIds GROUP BY o.pickupScheduleId
+        """)
+    java.util.List<Object[]> countByPickupScheduleIds(
+        @org.springframework.data.repository.query.Param("scheduleIds") java.util.List<UUID> scheduleIds);
+
     long countByPickupScheduleId(UUID pickupScheduleId);
 }

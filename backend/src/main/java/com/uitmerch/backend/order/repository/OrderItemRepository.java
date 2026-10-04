@@ -15,6 +15,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
 
     List<OrderItem> findByOrderId(UUID orderId);
 
+    List<OrderItem> findByOrderIdInOrderByCreatedAtAscIdAsc(List<UUID> orderIds);
+
     // Total quantity ordered per merch (non-cancelled orders only)
     @Query(value = """
             SELECT oi.merch_id, SUM(oi.quantity)

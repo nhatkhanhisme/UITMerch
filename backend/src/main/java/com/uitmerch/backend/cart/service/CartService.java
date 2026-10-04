@@ -44,7 +44,10 @@ public class CartService {
 
     @Transactional
     public CartResponse getCart(UUID userId) {
-        Cart cart = findOrCreateActiveCart(userId);
+        // Existing carts need no user write lock. Creation/reactivation still
+        // acquires the lock and rechecks, serializing against add and checkout.
+        Cart cart = cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)
+            .orElseGet(() -> findOrCreateActiveCart(userId));
         return buildCartResponse(cart);
     }
 

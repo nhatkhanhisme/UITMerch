@@ -25,7 +25,10 @@ import com.uitmerch.backend.organization.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -294,11 +297,7 @@ public class OrderService {
             ? orderRepository.findByUserIdAndStatus(userId, statusFilter, pageable)
             : orderRepository.findByUserId(userId, pageable);
 
-        return orders.map(order -> {
-            List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
-            PickupSchedule schedule = loadPickupSchedule(order);
-            return OrderResponse.from(order, items, schedule);
-        });
+        return mapOrderPage(orders, true);
     }
 
     @Transactional(readOnly = true)
@@ -328,11 +327,7 @@ public class OrderService {
             ? orderRepository.findByOrgIdAndStatus(resolvedOrgId, statusFilter, pageable)
             : orderRepository.findByOrgId(resolvedOrgId, pageable);
 
-        return orders.map(order -> {
-            List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
-            PickupSchedule schedule = loadPickupSchedule(order);
-            return OrderResponse.from(order, items, schedule);
-        });
+        return mapOrderPage(orders, true);
     }
 
     @Transactional(readOnly = true)
@@ -483,11 +478,13 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<PickupScheduleResponse> getPickupSchedules(UUID ownerId, UUID orgId, Pageable pageable) {
         Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
-        return pickupScheduleRepository.findByOrgIdOrderByPickupDateDesc(org.getId(), pageable)
-            .map(schedule -> {
-                long count = orderRepository.countByPickupScheduleId(schedule.getId());
-                return PickupScheduleResponse.from(schedule, (int) count);
-            });
+        Page<PickupSchedule> schedules = pickupScheduleRepository.findByOrgIdOrderByPickupDateDesc(org.getId(), pageable);
+        if (schedules.isEmpty()) return schedules.map(schedule -> PickupScheduleResponse.from(schedule, 0));
+        List<UUID> ids = schedules.getContent().stream().map(PickupSchedule::getId).toList();
+        Map<UUID, Long> counts = orderRepository.countByPickupScheduleIds(ids).stream()
+            .collect(Collectors.toMap(row -> (UUID) row[0], row -> ((Number) row[1]).longValue()));
+        return schedules.map(schedule -> PickupScheduleResponse.from(schedule,
+            Math.toIntExact(counts.getOrDefault(schedule.getId(), 0L))));
     }
 
     @Transactional(readOnly = true)
@@ -501,12 +498,30 @@ public class OrderService {
             throw new ResourceNotFoundException("Pickup schedule", scheduleId.toString());
         }
 
-        return orderRepository.findByPickupScheduleId(scheduleId).stream()
-            .map(order -> {
-                List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
-                return OrderResponse.from(order, items, schedule);
-            })
-            .toList();
+        List<Order> orders = orderRepository.findByPickupScheduleId(scheduleId);
+        Map<UUID, List<OrderItem>> items = loadOrderItems(orders);
+        return orders.stream().map(order -> OrderResponse.from(order,
+            items.getOrDefault(order.getId(), List.of()), schedule)).toList();
+    }
+
+    /** Bounded check-in list; the legacy list endpoint remains available during client migration. */
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getPickupScheduleOrderPage(UUID ownerId, UUID orgId, UUID scheduleId, Pageable pageable) {
+        Organization org = organizationService.getOwnOrganizationEntity(ownerId, orgId);
+        PickupSchedule schedule = pickupScheduleRepository.findById(scheduleId)
+            .filter(value -> org.getId().equals(value.getOrgId()))
+            .orElseThrow(() -> new ResourceNotFoundException("Pickup schedule", scheduleId.toString()));
+        Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : Sort.by("createdAt").descending();
+        for (Sort.Order field : sort) {
+            if (!Set.of("createdAt", "id", "status", "totalAmount").contains(field.getProperty())) {
+                throw new ValidationException("Unsupported pickup order sort field: " + field.getProperty());
+            }
+        }
+        if (sort.getOrderFor("id") == null) sort = sort.and(Sort.by("id").descending());
+        Pageable bounded = PageRequest.of(pageable.getPageNumber(), Math.min(pageable.getPageSize(), 100), sort);
+        Page<Order> orders = orderRepository.findByOrgIdAndPickupScheduleId(org.getId(), scheduleId, bounded);
+        Map<UUID, List<OrderItem>> items = loadOrderItems(orders.getContent());
+        return orders.map(order -> OrderResponse.from(order, items.getOrDefault(order.getId(), List.of()), schedule));
     }
 
     // ------------------------------------------------------------------ //
@@ -626,15 +641,38 @@ public class OrderService {
             ? orderRepository.findByStatus(statusFilter, pageable)
             : orderRepository.findAll(pageable);
 
-        return orders.map(order -> {
-            List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
-            return OrderResponse.from(order, items);
-        });
+        return mapOrderPage(orders, false);
     }
 
     // ------------------------------------------------------------------ //
     //  HELPERS
     // ------------------------------------------------------------------ //
+
+    private Page<OrderResponse> mapOrderPage(Page<Order> page, boolean includeSchedules) {
+        if (page.isEmpty()) return new PageImpl<>(List.of(), page.getPageable(), page.getTotalElements());
+        Map<UUID, List<OrderItem>> items = loadOrderItems(page.getContent());
+        Map<UUID, PickupSchedule> schedules = new HashMap<>();
+        if (includeSchedules) {
+            List<UUID> ids = page.getContent().stream().map(Order::getPickupScheduleId)
+                .filter(Objects::nonNull).distinct().toList();
+            if (!ids.isEmpty()) pickupScheduleRepository.findAllById(ids)
+                .forEach(schedule -> schedules.put(schedule.getId(), schedule));
+        }
+        return page.map(order -> OrderResponse.from(order, items.getOrDefault(order.getId(), List.of()),
+            schedules.get(order.getPickupScheduleId())));
+    }
+
+    private Map<UUID, List<OrderItem>> loadOrderItems(List<Order> orders) {
+        if (orders.isEmpty()) return Map.of();
+        List<UUID> ids = orders.stream().map(Order::getId).toList();
+        Map<UUID, List<OrderItem>> items = new HashMap<>();
+        // Also bound IN queries for callers of the transitional, unpaged endpoint.
+        for (int start = 0; start < ids.size(); start += 200) {
+            orderItemRepository.findByOrderIdInOrderByCreatedAtAscIdAsc(ids.subList(start, Math.min(start + 200, ids.size())))
+                .forEach(item -> items.computeIfAbsent(item.getOrderId(), key -> new ArrayList<>()).add(item));
+        }
+        return items;
+    }
 
     /**
      * Valid non-cancel transitions (cancel is handled by dedicated cancel endpoints):

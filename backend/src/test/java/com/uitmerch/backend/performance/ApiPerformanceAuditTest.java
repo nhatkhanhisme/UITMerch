@@ -382,7 +382,10 @@ class ApiPerformanceAuditTest {
                 var summary=summarize(route,samples); summary.put("page_size",size); sizes.add(summary); save(report);
             }
         }
-        report.put("sql_experiments",sqlExperiments());
+        // After optimization migrations are installed, adding a second index
+        // is not an unindexed/indexed comparison. Keep DDL experiments opt-in.
+        report.put("sql_experiments", "true".equals(System.getenv("UITMERCH_PERFORMANCE_SQL_EXPERIMENTS"))
+            ? sqlExperiments() : List.of());
         report.put("finished_at",Instant.now().toString()); save(report);
         assertThat(results).hasSize(routes.size());
         assertThat(results.stream().filter(r->!((List<?>)r.get("errors")).isEmpty()).toList()).as("Every baseline route must have a successful fixture").isEmpty();

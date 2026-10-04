@@ -37,6 +37,11 @@ app:
     secret-key: dev
     public-url: http://localhost/dev-storage
 
+management:
+  health:
+    mail:
+      enabled: false
+
 springdoc:
   swagger-ui:
     enabled: true

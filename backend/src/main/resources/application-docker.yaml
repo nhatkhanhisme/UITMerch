@@ -26,6 +26,11 @@ app:
     expiration: ${APP_JWT_EXPIRATION:86400000}
     refresh-expiration: ${APP_JWT_REFRESH_EXPIRATION:604800000}
 
+management:
+  health:
+    mail:
+      enabled: false
+
 logging:
   level:
     root: INFO

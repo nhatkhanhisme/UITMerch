@@ -166,7 +166,8 @@ public class OrganizerOrderController {
 
     @GetMapping("/pickup-schedules/{scheduleId}/orders")
     @PreAuthorize("hasRole('ORGANIZER')")
-    @Operation(summary = "Get check-in list for a pickup schedule")
+    @Operation(summary = "Get check-in list for a pickup schedule", deprecated = true,
+        description = "Legacy full list. New clients should use /orders/page for bounded pagination.")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getPickupScheduleOrders(
         @PathVariable UUID orgId,
         @PathVariable UUID scheduleId,
@@ -174,5 +175,22 @@ public class OrganizerOrderController {
     ) {
         List<OrderResponse> orders = orderService.getPickupScheduleOrders(UUID.fromString(userId), orgId, scheduleId);
         return ResponseEntity.ok(ApiResponse.success("Check-in list retrieved.", orders));
+    }
+
+    @GetMapping("/pickup-schedules/{scheduleId}/orders/page")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @Operation(summary = "Get paginated check-in list", description = "Defaults to 20 orders; maximum page size 100.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Check-in page retrieved"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Schedule not found or not owned")
+    })
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getPickupScheduleOrderPage(
+        @PathVariable UUID orgId,
+        @PathVariable UUID scheduleId,
+        @ParameterObject @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+        @RequestAttribute("userId") String userId
+    ) {
+        Page<OrderResponse> page = orderService.getPickupScheduleOrderPage(UUID.fromString(userId), orgId, scheduleId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("Check-in page retrieved.", page.getContent(), PaginationMeta.from(page)));
     }
 }

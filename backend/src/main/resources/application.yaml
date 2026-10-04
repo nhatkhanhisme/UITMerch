@@ -76,9 +76,9 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 20000
+      maximum-pool-size: ${APP_DB_POOL_MAX:10}
+      minimum-idle: ${APP_DB_POOL_MIN_IDLE:2}
+      connection-timeout: ${APP_DB_CONNECTION_TIMEOUT_MS:20000}
   
   # JPA & Hibernate Configuration
   # CRITICAL: ddl-auto=none enforces Flyway as the ONLY schema migration tool
@@ -100,12 +100,30 @@ spring:
   # Flyway Configuration - Strict Schema Versioning
   flyway:
     enabled: true
+    postgresql:
+      # Session advisory lock: transactional locks can stall concurrent index builds.
+      transactional-lock: false
     locations: classpath:db/migration
     baseline-on-migrate: false
     validate-on-migrate: true
     out-of-order: false
   
 # OpenAPI/Swagger Documentation — disabled by default in production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 300ms,500ms,1s
+
 # Set SWAGGER_ENABLED=true to re-enable (e.g. for staging environments)
 springdoc:
   swagger-ui:
