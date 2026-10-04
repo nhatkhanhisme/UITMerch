@@ -1,5 +1,6 @@
 package com.uitmerch.backend.common.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -116,7 +117,10 @@ public class SecurityConfig {
             
             // Define authorization rules
             .authorizeHttpRequests(authz -> {
-                authz.requestMatchers("/").permitAll()
+                // Let the servlet container render errors without replacing the
+                // original response with an authentication failure.
+                authz.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                    .requestMatchers("/").permitAll()
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/v1/public/**").permitAll()
                     .requestMatchers("/api/v1/categories/**").permitAll();
