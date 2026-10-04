@@ -1,0 +1,10 @@
+method,path,samples,p50_ms,p95_ms,p99_ms,mean_ms,max_ms,hibernate_statements_mean,bytes_mean,statuses,mode,concurrency,rps,pool_pending_max,pool_active_max,page_size
+GET,/api/v1/customer/orders,30,3.799363,6.276587,7.242636,4.0770681,7.242636,7.0,1231.0,{'200': 30},HTTP + PostgreSQL,,,,,1
+GET,/api/v1/customer/orders,30,9.194351,15.651646,15.828827,10.524414633333333,15.828827,45.0,20641.0,{'200': 30},HTTP + PostgreSQL,,,,,20
+GET,/api/v1/customer/orders,30,20.943166,26.557734,43.846353,21.74786453333333,43.846353,140.0,92096.0,{'200': 30},HTTP + PostgreSQL,,,,,100
+GET,/api/v1/admin/orders,30,3.515768,6.56185,7.18922,3.9331408333333333,7.18922,6.0,1060.0,{'200': 30},HTTP + PostgreSQL,,,,,1
+GET,/api/v1/admin/orders,30,5.959027,8.795423,11.103979,6.519708366666666,11.103979,25.0,17223.0,{'200': 30},HTTP + PostgreSQL,,,,,20
+GET,/api/v1/admin/orders,30,17.294993,23.297901,25.609501,17.5041081,25.609501,105.0,85332.0,{'200': 30},HTTP + PostgreSQL,,,,,100
+GET,/api/v1/public/merch,30,2.649736,6.116837,6.361812,3.3461404999999997,6.361812,3.0,588.0,{'200': 30},HTTP + PostgreSQL,,,,,1
+GET,/api/v1/public/merch,30,2.369982,3.604084,5.655113,2.6442455,5.655113,3.0,7707.0,{'200': 30},HTTP + PostgreSQL,,,,,20
+GET,/api/v1/public/merch,30,3.900179,6.77288,6.809287,4.228608866666667,6.809287,3.0,38278.0,{'200': 30},HTTP + PostgreSQL,,,,,100
