@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, publicClient } from "./client";
 import type {
   ApiResponse,
   CategoryResponse,
@@ -17,7 +17,7 @@ export type GetMerchListParams = {
 };
 
 export async function getPublicMerchList(params?: GetMerchListParams) {
-  const { data } = await apiClient.get<ApiResponse<MerchResponse[]>>(
+  const { data } = await publicClient.get<ApiResponse<MerchResponse[]>>(
     "/api/v1/public/merch",
     { params },
   );
@@ -25,21 +25,21 @@ export async function getPublicMerchList(params?: GetMerchListParams) {
 }
 
 export async function getPopularMerch() {
-  const { data } = await apiClient.get<ApiResponse<MerchResponse[]>>(
+  const { data } = await publicClient.get<ApiResponse<MerchResponse[]>>(
     "/api/v1/public/merch/popular",
   );
   return data;
 }
 
 export async function getPublicMerchDetail(id: string) {
-  const { data } = await apiClient.get<ApiResponse<MerchResponse>>(
+  const { data } = await publicClient.get<ApiResponse<MerchResponse>>(
     `/api/v1/public/merch/${id}`,
   );
   return data;
 }
 
 export async function getCategories() {
-  const { data } = await apiClient.get<ApiResponse<CategoryResponse[]>>(
+  const { data } = await publicClient.get<ApiResponse<CategoryResponse[]>>(
     "/api/v1/categories",
   );
   return data;

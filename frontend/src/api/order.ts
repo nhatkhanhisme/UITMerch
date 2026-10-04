@@ -127,9 +127,15 @@ export async function getPickupSchedules(orgId: string, params?: { page?: number
   return data;
 }
 
-export async function getPickupScheduleOrders(orgId: string, scheduleId: string) {
+export async function getPickupScheduleOrders(
+  orgId: string,
+  scheduleId: string,
+  params: { page?: number; size?: number } = { page: 0, size: 20 },
+  signal?: AbortSignal,
+) {
   const { data } = await apiClient.get<ApiResponse<OrderResponse[]>>(
-    `/api/v1/organizations/${orgId}/pickup-schedules/${scheduleId}/orders`,
+    `/api/v1/organizations/${orgId}/pickup-schedules/${scheduleId}/orders/page`,
+    { params, signal },
   );
   return data;
 }

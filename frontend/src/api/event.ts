@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, publicClient } from "./client";
 import type {
   ApiResponse,
   CreateEventRequest,
@@ -13,7 +13,7 @@ export type GetPublicEventsParams = {
 };
 
 export async function getPublicEvents(params?: GetPublicEventsParams) {
-  const { data } = await apiClient.get<ApiResponse<EventResponse[]>>(
+  const { data } = await publicClient.get<ApiResponse<EventResponse[]>>(
     "/api/v1/public/events",
     { params },
   );
@@ -21,7 +21,7 @@ export async function getPublicEvents(params?: GetPublicEventsParams) {
 }
 
 export async function getPublicEvent(id: string) {
-  const { data } = await apiClient.get<ApiResponse<EventResponse>>(
+  const { data } = await publicClient.get<ApiResponse<EventResponse>>(
     `/api/v1/public/events/${id}`,
   );
   return data;

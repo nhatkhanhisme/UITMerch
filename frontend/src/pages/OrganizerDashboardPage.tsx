@@ -1,6 +1,7 @@
 import { AnalyticsPanel } from "../features/Analytics";
 import { CampaignManagement, CampaignOrderNotice } from "../features/Campaigns";
 import { PickupScanner, OrderHistoryPanel } from "../features/Pickup";
+import { PickupScheduleOrders } from "../features/PickupScheduleOrders";
 import { getCampaignOrderContext } from "../api/campaigns";
 import { useEffect, useState } from "react";
 import { AmbientBackgroundGradients } from "../components/home/AmbientBackgroundGradients";
@@ -30,10 +31,8 @@ import {
 } from "../api/organization";
 import {
   cancelOrgOrder,
-  checkInOrder,
   createPickupSchedule,
   getOrgOrders,
-  getPickupScheduleOrders,
   getPickupSchedules,
   updateOrgOrderStatus,
 } from "../api/order";
@@ -1358,11 +1357,10 @@ function PickupTab({ orgId }: { orgId: string }) {
   const [form, setForm] = useState({ pickupDate: "", pickupTimeSlot: "", location: "", notes: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedSchedule, setExpandedSchedule] = useState<string | null>(null);
-  const [scheduleOrders, setScheduleOrders] = useState<Record<string, OrderResponse[]>>({});
-  const [checkingInId, setCheckingInId] = useState<string | null>(null);
 
   const load = () => {
     setIsLoading(true);
+    setExpandedSchedule(null);
     Promise.all([
       getPickupSchedules(orgId, { size: 50 }),
       getOrgOrders(orgId, { status: "CONFIRMED", size: 100 }),
@@ -1411,36 +1409,6 @@ function PickupTab({ orgId }: { orgId: string }) {
       toast.error(getApiErrorMessage(err));
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const loadScheduleOrders = async (scheduleId: string) => {
-    if (scheduleOrders[scheduleId]) {
-      setExpandedSchedule(expandedSchedule === scheduleId ? null : scheduleId);
-      return;
-    }
-    try {
-      const res = await getPickupScheduleOrders(orgId, scheduleId);
-      setScheduleOrders(prev => ({ ...prev, [scheduleId]: res.data ?? [] }));
-      setExpandedSchedule(scheduleId);
-    } catch (err) {
-      toast.error(getApiErrorMessage(err));
-    }
-  };
-
-  const handleCheckIn = async (orderId: string, scheduleId: string) => {
-    setCheckingInId(orderId);
-    try {
-      const res = await checkInOrder(orgId, orderId);
-      setScheduleOrders(prev => ({
-        ...prev,
-        [scheduleId]: (prev[scheduleId] ?? []).map(o => o.id === orderId ? res.data : o),
-      }));
-      toast.success("Đã check-in đơn hàng.");
-    } catch (err) {
-      toast.error(getApiErrorMessage(err));
-    } finally {
-      setCheckingInId(null);
     }
   };
 
@@ -1582,7 +1550,6 @@ function PickupTab({ orgId }: { orgId: string }) {
         <div className="flex flex-col gap-4">
           {schedules.map(schedule => {
             const isExpanded = expandedSchedule === schedule.id;
-            const orders = scheduleOrders[schedule.id] ?? [];
             return (
               <div className="rounded-panel border border-white/50 bg-white/40 shadow-glass backdrop-blur-xl" key={schedule.id}>
                 <div className="p-5">
@@ -1604,61 +1571,15 @@ function PickupTab({ orgId }: { orgId: string }) {
 
                   <button
                     className="mt-3 text-xs font-semibold text-black-blue underline-offset-2 hover:underline"
-                    onClick={() => loadScheduleOrders(schedule.id)}
+                    aria-expanded={isExpanded}
+                    onClick={() => setExpandedSchedule(current => current === schedule.id ? null : schedule.id)}
                     type="button"
                   >
                     {isExpanded ? "▲ Ẩn danh sách check-in" : "▼ Xem danh sách check-in"}
                   </button>
                 </div>
 
-                {isExpanded && (
-                  <div className="border-t border-white/40 p-5">
-                    <p className="text-xs font-semibold uppercase text-ink/50 mb-3">Danh sách check-in</p>
-                    {orders.length === 0 ? (
-                      <p className="text-xs text-ink/50">Không có đơn hàng trong lịch này.</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {orders.map(order => (
-                          <div
-                            className={[
-                              "flex items-center justify-between rounded-xl border px-4 py-3 text-sm",
-                              order.status === "COMPLETED"
-                                ? "border-green-200 bg-green-50"
-                                : "border-white/50 bg-white/40",
-                            ].join(" ")}
-                            key={order.id}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="font-mono text-sm font-bold text-black-blue">
-                                #{order.id.slice(0, 8).toUpperCase()}
-                              </span>
-                              <div>
-                                <p className="text-xs font-semibold text-black-blue">{order.guestName ?? "Khách hàng"}</p>
-                                {order.guestPhone && <p className="text-xs text-ink/50">{order.guestPhone}</p>}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {order.status === "COMPLETED" ? (
-                                <span className="rounded-full bg-green-100 border border-green-300 px-3 py-1 text-xs font-bold text-green-800">
-                                  ✓ Đã nhận
-                                </span>
-                              ) : (
-                                <button
-                                  className="rounded-full border border-aqua/60 bg-aqua/20 px-4 py-1.5 text-xs font-bold text-black-blue transition hover:bg-aqua/40 disabled:opacity-50"
-                                  disabled={checkingInId === order.id}
-                                  onClick={() => handleCheckIn(order.id, schedule.id)}
-                                  type="button"
-                                >
-                                  {checkingInId === order.id ? "..." : "Check-in"}
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {isExpanded && <PickupScheduleOrders key={`${orgId}:${schedule.id}`} orgId={orgId} scheduleId={schedule.id} />}
               </div>
             );
           })}

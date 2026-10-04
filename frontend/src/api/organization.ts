@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, publicClient } from "./client";
 import type {
   ApiResponse,
   CreateOrganizationRequest,
@@ -14,7 +14,7 @@ export type PaginationParams = {
 };
 
 export async function getPublicOrganizations(params?: PaginationParams) {
-  const { data } = await apiClient.get<ApiResponse<OrganizationResponse[]>>(
+  const { data } = await publicClient.get<ApiResponse<OrganizationResponse[]>>(
     "/api/v1/public/organizations",
     { params },
   );
@@ -22,14 +22,14 @@ export async function getPublicOrganizations(params?: PaginationParams) {
 }
 
 export async function getPublicOrganizationDetail(id: string) {
-  const { data } = await apiClient.get<ApiResponse<OrganizationResponse>>(
+  const { data } = await publicClient.get<ApiResponse<OrganizationResponse>>(
     `/api/v1/public/organizations/${id}`,
   );
   return data;
 }
 
 export async function getPublicOrgMerch(id: string, params?: PaginationParams) {
-  const { data } = await apiClient.get<ApiResponse<MerchResponse[]>>(
+  const { data } = await publicClient.get<ApiResponse<MerchResponse[]>>(
     `/api/v1/public/organizations/${id}/merch`,
     { params },
   );
@@ -37,7 +37,7 @@ export async function getPublicOrgMerch(id: string, params?: PaginationParams) {
 }
 
 export async function getPublicOrgEvents(id: string, params?: PaginationParams) {
-  const { data } = await apiClient.get<ApiResponse<EventResponse[]>>(
+  const { data } = await publicClient.get<ApiResponse<EventResponse[]>>(
     `/api/v1/public/organizations/${id}/events`,
     { params },
   );

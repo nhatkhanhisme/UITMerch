@@ -10,6 +10,16 @@ export const authTransport = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 15000,
 });
+// Use only for catalog reads whose response does not depend on the account.
+export const publicClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: 20000,
+  withCredentials: false,
+});
+publicClient.interceptors.request.use(config => {
+  config.headers.delete("Authorization");
+  return config;
+}, error => { throw error; }, { synchronous: true });
 type Bridge = {
   read: () => AuthSession | null;
   write: (s: AuthSession) => void;

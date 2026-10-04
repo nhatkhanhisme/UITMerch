@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { apiClient, publicClient } from "./client";
 import type { ApiResponse, OrderResponse } from "../types/shared";
 import type {
   Campaign,
@@ -16,20 +16,22 @@ export type CreateCampaignRequest = {
   variants: { merchId: string; label: string }[];
 };
 export async function listCampaigns(page = 0, orgId?: string) {
+  const client = orgId ? apiClient : publicClient;
   const path = orgId
     ? `/api/v1/organizations/${orgId}/campaigns`
     : "/api/v1/public/campaigns";
   return (
-    await apiClient.get<ApiResponse<SpringPage<Campaign>>>(path, {
+    await client.get<ApiResponse<SpringPage<Campaign>>>(path, {
       params: { page, size: 20 },
     })
   ).data.data;
 }
 export async function getCampaign(id: string, orgId?: string) {
+  const client = orgId ? apiClient : publicClient;
   const path = orgId
     ? `/api/v1/organizations/${orgId}/campaigns/${id}`
     : `/api/v1/public/campaigns/${id}`;
-  return (await apiClient.get<ApiResponse<Campaign>>(path)).data.data;
+  return (await client.get<ApiResponse<Campaign>>(path)).data.data;
 }
 export async function createCampaign(
   orgId: string,
