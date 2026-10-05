@@ -194,6 +194,28 @@
         <plugins>
 
             <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>${flyway.version}</version>
+                <configuration>
+                    <url>${env.UITMERCH_MIGRATION_URL}</url>
+                    <user>${env.UITMERCH_MIGRATION_USER}</user>
+                    <password>${env.UITMERCH_MIGRATION_PASSWORD}</password>
+                    <locations><location>filesystem:src/main/resources/db/migration</location></locations>
+                    <validateOnMigrate>true</validateOnMigrate>
+                    <baselineOnMigrate>false</baselineOnMigrate>
+                    <outOfOrder>false</outOfOrder>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-database-postgresql</artifactId>
+                        <version>${flyway.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
