@@ -30,7 +30,7 @@ public class ProdMerchEmbeddingService implements MerchEmbeddingService {
         jdbcTemplate.update(
             """
             INSERT INTO merch_embeddings (merch_id, embedding, updated_at)
-            VALUES (?::uuid, ?::vector, now())
+            VALUES (?::uuid, ?::extensions.vector, now())
             ON CONFLICT (merch_id) DO UPDATE
                 SET embedding = EXCLUDED.embedding, updated_at = now()
             """,
@@ -46,9 +46,9 @@ public class ProdMerchEmbeddingService implements MerchEmbeddingService {
     public List<MerchSimilarityEntry> findNearest(float[] queryVec, int limit) {
         String vec = toVectorString(queryVec);
         return jdbcTemplate.query(
-            "SELECT e.merch_id, e.embedding <=> ?::vector AS distance FROM merch_embeddings e " +
+            "SELECT e.merch_id, e.embedding OPERATOR(extensions.<=>) ?::extensions.vector AS distance FROM merch_embeddings e " +
             "JOIN merch_items m ON m.id = e.merch_id JOIN organizations o ON o.id = m.org_id " +
-            "WHERE m.status = 'PUBLISHED' AND o.status = 'ACTIVE' AND e.embedding <=> ?::vector < ? " +
+            "WHERE m.status = 'PUBLISHED' AND o.status = 'ACTIVE' AND e.embedding OPERATOR(extensions.<=>) ?::extensions.vector < ? " +
             "ORDER BY distance " +
             "LIMIT ?",
             (rs, i) -> new MerchSimilarityEntry(

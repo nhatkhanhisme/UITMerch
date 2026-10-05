@@ -344,6 +344,9 @@ test("two tabs serialize cookie rotation through Web Locks without persisted tok
   const second = await context.newPage();
   await setup(second, "CUSTOMER");
   await second.goto("/following");
+  // Finish both initial bootstraps before replacing routes with expired-token responses.
+  for (const tab of [page, second])
+    await expect(tab.getByRole("checkbox", { name: "Gửi thêm qua email", exact: true })).toBeVisible();
   let rotations = 0;
   let activeRotations = 0, maximumActive = 0;
   const receivedCookies: string[] = [];

@@ -89,3 +89,11 @@ If Docker reports `no space left on device`, free host disk space before rebuild
 Production frontend auth uses the same-origin `/api` reverse proxy configured in `frontend/vercel.json`. Use exact HTTPS frontend origins for `APP_CORS_ALLOWED_ORIGINS`; production refuses localhost HTTP origins. Keep `APP_AUTH_COOKIE_SECURE`, `APP_RATE_LIMIT_SHARED`, and `APP_CHECKOUT_EXPIRY_ENABLED` true. Local HTTP development must explicitly use `APP_ENVIRONMENT=local` and `APP_AUTH_COOKIE_SECURE=false`; never reuse a local signing key in a deployed environment.
 
 Checkout defaults are `APP_CHECKOUT_MAX_QUANTITY=10`, `APP_CHECKOUT_MAX_PENDING=3`, and `APP_CHECKOUT_PENDING_HOURS=48`. Configure real SMTP and validate email delivery before accepting guest checkout. See [security rollout](../docs/reviews/2026-10-05-payment-security/ROLLOUT.md) for V46/V47 migrations, Supabase privileges and rollback gates.
+
+Flyway on Supabase must use a direct or session-mode connection when using session advisory locks for concurrent index migrations. Configure `SPRING_FLYWAY_URL` on pooler port 5432 and its project-qualified `SPRING_FLYWAY_USER`; set `SPRING_FLYWAY_PASSWORD` separately if runtime credentials are embedded in `SPRING_DATASOURCE_URL`. Do not use transaction pooler port 6543 for this migration connection. Keep migration validation enabled.
+
+### Durable security audit retention
+
+`APP_AUDIT_RETENTION_DAYS` defaults to 90; valid values are 1–365. Flyway V50 creates `security_audit.events` in a private schema with RLS and no browser-role grants. Security mutations record route templates, actor UUIDs, HTTP status and validated trace IDs only. An hourly job deletes at most 5,000 expired rows per run; retention cleanup resumes after a sleeping Render instance wakes. PostgreSQL persistence failures increment an internal metric and retain the redacted stdout event without changing the HTTP outcome. The backend database owner can administer these rows; this is durable retention, not immutable external storage.
+
+V49 moves vector and pg_trgm to `extensions` without rebuilding indexes. Native vector writes/searches qualify types and operators explicitly to work through transaction pooling. Hikari sets `public, extensions` for other trusted extension queries; local H2 disables that initialization. Historical migration checksums are unchanged.

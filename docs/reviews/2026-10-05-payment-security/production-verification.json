@@ -1,0 +1,125 @@
+{
+  "httpsApiAuth": {
+    "csrfStatus": 200,
+    "csrfCookieSecureHttpOnly": true,
+    "missingCsrfRejected": true,
+    "loginStatus": 200,
+    "refreshAbsentFromJson": true,
+    "refreshCookie": {
+      "secure": true,
+      "httpOnly": true,
+      "path": "/api/v1/auth",
+      "domain": "uitmerch.vercel.app",
+      "sameSite": "Lax"
+    },
+    "crossOriginRejected": true,
+    "refreshStatus": 200,
+    "refreshRotated": true,
+    "privateApiStatus": 200,
+    "logoutStatus": 200,
+    "refreshAfterLogoutRejected": true,
+    "browserPassed": true,
+    "temporaryAccountRemoved": true
+  },
+  "httpsBrowser": {
+    "loginStatus": 200,
+    "reloadRefreshStatus": 200,
+    "legacyStorageAbsent": true,
+    "refreshHiddenFromDocument": true,
+    "cookie": {
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax",
+      "domain": "uitmerch.vercel.app",
+      "path": "/api/v1/auth"
+    },
+    "anonymousBackendUploadStatus": 401,
+    "svgUploadStatus": 400,
+    "ownerUploadStatus": 200,
+    "logoutStatus": 200,
+    "logoutRedirectsToLogin": true,
+    "cspViolationsObserved": 0
+  },
+  "anonymousStorage": {
+    "avatars": {
+      "status": 400,
+      "apiStatus": "403",
+      "error": "Unauthorized",
+      "denied": true
+    },
+    "org-assets": {
+      "status": 400,
+      "apiStatus": "403",
+      "error": "Unauthorized",
+      "denied": true
+    }
+  },
+  "anonymousDataApi": {
+    "users": {
+      "status": 401,
+      "deniedOrEmpty": true
+    },
+    "orders": {
+      "status": 401,
+      "deniedOrEmpty": true
+    },
+    "auth_sessions": {
+      "status": 401,
+      "deniedOrEmpty": true
+    },
+    "checkout_actors": {
+      "status": 401,
+      "deniedOrEmpty": true
+    }
+  },
+  "smtp": {
+    "status": 202,
+    "smtpAccepted": true
+  },
+  "probeObjectCleanup": {
+    "removed": true
+  },
+  "date": "2026-10-06",
+  "commit": "825c9edaccfd6f3b8272dd41856d3f52cc3de9a3",
+  "frontendUrl": "https://uitmerch.vercel.app",
+  "backendUrl": "https://uitmerch-backend.onrender.com",
+  "latestMigration": 48,
+  "database": {
+    "users": 44,
+    "orders": 29,
+    "publicTables": 34,
+    "rlsEnabledTables": 34,
+    "remainingProbeAccounts": 0
+  },
+  "ci": {
+    "runId": 37346580317,
+    "backend": {
+      "tests": 315,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "testAndSecurityJobs": "passed",
+    "deploymentReadiness": "passed on rerun after environment recovery",
+    "overall": "success"
+  },
+  "followUps": [
+    "Strict script/connect CSP inventory beyond tested customer flows",
+    "Move vector and pg_trgm after impact review",
+    "Centralized audit-log retention configuration",
+    "Provider revocation of historical Gemini keys not independently verified"
+  ],
+  "render": {
+    "latestDeployId": "dep-db1u713ncjis73ava27g",
+    "status": "live",
+    "commit": "825c9edaccfd6f3b8272dd41856d3f52cc3de9a3"
+  },
+  "finalReadiness": {
+    "frontendProxyCsrf": 200,
+    "publicCampaignApi": 200
+  },
+  "currentSourceSecretScan": {
+    "findings": 0,
+    "includesGitHistory": false
+  }
+}

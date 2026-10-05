@@ -15,9 +15,10 @@ class SecurityAuditFilterTest {
             request.addHeader("Authorization","Bearer NEVER_LOG_AUTH");request.addHeader("Cookie","NEVER_LOG_COOKIE");
             request.setQueryString("token=NEVER_LOG_QUERY");request.setContent("NEVER_LOG_PASSWORD".getBytes());
             var response=new MockHttpServletResponse();response.setHeader("X-Trace-Id","audit-trace");
-            new SecurityAuditFilter().doFilter(request,response,(req,res)->{request.setAttribute("userId","actor-id");response.setStatus(403);});
+            var provider=org.mockito.Mockito.mock(org.springframework.beans.factory.ObjectProvider.class);
+            new SecurityAuditFilter(provider).doFilter(request,response,(req,res)->{request.setAttribute("userId","00000000-0000-0000-0000-000000000001");response.setStatus(403);});
             assertThat(appender.list).hasSize(1);
-            assertThat(appender.list.getFirst().getFormattedMessage()).contains("actor=actor-id","status=403","trace=audit-trace")
+            assertThat(appender.list.getFirst().getFormattedMessage()).contains("actor=00000000-0000-0000-0000-000000000001","status=403","trace=audit-trace")
                 .doesNotContain("NEVER_LOG", "token=");
         } finally {logger.detachAppender(appender);appender.stop();}
     }

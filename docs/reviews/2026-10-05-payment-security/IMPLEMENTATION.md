@@ -1,6 +1,6 @@
 # Security hardening — trạng thái triển khai
 
-Ngày 2026-10-05; nhánh local `security/app-hardening`, baseline `cc67c35`. Chưa push hoặc deploy. Review và audit ban đầu trong thư mục này là bằng chứng baseline, không đại diện cho dependency hiện tại.
+Ngày 2026-10-05; nhánh local `security/app-hardening`, baseline `cc67c35`. Đã push/deploy commit `825c9ed` ngày 2026-10-06; xem [production verification](DEPLOYMENT-2026-10-06.md). Review và audit ban đầu trong thư mục này là bằng chứng baseline, không đại diện cho dependency hiện tại.
 
 ## Đã triển khai local
 
@@ -14,14 +14,14 @@ Ngày 2026-10-05; nhánh local `security/app-hardening`, baseline `cc67c35`. Ch�
 
 ## Kiểm chứng
 
-- PostgreSQL backend: 314 tests, 0 failure/error; 1 performance benchmark opt-in skipped. Guard cuối cùng được chạy thêm riêng: 10 tests pass.
+- PostgreSQL backend sau V48 trên CI: 315 tests, 0 failure/error; 1 performance benchmark opt-in skipped. Guard cuối cùng được chạy thêm riêng: 10 tests pass.
 - Frontend: 66 unit tests pass; production TypeScript/Vite build pass.
 - Browser regression: 92 tests pass; 2 test auth-cookie/legacy-storage bổ sung pass khi chạy riêng (tổng 94 browser tests).
 - Dependency scan: 0 unresolved findings, 1 exception build-only có hạn. Source scan hiện tại không có secret finding; không chứng minh lịch sử Git đã sạch.
-- Browser dùng API fixtures local; backend cookie flags/CSRF/rotation được kiểm tra trên PostgreSQL. Chưa kiểm chứng cookie/proxy trên HTTPS production. GitHub CI chưa chạy vì chưa push. GitNexus phát hiện 198 symbol thay đổi trong các file đã theo dõi và 112 luồng liên quan, rủi ro tổng thể CRITICAL; symbol mới chưa có trong index baseline, đã được kiểm tra qua test riêng.
+- Browser dùng API fixtures local; backend cookie flags/CSRF/rotation được kiểm tra trên PostgreSQL. Cookie/proxy/login/reload/logout/upload đã kiểm chứng trên HTTPS production; các job GitHub test/security pass. GitNexus phát hiện 198 symbol thay đổi trong các file đã theo dõi và 112 luồng liên quan, rủi ro tổng thể CRITICAL; symbol mới chưa có trong index baseline, đã được kiểm tra qua test riêng.
 
 ## Chưa được xác minh trên production
 
-Supabase đã truy cập được ref của app sau reconnect; [live audit](SUPABASE-LIVE-AUDIT.md) phát hiện hai policy cho phép anon upload và live mới tới V43. Render yêu cầu đăng nhập lại. Vì vậy grants/RLS/storage policy, profile/env thực tế, proxy/HTTPS headers/cookie và vận hành worker chưa được đánh dấu hoàn tất. Hai Gemini API key từng nằm trong lịch sử Git phải được thu hồi tại provider; xóa khỏi source hiện tại không thu hồi chúng.
+Audit ban đầu phát hiện hai policy anon upload và schema V43. Rollout đã gỡ policy, chạy tới V48, bật RLS trên 34 bảng và kiểm chứng từ chối anonymous Data API/storage. Render và Vercel đã deploy; cookie/proxy/auth/upload HTTPS pass. Scheduler được bật, nhưng chưa chờ đủ 48 giờ để quan sát expiry của đơn mới trên production; logic expiry đã kiểm tra PostgreSQL. Hai Gemini API key từng nằm trong lịch sử Git phải được thu hồi tại provider; xóa khỏi source hiện tại không thu hồi chúng.
 
 Strict script/connect CSP, retention và truy cập audit log tập trung cần kiểm chứng staging/production. Các mục này là release gate trước thanh toán online, xem [ROLLOUT.md](ROLLOUT.md).

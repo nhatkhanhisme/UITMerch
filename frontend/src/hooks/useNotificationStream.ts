@@ -35,7 +35,7 @@ export function useNotificationStream({
     let expiry: ReturnType<typeof setTimeout> | undefined;
     let attempt = 0;
     const base = (
-      (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ""
+      import.meta.env.PROD ? "" : ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "")
     ).replace(/\/$/, "");
     async function connect() {
       if (!active) return;
