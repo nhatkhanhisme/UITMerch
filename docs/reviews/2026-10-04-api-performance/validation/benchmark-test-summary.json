@@ -1,0 +1,24 @@
+[
+  {
+    "run": "before-final",
+    "source_commit": "b6c96cc",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 104.046,
+    "sse_disconnect_access_denied_log_occurrences": 140,
+    "committed_response_log_occurrences": 70
+  },
+  {
+    "run": "after-final",
+    "source_commit": "e3bf4bb",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 74.009,
+    "sse_disconnect_access_denied_log_occurrences": 140,
+    "committed_response_log_occurrences": 70
+  }
+]

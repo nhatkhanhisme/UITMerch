@@ -1,0 +1,64 @@
+{
+  "date_local": "2026-10-05",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "primary_comparison": [
+    "before-final.json",
+    "after-final.json"
+  ],
+  "baseline_commit": "b6c96cc",
+  "optimized_commit": "e3bf4bb",
+  "source_isolated_detached_worktrees": true,
+  "backend_commit": "9ca461f",
+  "frontend_commit": "42edd7e",
+  "measured_requests": 16290,
+  "seed_counts_equal": true,
+  "validation": "All recorded HTTP samples 2xx, no transport errors, sample counts and p95 recalculated",
+  "hardware": "Intel i9-10885H, 8 cores/16 threads; workstation without CPU isolation",
+  "preserved_earlier_runs": [
+    "before-1.json",
+    "after-1.json",
+    "after-2.json"
+  ],
+  "missing_earlier_repeat": "Fourth earlier baseline run completed but its /tmp result was lost across session reset. It is not used for calculations or claimed as a saved comparison.",
+  "runs": [
+    {
+      "started_at": "2026-10-05T06:46:58.910401951Z",
+      "finished_at": "2026-10-05T06:48:26.889763815Z",
+      "java": "21.0.12.1",
+      "database": "PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+      "pool_size": 5,
+      "warmups": 5,
+      "sample_count": 30,
+      "seed_counts": {
+        "users": 23,
+        "organizations": 15,
+        "merch_items": 1037,
+        "merch_images": 1002,
+        "orders": 1011,
+        "order_items": 1018,
+        "events": 111,
+        "notifications": 2002
+      }
+    },
+    {
+      "started_at": "2026-10-05T06:53:12.413339334Z",
+      "finished_at": "2026-10-05T06:54:12.433724836Z",
+      "java": "21.0.12.1",
+      "database": "PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+      "pool_size": 5,
+      "warmups": 5,
+      "sample_count": 30,
+      "seed_counts": {
+        "users": 23,
+        "organizations": 15,
+        "merch_items": 1037,
+        "merch_images": 1002,
+        "orders": 1011,
+        "order_items": 1018,
+        "events": 111,
+        "notifications": 2002
+      }
+    }
+  ],
+  "sse_limit": "Timing ends at first SSE line. Baseline and optimized logs include AccessDeniedException after disconnect of committed stream; this is not validated as correct lifecycle."
+}

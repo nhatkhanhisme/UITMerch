@@ -1,0 +1,317 @@
+{
+  "date_local": "2026-10-05",
+  "backend_suites": [
+    {
+      "name": "com.uitmerch.backend.BackendApplicationTests",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.015"
+    },
+    {
+      "name": "com.uitmerch.backend.admin.service.AdminServiceTest",
+      "tests": "13",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.033"
+    },
+    {
+      "name": "com.uitmerch.backend.auth.service.AuthServiceTest",
+      "tests": "35",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.704"
+    },
+    {
+      "name": "com.uitmerch.backend.cart.service.CartServiceTest",
+      "tests": "13",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.288"
+    },
+    {
+      "name": "com.uitmerch.backend.common.config.GuestOrderSecurityTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.006"
+    },
+    {
+      "name": "com.uitmerch.backend.common.security.JwtTokenProviderTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.012"
+    },
+    {
+      "name": "com.uitmerch.backend.common.service.RateLimiterServiceTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.152"
+    },
+    {
+      "name": "com.uitmerch.backend.common.service.TokenBlacklistServiceTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.139"
+    },
+    {
+      "name": "com.uitmerch.backend.event.service.EventServiceTest",
+      "tests": "19",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.299"
+    },
+    {
+      "name": "com.uitmerch.backend.features.AnalyticsFeatureTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.383"
+    },
+    {
+      "name": "com.uitmerch.backend.features.ApiBoundaryFeatureTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.35"
+    },
+    {
+      "name": "com.uitmerch.backend.features.CampaignContextFeatureTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.293"
+    },
+    {
+      "name": "com.uitmerch.backend.features.CampaignFeatureTest",
+      "tests": "12",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.939"
+    },
+    {
+      "name": "com.uitmerch.backend.features.FollowingFeatureTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.548"
+    },
+    {
+      "name": "com.uitmerch.backend.features.LockingFeatureTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.577"
+    },
+    {
+      "name": "com.uitmerch.backend.features.MigrationUpgradeFeatureTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.495"
+    },
+    {
+      "name": "com.uitmerch.backend.features.PickupFeatureTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.735"
+    },
+    {
+      "name": "com.uitmerch.backend.features.PresentationContractFeatureTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.181"
+    },
+    {
+      "name": "com.uitmerch.backend.features.RestockFeatureTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "7.658"
+    },
+    {
+      "name": "com.uitmerch.backend.merch.repository.MerchItemRepositoryTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.783"
+    },
+    {
+      "name": "com.uitmerch.backend.merch.service.MerchServiceTest",
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.044"
+    },
+    {
+      "name": "com.uitmerch.backend.order.service.OrderServiceTest",
+      "tests": "33",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.91"
+    },
+    {
+      "name": "com.uitmerch.backend.organization.service.OrganizationServiceTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.241"
+    },
+    {
+      "name": "com.uitmerch.backend.performance.ApiObservabilitySecurityTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.42"
+    },
+    {
+      "name": "com.uitmerch.backend.performance.ApiOptimizationRegressionTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "3.775"
+    },
+    {
+      "name": "com.uitmerch.backend.performance.ApiPerformanceAuditTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "1",
+      "time": "0.0"
+    },
+    {
+      "name": "com.uitmerch.backend.performance.PopularMerchReadTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.511"
+    },
+    {
+      "name": "com.uitmerch.backend.performance.PreparedSearchIndexTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.689"
+    },
+    {
+      "name": "com.uitmerch.backend.regression.AiResourceRegressionTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.398"
+    },
+    {
+      "name": "com.uitmerch.backend.regression.DeliveryRegressionTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.967"
+    },
+    {
+      "name": "com.uitmerch.backend.regression.DevAuthRegressionTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "3.451"
+    },
+    {
+      "name": "com.uitmerch.backend.regression.DevDatasourceEnvironmentRegressionTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.003"
+    },
+    {
+      "name": "com.uitmerch.backend.regression.PostgresRegressionTest",
+      "tests": "23",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "16.585"
+    },
+    {
+      "name": "com.uitmerch.backend.regression.SecurityAndMailRegressionTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.625"
+    },
+    {
+      "name": "com.uitmerch.backend.regression.ServerPortEnvironmentRegressionTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.212"
+    },
+    {
+      "name": "com.uitmerch.backend.user.service.UserServiceTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.053"
+    },
+    {
+      "name": "com.uitmerch.backend.wishlist.service.WishlistServiceTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.167"
+    }
+  ],
+  "backend_total": {
+    "tests": 291,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "frontend": {
+    "test_files": 9,
+    "tests_passed": 62,
+    "build": "pass",
+    "playwright_passed": 92,
+    "backend_package": "pass"
+  },
+  "source_backend_commit": "9ca461f",
+  "source_frontend_commit": "42edd7e",
+  "benchmark_enabled_separately": true
+}

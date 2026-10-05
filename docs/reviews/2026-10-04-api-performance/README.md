@@ -1,5 +1,7 @@
 # Báo cáo hiệu năng API UITMerch — 04/10/2026
 
+Kết quả triển khai tiếp theo: [tối ưu và so sánh trước/sau ngày 05/10](OPTIMIZATION-RESULTS.md), [quy trình review/phát hành](ROLLOUT.md), [nội dung PR](PR-DRAFT.md). Các số liệu bên dưới là baseline lịch sử trước tối ưu.
+
 Đã kiểm kê và đo **103 route của các controller ứng dụng**: 49 GET, 30 POST, 17 PATCH, 7 DELETE. Có **8.130 request được lưu số đo**, gồm 3.060 request baseline, 4.800 request tải đồng thời và 270 request kiểm tra kích thước trang. Cả 103 route có fixture thành công; benchmark cuối không có HTTP 4xx/5xx trong các mẫu được báo cáo. Có thêm 560 request warmup, tổng 8.690 HTTP request trong benchmark local.
 
 Kết luận: ưu tiên giảm số lượt đi database, phân trang danh sách đơn của lịch nhận, bỏ khóa user khỏi đường đọc giỏ hàng sau khi tách việc khởi tạo, và kiểm tra khoảng cách mạng backend–database. Bảng đầy đủ ở cuối báo cáo; số đo không được xem là năng lực production.

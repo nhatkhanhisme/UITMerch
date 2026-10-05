@@ -1,0 +1,34 @@
+Changes: 23 files, 111 symbols
+Affected processes: 35
+Risk level: critical
+
+Changed symbols:
+  Class CartService → backend/src/main/java/com/uitmerch/backend/cart/service/CartService.java
+  Method getCart → backend/src/main/java/com/uitmerch/backend/cart/service/CartService.java
+  Class CacheConfig → backend/src/main/java/com/uitmerch/backend/common/config/CacheConfig.java
+  CodeElement cacheManager → backend/src/main/java/com/uitmerch/backend/common/config/CacheConfig.java
+  Method cacheManager → backend/src/main/java/com/uitmerch/backend/common/config/CacheConfig.java
+  Class SecurityConfig → backend/src/main/java/com/uitmerch/backend/common/config/SecurityConfig.java
+  CodeElement filterChain → backend/src/main/java/com/uitmerch/backend/common/config/SecurityConfig.java
+  Method filterChain → backend/src/main/java/com/uitmerch/backend/common/config/SecurityConfig.java
+  Class CategoryService → backend/src/main/java/com/uitmerch/backend/merch/service/CategoryService.java
+  CodeElement @Cacheable → backend/src/main/java/com/uitmerch/backend/merch/service/CategoryService.java
+  Method listAll → backend/src/main/java/com/uitmerch/backend/merch/service/CategoryService.java
+  CodeElement @Transactional → backend/src/main/java/com/uitmerch/backend/merch/service/CategoryService.java
+  Class MerchService → backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java
+  Method getPopularMerch → backend/src/main/java/com/uitmerch/backend/merch/service/MerchService.java
+  Class OrganizerOrderController → backend/src/main/java/com/uitmerch/backend/order/controller/OrganizerOrderController.java
+... and 96 more
+
+Affected execution flows:
+  • ListAllOrders → FindByOrderIdInOrderByCreatedAtAscIdAsc (6 steps) — changed: loadOrderItems, mapOrderPage, getAllOrders, findByOrderIdInOrderByCreatedAtAscIdAsc
+  • ListAllOrders → From (5 steps) — changed: mapOrderPage, getAllOrders
+  • ListAllOrders → FindByStatus (4 steps) — changed: getAllOrders
+  • GetCart → FindByCartId (4 steps) — changed: getCart
+  • GetCart → From (4 steps) — changed: getCart
+  • GetCart → FindByMerchIdInOrderByPosition (4 steps) — changed: getCart
+  • ListCategories → From (3 steps) — changed: listAll
+  • ListCategories → FindAllByOrderByDisplayOrderAsc (3 steps) — changed: listAll
+  • GetPopular → FindAllByStatus (3 steps) — changed: getPopularMerch
+  • GetPopular → SumQuantityByMerchIds (3 steps) — changed: getPopularMerch
+... and 25 more

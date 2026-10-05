@@ -1,0 +1,3011 @@
+{
+  "started_at" : "2026-10-04T17:27:33.504785573Z",
+  "java" : "21.0.12.1",
+  "database" : "PostgreSQL 17.11 (Debian 17.11-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+  "pool_size" : 5,
+  "warmups" : 5,
+  "sample_count" : 30,
+  "routes" : [ {
+    "method" : "GET",
+    "path" : "/",
+    "handler" : "HealthController.health"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/orders",
+    "handler" : "AdminController.listAllOrders"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/organizations",
+    "handler" : "AdminController.listOrganizations"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/admin/organizations/{id}/status",
+    "handler" : "AdminController.updateOrganizationStatus"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/users",
+    "handler" : "AdminController.listUsers"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/admin/users/{id}/active",
+    "handler" : "AdminController.setUserActive"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/admin/users/{id}/role",
+    "handler" : "AdminController.updateUserRole"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/forgot-password",
+    "handler" : "AuthController.forgotPassword"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/login",
+    "handler" : "AuthController.login"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/logout",
+    "handler" : "AuthController.logout"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/refresh",
+    "handler" : "AuthController.refresh"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/register",
+    "handler" : "AuthController.register"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/register/organizer",
+    "handler" : "AuthController.registerOrganizer"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/resend-otp",
+    "handler" : "AuthController.resendOtp"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/reset-password",
+    "handler" : "AuthController.resetPassword"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/verify-email",
+    "handler" : "AuthController.verifyEmail"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/categories",
+    "handler" : "CategoryController.listCategories"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/campaign-reservations",
+    "handler" : "CampaignController.reservations"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/campaigns/{id}/reservations",
+    "handler" : "CampaignController.reserve"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/cart",
+    "handler" : "CartController.getCart"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/cart/checkout",
+    "handler" : "CartController.checkout"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/cart/items",
+    "handler" : "CartController.addItem"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/customer/cart/items/{itemId}",
+    "handler" : "CartController.removeItem"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/cart/items/{itemId}",
+    "handler" : "CartController.updateItem"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/following",
+    "handler" : "FollowController.list"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/customer/following/{orgId}",
+    "handler" : "FollowController.unfollow"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/following/{orgId}",
+    "handler" : "FollowController.preferences"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/following/{orgId}",
+    "handler" : "FollowController.follow"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/notifications",
+    "handler" : "NotificationController.getNotifications"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/notifications/read-all",
+    "handler" : "NotificationController.markAllRead"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/notifications/stream",
+    "handler" : "NotificationController.stream"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/notifications/unread-count",
+    "handler" : "NotificationController.getUnreadCount"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/notifications/{id}/read",
+    "handler" : "NotificationController.markRead"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/orders/instant",
+    "handler" : "CustomerOrderController.createInstantOrder"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders/{id}",
+    "handler" : "CustomerOrderController.getOrder"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/orders/{id}/cancel",
+    "handler" : "CustomerOrderController.cancelOrder"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders/{orderId}/campaign-context",
+    "handler" : "CampaignContextController.customer"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders/{orderId}/history",
+    "handler" : "OrderHistoryController.customer"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/orders/{orderId}/pickup-token",
+    "handler" : "PickupController.issue"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/profile",
+    "handler" : "UserController.getProfile"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/profile",
+    "handler" : "UserController.updateProfile"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/restock-subscriptions",
+    "handler" : "RestockController.list"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/restock-subscriptions",
+    "handler" : "RestockController.subscribe"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/customer/restock-subscriptions/{merchId}",
+    "handler" : "RestockController.unsubscribe"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/wishlist",
+    "handler" : "WishlistController.getWishlist"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/customer/wishlist/{merchId}",
+    "handler" : "WishlistController.removeItem"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/wishlist/{merchId}",
+    "handler" : "WishlistController.addItem"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/dev/otps",
+    "handler" : "DevOtpController.getLatestOtp"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations",
+    "handler" : "OrganizationController.createOrganization"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/mine",
+    "handler" : "OrganizationController.getOwnOrganizations"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{id}",
+    "handler" : "OrganizationController.updateOrganization"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/analytics",
+    "handler" : "AnalyticsController.report"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/campaigns",
+    "handler" : "CampaignController.own"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/campaigns",
+    "handler" : "CampaignController.create"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/campaigns/{campaignId}",
+    "handler" : "CampaignContextController.detail"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/campaigns/{id}/cancel",
+    "handler" : "CampaignController.cancel"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/events",
+    "handler" : "EventController.getOwnEvents"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/events",
+    "handler" : "EventController.createEvent"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}",
+    "handler" : "EventController.deleteEvent"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}",
+    "handler" : "EventController.getOwnEvent"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}",
+    "handler" : "EventController.updateEvent"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}/merch",
+    "handler" : "EventController.attachMerch"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}/merch/{merchId}",
+    "handler" : "EventController.detachMerch"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/merchs",
+    "handler" : "MerchController.getOwnMerch"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/merchs",
+    "handler" : "MerchController.createMerch"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/organizations/{orgId}/merchs/{id}",
+    "handler" : "MerchController.deleteMerch"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/merchs/{id}",
+    "handler" : "MerchController.getOwnMerchItem"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/merchs/{id}",
+    "handler" : "MerchController.updateMerch"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/orders",
+    "handler" : "OrganizerOrderController.getOrgOrders"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/orders/pickup/checkin",
+    "handler" : "PickupController.checkIn"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/orders/pickup/verify",
+    "handler" : "PickupController.verify"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/orders/{id}",
+    "handler" : "OrganizerOrderController.getOrgOrder"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/orders/{id}/cancel",
+    "handler" : "OrganizerOrderController.cancelOrder"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/orders/{id}/checkin",
+    "handler" : "OrganizerOrderController.checkIn"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/orders/{id}/status",
+    "handler" : "OrganizerOrderController.updateOrderStatus"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/orders/{orderId}/campaign-context",
+    "handler" : "CampaignContextController.organizer"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/orders/{orderId}/history",
+    "handler" : "OrderHistoryController.organizer"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/pickup-schedules",
+    "handler" : "OrganizerOrderController.getPickupSchedules"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/pickup-schedules",
+    "handler" : "OrganizerOrderController.createPickupSchedule"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/pickup-schedules/{scheduleId}/orders",
+    "handler" : "OrganizerOrderController.getPickupScheduleOrders"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/pickup-schedules/{scheduleId}/orders/page",
+    "handler" : "OrganizerOrderController.getPickupScheduleOrderPage"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizer/notifications",
+    "handler" : "OrganizerNotificationController.getNotifications"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizer/notifications/read-all",
+    "handler" : "OrganizerNotificationController.markAllRead"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizer/notifications/stream",
+    "handler" : "OrganizerNotificationController.stream"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizer/notifications/unread-count",
+    "handler" : "OrganizerNotificationController.getUnreadCount"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizer/notifications/{id}/read",
+    "handler" : "OrganizerNotificationController.markRead"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/campaigns",
+    "handler" : "CampaignController.list"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/campaigns/{id}",
+    "handler" : "CampaignController.detail"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/events",
+    "handler" : "PublicEventController.getPublicEvents"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/events/{id}",
+    "handler" : "PublicEventController.getPublicEvent"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/popular",
+    "handler" : "PublicMerchController.getPopular"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/public/merch/visual-search",
+    "handler" : "AiMerchSearchController.visualSearch"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/{id}",
+    "handler" : "PublicMerchController.getMerch"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/{merchId}/purchase-context",
+    "handler" : "CampaignContextController.purchase"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/public/orders",
+    "handler" : "PublicOrderController.guestCheckout"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/orders/{orderId}",
+    "handler" : "PublicOrderController.trackGuestOrder"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/public/orders/{orderId}/pickup-receipt",
+    "handler" : "PickupController.receipt"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/public/orders/{orderId}/pickup-token",
+    "handler" : "PickupController.guestToken"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/organizations",
+    "handler" : "PublicOrganizationController.listOrganizations"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/organizations/{id}",
+    "handler" : "PublicOrganizationController.getOrganization"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/organizations/{id}/events",
+    "handler" : "PublicOrganizationController.getOrgEvents"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/organizations/{id}/merch",
+    "handler" : "PublicOrganizationController.getOrgMerch"
+  } ],
+  "baseline" : [ {
+    "method" : "GET",
+    "path" : "/",
+    "handler" : "HealthController.health",
+    "samples" : 30,
+    "p50_ms" : 3.07643,
+    "p95_ms" : 6.09164,
+    "p99_ms" : 6.631242,
+    "mean_ms" : 3.7505854,
+    "max_ms" : 6.631242,
+    "latencies_ms" : [ 5.222624, 3.828587, 3.204062, 2.825562, 3.234152, 6.09164, 3.066792, 3.065298, 2.855384, 5.922652, 4.1311, 3.63289, 2.809928, 6.631242, 4.191268, 5.120206, 5.640738, 3.0141, 2.659969, 2.525344, 2.648286, 5.443352, 2.880161, 3.064667, 3.07643, 3.977494, 4.521395, 2.821904, 2.327138, 2.083197 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 254.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/orders",
+    "handler" : "AdminController.listAllOrders",
+    "samples" : 30,
+    "p50_ms" : 20.247136,
+    "p95_ms" : 47.925341,
+    "p99_ms" : 63.538156,
+    "mean_ms" : 24.8406665,
+    "max_ms" : 63.538156,
+    "latencies_ms" : [ 41.849431, 36.300634, 24.316453, 32.313619, 30.22116, 29.452105, 26.896593, 33.235831, 47.925341, 63.538156, 23.832128, 23.689824, 21.824814, 17.984364, 22.135133, 15.733757, 15.087701, 20.247136, 19.410474, 16.708417, 15.492883, 17.001505, 20.13895, 25.39, 19.844894, 16.228541, 15.818253, 16.182499, 18.445055, 17.974344 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 17370.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/organizations",
+    "handler" : "AdminController.listOrganizations",
+    "samples" : 30,
+    "p50_ms" : 15.633644,
+    "p95_ms" : 21.798025,
+    "p99_ms" : 26.363748,
+    "mean_ms" : 16.537748699999998,
+    "max_ms" : 26.363748,
+    "latencies_ms" : [ 14.681633, 11.91805, 14.533234, 15.841568, 14.640431, 12.29139, 19.940815, 16.865847, 15.608733, 16.362396, 20.562567, 26.363748, 18.477004, 18.091394, 17.91416, 15.633644, 15.125656, 21.60388, 17.909645, 16.681302, 15.175883, 15.856921, 13.854272, 13.943302, 15.135652, 10.291886, 15.265835, 14.75004, 19.013548, 21.798025 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 6044.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/admin/organizations/{id}/status",
+    "handler" : "AdminController.updateOrganizationStatus",
+    "samples" : 30,
+    "p50_ms" : 13.343099,
+    "p95_ms" : 17.568389,
+    "p99_ms" : 18.070912,
+    "mean_ms" : 13.708934166666667,
+    "max_ms" : 18.070912,
+    "latencies_ms" : [ 12.686693, 11.109572, 11.458757, 14.711557, 17.311656, 12.022452, 13.343099, 12.337208, 11.444129, 9.594856, 13.915157, 13.721185, 13.711544, 14.650145, 14.425805, 15.343094, 14.461497, 18.070912, 13.270081, 14.820415, 17.568389, 15.587196, 16.011421, 17.377343, 11.737849, 11.30159, 13.020508, 11.836819, 11.711888, 12.705208 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 450.73333333333335,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/users",
+    "handler" : "AdminController.listUsers",
+    "samples" : 30,
+    "p50_ms" : 10.458722,
+    "p95_ms" : 16.0289,
+    "p99_ms" : 16.029061,
+    "mean_ms" : 10.8040918,
+    "max_ms" : 16.029061,
+    "latencies_ms" : [ 10.887716, 8.257044, 11.76072, 11.876554, 16.0289, 8.077283, 12.160594, 9.273012, 9.637535, 10.091171, 7.86003, 10.04799, 12.931221, 12.862151, 11.71538, 11.710281, 8.484661, 12.652817, 13.016452, 8.329343, 16.029061, 15.660674, 12.802205, 10.663932, 7.614522, 10.146176, 6.832702, 10.458722, 6.924613, 9.329292 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 4840.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/admin/users/{id}/active",
+    "handler" : "AdminController.setUserActive",
+    "samples" : 30,
+    "p50_ms" : 8.685032,
+    "p95_ms" : 10.481803,
+    "p99_ms" : 10.613663,
+    "mean_ms" : 8.4075443,
+    "max_ms" : 10.613663,
+    "latencies_ms" : [ 7.492071, 8.016999, 7.282924, 8.470348, 7.914287, 9.776374, 9.593899, 6.862242, 8.944596, 6.431108, 8.923201, 7.36017, 10.230046, 6.445866, 9.186618, 8.039982, 9.192115, 9.18123, 7.035351, 9.440024, 10.481803, 7.363916, 9.138701, 6.387787, 9.237254, 8.685032, 9.169313, 8.97735, 6.352059, 10.613663 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 343.9,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/admin/users/{id}/role",
+    "handler" : "AdminController.updateUserRole",
+    "samples" : 30,
+    "p50_ms" : 8.518357,
+    "p95_ms" : 9.756992,
+    "p99_ms" : 9.789551,
+    "mean_ms" : 8.239187833333334,
+    "max_ms" : 9.789551,
+    "latencies_ms" : [ 9.789551, 9.563004, 7.013377, 9.466434, 6.631558, 9.679599, 6.851465, 9.422206, 8.667291, 9.474498, 9.181899, 6.842657, 9.756992, 7.060372, 7.069616, 7.663459, 7.049093, 7.125242, 8.113972, 9.069932, 9.342562, 8.518357, 9.202986, 8.16589, 8.952542, 6.206855, 8.909973, 6.318889, 9.14382, 6.921544 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 344.8333333333333,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/forgot-password",
+    "handler" : "AuthController.forgotPassword",
+    "samples" : 30,
+    "p50_ms" : 9.412762,
+    "p95_ms" : 17.424002,
+    "p99_ms" : 22.858297,
+    "mean_ms" : 10.4764127,
+    "max_ms" : 22.858297,
+    "latencies_ms" : [ 12.357054, 17.424002, 14.485698, 13.803883, 10.957478, 15.951669, 22.858297, 16.533084, 11.115237, 7.043835, 10.288929, 6.864606, 8.409282, 9.412762, 8.134199, 9.387347, 11.109137, 6.437885, 10.073282, 6.445533, 9.711632, 6.386926, 7.99815, 6.676463, 10.771265, 9.371226, 12.333765, 7.024602, 8.46797, 6.457183 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 128.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/login",
+    "handler" : "AuthController.login",
+    "samples" : 30,
+    "p50_ms" : 76.150169,
+    "p95_ms" : 87.253646,
+    "p99_ms" : 87.783225,
+    "mean_ms" : 77.28704486666668,
+    "max_ms" : 87.783225,
+    "latencies_ms" : [ 76.150169, 75.027881, 76.124719, 75.914304, 75.331064, 74.584873, 75.470876, 78.402783, 76.257008, 76.510763, 77.143323, 75.07027, 75.017086, 76.662773, 74.019419, 75.173848, 76.164301, 75.846293, 80.476846, 79.901471, 87.783225, 87.253646, 75.342863, 76.693221, 76.870554, 82.905729, 76.041209, 77.928505, 77.400975, 75.141349 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 1182.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/logout",
+    "handler" : "AuthController.logout",
+    "samples" : 30,
+    "p50_ms" : 8.874325,
+    "p95_ms" : 11.198588,
+    "p99_ms" : 11.829999,
+    "mean_ms" : 8.8061728,
+    "max_ms" : 11.829999,
+    "latencies_ms" : [ 10.71577, 10.35439, 8.691428, 7.692308, 9.825504, 9.716114, 10.077112, 9.914431, 9.143103, 9.209591, 8.402962, 7.774766, 11.198588, 8.783628, 9.341296, 6.924628, 6.693012, 6.778659, 9.746277, 7.813133, 7.396822, 9.628381, 8.874325, 10.038178, 8.878333, 8.795051, 7.576462, 6.026261, 6.344672, 11.829999 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 102.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/refresh",
+    "handler" : "AuthController.refresh",
+    "samples" : 30,
+    "p50_ms" : 8.623746,
+    "p95_ms" : 10.461778,
+    "p99_ms" : 13.41414,
+    "mean_ms" : 8.3148215,
+    "max_ms" : 13.41414,
+    "latencies_ms" : [ 8.741973, 8.243084, 8.8627, 8.939966, 8.664614, 9.948811, 9.779093, 7.299831, 8.091484, 9.731705, 10.461778, 9.582644, 9.085041, 7.326319, 5.985763, 8.14456, 8.120632, 9.174422, 8.705774, 5.905027, 6.260444, 6.196793, 8.784827, 8.680406, 8.623746, 7.471017, 5.803161, 6.425418, 13.41414, 6.989472 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 1195.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/register",
+    "handler" : "AuthController.register",
+    "samples" : 30,
+    "p50_ms" : 77.620341,
+    "p95_ms" : 81.36632,
+    "p99_ms" : 88.512545,
+    "mean_ms" : 77.98728176666667,
+    "max_ms" : 88.512545,
+    "latencies_ms" : [ 76.829806, 77.3421, 78.60086, 79.395524, 78.11395, 76.170798, 78.029885, 78.286775, 77.186373, 76.698707, 77.299454, 78.222844, 76.508219, 76.334643, 77.549573, 75.954954, 77.793077, 76.546925, 77.554634, 77.620341, 75.682887, 77.846751, 80.254284, 78.120753, 77.657163, 88.512545, 81.36632, 78.090107, 78.095643, 75.952558 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 139.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/register/organizer",
+    "handler" : "AuthController.registerOrganizer",
+    "samples" : 30,
+    "p50_ms" : 76.337331,
+    "p95_ms" : 87.920095,
+    "p99_ms" : 97.908565,
+    "mean_ms" : 77.51966346666667,
+    "max_ms" : 97.908565,
+    "latencies_ms" : [ 76.357582, 77.69194, 76.351395, 76.211446, 77.427411, 75.137142, 76.818918, 76.773347, 87.920095, 97.908565, 76.239796, 76.754659, 75.315972, 79.090357, 77.303021, 75.305415, 76.255431, 75.713805, 77.097128, 77.651195, 75.961755, 75.894744, 75.513327, 76.601836, 75.990847, 76.078834, 76.941467, 75.345515, 76.337331, 75.599628 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 149.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/resend-otp",
+    "handler" : "AuthController.resendOtp",
+    "samples" : 30,
+    "p50_ms" : 5.795939,
+    "p95_ms" : 9.187335,
+    "p99_ms" : 9.311288,
+    "mean_ms" : 6.122065633333333,
+    "max_ms" : 9.311288,
+    "latencies_ms" : [ 5.798179, 5.154453, 7.803644, 5.939618, 8.214563, 5.30629, 5.709449, 5.795939, 4.575702, 7.754168, 4.598607, 4.547736, 7.566676, 4.961152, 6.265306, 5.722787, 9.187335, 7.913596, 7.165049, 6.006175, 5.336793, 6.687588, 4.965384, 9.311288, 4.771995, 5.902584, 5.346531, 4.370823, 6.32692, 4.655639 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 144.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/reset-password",
+    "handler" : "AuthController.resetPassword",
+    "samples" : 30,
+    "p50_ms" : 75.131226,
+    "p95_ms" : 80.521807,
+    "p99_ms" : 81.048411,
+    "mean_ms" : 75.84565153333332,
+    "max_ms" : 81.048411,
+    "latencies_ms" : [ 79.68646, 77.627379, 75.083582, 74.813988, 76.959941, 75.657791, 75.147318, 76.073312, 75.613774, 80.521807, 74.926245, 75.197178, 75.131226, 77.813094, 74.190725, 74.568973, 81.048411, 75.115525, 74.827413, 76.651509, 74.854014, 74.222222, 74.786889, 74.357999, 74.944112, 73.471948, 76.866669, 75.311573, 74.198889, 75.69958 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 126.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/auth/verify-email",
+    "handler" : "AuthController.verifyEmail",
+    "samples" : 30,
+    "p50_ms" : 4.841968,
+    "p95_ms" : 8.147437,
+    "p99_ms" : 11.364472,
+    "mean_ms" : 5.548420166666667,
+    "max_ms" : 11.364472,
+    "latencies_ms" : [ 5.512571, 4.149878, 4.192551, 5.872751, 4.549772, 5.828552, 7.255196, 4.515372, 11.364472, 7.111419, 4.375685, 4.664163, 5.467964, 4.583812, 5.918013, 4.234703, 5.015756, 4.841968, 3.996216, 7.951413, 4.36876, 5.494282, 5.805518, 6.65945, 4.712848, 4.392164, 8.147437, 4.079772, 6.790186, 4.599961 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 106.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/categories",
+    "handler" : "CategoryController.listCategories",
+    "samples" : 30,
+    "p50_ms" : 1.178708,
+    "p95_ms" : 3.596973,
+    "p99_ms" : 4.18721,
+    "mean_ms" : 1.6468886,
+    "max_ms" : 4.18721,
+    "latencies_ms" : [ 1.159116, 1.262463, 1.120473, 0.940563, 0.964703, 1.178708, 1.083048, 1.020147, 3.194329, 2.952493, 1.495855, 1.344492, 2.378246, 3.596973, 1.508125, 4.18721, 1.892091, 1.281907, 1.368046, 1.144825, 1.079403, 1.149324, 0.929353, 0.960689, 0.964526, 1.003741, 2.872134, 2.847497, 1.419529, 1.106649 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 1241.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/campaign-reservations",
+    "handler" : "CampaignController.reservations",
+    "samples" : 30,
+    "p50_ms" : 6.000699,
+    "p95_ms" : 8.598398,
+    "p99_ms" : 17.095474,
+    "mean_ms" : 6.794305433333333,
+    "max_ms" : 17.095474,
+    "latencies_ms" : [ 8.375785, 8.125563, 5.568306, 6.271318, 6.983818, 5.150673, 7.057128, 5.198148, 4.295027, 6.000699, 5.834924, 5.506732, 8.111494, 4.645543, 4.776999, 7.919605, 8.108823, 8.137286, 5.398456, 4.875571, 8.562149, 4.961119, 8.598398, 17.095474, 4.939133, 6.825564, 6.974494, 5.292007, 8.365734, 5.873193 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 665.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/campaigns/{id}/reservations",
+    "handler" : "CampaignController.reserve",
+    "samples" : 30,
+    "p50_ms" : 16.833346,
+    "p95_ms" : 27.437852,
+    "p99_ms" : 27.577855,
+    "mean_ms" : 17.724942933333335,
+    "max_ms" : 27.577855,
+    "latencies_ms" : [ 17.126953, 18.810817, 19.278972, 22.820215, 27.577855, 23.506671, 19.198818, 21.495533, 27.437852, 17.267993, 14.800556, 14.245894, 16.512252, 13.855247, 16.715019, 13.421364, 17.133547, 18.35703, 15.706317, 17.058108, 16.833346, 12.083845, 15.331276, 16.57511, 14.905049, 16.442397, 15.484443, 18.233697, 18.326044, 15.206068 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 20.0,
+    "bytes_mean" : 1162.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/cart",
+    "handler" : "CartController.getCart",
+    "samples" : 30,
+    "p50_ms" : 15.998242,
+    "p95_ms" : 21.072052,
+    "p99_ms" : 24.982623,
+    "mean_ms" : 14.913843100000001,
+    "max_ms" : 24.982623,
+    "latencies_ms" : [ 16.011667, 20.091391, 18.976822, 17.204364, 16.448752, 16.478916, 17.197698, 18.197365, 24.982623, 16.606673, 14.786426, 11.028804, 16.741226, 16.64317, 21.072052, 10.073101, 14.931388, 15.998242, 15.195859, 16.236523, 12.548167, 18.345773, 11.114076, 9.157559, 13.210336, 10.3497, 9.939324, 12.240523, 7.123141, 8.483632 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 11486.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/cart/checkout",
+    "handler" : "CartController.checkout",
+    "samples" : 30,
+    "p50_ms" : 43.152314,
+    "p95_ms" : 82.039693,
+    "p99_ms" : 85.595273,
+    "mean_ms" : 50.86806873333333,
+    "max_ms" : 85.595273,
+    "latencies_ms" : [ 60.198777, 74.292313, 63.839235, 72.848889, 59.720471, 72.982055, 60.120241, 85.595273, 82.039693, 67.571385, 52.812833, 42.554331, 47.898838, 38.222322, 57.034027, 61.93704, 43.152314, 43.288015, 41.092273, 39.13013, 34.915351, 38.688461, 33.760496, 34.545706, 35.450208, 37.551289, 42.289642, 31.881421, 33.037768, 37.591265 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 76.0,
+    "bytes_mean" : 5727.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/cart/items",
+    "handler" : "CartController.addItem",
+    "samples" : 30,
+    "p50_ms" : 13.257194,
+    "p95_ms" : 17.105953,
+    "p99_ms" : 17.331609,
+    "mean_ms" : 13.138887433333334,
+    "max_ms" : 17.331609,
+    "latencies_ms" : [ 13.319004, 13.257194, 8.786811, 8.532568, 13.634458, 16.020851, 13.412726, 13.352657, 12.864106, 12.67818, 16.348718, 13.458298, 12.957287, 13.620065, 13.546971, 12.236621, 14.742599, 12.278683, 15.866799, 12.029673, 11.384027, 8.20734, 9.69705, 15.271218, 15.572706, 11.472506, 12.103385, 17.331609, 17.105953, 13.07656 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 11.0,
+    "bytes_mean" : 12030.866666666667,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/customer/cart/items/{itemId}",
+    "handler" : "CartController.removeItem",
+    "samples" : 30,
+    "p50_ms" : 6.728897,
+    "p95_ms" : 12.164388,
+    "p99_ms" : 14.120675,
+    "mean_ms" : 7.630913166666667,
+    "max_ms" : 14.120675,
+    "latencies_ms" : [ 8.517407, 4.757812, 7.158323, 5.016785, 11.408673, 6.776779, 6.317587, 6.728897, 4.924413, 5.202245, 6.518625, 4.982605, 8.106837, 4.725149, 8.654295, 5.62414, 11.230644, 8.830046, 10.588681, 5.583979, 5.508921, 7.830428, 10.38881, 5.703886, 10.461143, 12.164388, 6.295768, 14.120675, 9.63349, 5.165964 ],
+    "statuses" : {
+      "204" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 0.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/cart/items/{itemId}",
+    "handler" : "CartController.updateItem",
+    "samples" : 30,
+    "p50_ms" : 10.541827,
+    "p95_ms" : 13.268559,
+    "p99_ms" : 17.922529,
+    "mean_ms" : 10.444472033333334,
+    "max_ms" : 17.922529,
+    "latencies_ms" : [ 11.61461, 10.36009, 7.948925, 10.133655, 10.250679, 6.655602, 9.200195, 7.837852, 10.881003, 11.150987, 11.16023, 7.304699, 11.013711, 17.922529, 11.343701, 13.268559, 7.792646, 11.834499, 10.414004, 9.981772, 7.181125, 11.452595, 10.646636, 8.201533, 11.663726, 11.691957, 12.58065, 10.541827, 8.890294, 12.41387 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 11.0,
+    "bytes_mean" : 11473.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/following",
+    "handler" : "FollowController.list",
+    "samples" : 30,
+    "p50_ms" : 6.095374,
+    "p95_ms" : 11.251198,
+    "p99_ms" : 14.72094,
+    "mean_ms" : 6.7375395,
+    "max_ms" : 14.72094,
+    "latencies_ms" : [ 4.626329, 6.509937, 6.351509, 5.898612, 11.184939, 4.805939, 7.841813, 4.297543, 4.286739, 14.72094, 8.178244, 8.790053, 11.077075, 5.174138, 7.395777, 6.406112, 4.417459, 8.318588, 4.165739, 3.344876, 6.095374, 4.902306, 3.999355, 11.251198, 4.665924, 4.212812, 9.375046, 7.443592, 8.09861, 4.289607 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 411.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/customer/following/{orgId}",
+    "handler" : "FollowController.unfollow",
+    "samples" : 30,
+    "p50_ms" : 5.292375,
+    "p95_ms" : 10.935778,
+    "p99_ms" : 11.052021,
+    "mean_ms" : 5.841295466666667,
+    "max_ms" : 11.052021,
+    "latencies_ms" : [ 4.549345, 4.002151, 10.935778, 5.286972, 7.564896, 6.274108, 8.479114, 4.32713, 4.236864, 6.839758, 4.509751, 4.164226, 7.060472, 4.34326, 3.975942, 9.135927, 6.869663, 11.052021, 4.224251, 5.292375, 5.518322, 6.24511, 7.419954, 4.318689, 4.096603, 5.972455, 3.883337, 3.632662, 5.636675, 5.391053 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 89.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/following/{orgId}",
+    "handler" : "FollowController.preferences",
+    "samples" : 30,
+    "p50_ms" : 4.89131,
+    "p95_ms" : 10.166309,
+    "p99_ms" : 13.311512,
+    "mean_ms" : 5.839190566666667,
+    "max_ms" : 13.311512,
+    "latencies_ms" : [ 6.500433, 4.89131, 6.717273, 4.47058, 3.895534, 6.902965, 4.086399, 3.671661, 6.030397, 4.199032, 3.499727, 3.383723, 6.508816, 4.127022, 4.641984, 10.166309, 5.488939, 9.932754, 9.456831, 6.050642, 4.415187, 13.311512, 7.492904, 4.426488, 4.242959, 5.66986, 4.482003, 5.78648, 6.799915, 3.926078 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 255.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/following/{orgId}",
+    "handler" : "FollowController.follow",
+    "samples" : 30,
+    "p50_ms" : 6.03305,
+    "p95_ms" : 10.40597,
+    "p99_ms" : 11.785637,
+    "mean_ms" : 6.690076933333333,
+    "max_ms" : 11.785637,
+    "latencies_ms" : [ 6.702674, 5.414168, 4.424368, 7.610278, 5.47484, 4.593723, 9.324363, 5.306266, 11.785637, 5.789947, 9.350567, 8.557265, 10.40597, 4.863121, 9.066094, 4.828311, 4.337498, 8.550276, 4.78813, 6.772826, 6.03305, 5.158103, 10.398387, 5.064477, 6.861347, 6.341993, 6.236425, 7.867197, 4.177328, 4.617679 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 247.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/notifications",
+    "handler" : "NotificationController.getNotifications",
+    "samples" : 30,
+    "p50_ms" : 8.333315,
+    "p95_ms" : 12.554026,
+    "p99_ms" : 13.777843,
+    "mean_ms" : 8.472624666666666,
+    "max_ms" : 13.777843,
+    "latencies_ms" : [ 12.168489, 8.836371, 8.736883, 12.554026, 5.77493, 9.043289, 5.619143, 7.607027, 8.333108, 6.648956, 7.995884, 5.242895, 12.379717, 5.444865, 13.777843, 11.512184, 5.66807, 10.396763, 5.153708, 9.267459, 7.061491, 9.449211, 6.309361, 11.452494, 6.130193, 8.97568, 8.80331, 9.739375, 5.7627, 8.333315 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 8815.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/notifications/read-all",
+    "handler" : "NotificationController.markAllRead",
+    "samples" : 30,
+    "p50_ms" : 4.28648,
+    "p95_ms" : 9.132422,
+    "p99_ms" : 13.70964,
+    "mean_ms" : 5.254678166666666,
+    "max_ms" : 13.70964,
+    "latencies_ms" : [ 4.062226, 3.633037, 4.695083, 6.080605, 7.427778, 8.610969, 3.99323, 4.809089, 7.895763, 4.28648, 3.959659, 7.765084, 13.70964, 4.543332, 3.648257, 3.934753, 9.132422, 3.784152, 3.098841, 5.603729, 4.932625, 4.64896, 5.485095, 4.264442, 3.107952, 3.028938, 3.974261, 5.769976, 3.995065, 3.758902 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 132.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/notifications/stream",
+    "handler" : "NotificationController.stream",
+    "samples" : 30,
+    "p50_ms" : 4.241473,
+    "p95_ms" : 11.000103,
+    "p99_ms" : 11.445088,
+    "mean_ms" : 5.775295066666667,
+    "max_ms" : 11.445088,
+    "latencies_ms" : [ 7.074721, 11.000103, 4.393692, 3.657217, 8.028887, 3.890763, 3.416354, 6.408927, 4.147273, 3.555226, 5.393259, 7.036177, 4.223905, 11.445088, 4.241473, 8.500058, 8.661423, 8.161737, 3.804962, 3.633344, 7.778725, 4.174222, 3.65157, 7.06698, 4.052021, 3.967336, 7.425378, 4.126114, 3.541086, 6.800831 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 13.0,
+    "errors" : [ ],
+    "mode" : "SSE first line"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/notifications/unread-count",
+    "handler" : "NotificationController.getUnreadCount",
+    "samples" : 30,
+    "p50_ms" : 4.703551,
+    "p95_ms" : 7.639385,
+    "p99_ms" : 10.414735,
+    "mean_ms" : 5.2562103,
+    "max_ms" : 10.414735,
+    "latencies_ms" : [ 4.156082, 5.091872, 5.013646, 3.811943, 4.17366, 6.888547, 3.94705, 3.412394, 3.676077, 6.618528, 3.636703, 4.567677, 10.414735, 3.77631, 5.193274, 5.842466, 6.506248, 7.635465, 4.403473, 4.060942, 5.517662, 5.972731, 4.058297, 4.703551, 7.639385, 4.478252, 5.913878, 5.893502, 4.06488, 6.617079 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 126.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/notifications/{id}/read",
+    "handler" : "NotificationController.markRead",
+    "samples" : 30,
+    "p50_ms" : 5.106993,
+    "p95_ms" : 10.671941,
+    "p99_ms" : 10.968459,
+    "mean_ms" : 5.6454550333333335,
+    "max_ms" : 10.968459,
+    "latencies_ms" : [ 6.69664, 3.612448, 3.402831, 6.223536, 4.123675, 4.02006, 7.223907, 4.68233, 5.169119, 7.988853, 3.974353, 3.72278, 10.671941, 4.09405, 7.950995, 5.823773, 7.091843, 5.262056, 3.924932, 6.381864, 4.626325, 4.033313, 6.093159, 4.920686, 3.940475, 5.226258, 8.24233, 5.106993, 10.968459, 4.163667 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 402.8666666666667,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders",
+    "samples" : 30,
+    "p50_ms" : 10.613533,
+    "p95_ms" : 22.706628,
+    "p99_ms" : 28.980987,
+    "mean_ms" : 11.768388566666665,
+    "max_ms" : 28.980987,
+    "latencies_ms" : [ 10.228528, 10.613533, 11.162381, 9.470571, 8.415392, 11.088846, 8.036132, 10.988996, 10.542819, 10.187927, 15.7246, 13.858749, 10.179613, 8.235074, 10.933161, 8.316848, 11.329267, 11.921061, 9.018916, 11.792248, 12.182194, 7.653685, 9.408188, 7.867411, 22.706628, 16.813672, 9.823555, 11.750935, 28.980987, 13.81974 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 122721.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/orders/instant",
+    "handler" : "CustomerOrderController.createInstantOrder",
+    "samples" : 30,
+    "p50_ms" : 13.783724,
+    "p95_ms" : 25.465527,
+    "p99_ms" : 29.927965,
+    "mean_ms" : 14.580035066666666,
+    "max_ms" : 29.927965,
+    "latencies_ms" : [ 29.927965, 15.254287, 15.000203, 13.783724, 11.291633, 11.278593, 17.073131, 15.419448, 12.608778, 12.935197, 9.423881, 10.711068, 7.881113, 10.177757, 13.710553, 7.389079, 13.708271, 16.980151, 15.549321, 14.075581, 14.368835, 18.476991, 16.677802, 17.940756, 13.393774, 14.60644, 11.238086, 13.669718, 25.465527, 17.383389 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 12.0,
+    "bytes_mean" : 901.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders/{id}",
+    "handler" : "CustomerOrderController.getOrder",
+    "samples" : 30,
+    "p50_ms" : 6.762271,
+    "p95_ms" : 13.600776,
+    "p99_ms" : 13.938908,
+    "mean_ms" : 7.402232833333333,
+    "max_ms" : 13.938908,
+    "latencies_ms" : [ 13.600776, 13.938908, 7.465019, 9.358201, 7.418017, 8.267744, 7.826573, 6.546623, 5.612005, 4.773509, 9.53175, 4.777676, 3.992907, 5.944992, 5.111804, 7.575891, 5.422392, 4.473486, 5.05529, 9.271029, 5.54304, 10.011039, 5.414894, 6.762271, 7.273205, 6.301561, 12.671159, 5.769954, 8.048212, 8.307058 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 1397.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/orders/{id}/cancel",
+    "handler" : "CustomerOrderController.cancelOrder",
+    "samples" : 30,
+    "p50_ms" : 9.483663,
+    "p95_ms" : 13.228665,
+    "p99_ms" : 15.900932,
+    "mean_ms" : 9.725242433333333,
+    "max_ms" : 15.900932,
+    "latencies_ms" : [ 9.733905, 12.448041, 11.176471, 8.553079, 10.761189, 13.228665, 8.61183, 8.951604, 8.342468, 6.802063, 9.483663, 6.654843, 10.127709, 8.18998, 7.606525, 11.751803, 7.972999, 15.900932, 9.59035, 10.087797, 12.524208, 11.355431, 7.877011, 10.645247, 12.624433, 10.236033, 6.867262, 8.553262, 8.523574, 6.574896 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 16.0,
+    "bytes_mean" : 1007.5333333333333,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders/{orderId}/campaign-context",
+    "handler" : "CampaignContextController.customer",
+    "samples" : 30,
+    "p50_ms" : 6.996163,
+    "p95_ms" : 13.250657,
+    "p99_ms" : 18.804143,
+    "mean_ms" : 7.545241933333333,
+    "max_ms" : 18.804143,
+    "latencies_ms" : [ 9.191668, 4.335957, 4.618592, 7.79748, 4.607923, 8.077511, 5.879285, 3.993862, 8.183115, 4.646468, 3.908767, 12.999814, 4.942847, 13.250657, 10.859377, 5.586837, 8.579554, 6.996163, 6.560443, 8.169528, 4.759649, 8.388717, 4.604823, 5.632248, 11.316642, 7.474357, 7.812077, 18.804143, 8.639439, 5.739315 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 169.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders/{orderId}/history",
+    "handler" : "OrderHistoryController.customer",
+    "samples" : 30,
+    "p50_ms" : 4.511881,
+    "p95_ms" : 9.200861,
+    "p99_ms" : 10.196343,
+    "mean_ms" : 5.1245721,
+    "max_ms" : 10.196343,
+    "latencies_ms" : [ 4.475923, 6.666932, 5.471249, 9.200861, 4.417554, 5.354121, 7.833403, 6.038862, 3.935169, 7.665211, 4.516645, 3.66377, 4.909458, 4.91894, 3.403171, 3.698762, 10.196343, 4.474021, 3.242142, 6.462775, 5.771894, 3.77726, 5.87078, 3.78115, 3.14543, 3.209825, 6.31435, 4.511881, 3.661643, 3.147638 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 415.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/orders/{orderId}/pickup-token",
+    "handler" : "PickupController.issue",
+    "samples" : 15,
+    "p50_ms" : 5.593859,
+    "p95_ms" : 11.031339,
+    "p99_ms" : 11.031339,
+    "mean_ms" : 6.287346666666666,
+    "max_ms" : 11.031339,
+    "latencies_ms" : [ 11.031339, 7.455404, 4.372394, 4.878598, 5.176447, 4.21151, 6.089828, 4.010352, 3.849488, 6.654661, 5.088983, 7.464627, 5.593859, 9.775633, 8.657077 ],
+    "statuses" : {
+      "200" : 15
+    },
+    "hibernate_statements_mean" : 9.0,
+    "bytes_mean" : 279.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/profile",
+    "handler" : "UserController.getProfile",
+    "samples" : 30,
+    "p50_ms" : 4.023571,
+    "p95_ms" : 8.859418,
+    "p99_ms" : 11.435893,
+    "mean_ms" : 5.639306266666666,
+    "max_ms" : 11.435893,
+    "latencies_ms" : [ 3.338113, 3.261789, 7.961203, 3.353219, 2.928649, 4.964842, 8.859418, 3.589173, 6.471322, 6.704242, 6.393751, 8.266662, 3.772306, 3.406252, 7.86034, 3.9985, 3.437014, 6.794466, 4.023571, 3.580005, 3.810847, 8.393481, 3.874462, 3.644076, 11.435893, 3.711214, 8.64087, 8.732215, 8.470711, 5.500582 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 346.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/customer/profile",
+    "handler" : "UserController.updateProfile",
+    "samples" : 30,
+    "p50_ms" : 4.922783,
+    "p95_ms" : 9.371765,
+    "p99_ms" : 11.504509,
+    "mean_ms" : 5.471273833333333,
+    "max_ms" : 11.504509,
+    "latencies_ms" : [ 5.415739, 11.504509, 8.006338, 7.41095, 7.109942, 8.213311, 4.469283, 8.576818, 5.194229, 4.633174, 8.953225, 4.922783, 9.371765, 5.014615, 5.187063, 8.385493, 5.80433, 6.294348, 3.809257, 3.131335, 2.849377, 3.544161, 4.171016, 2.978326, 2.769939, 2.69939, 3.360773, 4.659553, 3.013239, 2.683934 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 352.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/restock-subscriptions",
+    "handler" : "RestockController.list",
+    "samples" : 30,
+    "p50_ms" : 4.040857,
+    "p95_ms" : 7.385326,
+    "p99_ms" : 7.673036,
+    "mean_ms" : 4.364541900000001,
+    "max_ms" : 7.673036,
+    "latencies_ms" : [ 4.857431, 4.831579, 4.13584, 5.503965, 5.628792, 3.124896, 3.147294, 3.318185, 7.673036, 4.030468, 3.49724, 5.378536, 5.321157, 3.280744, 2.844353, 4.181214, 4.122668, 4.040857, 2.847703, 3.037622, 7.385326, 3.756128, 3.12817, 3.835234, 4.76505, 5.340991, 4.414835, 6.64567, 3.52714, 3.334133 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 423.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/restock-subscriptions",
+    "handler" : "RestockController.subscribe",
+    "samples" : 30,
+    "p50_ms" : 5.600954,
+    "p95_ms" : 10.906102,
+    "p99_ms" : 11.334962,
+    "mean_ms" : 6.612953266666667,
+    "max_ms" : 11.334962,
+    "latencies_ms" : [ 5.422657, 6.06518, 11.334962, 8.144482, 7.33493, 8.65917, 5.122643, 5.024953, 7.978658, 5.085703, 4.426247, 7.212723, 4.645323, 4.362284, 7.332267, 4.805066, 4.423451, 10.906102, 4.771809, 8.938518, 8.501901, 9.536428, 5.184145, 9.417145, 5.600954, 4.488846, 8.375909, 4.99085, 4.447522, 5.84777 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 229.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/customer/restock-subscriptions/{merchId}",
+    "handler" : "RestockController.unsubscribe",
+    "samples" : 30,
+    "p50_ms" : 3.769743,
+    "p95_ms" : 9.55494,
+    "p99_ms" : 12.492703,
+    "mean_ms" : 4.822484833333333,
+    "max_ms" : 12.492703,
+    "latencies_ms" : [ 3.769743, 4.770313, 6.437081, 5.580234, 5.652941, 3.759864, 4.255651, 6.887927, 3.683749, 3.496496, 12.492703, 3.611141, 3.451189, 5.592183, 3.725523, 3.274253, 3.231022, 9.55494, 3.65429, 3.308913, 5.566353, 4.811139, 6.897151, 6.251731, 3.029231, 2.945093, 3.028137, 4.401207, 4.52797, 3.026377 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 91.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/wishlist",
+    "handler" : "WishlistController.getWishlist",
+    "samples" : 30,
+    "p50_ms" : 4.749931,
+    "p95_ms" : 8.288963,
+    "p99_ms" : 9.507821,
+    "mean_ms" : 5.545321833333333,
+    "max_ms" : 9.507821,
+    "latencies_ms" : [ 9.507821, 4.273761, 5.445203, 7.075724, 7.304443, 8.288963, 4.435041, 4.576712, 5.906024, 4.058674, 3.839774, 7.454583, 4.18397, 4.168878, 5.897721, 5.837389, 4.111431, 4.749931, 7.944897, 4.21603, 7.520766, 6.931455, 4.774176, 6.995754, 4.130271, 3.542954, 6.709211, 4.061601, 4.112661, 4.303836 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 161.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/customer/wishlist/{merchId}",
+    "handler" : "WishlistController.removeItem",
+    "samples" : 30,
+    "p50_ms" : 4.557777,
+    "p95_ms" : 10.162243,
+    "p99_ms" : 15.30412,
+    "mean_ms" : 5.65934,
+    "max_ms" : 15.30412,
+    "latencies_ms" : [ 6.568544, 4.540444, 3.846912, 4.557777, 5.778874, 7.39115, 7.295329, 4.362107, 4.15529, 15.30412, 6.18586, 3.59024, 3.318498, 3.628244, 7.03186, 3.642112, 10.162243, 4.888874, 4.059122, 6.885078, 4.292337, 9.641858, 4.750399, 3.574078, 5.922523, 5.795234, 3.581764, 6.818818, 4.200162, 4.010349 ],
+    "statuses" : {
+      "204" : 30
+    },
+    "hibernate_statements_mean" : 8.0,
+    "bytes_mean" : 0.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/customer/wishlist/{merchId}",
+    "handler" : "WishlistController.addItem",
+    "samples" : 30,
+    "p50_ms" : 7.512151,
+    "p95_ms" : 13.34232,
+    "p99_ms" : 13.538751,
+    "mean_ms" : 8.490770533333334,
+    "max_ms" : 13.538751,
+    "latencies_ms" : [ 8.812879, 6.38997, 8.71512, 5.97035, 8.687699, 5.97177, 10.199353, 6.273083, 13.34232, 8.057467, 13.247106, 11.415678, 9.457602, 7.281852, 11.105022, 6.985874, 10.457986, 7.134034, 13.538751, 12.21066, 10.599925, 6.308183, 5.889298, 8.82517, 6.001619, 7.512151, 5.958802, 6.04017, 6.717341, 5.615881 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 13.0,
+    "bytes_mean" : 670.8666666666667,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/dev/otps",
+    "handler" : "DevOtpController.getLatestOtp",
+    "samples" : 30,
+    "p50_ms" : 2.598985,
+    "p95_ms" : 5.344933,
+    "p99_ms" : 6.457321,
+    "mean_ms" : 2.994275266666667,
+    "max_ms" : 6.457321,
+    "latencies_ms" : [ 2.568731, 2.600206, 4.022254, 2.474857, 2.521535, 4.353873, 3.360318, 2.313642, 2.16694, 3.120016, 2.636726, 2.08225, 2.053331, 1.955366, 6.457321, 2.684703, 2.078613, 2.099502, 3.776578, 2.598985, 3.913748, 2.985128, 2.288497, 2.090031, 2.220456, 2.121292, 5.344933, 2.599848, 3.455673, 4.882905 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 2.0,
+    "bytes_mean" : 171.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations",
+    "handler" : "OrganizationController.createOrganization",
+    "samples" : 30,
+    "p50_ms" : 5.118051,
+    "p95_ms" : 7.912127,
+    "p99_ms" : 11.213175,
+    "mean_ms" : 5.490398933333334,
+    "max_ms" : 11.213175,
+    "latencies_ms" : [ 3.702773, 3.396477, 5.805159, 4.675724, 6.452981, 7.912127, 3.838393, 3.863096, 6.723613, 4.095489, 3.697296, 3.462703, 7.328424, 3.649134, 3.759975, 6.678254, 5.118051, 4.716976, 11.213175, 4.637474, 6.491485, 7.342709, 6.038618, 7.438536, 4.245561, 5.32509, 7.047461, 4.173039, 5.577857, 6.304318 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 402.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/mine",
+    "handler" : "OrganizationController.getOwnOrganizations",
+    "samples" : 30,
+    "p50_ms" : 9.151518,
+    "p95_ms" : 17.083149,
+    "p99_ms" : 22.287433,
+    "mean_ms" : 9.917705933333334,
+    "max_ms" : 22.287433,
+    "latencies_ms" : [ 11.91815, 8.9046, 10.073195, 12.57367, 9.164385, 13.347137, 10.23507, 15.686588, 7.836721, 10.462482, 6.795515, 10.215714, 6.147939, 8.434122, 6.496076, 11.085674, 6.949985, 11.91749, 12.788124, 5.864275, 7.920646, 5.679801, 5.323994, 8.55858, 17.083149, 6.803031, 11.665175, 6.160939, 9.151518, 22.287433 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 6549.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{id}",
+    "handler" : "OrganizationController.updateOrganization",
+    "samples" : 30,
+    "p50_ms" : 5.812803,
+    "p95_ms" : 10.030009,
+    "p99_ms" : 11.734751,
+    "mean_ms" : 6.411326,
+    "max_ms" : 11.734751,
+    "latencies_ms" : [ 4.919191, 6.338372, 7.244851, 4.407485, 5.734772, 6.825655, 10.030009, 5.642436, 4.547253, 6.56029, 5.515033, 4.481089, 7.398231, 5.812803, 4.897566, 8.75104, 5.106804, 11.734751, 5.443045, 7.036111, 8.017829, 5.882297, 6.306423, 5.09199, 8.318678, 5.384206, 4.627975, 8.648238, 5.122406, 6.512951 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 429.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/analytics",
+    "handler" : "AnalyticsController.report",
+    "samples" : 30,
+    "p50_ms" : 12.189709,
+    "p95_ms" : 16.82688,
+    "p99_ms" : 20.540352,
+    "mean_ms" : 12.582944466666667,
+    "max_ms" : 20.540352,
+    "latencies_ms" : [ 11.957262, 11.858335, 13.383611, 15.80395, 20.540352, 12.592121, 11.980361, 14.092002, 12.189709, 9.78108, 13.56858, 14.766691, 16.82688, 11.748841, 10.832224, 11.759934, 13.216738, 15.298543, 13.67626, 12.723209, 9.844832, 12.490434, 10.72087, 10.993122, 12.528848, 10.336565, 10.508877, 9.818166, 12.655134, 8.994803 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 878.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/campaigns",
+    "handler" : "CampaignController.own",
+    "samples" : 30,
+    "p50_ms" : 4.884418,
+    "p95_ms" : 10.675787,
+    "p99_ms" : 11.891229,
+    "mean_ms" : 5.729709566666667,
+    "max_ms" : 11.891229,
+    "latencies_ms" : [ 3.451806, 3.52734, 5.391808, 3.935497, 3.518346, 3.492246, 8.93025, 3.731707, 3.839975, 6.769272, 6.365574, 4.38131, 8.202604, 4.322417, 4.045802, 7.68044, 4.063755, 4.128155, 8.086403, 3.887506, 3.725987, 5.939044, 6.226215, 7.270763, 11.891229, 5.944551, 6.58635, 10.675787, 6.99473, 4.884418 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 709.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/campaigns",
+    "handler" : "CampaignController.create",
+    "samples" : 30,
+    "p50_ms" : 8.860975,
+    "p95_ms" : 12.207612,
+    "p99_ms" : 14.908819,
+    "mean_ms" : 8.786876233333334,
+    "max_ms" : 14.908819,
+    "latencies_ms" : [ 10.846073, 7.313876, 10.701821, 6.873031, 8.860975, 10.676571, 14.908819, 10.197362, 9.260868, 8.301094, 7.054314, 10.034354, 6.549126, 9.716724, 6.667472, 11.562558, 6.256977, 9.824046, 12.207612, 5.831623, 9.527076, 5.936832, 9.640942, 5.604573, 6.632951, 5.909863, 8.573849, 8.545587, 9.790229, 9.799089 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 12.0,
+    "bytes_mean" : 530.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/campaigns/{campaignId}",
+    "handler" : "CampaignContextController.detail",
+    "samples" : 30,
+    "p50_ms" : 5.072396,
+    "p95_ms" : 8.27236,
+    "p99_ms" : 8.716352,
+    "mean_ms" : 5.540748833333334,
+    "max_ms" : 8.716352,
+    "latencies_ms" : [ 4.381502, 5.778127, 6.456364, 4.260234, 4.831857, 8.716352, 4.263844, 6.07004, 5.669531, 5.663958, 6.680965, 4.053523, 3.348373, 3.495069, 7.054285, 4.61005, 4.589019, 8.08953, 4.161857, 4.853434, 7.708218, 5.181915, 6.136684, 8.27236, 3.936262, 7.356669, 5.072396, 7.315033, 4.404566, 3.810448 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 519.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/campaigns/{id}/cancel",
+    "handler" : "CampaignController.cancel",
+    "samples" : 30,
+    "p50_ms" : 6.28555,
+    "p95_ms" : 9.388638,
+    "p99_ms" : 11.802056,
+    "mean_ms" : 6.9596567,
+    "max_ms" : 11.802056,
+    "latencies_ms" : [ 7.531522, 7.652351, 5.36741, 9.258466, 5.689875, 9.380188, 5.658947, 9.388638, 5.829875, 7.954594, 6.537689, 9.11091, 5.325034, 5.422257, 7.236465, 4.955307, 8.682409, 11.802056, 6.042089, 9.287518, 5.173725, 5.380109, 8.796253, 5.481218, 5.111626, 7.309276, 8.146274, 4.476565, 6.28555, 4.515505 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 11.0,
+    "bytes_mean" : 530.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/events",
+    "handler" : "EventController.getOwnEvents",
+    "samples" : 30,
+    "p50_ms" : 4.485035,
+    "p95_ms" : 10.107392,
+    "p99_ms" : 11.165305,
+    "mean_ms" : 5.543670033333333,
+    "max_ms" : 11.165305,
+    "latencies_ms" : [ 4.448626, 7.338301, 4.721023, 5.96532, 6.335071, 4.311915, 3.576767, 3.51517, 5.429382, 3.999, 3.597781, 3.783693, 7.953558, 4.163833, 4.094027, 7.484926, 4.535178, 3.818036, 10.107392, 5.624306, 8.380112, 6.265149, 11.165305, 4.485035, 4.276192, 7.500767, 4.237304, 4.116135, 7.04834, 4.032457 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 6297.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/events",
+    "handler" : "EventController.createEvent",
+    "samples" : 30,
+    "p50_ms" : 5.062042,
+    "p95_ms" : 9.1792,
+    "p99_ms" : 9.447722,
+    "mean_ms" : 5.8699113333333335,
+    "max_ms" : 9.447722,
+    "latencies_ms" : [ 8.277629, 7.3989, 8.565254, 5.4702, 4.421918, 6.525354, 4.162602, 3.991206, 6.319691, 5.062042, 3.978569, 4.824863, 5.623397, 5.109474, 4.659944, 9.447722, 4.573457, 8.528114, 8.508539, 9.1792, 4.383713, 4.128041, 6.45066, 4.388749, 4.218606, 8.001779, 4.512732, 3.771156, 6.984502, 4.629327 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 10.0,
+    "bytes_mean" : 353.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}",
+    "handler" : "EventController.deleteEvent",
+    "samples" : 30,
+    "p50_ms" : 3.860556,
+    "p95_ms" : 7.240662,
+    "p99_ms" : 8.826313,
+    "mean_ms" : 4.303646033333334,
+    "max_ms" : 8.826313,
+    "latencies_ms" : [ 6.08082, 3.929435, 3.271182, 2.998312, 6.072584, 3.256998, 3.342186, 4.926383, 3.86464, 2.748764, 2.863383, 5.039332, 3.406122, 2.993205, 2.782934, 6.143993, 3.76502, 2.798453, 2.776685, 5.675227, 4.38906, 3.983022, 6.40749, 3.737187, 3.789456, 7.240662, 4.081874, 3.860556, 8.826313, 4.058103 ],
+    "statuses" : {
+      "204" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 0.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}",
+    "handler" : "EventController.getOwnEvent",
+    "samples" : 30,
+    "p50_ms" : 9.669746,
+    "p95_ms" : 16.755986,
+    "p99_ms" : 17.886574,
+    "mean_ms" : 9.5431944,
+    "max_ms" : 17.886574,
+    "latencies_ms" : [ 8.015565, 10.972949, 6.197355, 9.796082, 6.474538, 14.006897, 6.580147, 12.464405, 12.077279, 6.398193, 9.669746, 5.754993, 10.590177, 5.778331, 10.046791, 6.68571, 11.955001, 6.075391, 10.984332, 13.246683, 6.476468, 9.936614, 5.854746, 10.52086, 5.77753, 8.941419, 8.202118, 16.755986, 17.886574, 12.172952 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 8.0,
+    "bytes_mean" : 813.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}",
+    "handler" : "EventController.updateEvent",
+    "samples" : 30,
+    "p50_ms" : 9.602694,
+    "p95_ms" : 18.04601,
+    "p99_ms" : 18.049164,
+    "mean_ms" : 10.8211339,
+    "max_ms" : 18.049164,
+    "latencies_ms" : [ 7.112879, 11.272297, 9.272128, 6.018634, 5.749768, 9.377502, 13.287261, 9.469925, 8.453393, 14.485652, 15.182185, 12.841732, 8.57723, 9.232749, 12.322441, 18.04601, 13.484553, 11.751241, 18.049164, 11.261765, 8.964303, 11.253034, 9.602694, 7.070957, 17.843986, 14.172855, 11.416526, 7.373174, 6.417975, 5.270004 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 10.0,
+    "bytes_mean" : 408.8666666666667,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}/merch",
+    "handler" : "EventController.attachMerch",
+    "samples" : 30,
+    "p50_ms" : 11.708504,
+    "p95_ms" : 17.89609,
+    "p99_ms" : 19.00286,
+    "mean_ms" : 11.631925333333333,
+    "max_ms" : 19.00286,
+    "latencies_ms" : [ 9.916905, 10.998951, 12.709636, 10.380494, 6.877246, 13.222466, 7.805725, 11.708504, 10.207272, 10.143187, 7.357241, 11.99934, 13.252042, 7.069494, 10.958172, 17.89609, 13.206764, 14.363391, 14.056035, 13.016745, 8.806177, 12.64258, 19.00286, 10.061977, 11.757181, 12.80817, 7.885453, 11.221657, 14.599795, 13.02621 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 12.0,
+    "bytes_mean" : 821.8333333333334,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/organizations/{orgId}/events/{id}/merch/{merchId}",
+    "handler" : "EventController.detachMerch",
+    "samples" : 30,
+    "p50_ms" : 10.259611,
+    "p95_ms" : 17.827478,
+    "p99_ms" : 19.374205,
+    "mean_ms" : 10.795972266666666,
+    "max_ms" : 19.374205,
+    "latencies_ms" : [ 7.344206, 5.734383, 9.661466, 6.613966, 11.48168, 9.447494, 6.360527, 8.87955, 5.422701, 8.103212, 7.73127, 9.512752, 15.965166, 13.382506, 11.193389, 10.259611, 11.748131, 7.367166, 19.374205, 11.611632, 17.827478, 7.54753, 13.199039, 13.057015, 14.382045, 14.523668, 15.101151, 12.279477, 11.90373, 6.863022 ],
+    "statuses" : {
+      "204" : 30
+    },
+    "hibernate_statements_mean" : 8.0,
+    "bytes_mean" : 0.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/merchs",
+    "handler" : "MerchController.getOwnMerch",
+    "samples" : 30,
+    "p50_ms" : 8.931487,
+    "p95_ms" : 16.810266,
+    "p99_ms" : 19.782946,
+    "mean_ms" : 9.6236911,
+    "max_ms" : 19.782946,
+    "latencies_ms" : [ 16.810266, 19.782946, 9.467323, 14.184329, 16.309845, 12.653906, 8.652088, 11.185923, 9.177819, 7.949387, 8.931487, 5.711653, 4.693591, 7.811286, 4.911183, 4.937956, 11.973438, 9.531735, 6.570061, 9.716195, 9.322006, 10.913549, 12.260688, 6.731683, 13.269149, 8.558053, 8.766885, 4.959696, 7.076849, 5.889758 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 7886.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/merchs",
+    "handler" : "MerchController.createMerch",
+    "samples" : 30,
+    "p50_ms" : 4.847435,
+    "p95_ms" : 8.519352,
+    "p99_ms" : 10.772913,
+    "mean_ms" : 5.871120566666666,
+    "max_ms" : 10.772913,
+    "latencies_ms" : [ 4.731456, 7.489355, 4.252082, 4.269659, 6.810352, 4.288932, 4.665489, 7.271331, 4.847435, 4.58429, 10.772913, 5.186997, 8.519352, 7.290604, 8.057511, 4.931447, 4.523899, 6.407126, 4.266387, 4.438113, 6.606819, 4.421394, 3.582914, 3.929089, 7.735347, 4.620775, 7.663783, 7.815689, 4.519576, 7.633501 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 424.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "DELETE",
+    "path" : "/api/v1/organizations/{orgId}/merchs/{id}",
+    "handler" : "MerchController.deleteMerch",
+    "samples" : 30,
+    "p50_ms" : 3.565911,
+    "p95_ms" : 6.831376,
+    "p99_ms" : 7.401695,
+    "mean_ms" : 4.2582365,
+    "max_ms" : 7.401695,
+    "latencies_ms" : [ 3.084, 4.687401, 3.68275, 3.237928, 3.138136, 5.201622, 3.860885, 3.373873, 3.425892, 7.401695, 3.560574, 5.984168, 5.739844, 5.218198, 4.578989, 3.565911, 3.20408, 6.017272, 3.473814, 3.278956, 3.144379, 5.871735, 3.465686, 2.960505, 4.52343, 4.800383, 3.385931, 3.246267, 6.831376, 3.801415 ],
+    "statuses" : {
+      "204" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 0.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/merchs/{id}",
+    "handler" : "MerchController.getOwnMerchItem",
+    "samples" : 30,
+    "p50_ms" : 3.91586,
+    "p95_ms" : 8.044233,
+    "p99_ms" : 15.878301,
+    "mean_ms" : 4.7109583,
+    "max_ms" : 15.878301,
+    "latencies_ms" : [ 6.621333, 3.703222, 15.878301, 4.331034, 5.4796, 4.680665, 3.097552, 2.706528, 4.79333, 5.851999, 3.060814, 2.690745, 2.580532, 5.161604, 3.594372, 4.904044, 4.191601, 4.643011, 3.209081, 3.022739, 2.838151, 6.135755, 4.114417, 3.427845, 3.524607, 8.044233, 3.74065, 3.740167, 7.644957, 3.91586 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 520.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/merchs/{id}",
+    "handler" : "MerchController.updateMerch",
+    "samples" : 30,
+    "p50_ms" : 10.074319,
+    "p95_ms" : 19.659002,
+    "p99_ms" : 19.833054,
+    "mean_ms" : 11.035964633333332,
+    "max_ms" : 19.833054,
+    "latencies_ms" : [ 10.074319, 7.214271, 7.656604, 9.856518, 6.940725, 8.942599, 11.579807, 6.643971, 7.546508, 6.48196, 7.745266, 7.272092, 10.391165, 6.05552, 13.004039, 13.403708, 16.309297, 13.89464, 9.53838, 8.954651, 12.533311, 14.318357, 11.733896, 19.833054, 14.003071, 11.741313, 7.581594, 13.541974, 16.627327, 19.659002 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 12.0,
+    "bytes_mean" : 475.76666666666665,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/orders",
+    "handler" : "OrganizerOrderController.getOrgOrders",
+    "samples" : 30,
+    "p50_ms" : 6.643546,
+    "p95_ms" : 11.648457,
+    "p99_ms" : 13.85688,
+    "mean_ms" : 7.262651866666667,
+    "max_ms" : 13.85688,
+    "latencies_ms" : [ 5.773599, 13.85688, 8.45196, 11.648457, 11.089828, 5.631501, 10.262921, 6.988998, 10.015493, 5.004557, 8.745498, 4.821478, 4.482307, 11.072536, 4.650353, 7.169273, 6.643546, 9.883081, 5.18664, 4.5386, 7.653148, 4.810089, 4.538224, 7.768124, 4.849396, 4.551422, 7.594738, 4.705561, 4.434042, 11.057306 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 17404.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/orders/pickup/checkin",
+    "handler" : "PickupController.checkIn",
+    "samples" : 30,
+    "p50_ms" : 8.446751,
+    "p95_ms" : 12.212334,
+    "p99_ms" : 13.148883,
+    "mean_ms" : 8.774090966666668,
+    "max_ms" : 13.148883,
+    "latencies_ms" : [ 6.816622, 11.654878, 9.014285, 9.971347, 10.394307, 8.446751, 6.503229, 9.747483, 13.148883, 10.576531, 11.723642, 8.8641, 6.772931, 9.809295, 7.716778, 6.463288, 12.212334, 9.372552, 11.631986, 6.866153, 7.915529, 7.61876, 5.750809, 7.163011, 5.689027, 10.240192, 7.558195, 8.527809, 7.045943, 8.006079 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 18.0,
+    "bytes_mean" : 965.7,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/orders/pickup/verify",
+    "handler" : "PickupController.verify",
+    "samples" : 30,
+    "p50_ms" : 4.438269,
+    "p95_ms" : 9.824097,
+    "p99_ms" : 9.903333,
+    "mean_ms" : 5.2956618,
+    "max_ms" : 9.903333,
+    "latencies_ms" : [ 4.264612, 5.319757, 8.582861, 8.825394, 4.123109, 4.438269, 5.231773, 4.461014, 7.158256, 3.926556, 7.297265, 3.860374, 9.903333, 4.131725, 4.685642, 3.954422, 5.576084, 3.547303, 4.087959, 3.538003, 3.236501, 5.825114, 3.621332, 3.263481, 9.824097, 3.04179, 8.35528, 3.411946, 5.539395, 5.837207 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 8.0,
+    "bytes_mean" : 963.6333333333333,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/orders/{id}",
+    "handler" : "OrganizerOrderController.getOrgOrder",
+    "samples" : 30,
+    "p50_ms" : 3.214249,
+    "p95_ms" : 6.949015,
+    "p99_ms" : 8.053077,
+    "mean_ms" : 3.9530105333333334,
+    "max_ms" : 8.053077,
+    "latencies_ms" : [ 4.419031, 3.10383, 3.510804, 5.632622, 4.028313, 2.933198, 3.045322, 3.035613, 5.241773, 2.897498, 2.505637, 2.759331, 2.739603, 8.053077, 3.395265, 3.030074, 4.24968, 5.081703, 5.892832, 3.981333, 6.949015, 3.214249, 2.944746, 2.958078, 5.717727, 3.137596, 2.749507, 2.759021, 3.9599, 4.663938 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 1397.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/orders/{id}/cancel",
+    "handler" : "OrganizerOrderController.cancelOrder",
+    "samples" : 30,
+    "p50_ms" : 6.849638,
+    "p95_ms" : 9.416527,
+    "p99_ms" : 12.374384,
+    "mean_ms" : 7.330906933333334,
+    "max_ms" : 12.374384,
+    "latencies_ms" : [ 8.889758, 8.980855, 6.125634, 9.046317, 5.899282, 8.799866, 5.674246, 7.611515, 6.367537, 12.374384, 5.735022, 8.042818, 9.168786, 6.849638, 8.196328, 6.652835, 9.416527, 5.743366, 6.90155, 5.898553, 5.117278, 9.248283, 5.602463, 6.775357, 8.064125, 6.737269, 5.88556, 7.668777, 5.334897, 7.118382 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 15.0,
+    "bytes_mean" : 1008.4666666666667,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/orders/{id}/checkin",
+    "handler" : "OrganizerOrderController.checkIn",
+    "samples" : 30,
+    "p50_ms" : 5.728126,
+    "p95_ms" : 8.848094,
+    "p99_ms" : 10.843684,
+    "mean_ms" : 6.387186266666666,
+    "max_ms" : 10.843684,
+    "latencies_ms" : [ 5.728126, 4.661936, 6.181838, 6.384154, 8.424096, 4.774102, 4.938901, 5.566823, 4.505995, 6.416267, 4.998823, 4.464448, 6.865013, 5.578273, 8.848094, 5.465364, 8.199483, 8.442873, 8.793063, 5.468548, 8.447739, 5.262311, 8.326451, 5.493366, 7.098415, 5.839895, 4.626394, 10.843684, 4.910398, 6.060715 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 14.0,
+    "bytes_mean" : 965.8333333333334,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizations/{orgId}/orders/{id}/status",
+    "handler" : "OrganizerOrderController.updateOrderStatus",
+    "samples" : 30,
+    "p50_ms" : 6.224696,
+    "p95_ms" : 9.687445,
+    "p99_ms" : 11.143545,
+    "mean_ms" : 6.817068433333334,
+    "max_ms" : 11.143545,
+    "latencies_ms" : [ 7.666859, 5.051182, 6.224696, 5.554744, 4.947656, 11.143545, 5.887158, 6.356043, 8.097924, 6.021006, 5.266827, 7.881997, 4.932474, 8.105284, 5.22206, 5.168621, 6.792529, 5.265182, 8.561998, 7.200967, 9.611677, 9.687445, 5.535389, 8.008161, 5.802933, 9.184627, 5.22736, 7.714545, 5.201066, 7.190098 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 13.0,
+    "bytes_mean" : 969.6333333333333,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/orders/{orderId}/campaign-context",
+    "handler" : "CampaignContextController.organizer",
+    "samples" : 30,
+    "p50_ms" : 3.24224,
+    "p95_ms" : 7.023893,
+    "p99_ms" : 9.216549,
+    "mean_ms" : 4.025740533333333,
+    "max_ms" : 9.216549,
+    "latencies_ms" : [ 6.03362, 7.023893, 3.434453, 2.913582, 3.116947, 6.736022, 3.310338, 2.908579, 3.065252, 6.204781, 4.163948, 3.24224, 3.052814, 5.284219, 4.089991, 2.858408, 2.69141, 2.571642, 9.216549, 3.123963, 2.909203, 4.978448, 3.995227, 4.582091, 3.211337, 4.487753, 4.089583, 2.712274, 2.445253, 2.318396 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 169.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/orders/{orderId}/history",
+    "handler" : "OrderHistoryController.organizer",
+    "samples" : 30,
+    "p50_ms" : 3.163217,
+    "p95_ms" : 6.697666,
+    "p99_ms" : 15.187779,
+    "mean_ms" : 4.095442033333333,
+    "max_ms" : 15.187779,
+    "latencies_ms" : [ 6.31265, 3.374988, 3.016793, 3.163217, 6.697666, 3.366287, 2.935596, 2.607682, 15.187779, 4.079656, 4.700888, 4.033191, 4.289832, 5.18576, 4.285751, 3.098836, 2.718646, 2.684105, 5.676991, 3.181728, 2.428848, 2.794327, 2.557037, 5.519671, 2.960075, 2.829001, 3.014244, 2.452103, 4.904613, 2.8053 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 415.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/pickup-schedules",
+    "handler" : "OrganizerOrderController.getPickupSchedules",
+    "samples" : 30,
+    "p50_ms" : 4.040366,
+    "p95_ms" : 6.838742,
+    "p99_ms" : 7.936556,
+    "mean_ms" : 4.365423566666666,
+    "max_ms" : 7.936556,
+    "latencies_ms" : [ 4.74007, 4.445096, 5.417175, 4.79534, 3.772437, 3.604674, 5.118902, 4.128011, 3.061746, 3.007604, 3.515821, 5.113668, 3.767922, 3.165326, 3.687366, 5.976952, 3.370902, 3.115733, 3.393157, 7.936556, 4.08944, 3.859695, 6.25694, 4.695883, 5.248646, 6.838742, 4.040366, 3.316276, 2.822606, 4.659655 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 495.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/organizations/{orgId}/pickup-schedules",
+    "handler" : "OrganizerOrderController.createPickupSchedule",
+    "samples" : 30,
+    "p50_ms" : 6.005005,
+    "p95_ms" : 10.775904,
+    "p99_ms" : 10.985728,
+    "mean_ms" : 6.6836298,
+    "max_ms" : 10.985728,
+    "latencies_ms" : [ 10.775904, 5.452434, 7.775074, 6.710908, 7.659849, 5.751763, 5.959668, 4.949006, 4.712285, 7.055127, 5.476368, 4.750471, 6.227409, 4.894953, 10.397719, 5.699581, 9.167065, 9.680279, 6.292903, 6.875169, 5.465139, 4.974258, 6.925858, 6.005005, 6.045162, 5.761021, 5.137781, 10.985728, 5.64234, 7.302667 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 13.0,
+    "bytes_mean" : 338.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/pickup-schedules/{scheduleId}/orders",
+    "handler" : "OrganizerOrderController.getPickupScheduleOrders",
+    "samples" : 30,
+    "p50_ms" : 27.647111,
+    "p95_ms" : 37.830225,
+    "p99_ms" : 51.998313,
+    "mean_ms" : 29.6685373,
+    "max_ms" : 51.998313,
+    "latencies_ms" : [ 29.825374, 35.747194, 51.998313, 34.872887, 28.336726, 30.996091, 30.693487, 27.354653, 29.735965, 30.717941, 27.647111, 26.124171, 29.710414, 26.822926, 27.40201, 26.246697, 26.238681, 27.000395, 23.932356, 28.503387, 28.065889, 26.372778, 37.8125, 29.279308, 26.815274, 23.146051, 27.571137, 37.830225, 26.017074, 27.239104 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 12.0,
+    "bytes_mean" : 987407.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/pickup-schedules/{scheduleId}/orders/page",
+    "handler" : "OrganizerOrderController.getPickupScheduleOrderPage",
+    "samples" : 30,
+    "p50_ms" : 4.827151,
+    "p95_ms" : 7.256278,
+    "p99_ms" : 9.386845,
+    "mean_ms" : 5.2575508,
+    "max_ms" : 9.386845,
+    "latencies_ms" : [ 4.311497, 3.844515, 6.12006, 5.150365, 4.154488, 5.513087, 5.209883, 3.983889, 3.698873, 6.937676, 4.585589, 4.253225, 9.386845, 4.827151, 4.169984, 6.834173, 7.015497, 7.256278, 4.926265, 4.124875, 5.7171, 6.25063, 4.216536, 4.665389, 5.680752, 4.160856, 4.515863, 6.754196, 5.157118, 4.303869 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 8.0,
+    "bytes_mean" : 19935.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizer/notifications",
+    "handler" : "OrganizerNotificationController.getNotifications",
+    "samples" : 30,
+    "p50_ms" : 3.499322,
+    "p95_ms" : 6.337647,
+    "p99_ms" : 7.74128,
+    "mean_ms" : 4.081554766666667,
+    "max_ms" : 7.74128,
+    "latencies_ms" : [ 4.057602, 5.102056, 3.373597, 3.071435, 3.08714, 5.755589, 4.238814, 3.126433, 2.875304, 5.066636, 3.599965, 3.215103, 3.008179, 2.756964, 4.98171, 3.205811, 3.104554, 2.546791, 2.610791, 7.74128, 3.4996, 3.2024, 4.308198, 5.864987, 5.908715, 6.337647, 4.904356, 3.499322, 3.027678, 5.367986 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 8193.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizer/notifications/read-all",
+    "handler" : "OrganizerNotificationController.markAllRead",
+    "samples" : 30,
+    "p50_ms" : 2.958918,
+    "p95_ms" : 4.846137,
+    "p99_ms" : 7.809305,
+    "mean_ms" : 3.3872472,
+    "max_ms" : 7.809305,
+    "latencies_ms" : [ 2.332445, 2.591133, 7.809305, 3.448106, 2.773004, 2.494496, 4.846137, 3.575489, 4.762933, 2.804561, 4.731886, 3.581242, 2.614733, 2.444409, 2.516321, 3.459126, 4.040381, 2.958918, 2.572982, 2.48236, 2.418266, 4.571211, 3.214319, 2.7946, 3.1988, 3.080808, 4.824432, 3.293878, 2.871751, 2.509384 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 132.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizer/notifications/stream",
+    "handler" : "OrganizerNotificationController.stream",
+    "samples" : 30,
+    "p50_ms" : 2.833984,
+    "p95_ms" : 6.167059,
+    "p99_ms" : 6.332908,
+    "mean_ms" : 3.406277633333333,
+    "max_ms" : 6.332908,
+    "latencies_ms" : [ 3.882966, 3.204753, 2.732762, 5.057972, 5.206076, 3.207944, 2.265108, 2.389685, 2.325163, 3.254652, 4.254278, 2.690183, 2.370039, 2.258373, 2.833984, 6.167059, 2.656804, 2.710443, 2.48221, 4.627146, 3.175006, 2.547393, 2.910802, 2.496072, 6.332908, 4.569269, 2.5873, 2.231127, 4.53326, 4.227592 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 13.0,
+    "errors" : [ ],
+    "mode" : "SSE first line"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizer/notifications/unread-count",
+    "handler" : "OrganizerNotificationController.getUnreadCount",
+    "samples" : 30,
+    "p50_ms" : 2.872977,
+    "p95_ms" : 8.988456,
+    "p99_ms" : 10.451383,
+    "mean_ms" : 3.7004441,
+    "max_ms" : 10.451383,
+    "latencies_ms" : [ 2.452941, 3.335649, 3.922211, 2.62379, 2.356358, 2.512118, 2.272029, 4.703412, 4.124474, 2.658428, 2.269425, 2.34029, 2.9318, 4.106364, 2.596798, 2.708293, 2.395171, 2.304077, 6.250375, 4.766751, 2.459633, 2.660282, 4.502276, 10.451383, 8.988456, 3.33099, 2.872977, 2.936068, 5.39376, 3.786744 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 126.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "PATCH",
+    "path" : "/api/v1/organizer/notifications/{id}/read",
+    "handler" : "OrganizerNotificationController.markRead",
+    "samples" : 30,
+    "p50_ms" : 2.561766,
+    "p95_ms" : 4.909539,
+    "p99_ms" : 8.372951,
+    "mean_ms" : 2.9753203333333333,
+    "max_ms" : 8.372951,
+    "latencies_ms" : [ 2.340371, 2.407396, 8.372951, 3.429867, 2.645287, 2.93239, 3.389597, 2.959378, 2.32329, 3.495404, 4.909539, 3.222751, 2.473743, 2.153026, 2.075552, 2.00706, 4.145805, 2.846415, 2.360693, 2.561766, 2.219373, 2.012295, 4.37402, 2.735143, 2.079346, 2.024558, 1.950146, 2.179768, 3.932875, 2.699805 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 402.96666666666664,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/campaigns",
+    "handler" : "CampaignController.list",
+    "samples" : 30,
+    "p50_ms" : 2.219847,
+    "p95_ms" : 4.509597,
+    "p99_ms" : 4.743493,
+    "mean_ms" : 2.7012705,
+    "max_ms" : 4.743493,
+    "latencies_ms" : [ 2.303235, 4.509597, 3.117673, 4.435641, 3.94181, 4.743493, 4.004062, 2.907007, 2.66371, 2.094919, 2.684347, 3.884441, 2.622699, 2.219847, 1.980753, 1.944346, 1.863253, 3.990212, 2.723656, 2.068441, 1.790281, 1.708575, 1.64284, 1.632081, 1.924513, 4.191815, 2.125996, 1.759173, 1.876984, 1.682715 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 2.0,
+    "bytes_mean" : 6326.8,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/campaigns/{id}",
+    "handler" : "CampaignController.detail",
+    "samples" : 30,
+    "p50_ms" : 2.23364,
+    "p95_ms" : 4.872456,
+    "p99_ms" : 5.138462,
+    "mean_ms" : 2.618650533333333,
+    "max_ms" : 5.138462,
+    "latencies_ms" : [ 1.545899, 1.847352, 2.540261, 3.866445, 2.982976, 3.733477, 2.401243, 1.907286, 5.138462, 2.370162, 2.120836, 2.146845, 2.109139, 2.254156, 4.433196, 3.336381, 2.23364, 2.576259, 2.15812, 1.998765, 4.872456, 2.19519, 1.814531, 1.927703, 1.819578, 1.787038, 1.74235, 3.531386, 2.931233, 2.237151 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 4.0,
+    "bytes_mean" : 519.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/events",
+    "handler" : "PublicEventController.getPublicEvents",
+    "samples" : 30,
+    "p50_ms" : 4.097361,
+    "p95_ms" : 11.116353,
+    "p99_ms" : 11.865918,
+    "mean_ms" : 5.2706117,
+    "max_ms" : 11.865918,
+    "latencies_ms" : [ 11.865918, 5.501605, 10.475299, 9.237082, 8.78603, 4.481626, 11.116353, 4.097361, 7.455361, 8.380827, 7.603772, 4.380204, 3.649881, 3.284334, 6.095446, 3.317757, 3.123265, 2.969629, 5.80541, 3.087596, 2.510893, 2.550549, 2.86, 5.512527, 2.828348, 2.564349, 2.559076, 2.36323, 5.628752, 4.025871 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 2.0,
+    "bytes_mean" : 6241.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/events/{id}",
+    "handler" : "PublicEventController.getPublicEvent",
+    "samples" : 30,
+    "p50_ms" : 2.549852,
+    "p95_ms" : 7.007428,
+    "p99_ms" : 7.829272,
+    "mean_ms" : 3.137407533333333,
+    "max_ms" : 7.829272,
+    "latencies_ms" : [ 2.482249, 3.713032, 2.407261, 2.00832, 1.968327, 2.029946, 1.95757, 2.188807, 4.714604, 2.629375, 2.42434, 2.389879, 2.205614, 3.28717, 4.16077, 2.793554, 2.214972, 2.623044, 2.559488, 6.142079, 3.30089, 2.549852, 2.338764, 2.885448, 7.829272, 2.64006, 2.484627, 2.473164, 7.007428, 3.71232 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 813.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch",
+    "samples" : 30,
+    "p50_ms" : 4.800366,
+    "p95_ms" : 7.3482,
+    "p99_ms" : 7.476027,
+    "mean_ms" : 5.2422315,
+    "max_ms" : 7.476027,
+    "latencies_ms" : [ 7.3482, 4.467427, 4.018667, 6.872769, 4.42181, 4.099056, 7.476027, 4.800366, 4.164814, 6.861369, 5.088611, 6.383357, 6.782884, 4.429912, 3.761775, 6.802761, 4.354742, 4.059981, 6.07831, 4.957584, 3.867996, 3.790506, 5.754611, 5.356307, 4.053199, 6.235462, 6.680668, 3.735283, 6.010281, 4.55221 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 7707.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/popular",
+    "handler" : "PublicMerchController.getPopular",
+    "samples" : 30,
+    "p50_ms" : 13.878025,
+    "p95_ms" : 17.524803,
+    "p99_ms" : 18.032943,
+    "mean_ms" : 13.7630276,
+    "max_ms" : 18.032943,
+    "latencies_ms" : [ 15.76068, 15.544377, 14.235932, 16.103959, 17.524803, 17.063257, 16.078815, 15.881766, 13.731329, 11.064247, 13.930849, 15.428562, 15.49151, 13.878025, 11.3504, 12.381451, 11.985695, 12.228371, 11.232307, 16.021832, 12.397799, 11.872738, 9.477894, 12.471928, 13.975801, 14.276636, 10.788614, 18.032943, 11.858472, 10.819836 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 3859.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/public/merch/visual-search",
+    "handler" : "AiMerchSearchController.visualSearch",
+    "samples" : 15,
+    "p50_ms" : 9.117974,
+    "p95_ms" : 13.363956,
+    "p99_ms" : 13.363956,
+    "mean_ms" : 9.2364186,
+    "max_ms" : 13.363956,
+    "latencies_ms" : [ 9.117974, 6.609549, 12.611847, 8.96953, 10.053006, 10.988285, 13.363956, 6.787376, 10.155141, 11.132084, 7.485379, 7.666055, 7.311207, 7.148282, 9.146608 ],
+    "statuses" : {
+      "200" : 15
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 3392.0,
+    "errors" : [ ],
+    "mode" : "AI stub + real keyword fallback"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/{id}",
+    "handler" : "PublicMerchController.getMerch",
+    "samples" : 30,
+    "p50_ms" : 2.124758,
+    "p95_ms" : 5.557637,
+    "p99_ms" : 6.795329,
+    "mean_ms" : 2.6894234000000004,
+    "max_ms" : 6.795329,
+    "latencies_ms" : [ 4.72843, 2.649176, 2.287899, 2.50522, 2.468038, 5.526167, 3.591677, 2.277124, 2.06748, 2.04303, 1.850762, 5.557637, 2.588727, 2.181224, 1.901104, 2.124758, 1.759922, 4.475334, 2.886628, 1.699026, 1.421131, 1.59293, 1.601026, 1.635494, 1.601188, 6.795329, 3.211127, 1.91994, 1.909163, 1.826011 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 2.0,
+    "bytes_mean" : 520.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/{merchId}/purchase-context",
+    "handler" : "CampaignContextController.purchase",
+    "samples" : 30,
+    "p50_ms" : 1.533168,
+    "p95_ms" : 3.791559,
+    "p99_ms" : 5.300226,
+    "mean_ms" : 1.8774326,
+    "max_ms" : 5.300226,
+    "latencies_ms" : [ 2.10346, 1.809471, 1.611227, 1.629965, 1.494583, 1.424367, 1.533442, 5.300226, 2.318948, 1.538536, 1.610363, 1.46028, 1.467016, 1.422282, 1.349262, 3.791559, 1.906502, 1.537691, 1.504002, 1.533168, 1.409489, 1.443823, 1.397006, 1.402103, 3.644389, 2.638373, 1.735033, 1.411537, 1.473395, 1.42148 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 150.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/public/orders",
+    "handler" : "PublicOrderController.guestCheckout",
+    "samples" : 30,
+    "p50_ms" : 6.576325,
+    "p95_ms" : 11.793556,
+    "p99_ms" : 13.112295,
+    "mean_ms" : 7.245439866666667,
+    "max_ms" : 13.112295,
+    "latencies_ms" : [ 11.279346, 6.442027, 13.112295, 11.211996, 6.075358, 11.793556, 6.590935, 9.941405, 6.576325, 11.301572, 6.461937, 11.046233, 5.256799, 9.134408, 8.352569, 8.069587, 4.902312, 6.74939, 5.867359, 4.360152, 6.617206, 4.739507, 3.787082, 4.277938, 6.7134, 4.336581, 4.286371, 8.970201, 4.294555, 4.814794 ],
+    "statuses" : {
+      "201" : 30
+    },
+    "hibernate_statements_mean" : 8.0,
+    "bytes_mean" : 920.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/orders/{orderId}",
+    "handler" : "PublicOrderController.trackGuestOrder",
+    "samples" : 30,
+    "p50_ms" : 1.116324,
+    "p95_ms" : 2.870463,
+    "p99_ms" : 3.969483,
+    "mean_ms" : 1.4601000333333334,
+    "max_ms" : 3.969483,
+    "latencies_ms" : [ 1.452545, 3.969483, 1.857991, 1.221449, 1.116324, 1.046441, 1.006874, 0.944485, 0.986679, 0.891066, 0.922276, 0.960587, 1.07433, 2.748132, 2.457153, 1.519364, 1.116297, 0.937952, 1.061142, 1.213661, 1.752265, 1.793802, 1.21306, 1.395951, 2.870463, 2.039582, 1.214, 1.033944, 1.01134, 0.974363 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 2.0,
+    "bytes_mean" : 1226.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/public/orders/{orderId}/pickup-receipt",
+    "handler" : "PickupController.receipt",
+    "samples" : 30,
+    "p50_ms" : 3.060115,
+    "p95_ms" : 7.279963,
+    "p99_ms" : 8.882775,
+    "mean_ms" : 3.6229113333333336,
+    "max_ms" : 8.882775,
+    "latencies_ms" : [ 3.055579, 2.045551, 1.691209, 2.955243, 3.060115, 2.198357, 3.040856, 3.417617, 2.998685, 1.968381, 1.875252, 1.730977, 1.547706, 4.106438, 4.511117, 4.149613, 6.630398, 2.973759, 3.556973, 7.279963, 3.592029, 3.54512, 8.882775, 3.380964, 4.153351, 4.358782, 5.237072, 5.528974, 2.622675, 2.591809 ],
+    "statuses" : {
+      "202" : 30
+    },
+    "hibernate_statements_mean" : 5.0,
+    "bytes_mean" : 126.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "POST",
+    "path" : "/api/v1/public/orders/{orderId}/pickup-token",
+    "handler" : "PickupController.guestToken",
+    "samples" : 30,
+    "p50_ms" : 2.771901,
+    "p95_ms" : 4.685073,
+    "p99_ms" : 5.485449,
+    "mean_ms" : 3.081719366666667,
+    "max_ms" : 5.485449,
+    "latencies_ms" : [ 1.960716, 3.261451, 2.858563, 2.330036, 2.352688, 2.881145, 4.181206, 2.590281, 3.603142, 3.158971, 3.869163, 2.56697, 3.813528, 2.682023, 2.857399, 4.685073, 3.217441, 2.771901, 2.302792, 4.403805, 2.769453, 2.292263, 2.362085, 4.256564, 2.505478, 2.029638, 2.605871, 5.485449, 3.448571, 2.347915 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 8.0,
+    "bytes_mean" : 279.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/organizations",
+    "handler" : "PublicOrganizationController.listOrganizations",
+    "samples" : 30,
+    "p50_ms" : 4.82436,
+    "p95_ms" : 10.337219,
+    "p99_ms" : 10.962178,
+    "mean_ms" : 5.419096766666667,
+    "max_ms" : 10.962178,
+    "latencies_ms" : [ 3.313188, 5.867151, 4.442098, 3.363438, 3.105754, 4.154317, 4.41055, 3.532184, 3.49374, 5.701967, 4.82436, 3.462847, 3.484525, 8.095991, 5.031673, 3.631638, 7.661525, 8.61313, 8.478447, 5.236938, 5.835738, 7.178119, 4.196944, 5.044266, 6.448526, 3.908968, 3.592852, 10.337219, 5.162632, 10.962178 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 6028.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/organizations/{id}",
+    "handler" : "PublicOrganizationController.getOrganization",
+    "samples" : 30,
+    "p50_ms" : 2.86494,
+    "p95_ms" : 4.840208,
+    "p99_ms" : 5.653824,
+    "mean_ms" : 3.043811666666667,
+    "max_ms" : 5.653824,
+    "latencies_ms" : [ 3.155006, 3.123903, 5.653824, 3.353172, 2.602148, 2.86494, 4.252529, 3.78561, 2.297762, 2.075117, 2.405897, 2.244113, 4.468334, 3.994349, 2.995519, 2.108042, 1.819906, 1.98212, 4.194518, 4.144047, 2.248337, 1.98289, 1.966871, 1.726214, 3.424737, 3.276159, 2.567207, 2.007469, 3.753402, 4.840208 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 431.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/organizations/{id}/events",
+    "handler" : "PublicOrganizationController.getOrgEvents",
+    "samples" : 30,
+    "p50_ms" : 2.357738,
+    "p95_ms" : 5.288886,
+    "p99_ms" : 6.859347,
+    "mean_ms" : 2.8428767333333336,
+    "max_ms" : 6.859347,
+    "latencies_ms" : [ 2.546114, 2.357738, 2.285963, 2.408079, 5.288886, 2.784245, 2.256499, 2.073603, 2.020928, 1.95951, 3.855745, 3.256937, 2.178338, 1.952156, 2.031466, 2.11578, 1.874538, 6.859347, 2.704841, 2.093233, 2.079487, 2.0544, 4.195505, 2.926008, 3.700433, 3.182588, 2.11133, 3.950997, 3.639131, 2.542477 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 2.0,
+    "bytes_mean" : 6241.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/organizations/{id}/merch",
+    "handler" : "PublicOrganizationController.getOrgMerch",
+    "samples" : 30,
+    "p50_ms" : 3.557908,
+    "p95_ms" : 6.116195,
+    "p99_ms" : 6.434525,
+    "mean_ms" : 3.9811378666666664,
+    "max_ms" : 6.434525,
+    "latencies_ms" : [ 4.535079, 3.557908, 3.10636, 3.151629, 4.122262, 4.847373, 3.322928, 2.979042, 2.995285, 6.434525, 4.275668, 2.984999, 2.715602, 4.903572, 3.865703, 5.214336, 3.652171, 6.116195, 3.546427, 3.121706, 3.2229, 5.633654, 3.751537, 3.104136, 3.087365, 5.090258, 4.376322, 3.326471, 3.39737, 4.995353 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 7707.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL"
+  } ],
+  "seed_counts" : {
+    "users" : 23,
+    "organizations" : 15,
+    "merch_items" : 1037,
+    "merch_images" : 1002,
+    "orders" : 1011,
+    "order_items" : 1018,
+    "events" : 111,
+    "notifications" : 2002
+  },
+  "load" : [ {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch",
+    "samples" : 200,
+    "p50_ms" : 3.895069,
+    "p95_ms" : 6.529924,
+    "p99_ms" : 7.77835,
+    "mean_ms" : 4.202242125000001,
+    "max_ms" : 10.664199,
+    "latencies_ms" : [ 4.340416, 3.763148, 6.572166, 6.746572, 3.982261, 4.880765, 4.208445, 3.97926, 5.950583, 4.540564, 4.119776, 3.387994, 4.156325, 5.639696, 3.50125, 3.187745, 3.324481, 5.232001, 3.440547, 3.224562, 3.049074, 5.498153, 3.86045, 3.081575, 3.142511, 7.758893, 5.180409, 3.651371, 5.729825, 4.600831, 4.942783, 5.196095, 10.664199, 4.221099, 5.368697, 3.629157, 3.372773, 3.180274, 5.558133, 3.808579, 3.364548, 3.1881, 4.899242, 4.399129, 3.523774, 3.26814, 7.079897, 4.725174, 3.061957, 3.472435, 5.366932, 4.151551, 4.848368, 5.686493, 3.817031, 3.111807, 3.066058, 4.699963, 4.779213, 3.356161, 3.110287, 3.629998, 5.118441, 3.290743, 3.267876, 2.962159, 5.017904, 4.097301, 3.426107, 3.244306, 7.77835, 5.149959, 3.897583, 6.545887, 5.602315, 5.059369, 7.130806, 3.869534, 3.508134, 5.68497, 4.799536, 3.594602, 3.329231, 6.814878, 4.168233, 4.044816, 5.238346, 6.023089, 3.624558, 3.317981, 7.873029, 4.870887, 3.797407, 5.560429, 4.276865, 4.661952, 4.460788, 5.319485, 3.49086, 3.401567, 4.526476, 5.277168, 3.471919, 3.205972, 4.048414, 5.309784, 3.51951, 3.132878, 3.084026, 5.838991, 4.073591, 3.255054, 2.901077, 6.107514, 4.043767, 3.020493, 2.889072, 4.837638, 4.024069, 4.959773, 3.480475, 4.885714, 3.541051, 3.117615, 3.116682, 4.17292, 4.627666, 3.286427, 3.136654, 3.153385, 5.399713, 3.519901, 2.888105, 2.931445, 4.342183, 4.06579, 3.539344, 3.301122, 2.928012, 6.529924, 3.778749, 3.032043, 3.164994, 5.442573, 4.411034, 4.731787, 4.634507, 4.055317, 3.223379, 3.130753, 3.3851, 5.173529, 3.494102, 3.078228, 2.94255, 4.557063, 3.953236, 2.986024, 2.908672, 2.942378, 4.537069, 4.165415, 3.271835, 2.830478, 2.860435, 5.907984, 4.368636, 3.211542, 2.920605, 4.797797, 3.895069, 5.114929, 5.250236, 4.327235, 3.637534, 3.18755, 3.727067, 4.908591, 3.489302, 3.075321, 3.156246, 4.830684, 3.986609, 3.150049, 2.87641, 3.663746, 4.545666, 3.255845, 2.731048, 2.642675, 3.436485, 6.50621, 3.292136, 2.861715, 3.795717, 5.195666, 4.954761, 3.707163, 4.40283, 3.854823 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 7707.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 1,
+    "rps" : 234.68648176576156,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch",
+    "samples" : 200,
+    "p50_ms" : 7.804407,
+    "p95_ms" : 15.38966,
+    "p99_ms" : 16.206539,
+    "mean_ms" : 8.00227797,
+    "max_ms" : 19.076911,
+    "latencies_ms" : [ 4.874232, 11.168258, 15.38966, 15.51691, 14.783447, 13.530495, 7.60242, 14.08673, 5.51008, 4.468958, 6.163565, 6.063802, 8.274355, 9.429015, 7.237026, 6.802041, 5.306515, 4.659485, 4.587512, 5.047976, 5.104263, 5.20755, 5.205837, 9.649362, 10.131826, 10.085201, 10.347337, 10.347395, 6.8889, 6.441487, 6.034201, 6.455275, 5.610913, 10.853942, 10.52394, 10.241983, 9.889576, 12.034006, 6.334417, 5.890396, 5.558655, 19.076911, 8.886215, 8.966504, 8.945209, 8.670057, 10.670139, 9.231449, 9.221083, 9.221159, 11.761884, 8.370797, 8.361925, 8.350751, 8.343256, 5.20345, 5.203246, 5.246706, 5.469567, 5.507883, 6.904353, 6.915781, 9.26555, 10.564496, 6.666082, 7.87311, 8.404688, 7.84094, 5.893341, 5.538158, 5.178461, 5.170401, 4.825258, 4.656488, 4.62866, 7.919015, 7.924294, 7.915554, 7.901587, 7.191478, 5.259084, 5.21021, 5.207253, 5.208488, 4.966128, 10.954305, 6.387434, 6.218456, 6.218551, 8.036799, 7.692575, 7.69262, 7.665976, 5.869255, 5.605152, 4.978497, 5.479162, 4.956321, 4.954142, 11.150648, 11.16614, 11.153792, 11.33197, 10.691587, 7.724203, 5.579065, 5.649533, 5.777649, 5.607951, 8.52023, 8.307465, 8.31645, 8.155207, 8.117677, 8.639689, 8.617847, 8.619086, 8.618083, 8.587264, 9.122997, 9.137007, 8.920708, 9.159851, 9.142304, 5.29551, 5.328067, 5.26542, 5.036218, 5.098709, 11.885494, 8.676046, 8.852078, 8.537354, 8.469888, 6.573976, 6.82491, 6.988471, 6.452954, 4.127355, 4.916877, 4.908323, 5.622091, 4.553994, 4.256946, 8.032765, 8.025444, 8.014769, 8.021065, 6.98334, 5.092653, 5.063829, 5.084909, 5.054777, 5.054996, 16.191651, 16.191684, 16.191699, 16.229656, 16.206539, 8.853007, 5.379556, 5.393606, 5.40208, 8.908381, 8.981185, 8.981383, 8.972691, 5.655492, 5.957351, 4.606933, 5.419485, 4.606951, 4.539073, 4.370323, 9.459384, 9.443194, 9.453904, 9.345916, 8.541702, 11.092967, 10.365502, 11.043939, 10.365823, 11.110391, 8.302773, 7.889057, 7.391455, 7.804407, 7.294996, 4.833976, 5.024018, 5.548899, 4.44347, 4.896213, 15.630865, 15.632181, 15.483927, 15.246417, 14.99122, 13.081403 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 7707.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 5,
+    "rps" : 599.1325620965476,
+    "pool_pending_max" : 1,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch",
+    "samples" : 200,
+    "p50_ms" : 11.650559,
+    "p95_ms" : 18.77267,
+    "p99_ms" : 25.246105,
+    "mean_ms" : 12.086784714999999,
+    "max_ms" : 26.596615,
+    "latencies_ms" : [ 10.727852, 10.662719, 10.69866, 11.214727, 10.425951, 14.451032, 16.326281, 15.46578, 14.137265, 14.837932, 10.686237, 10.700306, 15.523207, 15.360218, 14.77499, 14.852758, 14.088923, 15.757719, 15.400432, 20.81761, 13.089352, 10.061303, 11.802534, 11.650559, 12.036058, 16.529663, 14.496155, 15.221011, 15.210527, 15.916834, 18.16066, 16.504707, 15.852407, 16.4093, 14.450102, 13.598074, 13.160864, 11.569064, 11.895716, 10.508143, 9.448875, 9.744274, 9.748839, 10.904263, 8.902959, 8.177196, 8.429175, 8.420312, 15.274844, 9.61419, 15.300507, 13.383994, 15.269432, 14.683474, 12.222097, 25.246105, 26.596615, 26.391919, 24.667778, 19.042425, 22.347599, 20.8181, 19.887934, 18.77267, 16.671912, 9.570714, 5.890869, 9.261273, 15.544096, 7.582121, 9.081364, 12.82746, 15.419037, 12.457088, 11.857055, 13.719144, 13.224321, 14.366228, 12.360091, 12.442595, 7.402549, 14.139339, 8.238719, 7.721839, 11.176402, 14.903426, 13.505856, 12.761011, 14.356169, 13.330707, 16.40556, 15.083204, 16.400593, 9.568377, 12.880388, 14.25077, 14.196137, 14.326336, 13.731185, 13.836451, 16.203003, 16.180783, 16.278488, 20.604776, 15.754208, 13.530869, 13.512099, 15.002787, 16.096599, 13.551357, 9.601915, 10.921163, 9.523079, 6.890731, 7.354677, 7.750045, 7.347551, 7.402311, 6.477983, 7.197, 7.067465, 7.379039, 6.889883, 6.897918, 10.280308, 12.022889, 9.100547, 8.886394, 11.458336, 11.186486, 11.04583, 11.332999, 10.839678, 12.209316, 8.917678, 9.127888, 8.482274, 8.12233, 5.502985, 7.470779, 7.37093, 7.409297, 6.951891, 10.85641, 11.170539, 11.162742, 10.521898, 10.628106, 11.785878, 10.965355, 12.126812, 10.290665, 11.225386, 8.682958, 7.381364, 7.307905, 7.72477, 7.718727, 11.306485, 11.284305, 10.716601, 10.310245, 10.63375, 11.976039, 11.966856, 11.979551, 12.879218, 11.044, 8.496035, 8.485808, 8.48944, 10.33726, 7.374278, 7.931777, 7.419212, 7.216856, 7.745487, 11.291569, 11.758948, 11.709352, 11.653289, 11.784124, 13.112915, 12.401114, 12.186378, 12.13645, 11.903344, 9.256674, 7.93079, 10.994529, 8.431688, 10.017224, 11.372364, 11.066347, 11.056155, 11.027438, 11.827042, 11.429596, 12.242854, 11.669883 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 7707.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 10,
+    "rps" : 804.020365546412,
+    "pool_pending_max" : 5,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch",
+    "samples" : 200,
+    "p50_ms" : 18.508864,
+    "p95_ms" : 24.535561,
+    "p99_ms" : 26.224282,
+    "mean_ms" : 19.09538106,
+    "max_ms" : 42.532818,
+    "latencies_ms" : [ 10.013348, 13.300025, 14.206954, 10.291794, 9.857489, 12.910935, 9.499664, 9.433602, 12.701486, 12.516986, 15.615672, 15.445152, 15.28525, 15.19596, 14.657016, 20.294733, 20.038032, 19.365126, 19.11238, 18.651729, 17.790428, 17.391875, 17.459074, 17.391126, 16.95251, 17.09552, 17.107038, 17.029433, 17.26453, 16.443364, 16.9439, 17.705246, 17.702571, 17.646059, 17.240191, 16.493619, 16.504508, 16.524, 16.390452, 16.291022, 16.720487, 16.774586, 16.730456, 16.736297, 16.425109, 17.298403, 17.267424, 17.342004, 17.036853, 17.144104, 17.338429, 17.219885, 16.838048, 16.726101, 16.583337, 17.697349, 16.970444, 16.970575, 17.628787, 16.993872, 17.136753, 17.682296, 17.097715, 16.948534, 16.959728, 16.717445, 17.600727, 16.519873, 16.852629, 16.550741, 16.992058, 17.286335, 16.889884, 17.43365, 16.777597, 18.621759, 18.470946, 18.423412, 17.818034, 17.763157, 19.771553, 19.372799, 19.282222, 19.254834, 18.70597, 19.757041, 23.215541, 19.362399, 19.434171, 18.506338, 24.640443, 23.866569, 23.722265, 23.590834, 23.127644, 22.303023, 22.244777, 34.117704, 22.316101, 22.211399, 24.353777, 24.335417, 24.51415, 24.535561, 24.017103, 26.224282, 26.106439, 26.025626, 25.897203, 10.730686, 21.330162, 21.058909, 22.232895, 21.197586, 20.173767, 17.864281, 18.508864, 17.863403, 17.854347, 17.72866, 17.893908, 19.588137, 19.711977, 17.817453, 19.665037, 17.216236, 17.21765, 18.313046, 18.302557, 17.753499, 19.306789, 19.311597, 17.776066, 17.726371, 19.447755, 18.430906, 23.03259, 18.152368, 18.23092, 19.697457, 19.091988, 19.091177, 17.390983, 17.305076, 18.926907, 18.419283, 18.401337, 17.43548, 19.523075, 17.258725, 23.101441, 22.963448, 21.620122, 21.705102, 25.498502, 25.138514, 24.750146, 24.516376, 22.204221, 23.274671, 20.598387, 20.682487, 20.638508, 20.724749, 23.928649, 20.671806, 20.63289, 20.652684, 20.54465, 42.532818, 19.017534, 19.137964, 19.017717, 19.093122, 19.264541, 19.201349, 19.25602, 19.077755, 21.555666, 21.859599, 19.980504, 19.925529, 19.929424, 19.801142, 24.233656, 22.13988, 11.96626, 22.066478, 24.034652, 19.557069, 21.058069, 19.557914, 21.357769, 20.289592, 20.289514, 22.434887, 22.319823, 18.53014, 20.943694, 20.260061 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 7707.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 20,
+    "rps" : 979.8777546648024,
+    "pool_pending_max" : 15,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/popular",
+    "handler" : "PublicMerchController.getPopular",
+    "samples" : 200,
+    "p50_ms" : 9.487115,
+    "p95_ms" : 13.577234,
+    "p99_ms" : 16.111533,
+    "mean_ms" : 9.824065825,
+    "max_ms" : 23.085981,
+    "latencies_ms" : [ 9.429556, 11.159491, 9.951079, 9.789738, 9.907987, 8.782776, 11.960912, 12.395101, 10.621902, 9.661036, 7.529252, 10.464516, 9.426446, 8.999773, 10.949945, 8.512665, 11.62221, 10.602734, 11.065515, 9.834095, 8.436995, 10.703287, 10.866325, 8.821714, 11.394981, 7.841158, 11.737136, 9.368186, 10.58023, 9.46741, 8.035125, 14.251199, 13.396701, 11.385286, 11.578114, 16.111533, 14.535249, 9.716047, 8.069261, 9.601575, 8.020787, 9.837368, 10.090909, 9.101199, 10.644492, 9.06829, 12.08782, 13.577234, 10.44039, 12.019284, 10.580898, 8.582591, 12.235418, 14.036477, 12.984293, 15.472183, 10.876145, 12.159465, 9.464845, 8.041214, 9.703844, 7.578731, 9.393309, 8.852097, 8.898642, 9.02497, 9.793004, 8.269664, 10.622284, 9.449226, 8.446649, 10.693092, 8.493865, 10.974545, 9.633681, 12.322252, 10.298221, 8.043588, 9.681807, 8.032159, 8.737914, 8.937934, 8.982395, 18.570484, 10.80238, 10.839283, 8.362015, 9.336965, 9.235735, 9.550006, 8.6552, 9.22032, 8.546626, 10.327035, 8.031155, 10.748283, 10.20194, 8.148632, 9.384421, 8.09543, 9.026894, 7.512501, 9.787231, 8.203302, 10.264676, 7.487402, 9.609501, 10.820877, 8.675582, 10.00247, 8.047211, 9.574897, 7.878448, 9.571895, 7.449122, 10.453214, 7.768466, 9.487115, 10.809829, 9.201207, 10.222125, 7.795763, 8.99646, 7.449671, 8.063092, 7.919942, 9.654467, 9.51222, 9.415578, 9.854357, 9.378056, 9.562884, 8.583726, 8.489116, 7.497805, 8.785893, 7.554449, 7.867037, 9.537027, 11.015989, 10.231019, 9.899505, 9.445526, 9.794084, 8.955162, 7.578813, 8.695558, 7.203149, 7.731295, 9.290627, 9.191362, 9.716008, 8.855364, 7.215121, 9.191478, 7.923878, 8.981968, 7.803702, 8.701431, 7.139703, 10.433611, 7.442377, 10.146853, 11.362493, 8.476695, 10.838107, 7.898238, 9.194544, 7.793679, 9.488768, 7.777329, 11.25706, 10.32462, 10.33476, 9.297053, 8.458634, 9.659166, 7.438312, 15.215469, 13.153616, 13.01788, 14.537025, 23.085981, 13.710939, 10.280002, 8.868064, 10.287956, 8.084738, 10.692644, 8.860184, 11.853543, 11.777859, 7.840452, 9.613367, 7.588085, 8.960747, 7.968009, 9.803398, 7.731316, 11.122016 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 3859.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 1,
+    "rps" : 101.27905459843035,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/popular",
+    "handler" : "PublicMerchController.getPopular",
+    "samples" : 200,
+    "p50_ms" : 16.602814,
+    "p95_ms" : 22.993541,
+    "p99_ms" : 34.399735,
+    "mean_ms" : 17.337190255,
+    "max_ms" : 36.039142,
+    "latencies_ms" : [ 14.637822, 14.583756, 14.500049, 14.433294, 14.366035, 14.902691, 14.872358, 14.902124, 14.826318, 14.826533, 15.684359, 13.865402, 16.796861, 13.998315, 13.806155, 12.920865, 12.924913, 12.776593, 13.876762, 14.306576, 13.067322, 12.955091, 12.305419, 17.199879, 15.682036, 14.757096, 13.441166, 13.334277, 13.98931, 13.989153, 17.172863, 17.172094, 16.502926, 18.438911, 20.887385, 15.134109, 15.133907, 15.134978, 16.681342, 14.29402, 14.56292, 13.214137, 13.213974, 13.443845, 17.032676, 14.221128, 14.231414, 15.844604, 14.14632, 15.25805, 10.726803, 15.257969, 16.929422, 15.81095, 19.326262, 17.675256, 17.402056, 15.241786, 16.238072, 19.845647, 19.10569, 16.974834, 14.94862, 18.014197, 18.722477, 18.178437, 16.768072, 14.857622, 23.842019, 17.986893, 17.995752, 16.578466, 16.284343, 18.286001, 18.286701, 18.284604, 18.283082, 18.155975, 14.425044, 16.891776, 14.378912, 14.366192, 14.324292, 16.718168, 14.475224, 15.522729, 14.445661, 15.372277, 14.003422, 12.11061, 11.109658, 9.911888, 15.922408, 16.014542, 16.014585, 21.833286, 14.110327, 19.346778, 24.461692, 24.469389, 24.461585, 21.028259, 24.470736, 17.805656, 17.279955, 18.684386, 16.463263, 22.993541, 14.993433, 14.501581, 16.602814, 14.857877, 17.975158, 16.213485, 14.813525, 16.586528, 15.020228, 18.710819, 18.760825, 16.971493, 17.184567, 17.052947, 18.182424, 18.190121, 18.174102, 19.675071, 18.023308, 16.183512, 16.122994, 16.118283, 16.174668, 14.628278, 19.150437, 16.482395, 16.488026, 16.471295, 16.443118, 16.472836, 20.046759, 16.468794, 16.479525, 17.392114, 17.880615, 17.307983, 17.314405, 16.27724, 16.565465, 19.676873, 18.157116, 17.631991, 15.59806, 15.312266, 22.359042, 19.416656, 19.376702, 19.406978, 20.843733, 16.770722, 16.771063, 16.780662, 15.362938, 15.99903, 15.848142, 19.784587, 15.848145, 14.521344, 16.261056, 32.792842, 34.399735, 34.203198, 36.039142, 34.626115, 19.728416, 21.005111, 17.882805, 16.69855, 16.611596, 22.605562, 22.370923, 19.700384, 19.434708, 19.774105, 15.993618, 15.993249, 21.663434, 18.058648, 17.980135, 20.789912, 20.792579, 20.380556, 17.425787, 21.165727, 20.337661, 19.261316, 19.269325, 18.281835, 20.618939, 20.145571, 21.174502, 19.871529 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 3859.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 5,
+    "rps" : 283.98527947536604,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/popular",
+    "handler" : "PublicMerchController.getPopular",
+    "samples" : 200,
+    "p50_ms" : 40.284302,
+    "p95_ms" : 59.551612,
+    "p99_ms" : 70.328891,
+    "mean_ms" : 41.978579425,
+    "max_ms" : 77.216204,
+    "latencies_ms" : [ 40.708047, 22.67982, 22.306235, 22.317878, 22.029168, 23.503189, 40.226597, 39.662276, 42.634794, 39.096551, 35.522017, 35.441782, 35.715911, 35.443111, 33.528415, 34.198539, 34.323319, 34.392839, 33.774234, 31.056661, 36.154615, 34.953098, 41.082823, 35.425169, 34.599642, 45.815654, 43.872259, 40.284302, 41.290453, 39.986898, 38.412435, 38.120954, 37.927483, 46.447947, 41.137191, 39.648876, 39.650057, 38.640807, 40.968006, 38.938621, 43.400332, 43.227817, 43.203957, 36.19893, 41.933244, 40.351177, 39.800194, 40.240982, 40.306003, 40.222804, 42.429644, 42.261048, 42.26316, 40.256344, 34.381695, 42.078376, 41.758187, 41.57612, 34.191722, 38.286654, 50.113984, 50.499248, 50.757335, 53.989772, 76.756699, 32.422073, 51.813454, 52.477353, 65.159616, 50.177254, 51.964816, 49.374166, 52.639029, 51.245069, 52.344339, 52.369437, 52.56509, 51.780058, 47.033819, 40.675462, 43.974685, 42.077922, 41.703417, 46.989212, 37.177895, 49.727404, 49.528616, 51.908748, 52.390611, 77.216204, 60.194073, 59.119975, 38.821323, 59.551612, 70.328891, 63.282348, 63.260413, 60.864639, 62.532606, 61.094826, 54.156272, 54.979369, 54.260724, 53.951936, 45.353727, 40.376982, 42.0278, 40.312256, 38.108653, 51.075872, 42.975162, 45.730801, 44.403223, 42.38025, 50.742592, 42.469119, 43.471019, 44.026407, 41.956623, 42.556687, 36.61516, 38.701249, 34.438168, 35.516932, 37.383709, 34.866866, 36.17375, 35.184105, 33.334926, 35.8807, 35.866743, 34.924558, 36.442783, 33.500791, 40.612261, 40.61371, 44.556361, 37.921075, 37.294296, 41.105703, 37.903096, 48.401649, 37.90304, 38.676744, 36.186821, 33.297628, 35.22874, 35.697521, 39.332388, 34.497072, 34.953606, 31.523835, 37.695376, 33.446511, 33.824732, 37.326706, 30.782464, 30.413932, 35.101639, 37.178183, 37.662795, 40.542014, 43.525903, 40.825716, 39.158941, 39.947369, 43.903861, 40.403466, 35.553142, 37.755897, 36.97169, 38.433292, 31.542631, 31.715665, 41.021002, 39.700507, 36.157557, 33.446543, 50.195593, 38.468589, 39.121051, 20.111232, 48.453974, 32.322687, 57.331203, 47.12163, 45.885008, 47.51402, 55.850207, 56.709383, 48.518454, 47.665674, 48.803063, 43.927999, 37.617204, 37.405868, 35.756168, 37.130313, 34.806811, 32.920204 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 3859.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 10,
+    "rps" : 232.81067902398433,
+    "pool_pending_max" : 5,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch/popular",
+    "handler" : "PublicMerchController.getPopular",
+    "samples" : 200,
+    "p50_ms" : 72.634426,
+    "p95_ms" : 99.529723,
+    "p99_ms" : 104.902041,
+    "mean_ms" : 72.164512845,
+    "max_ms" : 149.140705,
+    "latencies_ms" : [ 39.568852, 23.502656, 41.014464, 25.895273, 25.853029, 23.129944, 22.875391, 37.930637, 39.970427, 52.798697, 36.564204, 49.58934, 48.067253, 47.728051, 47.436592, 57.197462, 56.81994, 56.194618, 56.004858, 55.816722, 54.066571, 54.085144, 54.066097, 52.908073, 51.460255, 51.463297, 51.785025, 49.662912, 49.884843, 49.255667, 47.954266, 48.684256, 48.215204, 48.212166, 52.149753, 50.460494, 50.074173, 50.066023, 55.558193, 50.082699, 53.664825, 54.801668, 54.99072, 54.78741, 62.374788, 58.848455, 58.518737, 58.644153, 67.165273, 58.211729, 59.914745, 58.07818, 58.441218, 58.52014, 61.160712, 60.543197, 61.179438, 60.558192, 61.964127, 60.747378, 59.580271, 54.584244, 59.006673, 62.444702, 57.033754, 71.663672, 63.115031, 62.762727, 62.685798, 64.61195, 70.407, 70.044093, 69.530413, 76.797205, 71.127797, 73.940903, 77.298497, 73.599625, 81.439837, 77.34721, 79.254476, 74.486674, 76.046899, 81.023833, 77.566957, 70.030009, 68.985205, 70.218987, 74.787098, 71.400471, 68.302939, 68.172757, 68.183708, 72.624868, 72.624821, 68.900541, 66.699527, 63.364944, 75.888917, 95.636532, 69.670696, 73.373811, 72.575397, 89.098528, 87.153111, 84.147334, 83.298437, 95.215905, 88.232115, 86.696012, 82.857359, 99.75672, 82.765609, 89.185632, 91.240025, 86.513096, 106.029557, 82.17572, 87.866145, 90.213292, 84.268205, 82.680957, 95.911994, 90.013009, 86.134123, 85.393816, 87.514965, 103.562061, 98.976697, 99.077671, 98.824313, 98.779069, 101.594244, 99.579386, 99.330675, 97.503347, 97.470858, 99.857901, 99.075142, 104.902041, 103.951456, 96.794515, 95.523775, 99.115149, 95.088961, 99.529723, 100.768369, 86.701866, 86.701522, 85.481612, 83.324022, 83.21994, 83.628126, 87.858501, 81.593574, 81.550798, 81.420456, 74.931432, 74.428547, 74.946603, 149.140705, 69.966045, 68.460855, 67.590481, 65.915408, 65.7418, 75.98147, 70.402525, 70.355214, 68.527131, 85.476213, 87.051397, 78.759342, 76.281045, 78.030612, 25.545922, 88.158312, 81.872303, 82.985938, 83.186645, 99.428802, 84.903093, 83.254988, 91.807826, 81.340358, 95.173575, 83.439436, 78.986432, 78.961152, 90.973414, 78.15511, 76.677421, 73.150061, 71.319413, 88.058013, 74.136022, 74.28021, 72.634426, 71.008066, 80.321295 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 3859.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 20,
+    "rps" : 261.5741380174464,
+    "pool_pending_max" : 15,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders",
+    "samples" : 200,
+    "p50_ms" : 6.347005,
+    "p95_ms" : 13.950284,
+    "p99_ms" : 18.162133,
+    "mean_ms" : 7.130637165,
+    "max_ms" : 25.503889,
+    "latencies_ms" : [ 25.503889, 8.045651, 10.799329, 7.982393, 11.597308, 11.904464, 13.972131, 7.716896, 11.653866, 6.998435, 10.133338, 9.765717, 9.697067, 12.944425, 14.027345, 16.218661, 7.826754, 10.258697, 6.707991, 10.363602, 5.949672, 9.62042, 6.388496, 8.276847, 8.166229, 10.36725, 10.078536, 6.909147, 6.528716, 9.19175, 6.581667, 17.671701, 18.093477, 17.369214, 7.976445, 19.249146, 13.950284, 5.327396, 6.321682, 4.88895, 4.821297, 7.723738, 5.974532, 5.002562, 9.276677, 18.162133, 9.388494, 6.535831, 4.656046, 7.935916, 5.30009, 4.738243, 8.011061, 4.658656, 4.403802, 7.62252, 4.821749, 4.995656, 8.488495, 5.517502, 7.692248, 6.051887, 10.909822, 4.781774, 4.890577, 8.916232, 4.640794, 6.83982, 7.302803, 6.347005, 9.682561, 6.246311, 9.531995, 5.463417, 8.233247, 7.578646, 5.989254, 4.939597, 4.127005, 3.728246, 8.246936, 4.56828, 4.351672, 7.931881, 4.728803, 5.589123, 7.175122, 4.592846, 5.492031, 6.268009, 5.375989, 6.872465, 5.093244, 5.887116, 6.338691, 4.784683, 4.059082, 5.939758, 5.583108, 4.026724, 4.024058, 7.204825, 4.442063, 6.809997, 7.393216, 5.325772, 6.927206, 7.420928, 5.283793, 5.197902, 5.677499, 4.58607, 5.715583, 4.013168, 3.774161, 4.840919, 4.928191, 3.562688, 3.397443, 4.23291, 4.853974, 3.731735, 3.648408, 5.418123, 5.188515, 3.435841, 3.382397, 5.200119, 4.38286, 4.444534, 4.075859, 6.76831, 5.910939, 5.966771, 5.412441, 4.049006, 4.690044, 7.143819, 3.964416, 4.459042, 7.12398, 4.627306, 3.775093, 8.253044, 4.601761, 4.294954, 7.405235, 6.438617, 5.664755, 7.723433, 7.376176, 9.009408, 4.495223, 7.297907, 5.188543, 4.797024, 9.506624, 5.201845, 6.406669, 6.70573, 4.316635, 5.757608, 7.558849, 5.505741, 9.382702, 10.659313, 7.501577, 5.30179, 9.935904, 5.39571, 9.117419, 5.023016, 6.778269, 7.360857, 6.005983, 10.711461, 7.420386, 17.436869, 8.738971, 6.485593, 10.928315, 7.429144, 8.482017, 9.995046, 6.107456, 4.774728, 6.91831, 5.854787, 4.577705, 8.643084, 7.194517, 7.643222, 5.167687, 4.483071, 7.929887, 4.395946, 5.156059, 8.109641, 4.707321, 6.597177 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 20640.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 1,
+    "rps" : 138.97013797306894,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders",
+    "samples" : 200,
+    "p50_ms" : 10.163359,
+    "p95_ms" : 16.274938,
+    "p99_ms" : 21.903232,
+    "mean_ms" : 10.304797404999999,
+    "max_ms" : 23.401558,
+    "latencies_ms" : [ 6.96646, 6.889324, 6.86293, 6.723606, 6.741628, 11.174274, 11.173461, 11.219144, 11.215848, 11.062944, 7.73048, 7.634204, 7.634091, 7.750015, 7.819041, 11.736812, 11.687814, 11.66247, 11.689986, 11.595342, 10.705732, 10.708951, 10.744763, 10.711226, 11.115989, 6.17289, 6.249185, 6.275562, 6.439205, 5.772463, 16.342569, 16.339911, 16.274938, 17.12927, 16.097356, 13.75523, 14.295441, 13.679442, 13.869547, 13.154531, 8.717914, 13.019852, 10.382059, 8.509965, 9.492782, 12.817829, 12.976681, 11.260726, 10.898522, 8.790695, 12.764107, 12.784697, 12.652509, 12.55737, 12.29498, 11.820374, 11.819372, 23.401558, 11.799225, 11.963236, 15.817201, 14.878331, 14.877681, 19.608768, 14.110484, 10.755626, 10.649306, 9.7628, 8.047871, 22.051722, 21.903232, 21.893026, 21.792178, 19.717373, 9.777353, 9.836049, 9.869755, 9.828657, 9.777707, 10.146306, 13.445429, 10.01073, 10.00405, 9.987105, 7.490079, 7.51667, 7.47663, 7.48749, 6.332599, 9.290954, 9.302923, 9.309556, 9.277013, 13.720811, 7.49464, 7.501689, 7.504991, 7.534384, 10.743447, 9.861613, 9.848239, 9.847629, 9.848665, 10.93973, 10.909933, 10.909634, 11.034503, 10.940759, 8.931354, 9.001836, 8.949696, 8.941045, 8.9555, 6.578762, 6.578967, 6.641038, 6.578869, 6.626737, 10.411271, 10.465146, 10.411468, 10.4277, 10.407399, 7.083614, 10.470179, 7.036255, 7.047552, 7.00888, 9.516355, 9.490238, 9.54896, 9.378904, 6.239423, 6.51198, 6.510188, 6.482353, 6.670542, 6.471129, 10.172667, 10.163292, 10.19966, 10.163359, 10.090258, 8.405119, 8.394835, 8.394716, 8.434764, 8.404091, 10.596028, 10.693906, 10.6207, 10.595775, 10.582378, 11.653944, 13.324731, 11.654216, 12.844148, 11.630341, 15.276045, 14.982998, 15.199283, 13.722429, 13.641515, 7.163138, 7.19168, 7.083038, 7.080343, 6.911749, 11.377956, 11.479753, 11.283776, 11.456392, 11.220233, 6.678744, 6.508141, 6.469268, 6.373326, 6.352004, 10.745231, 10.796736, 10.84035, 10.761383, 10.649474, 6.194619, 7.105742, 6.179121, 6.146295, 6.163398, 10.604358, 10.595656, 10.577038, 10.638616, 9.591264, 6.221844, 6.221729, 8.824224, 6.221869, 6.224738, 12.804879, 12.804989 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 20640.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 5,
+    "rps" : 472.20722833103594,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders",
+    "samples" : 200,
+    "p50_ms" : 18.847918,
+    "p95_ms" : 43.095786,
+    "p99_ms" : 52.878427,
+    "mean_ms" : 22.260940989999998,
+    "max_ms" : 60.742986,
+    "latencies_ms" : [ 20.60694, 20.618108, 20.424847, 20.311535, 22.280338, 23.808357, 23.545889, 25.839778, 22.839945, 22.624532, 11.444309, 11.730599, 11.531283, 11.742412, 14.944229, 16.223135, 12.502767, 16.169403, 7.303983, 16.809799, 13.917997, 13.897773, 15.901322, 15.939938, 13.272698, 17.806558, 20.463812, 16.584126, 16.706525, 16.565325, 15.40816, 15.143981, 17.195981, 16.163016, 16.156641, 8.873038, 11.401038, 11.294761, 12.54015, 16.120387, 13.592855, 14.081863, 15.317747, 13.868813, 15.189609, 15.590791, 18.173279, 14.095536, 16.772133, 20.453932, 19.684125, 16.594558, 18.405533, 16.891821, 22.040999, 23.047564, 18.847918, 20.178779, 22.842393, 24.75948, 21.878571, 23.330692, 19.79617, 25.250662, 22.651332, 22.676935, 19.859483, 25.984458, 33.914857, 29.279099, 33.143085, 26.068992, 34.552599, 37.483686, 32.279611, 42.499143, 53.445292, 34.472935, 32.485794, 30.340105, 42.413297, 60.742986, 25.639596, 44.682335, 44.822164, 33.084055, 36.079681, 36.353345, 47.539167, 45.900452, 41.599116, 36.752759, 33.089151, 49.244029, 29.020731, 33.709265, 52.878427, 37.052563, 43.63825, 48.056198, 39.551429, 31.846932, 37.434271, 43.095786, 42.055631, 29.94608, 27.308538, 27.011939, 16.528677, 25.282683, 16.293959, 16.779706, 15.701202, 26.889308, 19.023328, 19.429943, 18.447268, 19.774149, 19.465937, 23.324729, 27.262785, 25.928527, 26.311225, 18.181983, 26.058735, 29.303161, 30.375828, 29.325241, 25.534522, 22.132883, 36.33344, 34.240194, 29.187881, 35.371538, 26.468062, 30.911929, 27.20121, 21.329639, 29.114393, 28.338416, 19.498556, 15.325748, 13.935203, 13.687534, 23.944261, 13.083082, 18.354567, 15.845703, 18.431806, 18.322245, 16.53668, 16.008206, 15.733656, 21.093118, 19.902616, 11.910493, 11.915828, 10.406409, 15.438778, 16.160005, 17.738418, 21.130145, 17.161025, 18.172516, 23.293244, 12.430942, 16.87418, 10.474187, 17.064728, 17.385519, 18.627819, 17.009331, 18.359703, 17.755881, 20.090635, 18.348905, 19.174907, 13.146178, 12.192675, 16.475981, 12.727992, 11.822356, 15.161189, 11.608236, 15.862216, 9.115036, 15.626529, 10.782169, 8.225825, 15.621817, 15.925223, 17.169714, 15.463223, 15.222266, 17.728373, 14.61254, 16.235928, 11.409368, 11.634622, 8.912865 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 20640.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 10,
+    "rps" : 439.97786832126326,
+    "pool_pending_max" : 5,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders",
+    "samples" : 200,
+    "p50_ms" : 31.513756,
+    "p95_ms" : 48.556564,
+    "p99_ms" : 50.213389,
+    "mean_ms" : 31.714558605,
+    "max_ms" : 57.145446,
+    "latencies_ms" : [ 22.469524, 21.325051, 17.179558, 16.3369, 8.887503, 18.782775, 24.688045, 13.041741, 21.192822, 23.594352, 23.999342, 11.793921, 44.774843, 30.675216, 23.513063, 29.908484, 49.047537, 29.693048, 28.967299, 21.505302, 36.147686, 49.624801, 57.145446, 41.929701, 37.526487, 39.772016, 45.566975, 36.103577, 49.851169, 38.715519, 48.556564, 37.837513, 48.485443, 40.255452, 38.834008, 33.698903, 41.776238, 38.258346, 47.0099, 36.836037, 32.909688, 18.833617, 28.105359, 31.908063, 37.834903, 27.246774, 38.573445, 21.438257, 18.800123, 21.90926, 23.678866, 33.95921, 36.754719, 30.431397, 30.907589, 27.998212, 27.931235, 31.513756, 33.747621, 35.447722, 30.816969, 26.52155, 33.661825, 28.477719, 50.213389, 19.97045, 28.604866, 32.498441, 32.283355, 28.623331, 31.396586, 34.280231, 27.49495, 32.144304, 20.089231, 33.554763, 45.721611, 26.546003, 49.457203, 27.634364, 26.925067, 35.245071, 50.12426, 24.350769, 30.925164, 32.918786, 35.193675, 41.59798, 47.7554, 31.703307, 44.528075, 34.965945, 31.495483, 34.288131, 32.767083, 30.26681, 35.451282, 30.217398, 26.104266, 41.569455, 22.559047, 32.520821, 38.911856, 40.768015, 28.845487, 30.704751, 29.910493, 23.492634, 28.353684, 27.207147, 33.491388, 38.700417, 48.769369, 33.853136, 21.0625, 23.895805, 48.996571, 36.268745, 28.72753, 33.137771, 23.218658, 29.69203, 29.98496, 32.601657, 20.712904, 32.435414, 26.670367, 26.451058, 27.980246, 31.625855, 36.388321, 29.953802, 31.826856, 25.915758, 25.787593, 38.941255, 29.60157, 29.587545, 32.770412, 43.431512, 21.970926, 22.445652, 25.295118, 45.654442, 35.231956, 39.353557, 26.013555, 44.359937, 38.751918, 28.498067, 35.63251, 34.824594, 37.312318, 39.186852, 54.672545, 34.285297, 34.35962, 28.972088, 35.485388, 29.233923, 32.49088, 35.313771, 39.683716, 36.299802, 28.285577, 37.088236, 20.761674, 20.77421, 31.542893, 22.580033, 22.834726, 25.290858, 35.151031, 35.559009, 19.490344, 43.82693, 34.871747, 31.591684, 31.831773, 33.728604, 36.596907, 28.886562, 25.767072, 22.628589, 25.039783, 20.280216, 14.515506, 36.457489, 33.192095, 30.498458, 28.319126, 28.030925, 32.64984, 25.98262, 26.054449, 21.642277, 27.599807, 19.445846, 18.642643, 20.766339 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 20640.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 20,
+    "rps" : 602.1677249257608,
+    "pool_pending_max" : 15,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/cart",
+    "handler" : "CartController.getCart",
+    "samples" : 200,
+    "p50_ms" : 4.005273,
+    "p95_ms" : 6.808331,
+    "p99_ms" : 8.910663,
+    "mean_ms" : 4.39911507,
+    "max_ms" : 13.08514,
+    "latencies_ms" : [ 13.08514, 9.1758, 8.910663, 5.495404, 8.653004, 4.950858, 4.360721, 6.65587, 4.144107, 3.587026, 3.513304, 6.795156, 3.810383, 3.412186, 4.991717, 5.36811, 4.598508, 3.870652, 6.192548, 4.364111, 6.239046, 3.862087, 4.096604, 3.415388, 3.370593, 6.79306, 3.487053, 5.641699, 6.054325, 4.005273, 5.400757, 5.504141, 6.094802, 5.14996, 7.58784, 5.089317, 3.597805, 5.038753, 4.684406, 5.231953, 5.828069, 4.753837, 3.349024, 3.062636, 3.354126, 5.418588, 3.598896, 3.423939, 4.450681, 5.738008, 3.881421, 3.020047, 4.160694, 5.403549, 3.546432, 3.193415, 3.852909, 4.920945, 6.163159, 3.923266, 7.371535, 5.282879, 6.181124, 3.65621, 3.655867, 3.971907, 6.607384, 4.291718, 4.002118, 4.105289, 6.546813, 3.56504, 3.509218, 5.230178, 5.376625, 3.531452, 3.136308, 5.250097, 5.106739, 5.880445, 7.48842, 5.344993, 5.453325, 6.385202, 3.448275, 2.915597, 3.337213, 6.552068, 3.555101, 3.212902, 5.013571, 5.782843, 3.951755, 3.256836, 4.930742, 5.153791, 4.160726, 3.592293, 4.883969, 4.89585, 4.454038, 4.411097, 7.473675, 7.023837, 4.859574, 3.806966, 3.458906, 2.874043, 6.808331, 3.447082, 2.933294, 3.216522, 4.531388, 4.468989, 3.217061, 3.177631, 4.485203, 5.086803, 3.193207, 3.238598, 3.966917, 4.652286, 4.049399, 3.464069, 3.080825, 6.299249, 5.206513, 4.259875, 5.525076, 3.549002, 2.753669, 2.760712, 2.656111, 5.086907, 3.346229, 3.006756, 2.505498, 2.656348, 5.012401, 3.119711, 3.21152, 2.98684, 4.227054, 4.550552, 3.126545, 2.876102, 2.889691, 4.412342, 3.963853, 4.155517, 3.250829, 5.612581, 4.075428, 4.668451, 4.323141, 5.029206, 3.851467, 3.034451, 2.867111, 4.328525, 4.306104, 2.985755, 3.206306, 3.212934, 6.060983, 3.402066, 3.008898, 2.900508, 4.604605, 3.754978, 3.05333, 3.126218, 3.08627, 4.509732, 4.799781, 3.760305, 3.484258, 5.852006, 4.184115, 4.601836, 6.872915, 3.46223, 2.907324, 2.801856, 2.984832, 6.144799, 3.348882, 2.673528, 2.776593, 3.765153, 3.838542, 2.989466, 2.721921, 3.027205, 3.957136, 3.888615, 2.991043, 2.737687, 2.992904, 3.576202 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 11471.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 1,
+    "rps" : 224.15702260404123,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/cart",
+    "handler" : "CartController.getCart",
+    "samples" : 200,
+    "p50_ms" : 6.20518,
+    "p95_ms" : 8.509145,
+    "p99_ms" : 9.939859,
+    "mean_ms" : 6.377510115,
+    "max_ms" : 10.011277,
+    "latencies_ms" : [ 4.961211, 4.817876, 4.810646, 4.699178, 4.577716, 4.909048, 4.911178, 4.912695, 4.909036, 4.926104, 6.851415, 6.860268, 6.813466, 6.888335, 6.858749, 5.251058, 5.251059, 5.25042, 5.252954, 5.265569, 6.350336, 6.269176, 6.284483, 6.268666, 6.271415, 7.228635, 7.227403, 7.242079, 7.185706, 7.168492, 4.265756, 4.272484, 4.317263, 4.297706, 4.299913, 4.307145, 4.32602, 4.312976, 4.302353, 4.271069, 7.709826, 7.62965, 7.629421, 7.630028, 7.871323, 4.700556, 4.709894, 4.706283, 4.644852, 4.501502, 7.668883, 8.31043, 7.669635, 7.722084, 7.673667, 6.712732, 7.275385, 6.704748, 7.420699, 6.656746, 5.038714, 5.036904, 4.513478, 4.532579, 4.381718, 8.273976, 8.273474, 8.017676, 8.011294, 8.012389, 5.951326, 5.94942, 5.964413, 5.795747, 5.776786, 4.5136, 4.513723, 4.514104, 4.554784, 4.556192, 8.219438, 8.219202, 8.219238, 8.235685, 8.192651, 6.355011, 6.348465, 6.372958, 6.310629, 6.351721, 8.545552, 8.541912, 8.546059, 8.548176, 8.509145, 7.926024, 7.958618, 7.985357, 7.925721, 7.92604, 8.481601, 8.488707, 8.484356, 8.519715, 8.374071, 5.081305, 5.09827, 5.08398, 5.176447, 5.06945, 4.769309, 4.769426, 4.786141, 4.868941, 4.692491, 8.316324, 8.216463, 8.316041, 8.327719, 8.262248, 4.804082, 4.794937, 5.083928, 4.791612, 4.791639, 5.570755, 5.566679, 5.549786, 5.549506, 5.277375, 7.404902, 7.392233, 7.392921, 7.388097, 7.371636, 4.70588, 4.704122, 4.701034, 4.67843, 4.747547, 6.000143, 6.01228, 6.010078, 5.987763, 6.091119, 7.830766, 7.770632, 7.770591, 7.837285, 7.869819, 5.134285, 5.113597, 5.06961, 5.066642, 4.929918, 7.831137, 7.831517, 7.827452, 7.840316, 7.827616, 6.20041, 6.20518, 6.20198, 6.203589, 6.16701, 8.207572, 8.193362, 8.201013, 8.240104, 8.197073, 7.188026, 7.159528, 7.159385, 7.203254, 7.163792, 10.011277, 9.939859, 9.939632, 9.939181, 9.940356, 5.252942, 5.282217, 5.276119, 5.364069, 5.23997, 4.324631, 4.336291, 4.333786, 4.323515, 4.33518, 8.172437, 8.179516, 8.160568, 8.170517, 8.117296, 4.679939, 4.680974, 4.69118, 4.705843, 4.695478 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 11471.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 5,
+    "rps" : 777.7528434537015,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/cart",
+    "handler" : "CartController.getCart",
+    "samples" : 200,
+    "p50_ms" : 10.800585,
+    "p95_ms" : 14.122748,
+    "p99_ms" : 15.927988,
+    "mean_ms" : 10.627006885,
+    "max_ms" : 19.763283,
+    "latencies_ms" : [ 9.749104, 12.107136, 9.369194, 9.469048, 9.147187, 9.103331, 11.527095, 11.345891, 10.75925, 10.200073, 6.815113, 6.805991, 6.802048, 6.729948, 6.698613, 7.916768, 7.88497, 7.896093, 7.760475, 7.725577, 10.914558, 10.877512, 10.903311, 11.239856, 12.861557, 10.833055, 10.241404, 11.570139, 11.61867, 10.399421, 7.12682, 9.629283, 6.977913, 6.65486, 5.01297, 6.577433, 7.317328, 6.994537, 11.64715, 11.593187, 10.742923, 11.210605, 10.749945, 11.112816, 11.614358, 11.681488, 10.983385, 10.834934, 8.871945, 8.876, 8.025321, 9.202504, 8.758296, 12.813959, 14.602725, 9.730246, 13.470294, 9.622035, 14.203268, 19.06956, 14.122748, 12.968396, 13.047392, 12.764946, 13.890336, 14.764581, 11.79958, 10.858145, 10.257753, 9.514218, 13.680865, 9.362801, 10.91808, 10.154196, 8.709587, 9.876835, 10.100509, 10.030973, 9.399377, 9.392894, 9.881648, 11.057338, 8.202835, 11.113712, 12.762336, 13.20856, 11.585219, 13.561677, 12.996885, 12.321898, 11.791772, 12.320235, 9.956716, 9.219312, 10.584804, 9.767835, 10.598233, 10.129995, 13.047583, 12.769854, 12.91185, 10.853291, 10.824702, 12.231266, 11.129861, 9.586349, 9.689074, 8.855819, 8.794008, 11.474859, 6.142139, 11.517254, 8.770698, 12.565712, 11.676095, 13.040432, 13.04995, 13.590891, 11.825789, 12.219226, 10.547263, 9.591536, 9.517221, 7.80505, 7.281973, 7.431641, 11.553416, 8.999457, 6.7909, 9.297998, 12.885279, 12.004659, 11.547468, 12.607602, 13.029678, 11.526694, 11.52495, 11.030265, 8.567013, 8.441096, 10.199429, 10.375144, 9.789442, 12.215116, 12.287773, 12.841138, 12.829893, 15.321236, 15.206522, 19.763283, 15.092352, 15.927988, 15.324104, 13.443895, 12.53737, 12.420337, 11.834055, 10.748061, 10.742797, 8.07592, 6.489566, 8.163116, 6.731258, 8.193551, 9.39008, 7.44168, 7.27663, 7.101745, 6.883026, 6.516981, 7.862001, 7.893688, 6.909261, 8.486168, 8.98283, 12.241153, 11.439023, 12.731916, 12.211169, 12.197422, 11.04659, 12.717907, 13.025946, 11.29224, 10.959608, 7.188963, 12.460435, 9.744664, 10.800585, 13.614578, 9.302743, 12.930081, 13.228546, 12.867719, 12.934364, 12.560368, 9.728248, 8.940967, 10.384644, 9.350503 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 11471.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 10,
+    "rps" : 918.7474965279154,
+    "pool_pending_max" : 4,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/cart",
+    "handler" : "CartController.getCart",
+    "samples" : 200,
+    "p50_ms" : 21.98053,
+    "p95_ms" : 32.579153,
+    "p99_ms" : 37.663187,
+    "mean_ms" : 22.732919295000002,
+    "max_ms" : 40.524449,
+    "latencies_ms" : [ 13.930827, 12.356815, 22.083074, 23.076778, 23.77724, 11.481495, 11.461008, 13.839764, 10.69951, 17.962213, 12.82218, 20.274177, 23.289803, 22.700949, 17.927668, 24.647774, 21.290564, 24.351403, 28.765954, 20.713047, 22.583405, 28.804196, 36.218948, 26.730086, 30.563325, 24.369093, 24.646937, 28.539144, 21.755824, 27.57305, 17.427121, 28.794256, 28.122914, 29.591601, 27.520927, 25.079451, 28.651985, 30.890886, 28.615268, 17.937314, 22.551663, 20.365017, 16.15614, 18.807707, 20.447661, 28.763033, 32.731155, 19.440553, 15.898103, 12.09683, 29.501988, 14.468444, 19.352729, 11.404803, 22.040154, 16.939775, 21.497142, 18.619911, 19.959088, 19.98129, 36.593047, 21.490869, 11.519661, 27.270062, 16.28578, 27.058633, 22.997634, 31.684437, 28.641374, 24.623731, 20.980701, 24.714064, 20.911109, 17.415402, 18.123098, 18.412739, 9.780343, 21.058853, 20.496987, 34.755325, 27.978405, 25.628997, 26.823528, 25.748058, 23.124001, 21.988857, 24.00435, 20.497594, 16.683069, 20.789902, 30.225028, 25.844952, 21.655073, 28.730671, 14.852282, 27.553689, 14.050739, 28.725396, 31.25163, 27.461641, 19.828413, 31.937923, 30.370498, 29.797929, 19.530071, 19.402342, 29.893579, 35.80443, 16.916089, 39.223638, 19.805382, 16.73371, 37.663187, 26.93753, 27.546399, 26.348963, 25.506287, 29.157805, 32.579153, 20.665389, 26.541901, 24.317869, 26.857059, 24.881606, 21.261422, 25.443312, 16.072629, 21.317855, 21.390449, 17.998801, 15.889789, 17.253032, 16.550175, 22.376951, 13.642765, 15.568793, 12.57731, 12.336457, 24.081378, 20.059719, 17.529212, 21.404646, 19.53005, 25.253981, 21.955473, 32.400974, 20.282014, 20.582145, 14.554494, 30.582511, 19.987412, 21.817592, 17.892223, 16.30005, 27.688485, 27.418524, 29.198743, 20.440196, 20.355915, 10.967616, 35.933343, 19.503241, 21.605668, 27.623494, 16.583188, 28.599444, 27.433397, 24.155835, 24.091448, 33.694436, 20.020159, 25.730087, 23.255172, 21.821356, 19.035178, 21.98053, 13.566723, 23.385106, 16.806736, 19.49184, 40.524449, 28.244807, 27.151984, 28.854493, 21.673137, 24.44829, 21.301582, 22.933982, 15.42296, 18.574365, 22.809494, 21.699781, 20.261765, 24.794818, 17.916208, 10.988198, 25.942978, 25.030106, 24.496488, 19.664477 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 11471.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 20,
+    "rps" : 824.908443721172,
+    "pool_pending_max" : 15,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/analytics",
+    "handler" : "AnalyticsController.report",
+    "samples" : 200,
+    "p50_ms" : 8.853341,
+    "p95_ms" : 12.235224,
+    "p99_ms" : 17.6178,
+    "mean_ms" : 9.211679285,
+    "max_ms" : 20.566294,
+    "latencies_ms" : [ 19.015978, 14.742626, 12.672011, 11.464393, 8.588143, 8.944273, 8.227826, 8.984603, 9.238076, 9.766078, 8.499963, 10.48397, 9.715102, 8.438599, 10.63626, 8.103698, 10.613739, 10.935709, 10.610093, 12.235224, 9.463057, 8.897063, 10.058509, 8.1305, 9.336776, 7.6074, 8.621953, 9.097346, 10.523824, 11.578154, 10.49238, 12.676369, 12.260771, 9.304281, 9.946221, 8.341224, 11.154945, 9.945241, 10.016488, 8.995036, 7.688522, 9.893852, 7.915987, 8.926925, 7.915682, 8.758945, 7.174741, 7.582617, 8.244895, 8.942802, 10.110697, 9.25727, 7.81481, 9.729187, 9.013879, 8.696455, 7.942257, 8.786743, 7.356841, 8.853341, 9.391286, 9.571178, 8.680892, 7.783311, 7.843334, 7.418547, 8.733747, 7.275057, 8.72646, 8.433088, 8.421036, 8.131969, 9.187251, 8.819745, 9.139153, 7.866605, 8.862057, 8.131651, 9.859164, 8.052884, 10.596819, 8.699141, 10.571741, 10.898587, 13.807474, 9.761536, 9.845101, 7.403686, 9.265525, 7.812312, 10.581905, 8.190523, 16.206397, 13.477854, 10.621214, 7.890832, 10.046392, 7.57518, 8.965758, 7.92462, 11.029428, 8.443378, 8.671814, 10.009016, 8.768746, 8.517119, 7.657722, 8.560191, 7.539718, 8.818973, 7.885742, 9.283417, 7.82903, 9.50991, 8.199355, 9.956142, 9.972379, 10.699059, 8.931417, 9.007605, 8.838056, 8.275182, 9.071845, 8.023225, 8.443928, 8.556971, 9.107284, 8.595619, 8.533927, 7.495136, 9.262258, 7.365498, 8.653141, 7.16342, 10.225653, 7.540185, 8.832655, 8.448886, 10.310908, 9.649838, 8.187919, 8.004771, 10.485652, 7.526161, 7.53729, 7.5302, 9.000506, 9.05466, 10.101462, 20.566294, 9.661715, 8.44542, 8.986904, 8.558269, 8.038886, 7.16609, 10.17324, 9.244564, 7.530376, 9.105203, 9.311275, 9.323695, 7.347427, 9.469582, 7.218982, 9.679506, 7.783402, 9.138638, 7.510299, 8.557386, 8.775296, 9.468914, 17.6178, 9.388777, 10.20056, 8.994247, 7.059195, 9.107199, 8.825076, 10.445192, 9.843746, 11.190223, 11.252081, 7.710473, 10.535775, 7.402582, 8.686674, 7.888983, 8.193493, 7.114403, 7.447211, 7.753057, 7.806404, 8.900732, 9.129658, 7.243807, 8.772569, 8.288991, 8.370595, 7.551232 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 916.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 1,
+    "rps" : 108.14742805771098,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/analytics",
+    "handler" : "AnalyticsController.report",
+    "samples" : 200,
+    "p50_ms" : 11.456995,
+    "p95_ms" : 15.966595,
+    "p99_ms" : 17.840403,
+    "mean_ms" : 11.59471803,
+    "max_ms" : 19.046464,
+    "latencies_ms" : [ 9.728194, 9.466552, 9.581021, 9.516522, 9.016818, 7.739461, 7.149338, 8.306937, 6.938139, 7.64839, 9.364836, 9.362744, 8.865387, 8.602516, 9.37691, 8.160789, 9.108475, 8.160768, 8.251701, 8.567671, 16.52504, 14.438409, 16.333012, 15.529691, 17.794414, 15.787147, 11.924333, 11.177203, 11.688837, 8.542337, 13.282737, 13.175705, 9.8432, 13.161953, 10.671646, 12.802512, 9.90312, 10.881528, 10.968376, 8.430079, 12.852356, 12.89901, 12.887591, 13.209505, 12.898377, 14.234309, 12.443953, 12.911928, 12.521844, 10.689009, 15.376456, 11.814191, 14.479734, 14.140879, 10.41644, 11.723001, 11.654081, 10.950344, 14.216016, 10.9275, 17.282998, 18.105824, 15.361003, 15.353988, 13.775634, 12.824676, 12.993729, 13.919047, 12.542484, 12.871634, 14.410096, 13.044656, 13.587145, 12.114448, 12.262027, 15.966595, 14.901121, 12.282804, 15.213862, 11.913844, 11.546421, 19.046464, 16.895711, 16.19431, 10.350442, 17.741386, 15.768819, 15.558748, 12.511413, 10.30929, 13.1764, 14.368451, 17.840403, 13.863745, 10.131672, 12.698662, 11.495359, 14.972894, 14.303572, 14.02489, 14.784666, 14.782965, 12.001441, 11.990896, 11.030146, 8.632285, 8.630192, 10.992011, 7.543064, 9.089306, 12.62182, 12.614666, 11.904081, 10.18563, 9.092985, 11.042064, 11.041909, 11.66652, 11.046695, 10.3851, 8.551449, 8.87177, 8.549118, 8.250317, 7.910624, 11.218326, 11.197142, 11.216216, 10.889493, 10.938044, 10.682368, 10.678725, 10.645061, 10.660015, 10.607637, 9.996074, 10.027477, 9.996043, 10.000518, 10.39318, 12.509303, 12.505497, 15.473767, 12.495713, 12.129951, 12.416935, 12.130252, 12.13863, 12.405779, 9.424775, 9.487805, 9.047743, 8.809084, 8.762658, 8.985396, 11.782005, 11.774168, 12.825619, 12.600839, 11.320603, 10.79523, 10.820395, 10.826124, 9.759266, 9.735828, 9.802192, 9.862919, 9.817535, 9.801894, 9.872328, 10.540581, 10.542155, 11.489819, 10.840312, 10.485539, 8.877529, 8.889801, 8.884533, 8.63206, 7.969054, 11.573998, 11.571632, 11.565133, 11.587321, 11.533748, 11.243756, 11.456995, 11.502254, 11.516276, 11.563766, 11.739677, 11.549352, 11.54607, 11.498071, 11.470987, 10.992247, 10.653473, 10.639293, 10.621956, 10.940307 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 916.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 5,
+    "rps" : 429.36551125566876,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/analytics",
+    "handler" : "AnalyticsController.report",
+    "samples" : 200,
+    "p50_ms" : 18.61887,
+    "p95_ms" : 24.448327,
+    "p99_ms" : 26.864347,
+    "mean_ms" : 18.75535776,
+    "max_ms" : 28.435827,
+    "latencies_ms" : [ 12.155722, 18.113661, 12.046629, 11.99553, 11.947441, 17.938971, 18.362739, 17.674678, 11.615118, 18.086822, 17.061362, 17.044514, 17.025267, 24.038958, 17.0299, 17.627066, 17.400324, 17.100443, 16.630101, 11.283079, 17.323723, 17.237087, 17.209391, 17.232519, 16.391601, 20.059248, 20.064976, 19.851374, 19.760028, 21.538697, 19.424605, 19.293545, 19.355612, 19.605882, 19.31217, 22.086335, 25.674167, 22.20364, 22.885047, 19.558202, 26.864347, 25.097748, 26.773942, 25.043396, 24.878978, 23.641515, 21.169314, 23.434496, 20.408759, 19.418502, 17.672481, 17.679518, 21.315637, 20.301977, 24.960139, 16.274029, 18.019298, 28.435827, 20.255949, 23.769035, 24.061981, 20.483477, 18.984024, 21.255882, 24.273333, 23.800153, 24.448327, 22.145638, 18.918619, 19.747547, 19.722024, 20.097664, 18.909935, 18.205016, 21.910987, 20.654314, 22.300107, 20.486754, 24.210036, 24.025744, 19.229367, 21.487545, 24.211933, 27.313607, 19.995491, 19.963021, 17.24493, 21.371288, 22.394733, 22.857499, 18.964975, 19.238695, 18.471401, 16.701915, 17.691542, 17.937969, 16.970119, 20.343396, 15.594267, 10.636046, 19.348918, 17.285665, 16.480279, 18.758945, 17.155408, 18.328058, 16.205268, 23.056797, 16.23788, 18.533526, 18.61887, 17.535701, 19.7187, 20.164375, 16.347455, 18.417945, 22.17962, 21.231166, 16.694952, 19.971858, 19.157468, 17.143149, 19.822461, 18.898502, 18.685426, 24.446514, 11.497673, 13.179399, 19.554887, 19.230881, 20.265483, 14.881437, 23.723773, 22.216806, 15.658949, 22.25251, 18.741268, 23.28349, 16.690412, 20.835463, 25.427301, 18.429401, 19.117538, 18.790143, 19.07801, 19.175119, 19.140279, 17.979366, 16.1812, 17.001331, 16.54759, 20.900424, 10.878516, 16.924826, 16.475334, 17.334918, 19.034479, 18.484261, 15.851865, 14.895855, 16.855956, 19.009969, 17.673468, 16.483181, 15.848449, 16.652087, 11.434751, 15.907037, 15.925718, 15.905573, 16.79216, 18.314024, 13.859721, 14.080804, 10.00975, 18.39522, 18.078722, 15.934594, 17.172699, 16.96277, 17.440349, 14.623142, 18.688143, 18.703408, 18.560668, 13.601973, 13.280379, 16.887678, 16.926637, 17.689176, 15.749907, 13.598704, 18.862053, 17.631764, 15.690629, 17.637659, 22.236744, 11.226527, 19.874138, 19.857766 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 916.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 10,
+    "rps" : 518.2975047528075,
+    "pool_pending_max" : 5,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/organizations/{orgId}/analytics",
+    "handler" : "AnalyticsController.report",
+    "samples" : 200,
+    "p50_ms" : 34.841283,
+    "p95_ms" : 48.6688,
+    "p99_ms" : 56.001404,
+    "mean_ms" : 34.904875885,
+    "max_ms" : 60.467751,
+    "latencies_ms" : [ 11.554289, 11.465106, 11.548888, 11.446209, 41.40579, 15.912771, 25.656838, 19.610887, 19.375866, 25.086493, 27.642791, 18.331616, 24.585213, 18.283601, 24.388156, 32.548047, 32.367145, 34.594267, 34.968166, 20.591994, 37.435818, 37.429324, 29.824761, 29.807659, 34.265378, 32.722542, 24.024507, 23.666441, 34.856763, 37.471989, 32.545363, 34.946325, 32.779823, 35.310269, 38.598708, 33.918068, 44.175771, 48.6688, 33.778424, 45.725265, 33.340536, 37.470412, 32.83066, 38.059894, 57.161054, 23.759113, 46.387883, 36.925378, 34.864826, 39.916638, 38.413989, 37.988755, 54.083776, 39.480055, 55.369702, 36.56871, 34.013261, 40.05239, 38.009509, 29.178229, 29.839087, 34.064984, 36.108442, 38.614726, 37.120294, 34.841283, 42.427412, 31.872205, 33.938198, 38.86185, 30.466946, 42.09223, 31.877041, 34.007013, 33.574946, 37.189658, 28.387858, 39.660258, 30.456808, 38.449555, 37.694106, 40.22236, 42.946652, 26.382775, 26.026091, 32.876174, 44.062485, 28.077447, 27.1967, 33.438388, 29.163858, 37.23653, 25.937015, 20.529473, 29.980627, 49.367676, 56.001404, 36.372457, 35.485744, 39.513357, 24.26044, 41.171001, 26.991986, 23.257911, 55.551901, 19.976674, 44.356192, 35.828945, 49.398236, 39.251021, 41.729549, 38.627661, 40.700207, 37.089143, 43.195681, 43.327334, 41.278412, 43.304803, 48.633853, 46.367507, 36.180144, 34.055672, 47.055238, 36.840623, 37.616379, 31.786684, 32.584997, 34.559931, 33.518279, 36.34767, 41.951795, 36.526269, 32.874374, 41.088363, 28.279985, 26.378376, 39.634351, 31.965649, 46.212471, 29.827468, 28.086355, 32.587798, 38.717311, 30.277585, 28.065917, 26.45682, 37.027677, 29.859253, 32.092117, 31.627695, 30.13303, 40.661799, 39.197885, 23.608905, 26.007971, 30.905367, 24.236526, 39.860871, 45.306713, 43.935145, 34.178528, 23.572668, 33.599212, 24.170016, 27.136124, 35.515108, 38.226655, 40.969015, 39.284516, 27.510272, 60.467751, 32.572539, 39.557334, 48.00906, 55.153539, 41.029503, 39.577404, 38.754294, 31.486462, 23.992506, 27.275105, 40.300143, 46.655931, 28.085078, 30.529115, 28.297672, 43.180632, 44.775908, 39.370034, 34.227334, 51.545042, 42.184591, 42.181342, 31.617451, 40.656716, 43.121204, 29.944804, 30.958733, 30.943892, 32.573015 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 916.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 20,
+    "rps" : 542.1731366857271,
+    "pool_pending_max" : 15,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/orders/{orderId}",
+    "handler" : "PublicOrderController.trackGuestOrder",
+    "samples" : 200,
+    "p50_ms" : 1.083049,
+    "p95_ms" : 3.491817,
+    "p99_ms" : 4.359935,
+    "mean_ms" : 1.470997225,
+    "max_ms" : 4.905981,
+    "latencies_ms" : [ 3.192652, 1.829548, 1.234134, 1.041694, 0.959684, 1.089968, 4.359935, 2.75235, 1.431187, 1.339768, 1.343234, 2.562938, 2.703157, 1.62525, 1.378976, 1.187812, 1.041768, 0.98592, 0.953904, 0.969773, 0.907728, 0.914978, 0.85223, 0.853361, 0.884776, 0.819669, 0.844521, 0.841261, 0.844412, 2.567786, 3.911988, 1.413726, 1.358812, 1.487087, 1.223748, 1.030263, 1.063604, 1.041598, 0.957254, 1.280138, 3.429709, 1.955412, 1.099524, 0.980709, 0.879971, 0.882001, 0.933896, 1.027713, 0.932344, 0.886109, 0.912427, 0.903029, 0.984828, 3.20154, 1.97342, 1.101546, 0.942338, 0.927165, 0.857009, 0.862841, 0.831942, 0.850152, 0.93271, 0.880935, 0.923647, 0.833952, 1.08971, 1.919971, 2.443762, 1.819823, 1.283914, 1.062316, 1.330952, 1.002333, 1.3029, 1.083916, 0.862093, 0.846164, 0.781952, 0.780873, 2.476594, 2.238366, 1.097597, 0.890783, 1.297089, 2.122847, 1.899096, 1.156265, 1.064697, 0.869696, 0.80364, 2.187938, 3.002267, 1.334742, 1.016317, 0.92953, 0.813144, 0.743742, 0.806675, 1.083049, 1.020448, 0.928882, 1.232602, 0.973861, 1.274999, 3.753495, 2.283346, 1.243347, 0.91509, 0.901323, 0.885533, 0.876575, 0.811516, 0.908429, 0.914755, 0.918654, 0.925453, 2.420543, 3.332554, 1.427252, 1.102719, 0.957222, 0.983788, 0.945326, 0.962858, 0.956744, 0.939646, 0.942323, 0.925395, 0.952416, 1.7726, 3.720119, 1.812916, 1.07598, 1.035699, 0.884143, 0.83438, 0.856787, 1.598945, 0.965837, 1.20309, 1.254889, 4.063054, 2.142927, 1.324553, 1.594144, 1.907522, 2.067756, 1.195434, 1.059705, 1.074842, 4.905981, 1.985022, 1.48517, 3.491817, 3.432608, 1.730034, 3.16402, 2.005032, 1.144274, 0.991248, 1.196405, 1.164643, 1.077241, 1.054939, 1.00923, 0.942334, 0.891817, 1.029045, 3.596218, 2.837397, 1.556136, 1.231711, 1.048493, 1.369217, 1.150039, 1.668388, 1.463215, 3.704925, 3.475098, 1.424174, 1.409957, 1.223984, 1.203124, 1.093308, 1.064883, 1.008034, 1.171309, 4.752043, 2.769327, 1.370103, 1.331063, 0.993323, 1.016597, 1.04257, 0.949549, 0.981809, 1.054649, 2.084916, 3.936396 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 1226.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 1,
+    "rps" : 669.8695160164947,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/orders/{orderId}",
+    "handler" : "PublicOrderController.trackGuestOrder",
+    "samples" : 200,
+    "p50_ms" : 2.338277,
+    "p95_ms" : 6.219876,
+    "p99_ms" : 7.245755,
+    "mean_ms" : 2.90530218,
+    "max_ms" : 7.606059,
+    "latencies_ms" : [ 3.27855, 3.239219, 3.137571, 3.024085, 2.911984, 2.333226, 2.34351, 2.311325, 2.315541, 2.28248, 2.000027, 1.868105, 1.869567, 1.850234, 1.832827, 2.838514, 2.39436, 2.338277, 7.606059, 2.231507, 5.130043, 5.161265, 5.137653, 4.707963, 3.110735, 3.097813, 3.087452, 3.087813, 3.079621, 4.823179, 4.734207, 4.743135, 4.753994, 4.852918, 3.215584, 7.245755, 3.207898, 3.192766, 3.192334, 6.219876, 6.21611, 6.213126, 6.236627, 3.468706, 1.79524, 1.867237, 1.804436, 1.852332, 1.539485, 1.565933, 1.542688, 1.545931, 1.441137, 3.560658, 3.214313, 3.152915, 3.120672, 3.132145, 1.781773, 1.632707, 1.601166, 1.656012, 1.587164, 1.622508, 1.67523, 1.623914, 1.566062, 6.739512, 6.060715, 6.074947, 5.926617, 5.871669, 3.154701, 2.480712, 2.481438, 2.324357, 2.368503, 1.810043, 1.841261, 1.908319, 1.794906, 1.788734, 1.955633, 1.859593, 1.871044, 1.875133, 1.783034, 1.883817, 1.909574, 1.847756, 1.822317, 1.770898, 1.568564, 1.55338, 1.564487, 1.574905, 1.527724, 6.686966, 6.641196, 6.684208, 6.651837, 6.627804, 2.141297, 2.112245, 2.131469, 2.153691, 2.104509, 1.655284, 1.627265, 1.638799, 1.615617, 1.589115, 1.743442, 1.849911, 1.919586, 1.725107, 1.720238, 1.661131, 1.652183, 1.661758, 1.532576, 1.476462, 2.090935, 2.144636, 2.09234, 2.184939, 2.090445, 2.911163, 3.610842, 2.984703, 2.880916, 7.349846, 4.992356, 5.08241, 4.957256, 4.367121, 3.191912, 2.783081, 2.765355, 2.781351, 2.677253, 1.941295, 1.89982, 1.881185, 1.912508, 1.874853, 1.614437, 1.616761, 1.623095, 1.600082, 1.619801, 1.697463, 1.586504, 1.572391, 1.607723, 1.56744, 2.482849, 1.753777, 1.835243, 1.788805, 1.761331, 4.343356, 4.273049, 4.263719, 4.23256, 3.688304, 3.573054, 3.564605, 3.556788, 3.554409, 3.546418, 2.785431, 2.843371, 2.744497, 2.749944, 2.795062, 2.724115, 2.463946, 2.411953, 2.428262, 2.364643, 2.40612, 2.427385, 2.416039, 2.399827, 2.187847, 2.100615, 2.095702, 2.085733, 2.146329, 2.119296, 5.57621, 5.575972, 5.62404, 5.591439, 5.798751, 2.640814, 2.684056, 2.648878, 2.648486 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 1226.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 5,
+    "rps" : 1689.6056826981014,
+    "pool_pending_max" : 0,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/orders/{orderId}",
+    "handler" : "PublicOrderController.trackGuestOrder",
+    "samples" : 200,
+    "p50_ms" : 1.913807,
+    "p95_ms" : 4.795256,
+    "p99_ms" : 5.764237,
+    "mean_ms" : 2.368279465,
+    "max_ms" : 6.908481,
+    "latencies_ms" : [ 4.554869, 4.269548, 4.02979, 4.489922, 4.392193, 3.198699, 4.506543, 3.129877, 3.774592, 3.517734, 1.890668, 1.977294, 1.915664, 1.889658, 2.015427, 2.15263, 1.842778, 1.827695, 2.010719, 1.40456, 1.847531, 1.750556, 1.745289, 1.702887, 1.601995, 1.769822, 2.418584, 1.672217, 1.972208, 2.306268, 1.706799, 2.093057, 2.244945, 1.507029, 1.659835, 1.910541, 1.854348, 1.50849, 1.437119, 1.411669, 1.340688, 1.537416, 1.278043, 1.241547, 1.438161, 1.348023, 1.639224, 1.265081, 1.444459, 1.754875, 1.753066, 1.569695, 1.436122, 1.558304, 1.495216, 1.786357, 1.492889, 1.661619, 1.492344, 1.735793, 1.412704, 1.913807, 1.528079, 1.621486, 3.255207, 2.261435, 2.070151, 1.965373, 2.319209, 1.809724, 3.050053, 1.489864, 1.604479, 1.202508, 1.846428, 1.614984, 1.518662, 1.841725, 2.302315, 2.253012, 2.013643, 2.023745, 1.724195, 2.038348, 2.016347, 2.007564, 1.868251, 1.874831, 2.015634, 1.999928, 1.909092, 2.180118, 2.191434, 3.255518, 3.519554, 3.080462, 3.299779, 2.881277, 4.795256, 4.546243, 4.665997, 4.232677, 4.447776, 5.100621, 5.093114, 4.969098, 4.872519, 4.724093, 3.403588, 3.398507, 3.327448, 3.558989, 3.610176, 1.976341, 1.951781, 1.957607, 2.031443, 1.918429, 1.930083, 1.962424, 1.898647, 1.588056, 1.553498, 1.650436, 1.936825, 1.856056, 2.058312, 2.566074, 2.076639, 2.296456, 1.372274, 1.979337, 2.477132, 1.666381, 1.718786, 1.498775, 1.38486, 2.010072, 1.351199, 1.536465, 1.477581, 2.322161, 1.527774, 1.747973, 1.286598, 1.623037, 1.6538, 1.354005, 1.675882, 1.620696, 1.613544, 1.547852, 1.441199, 3.719944, 1.583278, 1.570921, 2.065121, 1.740909, 1.590131, 3.064981, 2.891936, 1.922246, 1.887537, 4.491575, 1.904046, 5.327676, 5.203721, 5.164784, 4.508566, 6.908481, 4.0205, 3.981836, 5.904418, 5.764237, 4.252348, 3.383191, 2.818736, 3.032312, 2.928171, 3.63913, 3.524068, 2.272757, 1.641335, 1.778761, 2.012071, 1.975275, 1.602142, 1.875055, 1.456252, 2.219225, 1.47312, 1.952561, 1.534201, 1.868416, 1.596769, 1.567993, 1.471214, 1.617323, 1.67231, 1.469825 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 1226.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 10,
+    "rps" : 4009.777843270816,
+    "pool_pending_max" : 5,
+    "pool_active_max" : 5
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/orders/{orderId}",
+    "handler" : "PublicOrderController.trackGuestOrder",
+    "samples" : 200,
+    "p50_ms" : 5.092773,
+    "p95_ms" : 9.668202,
+    "p99_ms" : 10.965359,
+    "mean_ms" : 5.768209415,
+    "max_ms" : 14.211578,
+    "latencies_ms" : [ 5.517862, 7.38048, 4.107827, 4.631721, 3.89522, 7.34384, 7.915143, 8.774081, 7.217459, 9.2265, 8.689616, 8.819111, 8.950002, 7.519716, 8.861945, 7.119042, 6.142054, 6.816575, 6.433225, 5.593596, 2.428614, 3.008936, 4.801583, 3.276283, 3.04039, 3.736239, 2.687383, 3.151642, 3.651791, 3.132964, 3.719872, 2.819844, 5.341366, 3.649154, 4.340652, 4.042921, 3.844896, 3.806205, 3.393757, 2.746191, 5.692537, 3.653448, 8.661795, 3.614502, 4.374812, 4.192713, 6.143353, 3.586679, 3.806764, 4.008499, 3.747073, 7.599775, 1.96992, 1.645858, 1.975914, 3.488704, 4.930286, 3.104432, 8.966332, 3.481863, 5.381352, 10.094344, 1.515438, 8.364702, 6.283857, 8.517317, 1.656072, 6.134397, 7.762216, 8.731451, 7.575325, 3.570172, 8.216946, 8.596184, 9.861205, 10.730879, 6.887449, 8.362416, 7.551459, 6.726994, 7.620528, 9.280143, 6.663838, 4.158602, 4.969616, 4.237137, 3.684236, 4.970803, 5.6564, 3.922463, 4.536386, 4.636699, 6.007271, 3.706206, 4.663284, 4.499488, 3.250186, 3.955621, 4.206355, 6.509349, 4.40197, 3.743954, 4.436193, 14.211578, 4.181512, 4.062059, 4.13958, 4.174601, 4.138481, 4.715572, 4.180088, 4.067803, 4.063931, 2.082458, 2.863936, 6.47425, 6.039017, 10.655443, 5.759198, 5.826056, 5.172748, 8.830403, 5.108702, 7.069582, 1.729567, 4.356657, 8.627994, 7.516835, 7.02277, 3.738807, 8.58247, 7.882555, 9.685222, 8.692026, 9.508837, 6.747262, 6.818798, 9.463096, 9.465221, 6.634762, 7.334894, 9.328432, 11.165177, 7.56474, 6.052888, 8.007637, 8.110842, 9.099657, 9.326761, 7.080824, 7.05675, 8.323729, 7.932745, 8.669901, 10.262839, 10.965359, 8.540176, 9.668202, 7.155012, 6.57008, 9.632502, 10.523291, 5.092773, 6.615707, 8.533479, 7.147529, 5.403321, 6.159946, 2.839829, 3.927985, 1.976953, 2.971321, 5.071312, 4.711211, 4.719934, 5.334528, 4.943673, 2.431487, 4.762105, 4.875181, 4.89053, 5.444831, 4.697265, 6.744915, 4.666941, 4.238093, 6.739775, 4.891631, 4.868674, 3.925412, 3.534513, 4.440674, 4.047015, 4.111165, 1.936291, 4.358938, 4.089811, 3.417694, 3.945741, 2.013525 ],
+    "statuses" : {
+      "200" : 200
+    },
+    "hibernate_statements_mean" : 0.0,
+    "bytes_mean" : 1226.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "concurrency" : 20,
+    "rps" : 3166.4907760202855,
+    "pool_pending_max" : 10,
+    "pool_active_max" : 5
+  } ],
+  "page_sizes" : [ {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders",
+    "samples" : 30,
+    "p50_ms" : 3.124764,
+    "p95_ms" : 6.662377,
+    "p99_ms" : 7.081718,
+    "mean_ms" : 3.9144426,
+    "max_ms" : 7.081718,
+    "latencies_ms" : [ 3.036775, 6.662377, 3.364315, 2.942979, 3.047215, 4.701596, 4.368984, 4.088837, 3.944417, 7.081718, 4.680272, 5.077872, 5.965024, 3.137709, 2.991288, 2.860557, 2.640584, 5.959341, 2.941257, 2.790168, 2.844808, 3.080164, 4.823578, 3.112869, 2.649902, 3.032218, 5.036674, 4.642422, 3.124764, 2.802594 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 1231.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders",
+    "samples" : 30,
+    "p50_ms" : 3.77312,
+    "p95_ms" : 5.38642,
+    "p99_ms" : 5.873701,
+    "mean_ms" : 3.9980568,
+    "max_ms" : 5.873701,
+    "latencies_ms" : [ 4.158874, 5.345336, 5.873701, 3.498042, 3.073802, 3.481347, 5.38642, 3.77312, 3.065136, 2.991155, 3.870966, 4.342659, 4.938334, 3.152868, 3.312666, 5.101995, 3.486002, 2.969538, 2.936668, 4.300609, 3.924947, 3.453157, 3.541471, 3.596643, 5.331077, 4.396835, 4.117008, 4.537609, 4.765103, 3.218616 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 20640.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 20
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/customer/orders",
+    "handler" : "CustomerOrderController.getOrders",
+    "samples" : 30,
+    "p50_ms" : 5.370427,
+    "p95_ms" : 7.27369,
+    "p99_ms" : 7.601866,
+    "mean_ms" : 5.553881433333333,
+    "max_ms" : 7.601866,
+    "latencies_ms" : [ 6.821549, 5.52134, 4.594421, 5.554437, 5.854142, 5.117421, 5.845611, 5.388019, 6.298282, 6.754207, 4.878554, 4.59513, 7.27369, 5.019571, 4.207072, 5.575906, 5.24333, 4.386583, 5.290517, 5.807719, 4.920048, 4.768262, 6.084299, 5.187198, 4.525493, 6.967988, 5.370427, 7.601866, 5.93987, 5.223491 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 7.0,
+    "bytes_mean" : 92106.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 100
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/orders",
+    "handler" : "AdminController.listAllOrders",
+    "samples" : 30,
+    "p50_ms" : 3.256573,
+    "p95_ms" : 5.490826,
+    "p99_ms" : 5.973453,
+    "mean_ms" : 3.6444465,
+    "max_ms" : 5.973453,
+    "latencies_ms" : [ 3.256573, 2.790916, 2.675403, 3.065557, 5.429178, 3.024947, 2.900132, 2.719578, 3.32185, 4.041271, 3.142821, 3.540258, 2.959317, 4.979326, 4.207957, 5.108782, 3.551106, 5.19878, 3.289244, 2.895101, 2.923237, 3.142847, 5.973453, 3.601698, 3.113521, 3.110797, 5.490826, 3.385016, 3.133106, 3.360797 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 1060.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/orders",
+    "handler" : "AdminController.listAllOrders",
+    "samples" : 30,
+    "p50_ms" : 3.878624,
+    "p95_ms" : 6.246388,
+    "p99_ms" : 6.541361,
+    "mean_ms" : 4.3269804333333335,
+    "max_ms" : 6.541361,
+    "latencies_ms" : [ 4.409687, 3.459107, 6.246388, 5.077227, 4.423137, 4.79592, 3.807374, 3.216777, 3.086996, 3.078624, 5.469821, 3.878624, 3.447419, 3.571715, 5.453265, 3.596116, 3.50755, 3.286455, 5.571394, 3.829422, 3.369344, 3.259557, 4.801131, 4.529536, 4.342702, 3.622953, 6.541361, 5.219354, 5.071283, 5.839174 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 17220.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 20
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/admin/orders",
+    "handler" : "AdminController.listAllOrders",
+    "samples" : 30,
+    "p50_ms" : 5.830748,
+    "p95_ms" : 7.133185,
+    "p99_ms" : 7.650162,
+    "mean_ms" : 5.751406933333333,
+    "max_ms" : 7.650162,
+    "latencies_ms" : [ 5.30251, 7.650162, 6.111465, 5.830748, 6.941551, 5.866665, 5.870941, 5.927269, 6.509318, 6.320507, 5.210702, 4.619306, 6.10388, 5.437566, 4.641053, 5.080937, 5.570447, 4.680315, 4.28041, 6.528616, 4.771688, 4.43359, 5.526593, 5.080335, 5.293619, 7.133185, 6.332729, 6.527688, 6.218607, 6.739806 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 6.0,
+    "bytes_mean" : 85332.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 100
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch",
+    "samples" : 30,
+    "p50_ms" : 2.585211,
+    "p95_ms" : 3.981297,
+    "p99_ms" : 4.377552,
+    "mean_ms" : 2.8900898666666666,
+    "max_ms" : 4.377552,
+    "latencies_ms" : [ 2.20737, 3.678804, 2.68853, 2.270601, 2.314381, 2.108905, 2.221769, 3.26547, 3.654936, 2.575063, 2.311438, 2.2458, 2.207324, 2.350315, 3.802825, 2.916818, 2.6642, 2.746198, 2.331235, 3.981297, 3.734119, 2.826436, 3.87719, 3.953538, 4.377552, 2.573919, 2.442144, 2.247335, 2.585211, 3.541973 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 589.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 1
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch",
+    "samples" : 30,
+    "p50_ms" : 2.818279,
+    "p95_ms" : 4.298271,
+    "p99_ms" : 4.818658,
+    "mean_ms" : 2.9612586666666667,
+    "max_ms" : 4.818658,
+    "latencies_ms" : [ 3.192204, 2.818279, 2.541255, 2.601983, 2.276756, 4.818658, 2.981529, 2.559241, 2.430462, 2.455286, 2.998216, 3.712584, 2.626107, 3.01021, 3.09574, 2.46509, 4.298271, 3.21215, 2.894442, 4.002579, 2.990281, 3.931732, 2.675048, 2.246566, 2.161755, 2.122227, 2.085142, 3.8942, 3.144915, 2.594852 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 7707.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 20
+  }, {
+    "method" : "GET",
+    "path" : "/api/v1/public/merch",
+    "handler" : "PublicMerchController.listMerch",
+    "samples" : 30,
+    "p50_ms" : 3.727079,
+    "p95_ms" : 5.269529,
+    "p99_ms" : 5.623736,
+    "mean_ms" : 3.9289937333333333,
+    "max_ms" : 5.623736,
+    "latencies_ms" : [ 3.853057, 5.623736, 3.732124, 3.377703, 3.105961, 4.678974, 3.552816, 3.854348, 3.353106, 5.105338, 4.516031, 4.624049, 3.727079, 4.931417, 3.836191, 3.529698, 3.473982, 4.534562, 4.293383, 3.610159, 3.294219, 4.377884, 4.25421, 3.34202, 3.105685, 3.119322, 5.269529, 3.672983, 3.157451, 2.962795 ],
+    "statuses" : {
+      "200" : 30
+    },
+    "hibernate_statements_mean" : 3.0,
+    "bytes_mean" : 38277.0,
+    "errors" : [ ],
+    "mode" : "HTTP + PostgreSQL",
+    "page_size" : 100
+  } ],
+  "sql_experiments" : [ ],
+  "finished_at" : "2026-10-04T17:28:35.474852009Z"
+}

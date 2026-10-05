@@ -1,0 +1,7 @@
+Changes: 1 files, 2 symbols
+Affected processes: 0
+Risk level: low
+
+Changed symbols:
+  Class ApiPerformanceAuditTest → backend/src/test/java/com/uitmerch/backend/performance/ApiPerformanceAuditTest.java
+  Property emf → backend/src/test/java/com/uitmerch/backend/performance/ApiPerformanceAuditTest.java

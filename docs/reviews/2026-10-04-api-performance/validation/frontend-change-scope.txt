@@ -1,0 +1,33 @@
+Changes: 11 files, 49 symbols
+Affected processes: 10
+Risk level: high
+
+Changed symbols:
+  Property id → frontend/e2e/pickup-pagination.spec.ts
+  Property name → frontend/e2e/pickup-pagination.spec.ts
+  Property ownerId → frontend/e2e/pickup-pagination.spec.ts
+  Property status → frontend/e2e/pickup-pagination.spec.ts
+  Property totalMerch → frontend/e2e/pickup-pagination.spec.ts
+  Property guestName → frontend/e2e/pickup-pagination.spec.ts
+  Property id → frontend/e2e/pickup-pagination.spec.ts
+  Property status → frontend/e2e/pickup-pagination.spec.ts
+  Function listCampaigns → frontend/src/api/campaigns.ts
+  Function getCampaign → frontend/src/api/campaigns.ts
+  Const publicClient → frontend/src/api/client.ts
+  Function getPublicEvents → frontend/src/api/event.ts
+  Function getPublicEvent → frontend/src/api/event.ts
+  Function getPublicMerchList → frontend/src/api/merch.ts
+  Function getPopularMerch → frontend/src/api/merch.ts
+... and 34 more
+
+Affected execution flows:
+  • EventDetailPage → GetPublicEvent (3 steps) — changed: getPublicEvent
+  • EventDetailPage → GetPublicOrganizationDetail (3 steps) — changed: getPublicOrganizationDetail
+  • MerchPage → GetCategories (3 steps) — changed: getCategories
+  • MerchPage → GetPublicOrganizations (3 steps) — changed: getPublicOrganizations
+  • OrganizationDetailPage → GetPublicOrgMerch (3 steps) — changed: getPublicOrgMerch
+  • ProductDetailPage → GetPublicMerchDetail (3 steps) — changed: getPublicMerchDetail
+  • OrganizationDetailPage → GetPublicOrganizationDetail (3 steps) — changed: getPublicOrganizationDetail
+  • MerchTab → GetCategories (3 steps) — changed: getCategories
+  • OrganizationDetailPage → GetPublicOrganizations (3 steps) — changed: getPublicOrganizations
+  • ProductDetailPage → GetPublicOrganizationDetail (3 steps) — changed: getPublicOrganizationDetail
