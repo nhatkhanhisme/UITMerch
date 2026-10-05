@@ -1,3 +1,4 @@
+import { mockBrowserSession } from "./auth-fixture";
 import { test, expect, type Page } from "@playwright/test";
 const campaign = {
   id: "collection",
@@ -32,29 +33,7 @@ async function setup(
   page: Page,
   options: { role?: string; followerCount?: number; following?: boolean } = {},
 ) {
-  if (options.role)
-    await page.addInitScript(
-      (role) =>
-        localStorage.setItem(
-          "uitmerch-auth",
-          JSON.stringify({
-            state: {
-              user: {
-                id: "test-account",
-                email: "test@example.test",
-                fullName: "Người dùng Demo",
-                role,
-                isVerified: true,
-              },
-              accessToken: `h.${btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }))}.s`,
-              refreshToken: "test-refresh",
-              tokenType: "Bearer",
-            },
-            version: 0,
-          }),
-        ),
-      options.role,
-    );
+  await mockBrowserSession(page, options.role ? {id:"test-account",email:"test@example.test",fullName:"Người dùng Demo",role:options.role,isVerified:true} : undefined);
   let following = options.following ?? false;
   const notices = [
     {
@@ -84,6 +63,7 @@ async function setup(
   await page.route("**/api/v1/**", async (route) => {
     const req = route.request(),
       path = new URL(req.url()).pathname;
+    if (path.startsWith("/api/v1/auth/")) return route.fallback();
     if (path.endsWith("/stream"))
       return route.fulfill({ contentType: "text/event-stream", body: "" });
     if (req.method() !== "GET") writes.push(path);

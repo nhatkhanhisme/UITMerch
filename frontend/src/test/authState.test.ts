@@ -13,7 +13,6 @@ const initial: AuthSession = {
     isVerified: true,
   },
   accessToken: "old",
-  refreshToken: "refresh",
   tokenType: "Bearer",
 };
 beforeEach(() => {
@@ -47,11 +46,23 @@ it("preserves same-user data during token rotation", () => {
     .setSession({
       ...initial,
       accessToken: "new",
-      refreshToken: "new-refresh",
     });
   expect(queryClient.getQueryData(["private", "a"])).toEqual({
     secret: "private",
   });
   expect(useCartStore.getState().items).toHaveLength(1);
   expect(apiClient.defaults.headers.common.Authorization).toBe("Bearer new");
+});
+it("bootstraps the same buyer without discarding request IDs, then clears them on logout", () => {
+  useAuthStore.getState().clearSession();
+  sessionStorage.setItem("uitmerch-reservation:a:c", "own-request");
+  sessionStorage.setItem("uitmerch-checkout:a:hash", "own-checkout");
+  sessionStorage.setItem("uitmerch-reservation:other:c", "foreign-request");
+  useAuthStore.getState().setSession(initial);
+  expect(sessionStorage.getItem("uitmerch-reservation:a:c")).toBe("own-request");
+  expect(sessionStorage.getItem("uitmerch-checkout:a:hash")).toBe("own-checkout");
+  expect(sessionStorage.getItem("uitmerch-reservation:other:c")).toBeNull();
+  expect(localStorage.getItem("uitmerch-auth")).toBeNull();
+  useAuthStore.getState().clearSession();
+  expect(sessionStorage.getItem("uitmerch-checkout:a:hash")).toBeNull();
 });

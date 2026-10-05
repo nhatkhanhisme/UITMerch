@@ -88,6 +88,7 @@ public class CampaignService {
         variants.findByCampaignIdAndMerchId(campaignId,request.merchId()).orElseThrow(()->new ValidationException("Invalid campaign variant."));
         InstantOrderRequest orderRequest=new InstantOrderRequest(); orderRequest.setMerchId(request.merchId());
         orderRequest.setQuantity(request.quantity()); orderRequest.setNote(request.note());
+        orderRequest.setRequestId(request.requestId());
         var order=orders.createCampaignOrder(user,orderRequest,campaignId);
         CampaignReservation row=new CampaignReservation(); row.setId(UUID.randomUUID()); row.setCampaignId(campaignId);
         row.setUserId(user); row.setMerchId(request.merchId()); row.setOrderId(order.getId()); row.setQuantity(request.quantity());

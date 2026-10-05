@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import { withCheckoutRequest } from "./checkoutSecurity";
 import type {
   AddCartItemRequest,
   ApiResponse,
@@ -36,9 +37,11 @@ export async function removeCartItem(itemId: string) {
 }
 
 export async function checkoutCart(request?: CheckoutRequest) {
+  return withCheckoutRequest("cart", request ?? {}, async requestId => {
   const { data } = await apiClient.post<ApiResponse<OrderResponse[]>>(
     "/api/v1/customer/cart/checkout",
-    request ?? {},
+    { ...request, requestId },
   );
   return data;
+  });
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service("mailTransport")
 @Profile("dev | docker")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.dev.mock-mail", havingValue = "true")
 public class DevEmailService implements EmailService {
     @Override public void sendAnnouncement(String email, String title, String message) {
         log.info("[DEV] Announcement '{}' to {}", title, email);
@@ -14,12 +15,12 @@ public class DevEmailService implements EmailService {
 
     @Override
     public void sendOtp(String toEmail, String otpCode) {
-        log.info("===== [DEV] OTP for {} → {} =====", toEmail, otpCode);
+        log.info("[DEV] Verification mail suppressed; OTP is not logged.");
     }
 
     @Override
     public void sendPasswordReset(String toEmail, String otpCode) {
-        log.info("===== [DEV] Password-reset OTP for {} → {} =====", toEmail, otpCode);
+        log.info("[DEV] Password-reset mail suppressed; OTP is not logged.");
     }
 
     @Override

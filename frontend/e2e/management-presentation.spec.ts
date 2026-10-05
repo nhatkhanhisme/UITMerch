@@ -1,3 +1,4 @@
+import { mockBrowserSession } from "./auth-fixture";
 import { test, expect, type Page } from "@playwright/test";
 const org = {
   id: "demo-org",
@@ -74,20 +75,7 @@ async function setup(page: Page, role = "CUSTOMER") {
     isVerified: true,
     avatarUrl: "/assets/figma/logo-header.svg",
   };
-  await page.addInitScript((user) => {
-    localStorage.setItem(
-      "uitmerch-auth",
-      JSON.stringify({
-        state: {
-          user,
-          accessToken: `header.${btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 7200 }))}.signature`,
-          refreshToken: "demo-refresh",
-          tokenType: "Bearer",
-        },
-        version: 0,
-      }),
-    );
-  }, user);
+  await mockBrowserSession(page, user);
   let read = false;
   let active = true;
   let follows = true;
@@ -96,6 +84,7 @@ async function setup(page: Page, role = "CUSTOMER") {
     const req = route.request();
     const url = new URL(req.url());
     const path = url.pathname;
+      if (path.startsWith("/api/v1/auth/")) return route.fallback();
     let data: unknown = [];
     if (path.endsWith("/stream"))
       return route.fulfill({ contentType: "text/event-stream", body: "" });

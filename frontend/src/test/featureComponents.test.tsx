@@ -64,7 +64,6 @@ beforeEach(() => {
   useAuthStore.setState({
     user: customer,
     accessToken: "test",
-    refreshToken: "test",
   });
 });
 it("offers login instead of calling restock APIs for anonymous visitors", () => {
@@ -223,7 +222,7 @@ it("keeps guest receipt responses generic and does not store credentials", async
     screen.getByRole("button", { name: "Gửi hướng dẫn nhận hàng" }),
   );
   await screen.findByText(/Nếu thông tin hợp lệ/);
-  expect(localStorage.length).toBe(1);
+  expect(localStorage.length).toBe(0);
   expect(sessionStorage.length).toBe(0);
 });
 it("opening the bell does not automatically mark every notification read", async () => {

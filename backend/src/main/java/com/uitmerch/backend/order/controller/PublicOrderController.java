@@ -47,7 +47,7 @@ public class PublicOrderController {
         HttpServletRequest httpRequest
     ) {
         if (!rateLimiterService.isAllowed("guest-order:" + ipUtil.extractClientIp(httpRequest), GUEST_ORDER_MAX, GUEST_ORDER_WINDOW)) {
-            throw new ValidationException("Too many orders from this IP. Please try again later.");
+            throw new com.uitmerch.backend.common.exception.RateLimitException("Too many orders from this IP. Please try again later.",3600);
         }
         Object authenticatedId = httpRequest.getAttribute("userId");
         List<OrderResponse> orders;
@@ -76,7 +76,6 @@ public class PublicOrderController {
         @PathVariable UUID orderId,
         @RequestParam String email
     ) {
-        OrderResponse order = orderService.getGuestOrderByEmail(orderId, email);
-        return ResponseEntity.ok(ApiResponse.success("Order retrieved.", order));
+        throw new com.uitmerch.backend.common.exception.ResourceNotFoundException("Order",orderId.toString());
     }
 }

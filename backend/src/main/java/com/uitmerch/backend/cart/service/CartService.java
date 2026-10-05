@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CartService {
+    private final com.uitmerch.backend.order.security.CheckoutSecurityService checkoutSecurity;
+    private final com.uitmerch.backend.order.repository.OrderRepository checkoutOrders;
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
@@ -137,6 +139,8 @@ public class CartService {
 
     @Transactional
     public List<OrderResponse> checkout(UUID userId, CheckoutRequest request) {
+        var checkout = checkoutSecurity.begin(userId,null,null,request.getRequestId(),"cart",request);
+        if (checkout.replay()!=null) return checkout.replay();
         Cart cart = getActiveCartOrThrow(userId);
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
 
@@ -152,6 +156,9 @@ public class CartService {
         cartItemRepository.deleteAll(cartItems);
         cart.setStatus(CartStatus.CHECKED_OUT);
         cartRepository.save(cart);
+
+        orders.forEach(result -> checkoutSecurity.attach(checkoutOrders.findById(result.getId()).orElseThrow(),checkout,false));
+        checkoutSecurity.finish(checkout,orders);
 
         return orders;
     }

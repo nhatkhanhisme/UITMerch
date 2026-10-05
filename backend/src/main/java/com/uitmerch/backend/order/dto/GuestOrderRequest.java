@@ -10,6 +10,9 @@ import java.util.List;
 
 @Data
 public class GuestOrderRequest {
+    private java.util.UUID requestId;
+    @Size(max=43)
+    private String guestCheckoutToken;
 
     @NotEmpty(message = "Order must contain at least one item")
     @Size(max = 100)

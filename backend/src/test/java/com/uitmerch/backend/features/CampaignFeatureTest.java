@@ -140,8 +140,10 @@ class CampaignFeatureTest extends BackendFeatureTest {
         assertThatThrownBy(()->campaigns.publicDetail(c.id())).isInstanceOf(ResourceNotFoundException.class);
     }
     @Test void concurrentReservationsCannotOversell() throws Exception {
-        var org=organization(); var item=product(org,10); var c=campaign(org,item,5); var user=user(UserRole.CUSTOMER);
-        var results=parallel(8,()->campaigns.reserve(user.getId(),c.id(),request(item,2)));
+        var org=organization(); var item=product(org,10); var c=campaign(org,item,5);
+        var buyers=java.util.stream.IntStream.range(0,8).mapToObj(i->user(UserRole.CUSTOMER)).toList();
+        var buyerIndex=new java.util.concurrent.atomic.AtomicInteger();
+        var results=parallel(8,()->campaigns.reserve(buyers.get(buyerIndex.getAndIncrement()).getId(),c.id(),request(item,2)));
         assertThat(results.stream().filter(Boolean::booleanValue).count()).isEqualTo(5);
         assertThat(merch.findById(item.getId()).orElseThrow().getStock()).isZero();
         assertThat(campaigns.publicDetail(c.id()).reservedQuantity()).isEqualTo(10);

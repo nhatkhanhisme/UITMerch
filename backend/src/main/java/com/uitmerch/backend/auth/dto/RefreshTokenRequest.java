@@ -7,5 +7,6 @@ import lombok.Data;
 public class RefreshTokenRequest {
 
     @NotBlank(message = "Refresh token is required")
+    @lombok.ToString.Exclude
     private String refreshToken;
 }

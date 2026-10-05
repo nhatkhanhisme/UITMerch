@@ -19,6 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @EnabledIfEnvironmentVariable(named = "UITMERCH_TEST_DATABASE_URL", matches = "jdbc:postgresql:.*")
 class PickupFeatureTest extends BackendFeatureTest {
+    @Autowired com.uitmerch.backend.order.security.CheckoutSecurityService guestCheckoutSecurity;
+    private com.uitmerch.backend.order.security.CheckoutSecurityService contextCheckoutSecurity() { return guestCheckoutSecurity; }
     @Autowired PickupService pickup;
     @Autowired PickupTokenRepository tokens;
     @Autowired OrderService orders;
@@ -26,7 +28,7 @@ class PickupFeatureTest extends BackendFeatureTest {
     @Autowired PickupScheduleRepository schedules;
     @Autowired OrderHistoryService history;
     private OrderResponse order(com.uitmerch.backend.organization.entity.Organization org, UUID user) {
-        InstantOrderRequest request = new InstantOrderRequest(); request.setMerchId(product(org, 3).getId()); request.setQuantity(1);
+        InstantOrderRequest request = new InstantOrderRequest(); request.setRequestId(UUID.randomUUID()); request.setMerchId(product(org, 3).getId()); request.setQuantity(1);
         return orders.createInstantOrder(user, request);
     }
     private void ready(com.uitmerch.backend.organization.entity.Organization org, UUID id) {
@@ -100,8 +102,12 @@ class PickupFeatureTest extends BackendFeatureTest {
     }
     @Test void guestMustProveAccessToEmailAndReceiptIsConsumedOnce() throws Exception {
         var org = organization(); var item = product(org, 3);
-        GuestOrderRequest request = new GuestOrderRequest(); request.setGuestName("Guest"); request.setGuestPhone("0901234567"); request.setGuestEmail("guest@uit.edu.vn");
+        GuestOrderRequest request = new GuestOrderRequest(); request.setRequestId(UUID.randomUUID()); request.setGuestName("Guest"); request.setGuestPhone("0901234567"); request.setGuestEmail("guest@uit.edu.vn");
         GuestOrderItemRequest line = new GuestOrderItemRequest(); line.setMerchId(item.getId()); line.setQuantity(1); request.setItems(List.of(line));
+        var checkoutSecurity = contextCheckoutSecurity();
+        UUID challenge = checkoutSecurity.challenge(request.getGuestEmail());
+        var otp = json.readValue(jobs.findAll().getFirst().getPayload(), com.uitmerch.backend.common.delivery.BackgroundJobService.MailPayload.class);
+        request.setGuestCheckoutToken(checkoutSecurity.verify(request.getGuestEmail(),challenge,otp.arguments().getFirst()));
         var order = orders.createGuestOrder(request).getFirst(); ready(org, order.getId()); jobs.deleteAll();
         String path = "/api/v1/public/orders/" + order.getId();
         mvc.perform(post(path + "/pickup-receipt").contentType("application/json").content("{\"email\":\"other@uit.edu.vn\"}"))

@@ -1,3 +1,4 @@
+import { mockBrowserSession } from "./auth-fixture";
 import { test, expect, type Page } from "@playwright/test";
 
 const customer = {
@@ -50,23 +51,10 @@ const pageData = (content: unknown[]) => ({
   first: true,
 });
 async function setup(page: Page, notifications = 0) {
-  await page.addInitScript((user) => {
-    const accessToken = `header.${btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 7200 }))}.signature`;
-    localStorage.setItem(
-      "uitmerch-auth",
-      JSON.stringify({
-        state: {
-          user,
-          accessToken,
-          refreshToken: "ui-refresh",
-          tokenType: "Bearer",
-        },
-        version: 0,
-      }),
-    );
-  }, customer);
+  await mockBrowserSession(page, customer);
   await page.route("**/api/v1/**", async (route) => {
     const path = new URL(route.request().url()).pathname;
+    if (path.startsWith("/api/v1/auth/")) return route.fallback();
     if (path.endsWith("/stream"))
       return route.fulfill({ contentType: "text/event-stream", body: "" });
     let data: unknown = [];

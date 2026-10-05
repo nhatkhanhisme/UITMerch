@@ -124,10 +124,11 @@ class PostgresRegressionTest {
     }
     private com.uitmerch.backend.order.dto.InstantOrderRequest purchase(UUID id, int quantity) {
         var request = new com.uitmerch.backend.order.dto.InstantOrderRequest();
-        request.setMerchId(id); request.setQuantity(quantity); return request;
+        request.setRequestId(UUID.randomUUID());request.setMerchId(id); request.setQuantity(quantity); return request;
     }
     private com.uitmerch.backend.order.dto.GuestOrderRequest publicPurchase(UUID id) {
         var request = new com.uitmerch.backend.order.dto.GuestOrderRequest();
+        request.setRequestId(UUID.randomUUID());
         var item = new com.uitmerch.backend.order.dto.GuestOrderItemRequest();
         item.setMerchId(id); item.setQuantity(1);
         request.setItems(List.of(item)); request.setGuestName("Student"); request.setGuestPhone("0901234567");
@@ -205,15 +206,13 @@ class PostgresRegressionTest {
             .contentType("application/json").content(body)).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
         UUID linkedId = UUID.fromString(json.readTree(linked).at("/data/0/id").asText());
         assertThat(orderRepository.findById(linkedId).orElseThrow().getUserId()).isEqualTo(user.getId());
-        String guest = mvc.perform(post("/api/v1/public/orders").contentType("application/json").content(body))
-            .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
-        UUID guestId = UUID.fromString(json.readTree(guest).at("/data/0/id").asText());
-        assertThat(orderRepository.findById(guestId).orElseThrow().getUserId()).isNull();
+        mvc.perform(post("/api/v1/public/orders").contentType("application/json").content(body))
+            .andExpect(status().isUnauthorized());
         User owner = users.findById(org.getOwnerId()).orElseThrow();
         String organizerToken = auth.login(credentials(owner)).getToken();
         mvc.perform(post("/api/v1/public/orders").header("Authorization", "Bearer " + organizerToken)
             .contentType("application/json").content(body)).andExpect(status().isForbidden());
-        assertThat(merchandise.findById(item.getId()).orElseThrow().getStock()).isEqualTo(3);
+        assertThat(merchandise.findById(item.getId()).orElseThrow().getStock()).isEqualTo(4);
     }
     @Test
     void parallelCancellationsRestoreStockOnce() throws Exception {
@@ -405,9 +404,12 @@ class PostgresRegressionTest {
             org.springframework.test.util.ReflectionTestUtils.setField(jwt, "accessTokenExpiration", -1000L);
             expired = jwt.generateSessionAccessToken(user.getId().toString(), user.getEmail(), user.getRole().name(), sessionId, user.getAuthVersion());
         } finally { org.springframework.test.util.ReflectionTestUtils.setField(jwt, "accessTokenExpiration", expiry); }
-        mvc.perform(post("/api/v1/auth/refresh").header("Authorization", "Bearer " + expired)
+        var csrfResponse=mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/auth/csrf")).andReturn().getResponse();
+        String csrfToken=json.readTree(csrfResponse.getContentAsString()).path("data").path("csrfToken").asText();
+        mvc.perform(post("/api/v1/auth/refresh").cookie(new jakarta.servlet.http.Cookie("uitmerch-refresh",login.getRefreshToken()),
+                new jakarta.servlet.http.Cookie("uitmerch-csrf",csrfToken)).header("X-CSRF-TOKEN",csrfToken).header("Authorization", "Bearer " + expired)
             .contentType("application/json").content(json.writeValueAsString(Map.of("refreshToken", login.getRefreshToken()))))
             .andExpect(status().isOk());
-        mvc.perform(post("/api/v1/auth/logout")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/v1/auth/logout")).andExpect(status().isForbidden());
     }
 }

@@ -17,7 +17,7 @@ export async function withRefreshLock<T>(work: () => Promise<T>): Promise<T> {
       if (!held || held.expires < Date.now()) {
         localStorage.setItem(
           key,
-          JSON.stringify({ owner, expires: Date.now() + 20000 }),
+          JSON.stringify({ owner, expires: Date.now() + 60000 }),
         );
         await new Promise((resolve) => setTimeout(resolve, 30));
         acquired =
@@ -27,9 +27,16 @@ export async function withRefreshLock<T>(work: () => Promise<T>): Promise<T> {
       return work();
     }
     if (acquired) {
+      const renew = setInterval(() => {
+        try {
+          if (JSON.parse(localStorage.getItem(key) ?? "null")?.owner === owner)
+            localStorage.setItem(key, JSON.stringify({ owner, expires: Date.now() + 60000 }));
+        } catch { /* A lease must not expose any credentials. */ }
+      }, 10000);
       try {
         return await work();
       } finally {
+        clearInterval(renew);
         try {
           if (JSON.parse(localStorage.getItem(key) ?? "null")?.owner === owner)
             localStorage.removeItem(key);

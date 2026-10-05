@@ -26,6 +26,7 @@ import java.time.Duration;
 public class AuthController {
 
     private final AuthService authService;
+    private final com.uitmerch.backend.auth.service.AuthCookieService cookies;
     private final RateLimiterService rateLimiterService;
     private final IpUtil ipUtil;
 
@@ -92,8 +93,13 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Email verified successfully.", null));
     }
 
+    @GetMapping("/csrf")
+    public ResponseEntity<ApiResponse<java.util.Map<String,String>>> csrf(HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
+        return ResponseEntity.ok(ApiResponse.success("Request verification ready.", java.util.Map.of("csrfToken",cookies.issueCsrf(request,response))));
+    }
+
     @PostMapping("/login")
-    @Operation(summary = "Login and receive JWT tokens")
+    @Operation(summary = "Login and receive an access token with an HttpOnly refresh cookie")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Login successful — JWT tokens returned"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — see data for field errors"),
@@ -103,17 +109,20 @@ public class AuthController {
     })
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest request,
-            HttpServletRequest httpRequest
+            HttpServletRequest httpRequest, jakarta.servlet.http.HttpServletResponse httpResponse
     ) {
+        cookies.csrf(httpRequest);
         if (!rateLimiterService.isAllowed("login:" + ipUtil.extractClientIp(httpRequest), LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW)) {
             throw new ValidationException("Too many login attempts. Please try again in 15 minutes.");
         }
         AuthResponse response = authService.login(request);
+        httpRequest.setAttribute("userId",response.getUserId().toString());
+        cookies.write(httpResponse,response.getRefreshToken());
         return ResponseEntity.ok(ApiResponse.success("Login successful.", response));
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Refresh access token", description = "Exchange a valid refresh token for a new access token and rotated refresh token.")
+    @Operation(summary = "Refresh access token", description = "Rotate the HttpOnly refresh cookie and return a new access token. Requires CSRF verification.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tokens refreshed successfully"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed — refresh token missing"),
@@ -121,9 +130,12 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Unexpected server error")
     })
     public ResponseEntity<ApiResponse<AuthResponse>> refresh(
-            @Valid @RequestBody RefreshTokenRequest request
+            HttpServletRequest request, jakarta.servlet.http.HttpServletResponse httpResponse
     ) {
-        AuthResponse response = authService.refreshToken(request.getRefreshToken());
+        cookies.csrf(request);
+        AuthResponse response = authService.refreshToken(cookies.refresh(request));
+        request.setAttribute("userId",response.getUserId().toString());
+        cookies.write(httpResponse,response.getRefreshToken());
         return ResponseEntity.ok(ApiResponse.success("Tokens refreshed successfully.", response));
     }
 
@@ -184,20 +196,14 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Logout and invalidate the current JWT")
+    @Operation(summary = "Logout and revoke the current cookie session")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Logged out successfully"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Missing or invalid token")
     })
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        String token = (authHeader != null && authHeader.startsWith("Bearer "))
-                ? authHeader.substring(7) : null;
-        if (token == null || token.isBlank()) {
-            throw new com.uitmerch.backend.common.exception.AuthenticationException("A valid bearer token is required to log out.");
-        }
-        authService.logout(token);
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response) {
+        cookies.csrf(request);
+        cookies.logout(request,response);
         return ResponseEntity.ok(ApiResponse.success("Logged out successfully.", null));
     }
 }

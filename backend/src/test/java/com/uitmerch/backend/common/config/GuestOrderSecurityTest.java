@@ -42,16 +42,13 @@ class GuestOrderSecurityTest {
 
     @Test void guestCanTrackWithoutAuthentication() throws Exception {
         UUID id = UUID.randomUUID();
-        when(orders.getGuestOrderByEmail(id, "guest@example.com"))
-            .thenReturn(OrderResponse.builder().id(id).build());
         mvc.perform(get("/api/v1/public/orders/" + id).param("email", "guest@example.com"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(id.toString()));
+            .andExpect(status().isNotFound());
+        verifyNoInteractions(orders);
     }
 
     @Test void wrongEmailRemainsNotFound() throws Exception {
         UUID id = UUID.randomUUID();
-        when(orders.getGuestOrderByEmail(id, "wrong@example.com"))
-            .thenThrow(new ResourceNotFoundException("Order", id.toString()));
         mvc.perform(get("/api/v1/public/orders/" + id).param("email", "wrong@example.com"))
             .andExpect(status().isNotFound());
     }

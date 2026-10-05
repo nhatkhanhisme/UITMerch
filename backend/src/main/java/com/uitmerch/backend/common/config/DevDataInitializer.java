@@ -38,6 +38,7 @@ import java.util.UUID;
 
 @Component
 @Profile("dev | docker")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.dev.seed-data", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
 public class DevDataInitializer implements ApplicationRunner {

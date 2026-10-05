@@ -1,0 +1,25 @@
+title = "UITMerch secret scan"
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Explicitly synthetic test/local JWT signing keys; never provider credentials"
+regexTarget = "secret"
+regexes = [
+  '''uitmerch-disposable-feature-test-secret-2026''',
+  '''uitmerch-disposable-test-suite-secret-2026''',
+  '''uitmerch-disposable-regression-test-secret-2026''',
+  '''uitmerch-disposable-observability-test-secret-2026''',
+  '''uitmerch-disposable-optimization-test-secret-2026''',
+  '''uitmerch-test-secret-key-minimum-32-characters''',
+  '''dev-secret-key-minimum-32-characters-long''',
+  '''uitmerch-dev-local-secret-key-at-least-32-characters''',
+  '''test-secret-key-that-is-at-least-32-characters-long'''
+]
+
+[[allowlists]]
+description = "Source-integrity hashes keyed by source filename in two validation artifacts"
+condition = "AND"
+paths = ['docs/reviews/2026-10-02-(backend-feature|frontend)-validation\.json$']
+regexTarget = "match"
+regexes = ['[A-Za-z0-9_./-]+\.(?:java|tsx?|sql)"\s*:\s*"[a-f0-9]{64}"']

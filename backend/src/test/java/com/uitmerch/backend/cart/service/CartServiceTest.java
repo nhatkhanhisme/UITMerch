@@ -53,6 +53,14 @@ class CartServiceTest {
     }
 
     @InjectMocks private CartService cartService;
+    @Mock private com.uitmerch.backend.order.security.CheckoutSecurityService checkoutSecurity;
+    @Mock private com.uitmerch.backend.order.repository.OrderRepository checkoutOrders;
+    @org.junit.jupiter.api.BeforeEach void checkoutPolicyIsTestedSeparately() {
+        org.mockito.Mockito.lenient().when(checkoutSecurity.begin(any(),any(),any(),any(),any(),any()))
+            .thenReturn(new com.uitmerch.backend.order.security.CheckoutSecurityService.Started("test","user:test",null));
+        org.mockito.Mockito.lenient().when(checkoutOrders.findById(any()))
+            .thenReturn(Optional.of(com.uitmerch.backend.order.entity.Order.builder().build()));
+    }
 
     private final UUID userId = UUID.randomUUID();
     private final UUID cartId = UUID.randomUUID();

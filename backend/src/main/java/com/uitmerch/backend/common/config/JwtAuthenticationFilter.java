@@ -51,9 +51,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         // These endpoints authenticate their own credentials; stale browser access
-        // headers must not prevent login or refresh. Logout still validates its bearer.
+        // headers must not prevent login or refresh. Cookie-authenticated logout checks CSRF in its handler.
         String path = request.getRequestURI().substring(request.getContextPath().length());
-        return java.util.Set.of("/api/v1/auth/login", "/api/v1/auth/refresh",
+        return java.util.Set.of("/api/v1/auth/logout", "/api/v1/auth/csrf", "/api/v1/auth/login", "/api/v1/auth/refresh",
             "/api/v1/auth/register", "/api/v1/auth/register/organizer",
             "/api/v1/auth/verify-email", "/api/v1/auth/resend-otp",
             "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password").contains(path);
@@ -132,15 +132,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         if (authHeader != null) {
             throw new org.springframework.security.authentication.BadCredentialsException("Invalid Authorization header");
-        }
-        // EventSource cannot set custom headers, so SSE endpoints accept token as a query param.
-        String path = request.getServletPath();
-        if ("/api/v1/customer/notifications/stream".equals(path)
-                || "/api/v1/organizer/notifications/stream".equals(path)) {
-            String queryToken = request.getParameter("token");
-            if (queryToken != null && !queryToken.isBlank()) {
-                return queryToken;
-            }
         }
         return null;
     }

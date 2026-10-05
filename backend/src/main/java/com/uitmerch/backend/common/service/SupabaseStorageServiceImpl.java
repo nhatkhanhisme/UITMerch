@@ -42,15 +42,6 @@ public class SupabaseStorageServiceImpl implements StorageService {
     
     private static final Logger logger = LoggerFactory.getLogger(SupabaseStorageServiceImpl.class);
     
-    // Allowed MIME types for image upload
-    private static final String[] ALLOWED_MIME_TYPES = {
-        "image/jpeg", "image/png", "image/gif", "image/webp",
-        "image/svg+xml"
-    };
-    
-    // Maximum file size: 10MB
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
-    
     @Value("${app.storage.public-url:https://your-project.supabase.co/storage/v1/object/public}")
     private String publicUrlBase;
     
@@ -68,7 +59,8 @@ public class SupabaseStorageServiceImpl implements StorageService {
     @Override
     public FileUploadResponse uploadFile(MultipartFile file, String bucket, String folderPath) {
         // Validate file
-        validateFile(file);
+        file = validateFile(file);
+        validatePath(bucket,folderPath);
         
         // Generate unique file name
         String originalFileName = file.getOriginalFilename();
@@ -103,6 +95,7 @@ public class SupabaseStorageServiceImpl implements StorageService {
     
     @Override
     public void deleteFile(String bucket, String filePath) {
+        validatePath(bucket,filePath);
         try {
             DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                 .bucket(bucket)
@@ -141,35 +134,16 @@ public class SupabaseStorageServiceImpl implements StorageService {
     /**
      * Validate file before upload.
      */
-    private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new StorageException("File is empty or null");
-        }
-        
-        // Check file size
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new StorageException("File size exceeds maximum allowed size of 10MB");
-        }
-        
-        // Check MIME type
-        String mimeType = file.getContentType();
-        if (mimeType == null || !isAllowedMimeType(mimeType)) {
-            throw new StorageException("File type not allowed. Only images are allowed (JPEG, PNG, GIF, WebP, SVG)");
-        }
+    private MultipartFile validateFile(MultipartFile file) {
+        if (file instanceof com.uitmerch.backend.common.security.SafeImageFile) return file;
+        return new com.uitmerch.backend.common.security.SafeImageFile(com.uitmerch.backend.common.security.ImageUploadPolicy.validate(file));
     }
-    
-    /**
-     * Check if MIME type is allowed.
-     */
-    private boolean isAllowedMimeType(String mimeType) {
-        for (String allowed : ALLOWED_MIME_TYPES) {
-            if (mimeType.equalsIgnoreCase(allowed)) {
-                return true;
-            }
-        }
-        return false;
+
+    private void validatePath(String bucket,String path) {
+        if(bucket==null || !bucket.matches("[a-z0-9][a-z0-9-]{0,62}") || path==null || path.contains("..") || !path.matches("[A-Za-z0-9][A-Za-z0-9/_.-]{0,199}"))
+            throw new com.uitmerch.backend.common.exception.ValidationException("Invalid storage path.");
     }
-    
+
     /**
      * Generate unique file name using UUID to avoid conflicts.
      * Preserves original extension.
@@ -191,6 +165,8 @@ public class SupabaseStorageServiceImpl implements StorageService {
      * Build public URL for the uploaded file.
      */
     private String buildPublicUrl(String bucket, String filePath) {
-        return publicUrlBase + "/" + bucket + "/" + filePath;
+        String base=publicUrlBase.replaceAll("/+$", "");
+        if(!base.endsWith("/storage/v1/object/public")) base += "/storage/v1/object/public";
+        return base + "/" + bucket + "/" + filePath;
     }
 }

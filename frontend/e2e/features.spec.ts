@@ -1,3 +1,4 @@
+import { mockBrowserSession } from "./auth-fixture";
 import { test, expect, type Page } from "@playwright/test";
 const user = {
   id: "a",
@@ -65,24 +66,11 @@ const pageData = (content: unknown[]) => ({
   first: true,
 });
 async function setup(page: Page, role?: "CUSTOMER" | "ORGANIZER" | "ADMIN") {
-  if (role)
-    await page.addInitScript(
-      (s) => {
-        if (!localStorage.getItem("uitmerch-auth"))
-          localStorage.setItem(
-            "uitmerch-auth",
-            JSON.stringify({ state: s, version: 0 }),
-          );
-      },
-      { ...session, user: { ...user, role } },
-    );
+  await mockBrowserSession(page, role ? { ...user, role } : undefined, session.accessToken);
   await page.route("**/api/v1/**", async (route) => {
     const path = new URL(route.request().url()).pathname;
+    if (path.startsWith("/api/v1/auth/")) return route.fallback();
     let data: unknown = [];
-    if (path === "/api/v1/auth/refresh") {
-      await route.fallback();
-      return;
-    }
     if (path.endsWith("/stream")) {
       await route.fulfill({ contentType: "text/event-stream", body: "" });
       return;
@@ -305,11 +293,12 @@ test("guest tracking and receipt request work on a narrow viewport", async ({
 }) => {
   await setup(page);
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.route("**/api/v1/public/orders/order?*", (route) =>
+  await page.route("**/api/v1/public/orders/order/tracking", (route) =>
     route.fulfill({ json: { success: true, data: order } }),
   );
   await page.goto("/guest-orders?orderId=order");
   await page.getByLabel("Email đặt hàng").fill("guest@uit.edu.vn");
+  await page.getByLabel("Mã tra cứu từ email").fill("x".repeat(43));
   await page.getByRole("button", { name: "Tra cứu", exact: true }).click();
   await expect(page.getByText("Trạng thái: READY")).toBeVisible();
   await page.getByRole("button", { name: "Gửi hướng dẫn nhận hàng" }).click();
@@ -346,25 +335,35 @@ test("analytics distinguishes completed order value from paid value", async ({
   await page.getByLabel("Từ ngày").fill("2020-01-01");
   await expect(page.getByRole("alert")).toContainText("366 ngày");
 });
-test("two tabs coordinate one refresh rotation through Web Locks", async ({
+test("two tabs serialize cookie rotation through Web Locks without persisted tokens", async ({
   page,
   context,
 }) => {
   await setup(page, "CUSTOMER");
   await page.goto("/following");
   const second = await context.newPage();
-  await setup(second);
+  await setup(second, "CUSTOMER");
   await second.goto("/following");
   let rotations = 0;
+  let activeRotations = 0, maximumActive = 0;
+  const receivedCookies: string[] = [];
+  for(const tab of [page,second]) {
+    await tab.unroute("**/api/v1/auth/**");
+    await tab.route("**/api/v1/auth/csrf",route=>route.fulfill({json:{success:true,data:{csrfToken:"test-csrf"}}}));
+  }
   await context.route("**/api/v1/auth/refresh", async (route) => {
     rotations++;
+    activeRotations++; maximumActive=Math.max(maximumActive,activeRotations);
+    receivedCookies.push(route.request().headers().cookie ?? "");
+    expect(route.request().headers()["x-csrf-token"]).toBe("test-csrf");
     await new Promise((r) => setTimeout(r, 100));
+    activeRotations--;
     await route.fulfill({
+      headers:{"Set-Cookie":`uitmerch-refresh=rotated-${rotations}; Path=/api/v1/auth; HttpOnly; SameSite=Lax`},
       json: {
         success: true,
         data: {
           token: jwt(Math.floor(Date.now() / 1000) + 7200),
-          refreshToken: "refresh-new",
           userId: "a",
           email: user.email,
           fullName: user.fullName,
@@ -408,15 +407,11 @@ test("two tabs coordinate one refresh rotation through Web Locks", async ({
   await expect(
     second.getByRole("checkbox", { name: "Gửi thêm qua email", exact: true }),
   ).toBeVisible();
-  expect(rotations).toBe(1);
-  await expect
-    .poll(() =>
-      second.evaluate(
-        () =>
-          JSON.parse(localStorage.getItem("uitmerch-auth")!).state.refreshToken,
-      ),
-    )
-    .toBe("refresh-new");
+  expect(rotations).toBe(2);
+  expect(maximumActive).toBe(1);
+  expect(receivedCookies[1]).toContain("uitmerch-refresh=rotated-1");
+  expect(await second.evaluate(() => localStorage.getItem("uitmerch-auth"))).toBeNull();
+  expect((await context.cookies()).find(cookie => cookie.name === "uitmerch-refresh")?.httpOnly).toBe(true);
 });
 
 test("ordinary guest checkout keeps server order IDs for tracking", async ({
@@ -448,6 +443,8 @@ test("ordinary guest checkout keeps server order IDs for tracking", async ({
       json: { success: true, data: { reservationRequired: false } },
     }),
   );
+  await page.route("**/api/v1/public/checkout/challenge",route=>route.fulfill({json:{success:true,data:{challengeId:"test-challenge"}}}));
+  await page.route("**/api/v1/public/checkout/verify",route=>route.fulfill({json:{success:true,data:{guestCheckoutToken:"x".repeat(43)}}}));
   let body: unknown;
   await page.route("**/api/v1/public/orders", async (route) => {
     body = route.request().postDataJSON();
@@ -462,6 +459,10 @@ test("ordinary guest checkout keeps server order IDs for tracking", async ({
   await page
     .getByPlaceholder("Để nhận thông báo cập nhật đơn")
     .fill("guest@uit.edu.vn");
+  await expect(page.getByRole("button",{name:"Xác nhận đặt hàng",exact:true})).toBeDisabled();
+  await page.getByRole("button",{name:"Gửi mã xác minh email"}).click();
+  await page.getByRole("textbox",{name:"Mã xác minh 6 số"}).fill("123456");
+  await page.getByRole("button",{name:"Xác minh",exact:true}).click();
   await page
     .getByRole("button", { name: "Xác nhận đặt hàng", exact: true })
     .click();

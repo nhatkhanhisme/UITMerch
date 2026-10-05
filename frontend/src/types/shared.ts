@@ -213,6 +213,7 @@ export type GuestOrderItemRequest = {
 };
 
 export type GuestOrderRequest = {
+  guestCheckoutToken?: string;
   items: GuestOrderItemRequest[];
   guestName: string;
   guestPhone: string;

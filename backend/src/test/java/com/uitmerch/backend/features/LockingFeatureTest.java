@@ -22,7 +22,7 @@ class LockingFeatureTest extends BackendFeatureTest {
     @Autowired JdbcTemplate jdbc;
     @Test void scanWaitingForOrderLockRejectsTokenReplacedBeforeItAcquiresLock() throws Exception {
         var org=organization(); var item=product(org,3); var customer=user(UserRole.CUSTOMER);
-        InstantOrderRequest request=new InstantOrderRequest();request.setMerchId(item.getId());request.setQuantity(1);
+        InstantOrderRequest request=new InstantOrderRequest(); request.setRequestId(UUID.randomUUID());request.setMerchId(item.getId());request.setQuantity(1);
         var order=orders.createInstantOrder(customer.getId(),request);
         orders.updateOrderStatus(org.getOwnerId(),org.getId(),order.getId(),OrderStatus.CONFIRMED);
         orders.updateOrderStatus(org.getOwnerId(),org.getId(),order.getId(),OrderStatus.READY);
@@ -54,12 +54,13 @@ class LockingFeatureTest extends BackendFeatureTest {
         String suffix=UUID.randomUUID().toString().substring(8);
         var a=UUID.fromString("00000000"+suffix); var b=UUID.fromString("80000000"+suffix);
         for(UUID id:List.of(a,b)) jdbc.update("INSERT INTO merch_items(id,org_id,name,price,stock,status) VALUES(?,?,?,100000,3,'PUBLISHED')",id,org.getId(),"Lock boundary SKU");
-        GuestOrderRequest request=new GuestOrderRequest();
+        GuestOrderRequest request=new GuestOrderRequest();request.setRequestId(UUID.randomUUID());
         var lines=new ArrayList<GuestOrderItemRequest>();
         for(UUID id:List.of(a,b)){var line=new GuestOrderItemRequest();line.setMerchId(id);line.setQuantity(1);lines.add(line);}
         request.setItems(lines);
         var current=new AtomicReference<>(orders.createPublicOrder(user.getId(),request).getFirst());
         for(int round=0;round<10;round++) {
+            request.setRequestId(UUID.randomUUID());
             var next=new AtomicReference<OrderResponse>(); var index=new AtomicInteger(); var old=current.get();
             assertThat(parallel(2,()->{if(index.getAndIncrement()==0)orders.cancelCustomerOrder(user.getId(),old.getId(),new CancelOrderRequest());else next.set(orders.createPublicOrder(user.getId(),request).getFirst());})).containsOnly(true);
             current.set(next.get());

@@ -16,6 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 public class RateLimiterService {
+    @org.springframework.beans.factory.annotation.Autowired(required=false)
+    private SharedRateLimitStore sharedStore;
+    @org.springframework.beans.factory.annotation.Value("${app.rate-limit.shared:true}")
+    private boolean shared;
 
     private final ConcurrentHashMap<String, Deque<Instant>> windowMap = new ConcurrentHashMap<>();
 
@@ -27,6 +31,10 @@ public class RateLimiterService {
      * @param window      Rolling time window
      */
     public boolean isAllowed(String key, int maxAttempts, Duration window) {
+        if (shared) {
+            if (sharedStore==null) throw new IllegalStateException("Shared rate limiter is required.");
+            return sharedStore.allowed(key,maxAttempts,window);
+        }
         Instant now = Instant.now();
         Instant cutoff = now.minus(window);
 
@@ -45,6 +53,7 @@ public class RateLimiterService {
 
     @Scheduled(fixedRate = 3_600_000)
     public void evictStale() {
+        if (shared) { sharedStore.purge(); return; }
         Instant cutoff = Instant.now().minusSeconds(3600);
         windowMap.entrySet().removeIf(entry -> {
             synchronized (entry.getValue()) {

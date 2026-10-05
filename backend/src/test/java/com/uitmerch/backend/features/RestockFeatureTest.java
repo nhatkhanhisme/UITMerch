@@ -74,7 +74,7 @@ class RestockFeatureTest extends BackendFeatureTest {
     @Test void cancellationRestoresStockAndNotifiesOnceDespiteConcurrentCancel() throws Exception {
         var org = organization(); var item = product(org, 1); var a = user(UserRole.CUSTOMER);
         restock.subscribe(a.getId(), item.getId(), false);
-        InstantOrderRequest purchase = new InstantOrderRequest(); purchase.setMerchId(item.getId()); purchase.setQuantity(1);
+        InstantOrderRequest purchase = new InstantOrderRequest(); purchase.setRequestId(UUID.randomUUID()); purchase.setMerchId(item.getId()); purchase.setQuantity(1);
         var order = orders.createInstantOrder(a.getId(), purchase);
         CancelOrderRequest cancel = new CancelOrderRequest(); cancel.setCancelReason("Changed mind");
         assertThat(parallel(2, () -> orders.cancelCustomerOrder(a.getId(), order.getId(), cancel))).containsExactlyInAnyOrder(true, false);

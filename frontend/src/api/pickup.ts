@@ -52,13 +52,16 @@ export async function exchangeGuestReceipt(
     )
   ).data.data;
 }
-export async function trackGuestOrder(orderId: string, email: string) {
+export async function trackGuestOrder(orderId: string, trackingCode: string) {
   return (
     await apiClient.get<ApiResponse<OrderResponse>>(
-      `/api/v1/public/orders/${orderId}`,
-      { params: { email } },
+      `/api/v1/public/orders/${orderId}/tracking`,
+      { headers: { "X-Guest-Tracking": trackingCode } },
     )
   ).data.data;
+}
+export async function requestGuestTracking(orderId: string, email: string) {
+  await apiClient.post(`/api/v1/public/orders/${orderId}/tracking-receipt`, { email });
 }
 export async function getOrderHistory(
   orderId: string,

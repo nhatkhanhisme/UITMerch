@@ -12,6 +12,5 @@ export type AuthUser = {
 export type AuthSession = {
   user: AuthUser;
   accessToken: string;
-  refreshToken: string;
   tokenType: string;
 };

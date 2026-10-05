@@ -1,4 +1,6 @@
 import React from "react";
+import { restoreSession } from "./api/client";
+import "./stores/authStore";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { RestockPage, FollowingPage } from "./features/Subscriptions";
@@ -206,6 +208,7 @@ function AppRouter() {
   );
 }
 
+void restoreSession().catch(() => {}).finally(() => {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -213,3 +216,4 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+});

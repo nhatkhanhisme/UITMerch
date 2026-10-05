@@ -10,6 +10,7 @@ import type { MockProduct } from "../mocks/merchData";
 import { getPublicMerchDetail } from "../api/merch";
 import { getPublicOrganizationDetail } from "../api/organization";
 import { createGuestCheckoutOrder, createInstantOrder } from "../api/order";
+import { GuestEmailVerification } from "../components/GuestEmailVerification";
 import { addCartItem } from "../api/cart";
 import {
   addToWishlist,
@@ -193,6 +194,7 @@ function PurchasePanel({ product }: { product: MockProduct }) {
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
+  const [guestCheckoutToken, setGuestCheckoutToken] = useState("");
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -303,10 +305,12 @@ function PurchasePanel({ product }: { product: MockProduct }) {
     }
 
     const checkoutUserId = user?.id;
+    if (!checkoutUserId && !guestCheckoutToken) { toast.error("Vui lòng xác minh email trước khi đặt hàng."); return; }
     setIsSubmitting(true);
     try {
       const result = await createGuestCheckoutOrder({
         guestEmail: guestEmail.trim() || undefined,
+        guestCheckoutToken: guestCheckoutToken || undefined,
         guestName: guestName.trim(),
         guestPhone: guestPhone.trim(),
         items: [{ merchId: product.id, quantity }],
@@ -592,15 +596,17 @@ function PurchasePanel({ product }: { product: MockProduct }) {
 
             <div>
               <label className="block text-xs font-semibold text-ink/70 mb-1">
-                Email (Tùy chọn)
+                {user ? "Email nhận thông báo" : "Email *"}
               </label>
               <input
                 className="w-full rounded-xl border border-white/70 bg-white/50 px-3 py-2 text-sm text-black-blue focus:outline-aqua"
-                onChange={(e) => setGuestEmail(e.target.value)}
+                onChange={(e) => { setGuestEmail(e.target.value); setGuestCheckoutToken(""); }}
                 placeholder="Để nhận thông báo cập nhật đơn"
                 type="email"
+                required={!user}
                 value={guestEmail}
               />
+              {!user && <GuestEmailVerification email={guestEmail} onVerified={setGuestCheckoutToken} />}
             </div>
 
             <div>
@@ -618,7 +624,7 @@ function PurchasePanel({ product }: { product: MockProduct }) {
             <div className="pt-2">
               <button
                 className="w-full rounded-full bg-aqua py-3 text-sm font-bold text-black-blue transition hover:bg-white hover:shadow-glass"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (!user && !guestCheckoutToken)}
                 type="submit"
               >
                 {isSubmitting ? "Đang xử lý..." : "Xác nhận đặt hàng"}

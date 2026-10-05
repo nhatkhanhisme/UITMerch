@@ -68,6 +68,11 @@ class OrderServiceTest {
     @Mock private com.uitmerch.backend.order.history.OrderHistoryService historyService;
 
     @InjectMocks private OrderService orderService;
+    @Mock private com.uitmerch.backend.order.security.CheckoutSecurityService checkoutSecurity;
+    @org.junit.jupiter.api.BeforeEach void checkoutPolicyIsTestedSeparately() {
+        org.mockito.Mockito.lenient().when(checkoutSecurity.begin(any(),any(),any(),any(),any(),any()))
+            .thenReturn(new com.uitmerch.backend.order.security.CheckoutSecurityService.Started("test","user:test",null));
+    }
 
     private final UUID userId = UUID.randomUUID();
     private final UUID orgId = UUID.randomUUID();
@@ -392,12 +397,8 @@ class OrderServiceTest {
             .guestEmail("guest@test.com").totalAmount(BigDecimal.ZERO)
             .status(OrderStatus.PENDING).build();
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(guestOrder));
-        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
-
-        OrderResponse response = orderService.getGuestOrderByEmail(orderId, "guest@test.com");
-
-        assertThat(response.getId()).isEqualTo(orderId);
+        assertThatThrownBy(() -> orderService.getGuestOrderByEmail(orderId,"guest@test.com"))
+            .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -406,8 +407,6 @@ class OrderServiceTest {
             .guestEmail("real@test.com").totalAmount(BigDecimal.ZERO)
             .status(OrderStatus.PENDING).build();
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(guestOrder));
-
         assertThatThrownBy(() -> orderService.getGuestOrderByEmail(orderId, "wrong@test.com"))
             .isInstanceOf(ResourceNotFoundException.class);
     }
@@ -415,8 +414,6 @@ class OrderServiceTest {
     @Test
     void getGuestOrderByEmail_authenticatedOrder_throwsResourceNotFound() {
         Order authOrder = orderWithStatus(OrderStatus.PENDING); // has userId set, no guestEmail
-
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(authOrder));
 
         assertThatThrownBy(() -> orderService.getGuestOrderByEmail(orderId, "any@test.com"))
             .isInstanceOf(ResourceNotFoundException.class);

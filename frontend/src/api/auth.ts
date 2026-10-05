@@ -1,5 +1,6 @@
 import axios from "axios";
-import { apiClient } from "./client";
+import { apiClient, authPost } from "./client";
+import { withRefreshLock } from "../lib/refreshLock";
 import type { AuthSession, UserRole } from "../types/auth";
 
 export type ApiResponse<T> = {
@@ -12,7 +13,6 @@ export type ApiResponse<T> = {
 export type AuthResponse = {
   token: string;
   tokenType: string;
-  refreshToken: string;
   userId: string;
   email: string;
   fullName: string;
@@ -39,10 +39,7 @@ export type VerifyEmailRequest = {
 };
 
 export async function login(request: LoginRequest) {
-  const { data } = await apiClient.post<ApiResponse<AuthResponse>>(
-    "/api/v1/auth/login",
-    request,
-  );
+  const { data } = await withRefreshLock(() => authPost<ApiResponse<AuthResponse>>("/api/v1/auth/login", request));
 
   return data;
 }
@@ -77,7 +74,6 @@ export async function verifyEmail(request: VerifyEmailRequest) {
 export function toAuthSession(payload: AuthResponse): AuthSession {
   return {
     accessToken: payload.token,
-    refreshToken: payload.refreshToken,
     tokenType: payload.tokenType,
     user: {
       id: payload.userId,
@@ -126,12 +122,9 @@ export async function resetPassword(request: {
   return data;
 }
 
-export async function logout(token: string) {
-  const { data } = await apiClient.post<ApiResponse<null>>(
-    "/api/v1/auth/logout",
-    null,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
+export async function logout(_token?: string) {
+  const { data } = await withRefreshLock(() => authPost<ApiResponse<null>>("/api/v1/auth/logout"));
+  try { localStorage.setItem("uitmerch-auth-invalidated", crypto.randomUUID()); } catch { /* Optional cross-tab notice. */ }
   return data;
 }
 

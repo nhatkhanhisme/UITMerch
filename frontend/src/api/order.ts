@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import { withCheckoutRequest } from "./checkoutSecurity";
 import type {
   ApiResponse,
   CancelOrderRequest,
@@ -11,11 +12,13 @@ import type {
 } from "../types/shared";
 
 export async function createGuestCheckoutOrder(request: GuestOrderRequest) {
+  return withCheckoutRequest("public", request, async requestId => {
   const { data } = await apiClient.post<ApiResponse<OrderResponse[]>>(
     "/api/v1/public/orders",
-    request,
+    { ...request, requestId },
   );
   return data;
+  });
 }
 
 // ─── Customer Orders ───────────────────────────────────────────────────────────
@@ -42,11 +45,13 @@ export async function getCustomerOrder(id: string) {
 }
 
 export async function createInstantOrder(request: InstantOrderRequest) {
+  return withCheckoutRequest("instant", request, async requestId => {
   const { data } = await apiClient.post<ApiResponse<OrderResponse>>(
     "/api/v1/customer/orders/instant",
-    request,
+    { ...request, requestId },
   );
   return data;
+  });
 }
 
 export async function cancelCustomerOrder(id: string, request: CancelOrderRequest) {

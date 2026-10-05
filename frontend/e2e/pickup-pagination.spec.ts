@@ -1,15 +1,10 @@
+import { mockBrowserSession } from "./auth-fixture";
 import { test, expect } from "@playwright/test";
 
 for (const width of [1440, 375]) {
   test(`organizer reaches and checks in the final pickup page at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    await page.addInitScript(() => {
-      localStorage.setItem("uitmerch-auth", JSON.stringify({ version: 0, state: {
-        user: { id: "perf-owner", email: "owner@example.test", fullName: "Organizer", role: "ORGANIZER", isVerified: true },
-        accessToken: `header.${btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 7200 }))}.signature`,
-        refreshToken: "test-refresh", tokenType: "Bearer",
-      } }));
-    });
+    await mockBrowserSession(page,{id:"perf-owner",email:"owner@example.test",fullName:"Organizer",role:"ORGANIZER",isVerified:true});
     const org = { id: "perf-org", ownerId: "perf-owner", name: "Tổ chức UIT", status: "ACTIVE", totalMerch: 0 };
     const last = { id: "99999999-last", guestName: "Khách cuối danh sách", status: "READY" };
     let completed = false;
@@ -18,6 +13,7 @@ for (const width of [1440, 375]) {
       const request = route.request();
       const url = new URL(request.url());
       const path = url.pathname;
+      if (path.startsWith("/api/v1/auth/")) return route.fallback();
       let data: unknown = [];
       let meta: unknown;
       if (path.endsWith("/stream")) return route.fulfill({ contentType: "text/event-stream", body: "" });

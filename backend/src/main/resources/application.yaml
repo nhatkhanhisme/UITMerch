@@ -2,11 +2,25 @@ server:
   port: ${PORT:${SERVER_PORT:8080}}
 
 app:
+  environment: ${APP_ENVIRONMENT:production}
+  dev:
+    otp-endpoint: ${APP_DEV_OTP_ENDPOINT:false}
+    seed-data: ${APP_DEV_SEED_DATA:false}
+    mock-mail: ${APP_DEV_MOCK_MAIL:false}
+  checkout:
+    max-quantity: ${APP_CHECKOUT_MAX_QUANTITY:10}
+    max-pending: ${APP_CHECKOUT_MAX_PENDING:3}
+    pending-hours: ${APP_CHECKOUT_PENDING_HOURS:48}
+    expiry-enabled: ${APP_CHECKOUT_EXPIRY_ENABLED:true}
+  rate-limit:
+    shared: ${APP_RATE_LIMIT_SHARED:true}
+  auth:
+    cookie-secure: ${APP_AUTH_COOKIE_SECURE:true}
   # JWT Configuration
   # NFR01: JWT access tokens utilized for session management
   jwt:
     secret: ${APP_JWT_SECRET}
-    expiration: ${APP_JWT_EXPIRATION:86400000}  # 24 hours in milliseconds
+    expiration: ${APP_JWT_EXPIRATION:900000}  # 15 minutes in milliseconds
     refresh-expiration: ${APP_JWT_REFRESH_EXPIRATION:604800000}  # 7 days in milliseconds
 
   mail:
@@ -32,6 +46,8 @@ app:
   # Supabase Storage Configuration
   # NFR03: Supabase Storage used for images; Base64/BLOB persistence in DB is strictly prohibited
   storage:
+    avatar-bucket: ${APP_STORAGE_AVATAR_BUCKET:avatars}
+    organization-bucket: ${APP_STORAGE_ORG_BUCKET:org-assets}
     endpoint: ${SUPABASE_STORAGE_ENDPOINT}
     region: ${SUPABASE_STORAGE_REGION}
     access-key: ${SUPABASE_STORAGE_S3_ACCESS_KEY_ID}
@@ -39,6 +55,10 @@ app:
     public-url: ${SUPABASE_PROJECT_URL}
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
   application:
     name: uitmerch-backend
   task:

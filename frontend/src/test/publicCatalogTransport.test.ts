@@ -12,7 +12,7 @@ function reply(config: InternalAxiosRequestConfig) {
 }
 beforeEach(() => {
   registerAuthBridge({
-    read: () => ({ accessToken: "access", refreshToken: "refresh", tokenType: "Bearer", user: {
+    read: () => ({ accessToken: "access", tokenType: "Bearer", user: {
       id: "customer", email: "customer@uit.edu.vn", fullName: "Customer", role: "CUSTOMER", isVerified: true,
     } }),
     write: vi.fn(), clear: vi.fn(), sync: vi.fn(async () => {}),

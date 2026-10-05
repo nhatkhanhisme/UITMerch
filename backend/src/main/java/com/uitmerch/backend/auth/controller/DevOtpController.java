@@ -23,6 +23,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/dev")
 @RequiredArgsConstructor
 @Profile("dev | docker")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.dev.otp-endpoint", havingValue = "true")
 public class DevOtpController {
 
     private final UserRepository userRepository;

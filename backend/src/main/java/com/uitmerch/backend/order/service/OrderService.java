@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private final com.uitmerch.backend.order.security.CheckoutSecurityService checkoutSecurity;
     private final com.uitmerch.backend.merch.service.InventoryService inventoryService;
     private final com.uitmerch.backend.order.history.OrderHistoryService historyService;
 
@@ -65,6 +66,11 @@ public class OrderService {
             String shippingName, String shippingPhone, String shippingAddress) {
         if (cartItems == null || cartItems.isEmpty()) throw new ValidationException("Order must contain items.");
         cartItems.forEach(item -> requirePositiveQuantity(item.getQuantity()));
+        Map<UUID,Integer> quantities = new HashMap<>();
+        cartItems.forEach(item -> quantities.merge(item.getMerchId(), item.getQuantity(), this::sumQuantity));
+        checkoutSecurity.quantities(quantities);
+        var checkout=checkoutSecurity.begin(userId,null,null,UUID.randomUUID(),"cart-internal",quantities);
+        checkoutSecurity.availableProducts(quantities.keySet());
         List<UUID> merchIds = cartItems.stream().map(CartItem::getMerchId).toList();
         Map<UUID, MerchItem> merchMap = merchItemRepository.findAllLockedByIds(merchIds)
             .stream().collect(Collectors.toMap(MerchItem::getId, m -> m));
@@ -123,6 +129,7 @@ public class OrderService {
                 .guestName(shippingName)
                 .guestPhone(shippingPhone)
                 .build();
+            checkoutSecurity.attach(order,checkout,false);
             order = orderRepository.save(order);
 
             final UUID orderId = order.getId();
@@ -134,6 +141,7 @@ public class OrderService {
             results.add(OrderResponse.from(order, savedItems));
         }
 
+        checkoutSecurity.finish(checkout,results);
         return results;
     }
 
@@ -153,6 +161,11 @@ public class OrderService {
 
     private OrderResponse createSingleOrder(UUID userId, InstantOrderRequest request, UUID campaignId) {
         requirePositiveQuantity(request.getQuantity());
+        checkoutSecurity.quantities(Map.of(request.getMerchId(), request.getQuantity()));
+        var checkout = checkoutSecurity.begin(userId, null, null, request.getRequestId(),
+            campaignId == null ? "instant" : "campaign:" + campaignId, request);
+        if (checkout.replay() != null) return checkout.replay().getFirst();
+        checkoutSecurity.availableProducts(Set.of(request.getMerchId()));
         MerchItem merch = merchItemRepository.findLockedById(request.getMerchId())
             .orElseThrow(() -> new ResourceNotFoundException("Merch item", request.getMerchId().toString()));
 
@@ -181,6 +194,7 @@ public class OrderService {
             .totalAmount(subtotal)
             .note(request.getNote())
             .build();
+        checkoutSecurity.attach(order, checkout, campaignId != null);
         order = orderRepository.save(order);
 
         OrderItem orderItem = OrderItem.builder()
@@ -195,7 +209,9 @@ public class OrderService {
 
         notifyOrganizer(merch.getOrgId(), order, "NEW_ORDER");
         notifyCustomerOrderPlaced(order);
-        return OrderResponse.from(order, List.of(orderItem));
+        var result = OrderResponse.from(order, List.of(orderItem));
+        checkoutSecurity.finish(checkout, List.of(result));
+        return result;
     }
 
     // ------------------------------------------------------------------ //
@@ -214,6 +230,16 @@ public class OrderService {
             throw new ValidationException("Order must contain between 1 and 100 valid items.");
         }
         items.forEach(item -> requirePositiveQuantity(item.getQuantity()));
+        Map<UUID,Integer> quantities = new TreeMap<>();
+        items.forEach(item -> quantities.merge(item.getMerchId(), item.getQuantity(), this::sumQuantity));
+        checkoutSecurity.quantities(quantities);
+        var payload = new LinkedHashMap<String,Object>();
+        payload.put("items",quantities);payload.put("name",request.getGuestName());payload.put("phone",request.getGuestPhone());
+        payload.put("email",request.getGuestEmail());payload.put("note",request.getNote());
+        var checkout = checkoutSecurity.begin(userId, request.getGuestEmail(), request.getGuestCheckoutToken(),
+            request.getRequestId(), "public", payload);
+        if (checkout.replay() != null) return checkout.replay();
+        checkoutSecurity.availableProducts(quantities.keySet());
         List<UUID> merchIds = items.stream().map(GuestOrderItemRequest::getMerchId).toList();
         Map<UUID, MerchItem> merchMap = merchItemRepository.findAllLockedByIds(merchIds)
             .stream().collect(Collectors.toMap(MerchItem::getId, m -> m));
@@ -273,6 +299,7 @@ public class OrderService {
                 .totalAmount(total)
                 .note(request.getNote())
                 .build();
+            checkoutSecurity.attach(order, checkout, false);
             order = orderRepository.save(order);
 
             final UUID orderId = order.getId();
@@ -284,6 +311,7 @@ public class OrderService {
             results.add(OrderResponse.from(order, savedItems));
         }
 
+        checkoutSecurity.finish(checkout, results);
         return results;
     }
 
@@ -362,6 +390,9 @@ public class OrderService {
         }
 
         campaignPolicy.ensureCanProgress(order.getId());
+        if (order.getStatus()==OrderStatus.PENDING && order.getPendingExpiresAt()!=null
+                && !order.getPendingExpiresAt().isAfter(java.time.Instant.now()))
+            throw new ValidationException("The pending order has expired.");
         validateStatusTransition(order.getStatus(), newStatus);
 
         OrderStatus previous = order.getStatus();
@@ -617,18 +648,20 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderResponse getGuestOrderByEmail(UUID orderId, String guestEmail) {
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new ResourceNotFoundException("Order", orderId.toString()));
+        throw new ResourceNotFoundException("Order",orderId.toString());
+    }
 
-        if (order.getUserId() != null
-                || order.getGuestEmail() == null
-                || !order.getGuestEmail().equalsIgnoreCase(guestEmail.trim())) {
-            throw new ResourceNotFoundException("Order", orderId.toString());
-        }
-
-        List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
-        PickupSchedule schedule = loadPickupSchedule(order);
-        return OrderResponse.from(order, items, schedule);
+    @Transactional
+    public void expirePendingOrder(UUID id) {
+        var order=orderRepository.findLockedById(id).orElse(null);
+        if (order==null || order.getStatus()!=OrderStatus.PENDING || order.getPendingExpiresAt()==null
+                || order.getPendingExpiresAt().isAfter(java.time.Instant.now())) return;
+        applyCancel(order,"system","Pending checkout expired after 48 hours",null);
+        orderRepository.saveAndFlush(order);
+        historyService.record(order,null,OrderStatus.PENDING,"SYSTEM");
+        restoreStockForItems(orderItemRepository.findByOrderId(id));
+        notifyCustomerInApp(order,OrderStatus.CANCELLED);
+        notifyOrganizer(order.getOrgId(),order,"ORDER_CANCELLED");
     }
 
     // ------------------------------------------------------------------ //
@@ -873,5 +906,9 @@ public class OrderService {
         }
         return (order.getGuestEmail() != null && !order.getGuestEmail().isBlank())
             ? order.getGuestEmail() : null;
+    }
+    private int sumQuantity(int first, int second) {
+        try { return Math.addExact(first, second); }
+        catch (ArithmeticException ex) { throw new ValidationException("Quantity exceeds the allowed limit."); }
     }
 }

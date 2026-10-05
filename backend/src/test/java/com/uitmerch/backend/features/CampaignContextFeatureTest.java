@@ -42,7 +42,7 @@ class CampaignContextFeatureTest extends BackendFeatureTest {
 
     @Test void contextUsesOrderReservationRatherThanCurrentSkuCampaignAndTracksClosedState() {
         var org = organization(); var item = product(org, 10); var customer = user(UserRole.CUSTOMER);
-        var request = new InstantOrderRequest(); request.setMerchId(item.getId()); request.setQuantity(1);
+        var request = new InstantOrderRequest(); request.setRequestId(UUID.randomUUID()); request.setMerchId(item.getId()); request.setQuantity(1);
         var normal = orders.createInstantOrder(customer.getId(), request);
         var campaign = campaigns.create(org.getOwnerId(), org.getId(), new CampaignRequests.Create("Context", null, 2,
                 Instant.now().plusSeconds(3600), List.of(new CampaignRequests.Variant(item.getId(), "Blue"))));
@@ -74,7 +74,7 @@ class CampaignContextFeatureTest extends BackendFeatureTest {
 
     @Test void apiEnforcesRolesAndOwnershipWithoutLeakingContext() throws Exception {
         var org = organization(); var otherOrg = organization(); var item = product(org, 10); var customer = user(UserRole.CUSTOMER);
-        var request = new InstantOrderRequest(); request.setMerchId(item.getId()); request.setQuantity(1);
+        var request = new InstantOrderRequest(); request.setRequestId(UUID.randomUUID()); request.setMerchId(item.getId()); request.setQuantity(1);
         var order = orders.createInstantOrder(customer.getId(), request);
         String customerPath = "/api/v1/customer/orders/" + order.getId() + "/campaign-context";
         String orgPath = "/api/v1/organizations/" + org.getId() + "/orders/" + order.getId() + "/campaign-context";

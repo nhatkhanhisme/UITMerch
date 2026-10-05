@@ -7,7 +7,8 @@ export const apiClient = axios.create({
   timeout: 20000,
 });
 export const authTransport = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.PROD ? "" : import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
   timeout: 15000,
 });
 // Use only for catalog reads whose response does not depend on the account.
@@ -25,6 +26,7 @@ type Bridge = {
   write: (s: AuthSession) => void;
   clear: () => void;
   sync: () => Promise<void>;
+  revision?: () => number;
 };
 let bridge: Bridge | undefined;
 let refreshing: Promise<AuthSession> | null = null;
@@ -32,26 +34,31 @@ export function registerAuthBridge(value: Bridge) {
   bridge = value;
 }
 
-export function refreshSession(): Promise<AuthSession> {
+export async function authPost<T>(path: string, payload: unknown = null) {
+  const csrf = await authTransport.get("/api/v1/auth/csrf");
+  const token = csrf.data?.data?.csrfToken;
+  if (typeof token !== "string" || !token) throw new Error("Không thể xác minh yêu cầu.");
+  return authTransport.post<T>(path, payload, { headers: { "X-CSRF-TOKEN": token } });
+}
+export function restoreSession(): Promise<AuthSession> { return refreshSession(true); }
+export function refreshSession(bootstrap = false): Promise<AuthSession> {
   if (refreshing) return refreshing;
   const observed = bridge?.read();
-  if (!observed) return Promise.reject(new Error("Bạn cần đăng nhập lại."));
+  const revision = bridge?.revision?.();
+  if (!observed && !bootstrap) return Promise.reject(new Error("Bạn cần đăng nhập lại."));
   const operation = withRefreshLock(async () => {
     await bridge?.sync();
     const current = bridge?.read();
-    if (!current || current.user.id !== observed.user.id)
+    if (current?.user.id !== observed?.user.id || bridge?.revision?.() !== revision)
       throw new Error("Phiên đăng nhập đã thay đổi.");
-    if (current.refreshToken !== observed.refreshToken) return current;
+    if (current && current.accessToken !== observed?.accessToken) return current;
     try {
-      const { data } = await authTransport.post("/api/v1/auth/refresh", {
-        refreshToken: current.refreshToken,
-      });
+      const { data } = await authPost<{ data: { token: string; userId: string; tokenType: string; email: string; fullName: string; role: AuthSession["user"]["role"]; isVerified: boolean } }>("/api/v1/auth/refresh");
       const p = data.data;
-      if (!p?.token || !p.refreshToken || !p.userId)
+      if (!p?.token || !p.userId)
         throw new Error("Phản hồi đăng nhập không hợp lệ.");
       const session: AuthSession = {
         accessToken: p.token,
-        refreshToken: p.refreshToken,
         tokenType: p.tokenType,
         user: {
           id: p.userId,
@@ -61,17 +68,21 @@ export function refreshSession(): Promise<AuthSession> {
           isVerified: p.isVerified,
         },
       };
-      if (bridge?.read()?.refreshToken !== current.refreshToken)
+      if (bridge?.read()?.accessToken !== current?.accessToken || bridge?.read()?.user.id !== current?.user.id || bridge?.revision?.() !== revision)
         throw new Error("Phiên đăng nhập đã thay đổi.");
-      bridge.write(session);
+      if (current && session.user.id !== current.user.id) {
+        bridge?.clear();
+        throw new Error("Tài khoản đã thay đổi. Vui lòng đăng nhập lại.");
+      }
+      bridge?.write(session);
       return session;
     } catch (error) {
       if (
-        axios.isAxiosError(error) &&
+        current && axios.isAxiosError(error) &&
         [401, 403].includes(error.response?.status ?? 0) &&
-        bridge?.read()?.refreshToken === current.refreshToken
+        bridge?.read()?.accessToken === current?.accessToken
       )
-        bridge.clear();
+        bridge?.clear();
       throw error;
     }
   });

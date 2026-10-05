@@ -2,6 +2,7 @@ import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import {
   AxiosError,
   type AxiosResponse,
+  type AxiosAdapter,
   type InternalAxiosRequestConfig,
 } from "axios";
 import {
@@ -20,7 +21,6 @@ const initial: AuthSession = {
     isVerified: true,
   },
   accessToken: "old-access",
-  refreshToken: "old-refresh",
   tokenType: "Bearer",
 };
 const reply = (
@@ -44,14 +44,14 @@ function reject(config: InternalAxiosRequestConfig, status: number): never {
   );
 }
 let session: AuthSession | null;
-let sync: ReturnType<typeof vi.fn>;
-let write: ReturnType<typeof vi.fn>;
-let clear: ReturnType<typeof vi.fn>;
+let refreshAdapter: AxiosAdapter;
+let sync: ReturnType<typeof vi.fn<() => Promise<void>>>;
+let write: ReturnType<typeof vi.fn<(s: AuthSession) => void>>;
+let clear: ReturnType<typeof vi.fn<() => void>>;
 const rotate = (config: InternalAxiosRequestConfig) =>
   reply(config, {
     data: {
       token: "new-access",
-      refreshToken: "new-refresh",
       userId: "customer-a",
       email: initial.user.email,
       fullName: "A",
@@ -62,6 +62,8 @@ const rotate = (config: InternalAxiosRequestConfig) =>
   });
 beforeEach(() => {
   session = structuredClone(initial);
+  authTransport.defaults.adapter = config => config.method === "get"
+    ? Promise.resolve(reply(config, { data: { csrfToken: "test-csrf" } })) : refreshAdapter(config);
   sync = vi.fn(async () => {});
   write = vi.fn((s) => {
     session = s;
@@ -87,7 +89,7 @@ describe("session refresh", () => {
       await new Promise((r) => setTimeout(r, 10));
       return rotate(c);
     });
-    authTransport.defaults.adapter = refresh;
+    refreshAdapter = refresh;
     apiClient.defaults.adapter = async (c) => {
       if (c.headers.get("Authorization") === "Bearer old-access")
         return reject(c, 401);
@@ -100,18 +102,17 @@ describe("session refresh", () => {
     ]);
     expect(refresh).toHaveBeenCalledTimes(1);
     expect(result.every((r) => r.data.ok)).toBe(true);
-    expect(session?.refreshToken).toBe("new-refresh");
+    expect(session?.accessToken).toBe("new-access");
   });
-  it("rehydrates and reuses a token rotated by another tab", async () => {
+  it("reuses a token already rotated in this tab", async () => {
     sync.mockImplementation(async () => {
       session = {
         ...initial,
         accessToken: "tab-access",
-        refreshToken: "tab-refresh",
       };
     });
     const refresh = vi.fn();
-    authTransport.defaults.adapter = refresh;
+    refreshAdapter = refresh;
     expect((await refreshSession()).accessToken).toBe("tab-access");
     expect(refresh).not.toHaveBeenCalled();
   });
@@ -120,7 +121,7 @@ describe("session refresh", () => {
     const wait = new Promise<void>((r) => {
       release = r;
     });
-    authTransport.defaults.adapter = async (c) => {
+    refreshAdapter = async (c) => {
       await wait;
       return rotate(c);
     };
@@ -132,22 +133,22 @@ describe("session refresh", () => {
     expect(write).not.toHaveBeenCalled();
   });
   it("clears a definitively revoked refresh token", async () => {
-    authTransport.defaults.adapter = async (c) => reject(c, 401);
+    refreshAdapter = async (c) => reject(c, 401);
     await expect(refreshSession()).rejects.toBeInstanceOf(AxiosError);
     expect(clear).toHaveBeenCalledOnce();
     expect(session).toBeNull();
   });
   it("keeps the session after a transient refresh network failure", async () => {
-    authTransport.defaults.adapter = async (c) => {
+    refreshAdapter = async (c) => {
       throw new AxiosError("Network", "ERR_NETWORK", c);
     };
     await expect(refreshSession()).rejects.toBeInstanceOf(AxiosError);
     expect(clear).not.toHaveBeenCalled();
-    expect(session?.refreshToken).toBe("old-refresh");
+    expect(session?.accessToken).toBe("old-access");
   });
   it("does not rotate on forbidden responses or auth failures", async () => {
     const refresh = vi.fn();
-    authTransport.defaults.adapter = refresh;
+    refreshAdapter = refresh;
     apiClient.defaults.adapter = async (c) =>
       reject(c, c.url?.startsWith("/api/v1/auth/") ? 401 : 403);
     await expect(apiClient.get("/private")).rejects.toBeInstanceOf(AxiosError);
@@ -158,7 +159,7 @@ describe("session refresh", () => {
   });
   it("retries a protected request at most once", async () => {
     const refresh = vi.fn(async (c) => rotate(c));
-    authTransport.defaults.adapter = refresh;
+    refreshAdapter = refresh;
     const protectedCall = vi.fn(async (c) => reject(c, 401));
     apiClient.defaults.adapter = protectedCall;
     await expect(apiClient.get("/private")).rejects.toBeInstanceOf(AxiosError);
@@ -170,7 +171,7 @@ describe("session refresh", () => {
     const wait = new Promise<void>((r) => {
       release = r;
     });
-    authTransport.defaults.adapter = async (c) => {
+    refreshAdapter = async (c) => {
       await wait;
       return rotate(c);
     };
@@ -179,11 +180,10 @@ describe("session refresh", () => {
     session = {
       ...initial,
       user: { ...initial.user, id: "other-user" },
-      refreshToken: "other-refresh",
     };
     release();
     await expect(pending).rejects.toThrow();
-    expect(session.user.id).toBe("other-user");
+    expect(session?.user.id).toBe("other-user");
     expect(write).not.toHaveBeenCalled();
   });
 });
@@ -194,7 +194,7 @@ it("never retries a request from the previous account with a new account token",
     release = r;
   });
   const refresh = vi.fn();
-  authTransport.defaults.adapter = refresh;
+  refreshAdapter = refresh;
   const calls = vi.fn(async (config: InternalAxiosRequestConfig) => {
     await wait;
     return reject(config, 401);
@@ -206,7 +206,6 @@ it("never retries a request from the previous account with a new account token",
     ...initial,
     user: { ...initial.user, id: "other" },
     accessToken: "other-access",
-    refreshToken: "other-refresh",
   };
   release();
   await expect(pending).rejects.toBeInstanceOf(AxiosError);

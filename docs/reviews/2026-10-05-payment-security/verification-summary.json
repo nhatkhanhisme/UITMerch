@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-05",
+  "branch": "security/app-hardening",
+  "deployed": false,
+  "backendPostgres": {
+    "tests": 314,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "skipReason": "Opt-in performance benchmark"
+  },
+  "finalProductionSafety": {
+    "tests": 10,
+    "failures": 0,
+    "errors": 0
+  },
+  "frontendUnit": {
+    "tests": 66,
+    "passed": 66
+  },
+  "frontendBuild": "passed",
+  "browserRegression": {
+    "tests": 92,
+    "passed": 92,
+    "transport": "local API fixtures"
+  },
+  "additionalBrowserAuth": {
+    "tests": 2,
+    "passed": 2
+  },
+  "dependencyScan": {
+    "unresolvedFindings": 0,
+    "acceptedBuildOnlyExceptions": 1,
+    "evidence": "dependency-verification.json"
+  },
+  "gitDiffCheck": "passed",
+  "configValidation": [
+    "CI YAML",
+    "proxy JSON",
+    "Python AST",
+    "bash syntax"
+  ],
+  "productionGates": [
+    "Supabase UITMerch grants/RLS/storage",
+    "Render deployed environment",
+    "Gemini key revocation",
+    "HTTPS proxy/cookie flows",
+    "Strict script CSP and audit retention"
+  ],
+  "currentSourceSecretScan": {
+    "findings": 0,
+    "redacted": true,
+    "includesGitHistory": false
+  }
+}

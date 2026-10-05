@@ -11,6 +11,7 @@ import {
   requestGuestReceipt,
   exchangeGuestReceipt,
   trackGuestOrder,
+  requestGuestTracking,
   getOrderHistory,
 } from "../api/pickup";
 import { useAuthStore } from "../stores/authStore";
@@ -353,6 +354,7 @@ export function GuestOrdersPage() {
   const [params, setParams] = useSearchParams();
   const [id, setId] = useState(params.get("orderId") ?? "");
   const [email, setEmail] = useState("");
+  const [trackingCode, setTrackingCode] = useState("");
   const [receipt, setReceipt] = useState(params.get("receiptToken") ?? "");
   const [order, setOrder] = useState<OrderResponse>();
   const [credential, setCredential] = useState<PickupCredential>();
@@ -367,7 +369,7 @@ export function GuestOrdersPage() {
       setParams(clean, { replace: true });
     }
   }, [params, setParams]);
-  async function run(kind: "track" | "receipt" | "exchange") {
+  async function run(kind: "track" | "trackingMail" | "receipt" | "exchange") {
     setBusy(true);
     setError(undefined);
     setMessage("");
@@ -375,7 +377,10 @@ export function GuestOrdersPage() {
     try {
       if (kind === "track") {
         setOrder(undefined);
-        setOrder(await trackGuestOrder(id.trim(), email.trim()));
+        setOrder(await trackGuestOrder(id.trim(), trackingCode.trim()));
+      } else if (kind === "trackingMail") {
+        await requestGuestTracking(id.trim(), email.trim());
+        setMessage("Nếu thông tin khớp, mã tra cứu có hiệu lực 24 giờ sẽ được gửi đến email của bạn.");
       } else if (kind === "receipt") {
         await requestGuestReceipt(id.trim(), email.trim());
         setMessage(
@@ -421,7 +426,15 @@ export function GuestOrdersPage() {
           </label>
         </div>
         <div className="feature-actions">
-          <button disabled={busy || !id || !email} onClick={() => run("track")}>
+          <button disabled={busy || !id || !email} onClick={() => run("trackingMail")}>
+            Gửi mã tra cứu
+          </button>
+        </div>
+        <label className="feature-fields">Mã tra cứu từ email
+          <input type="password" autoComplete="off" disabled={busy} value={trackingCode} onChange={e => { setTrackingCode(e.target.value); setOrder(undefined); }} />
+        </label>
+        <div className="feature-actions">
+          <button disabled={busy || !id || !trackingCode} onClick={() => run("track")}>
             Tra cứu
           </button>
           <button

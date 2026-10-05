@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import type { AuthSession, AuthUser } from "../types/auth";
 import { apiClient, registerAuthBridge } from "../api/client";
 import { resetServerState } from "../lib/queryClient";
@@ -9,21 +8,22 @@ import { useCartStore } from "./cartStore";
 type AuthState = {
   user: AuthUser | null;
   accessToken: string | null;
-  refreshToken: string | null;
   tokenType: string | null;
   setSession: (session: AuthSession | null) => void;
   updateUser: (updates: Partial<AuthUser>) => void;
   clearSession: () => void;
 };
-function clearPrivateData() {
+function clearPrivateData(preserveBuyer?: string) {
   resetServerState();
   cacheClear();
   useCartStore.getState().clearCart();
   try {
     for (let i = sessionStorage.length - 1; i >= 0; i--) {
       const key = sessionStorage.key(i);
-      if (key?.startsWith("uitmerch-reservation:"))
-        sessionStorage.removeItem(key);
+      if (key?.startsWith("uitmerch-reservation:") || key?.startsWith("uitmerch-checkout:")) {
+        const ownIntent = preserveBuyer && (key.startsWith(`uitmerch-reservation:${preserveBuyer}:`) || key.startsWith(`uitmerch-checkout:${preserveBuyer}:`));
+        if (!ownIntent) sessionStorage.removeItem(key);
+      }
     }
   } catch {
     /* A disabled storage area must not prevent logout. */
@@ -34,75 +34,32 @@ function setHeader(token: string | null) {
     apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
   else delete apiClient.defaults.headers.common.Authorization;
 }
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      tokenType: null,
-      setSession: (session) => {
-        if (get().user?.id !== session?.user.id) clearPrivateData();
-        set({
-          user: session?.user ?? null,
-          accessToken: session?.accessToken ?? null,
-          refreshToken: session?.refreshToken ?? null,
-          tokenType: session?.tokenType ?? null,
-        });
-        setHeader(session?.accessToken ?? null);
-      },
-      updateUser: (updates) =>
-        set((state) =>
-          state.user ? { user: { ...state.user, ...updates } } : {},
-        ),
-      clearSession: () => {
-        clearPrivateData();
-        set({
-          user: null,
-          accessToken: null,
-          refreshToken: null,
-          tokenType: null,
-        });
-        setHeader(null);
-      },
-    }),
-    {
-      name: "uitmerch-auth",
-      partialize: (state) => ({
-        user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        tokenType: state.tokenType,
-      }),
-      onRehydrateStorage: () => (state) =>
-        setHeader(state?.accessToken ?? null),
-    },
-  ),
-);
+// Discard credentials persisted by older releases; never hydrate them.
+try { localStorage.removeItem("uitmerch-auth"); } catch { /* Disabled storage is supported. */ }
+let authRevision = 0;
+export const useAuthStore = create<AuthState>()((set, get) => ({
+  user: null, accessToken: null, tokenType: null,
+  setSession: session => {
+    authRevision++;
+    if (get().user?.id !== session?.user.id) clearPrivateData(!get().user ? session?.user.id : undefined);
+    set({ user: session?.user ?? null, accessToken: session?.accessToken ?? null, tokenType: session?.tokenType ?? null });
+    setHeader(session?.accessToken ?? null);
+  },
+  updateUser: updates => set(state => state.user ? { user: { ...state.user, ...updates } } : {}),
+  clearSession: () => {
+    authRevision++;
+    clearPrivateData();
+    set({ user: null, accessToken: null, tokenType: null });
+    setHeader(null);
+  },
+}));
 export function readSession(): AuthSession | null {
   const s = useAuthStore.getState();
-  return s.user && s.accessToken && s.refreshToken
-    ? {
-        user: s.user,
-        accessToken: s.accessToken,
-        refreshToken: s.refreshToken,
-        tokenType: s.tokenType ?? "Bearer",
-      }
-    : null;
+  return s.user && s.accessToken ? { user: s.user, accessToken: s.accessToken, tokenType: s.tokenType ?? "Bearer" } : null;
 }
-registerAuthBridge({
-  read: readSession,
-  write: (s) => useAuthStore.getState().setSession(s),
-  clear: () => useAuthStore.getState().clearSession(),
-  sync: async () => {
-    await useAuthStore.persist.rehydrate();
-  },
+registerAuthBridge({ read: readSession, write: s => useAuthStore.getState().setSession(s),
+  clear: () => useAuthStore.getState().clearSession(), sync: async () => {}, revision: () => authRevision });
+// Broadcast only invalidation, never credentials or private user data.
+if (typeof window !== "undefined") window.addEventListener("storage", event => {
+  if (event.key === "uitmerch-auth-invalidated") useAuthStore.getState().clearSession();
 });
-if (typeof window !== "undefined")
-  window.addEventListener("storage", async (event) => {
-    if (event.key !== "uitmerch-auth") return;
-    const previous = readSession();
-    await useAuthStore.persist.rehydrate();
-    if (previous?.user.id !== readSession()?.user.id || !readSession())
-      clearPrivateData();
-  });

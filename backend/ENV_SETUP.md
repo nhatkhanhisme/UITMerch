@@ -4,10 +4,10 @@ Run the commands below from `backend/` with Java 21.
 
 | Mode | Command | Database | Storage/email | `.env` |
 |---|---|---|---|---|
-| Local dev | `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev` | In-memory H2; reset on shutdown | Mock storage; logged OTPs | Optional |
+| Local dev | `APP_ENVIRONMENT=local ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev` | In-memory H2; reset on shutdown | Mock storage; real SMTP unless explicitly opted out | Optional |
 | Docker Compose | `docker compose up --build` | External PostgreSQL from `.env`; no database container included | Real Supabase/SMTP by default | Required |
 | Default / prod | `./mvnw spring-boot:run` or `java -jar target/backend-*.jar --spring.profiles.active=prod` | External PostgreSQL | Real Supabase/SMTP | Required locally, or inject environment variables |
-| Explicit docker profile | `SPRING_PROFILES_ACTIVE=docker docker compose up --build` | External PostgreSQL | Mock storage; logged OTPs | Required for database and JWT |
+| Explicit docker profile | `APP_ENVIRONMENT=local SPRING_PROFILES_ACTIVE=docker docker compose up --build` | External PostgreSQL | Mock storage; real SMTP unless explicitly opted out | Required for database and JWT |
 
 Docker packaging does not automatically activate the `docker` Spring profile. That profile is for development; do not activate it on a production service because it enables mock services and development endpoints/data initialization.
 
@@ -53,7 +53,13 @@ Changing runtime CORS configuration requires container recreation; no image rebu
 
 The `dev` profile always binds its datasource and Hikari connection settings to in-memory H2, even if your shell contains production `SPRING_DATASOURCE_*` values. This prevents the H2/PostgreSQL driver mismatch and keeps development schema creation away from the remote database. To choose a different in-memory database, set `UITMERCH_DEV_DATASOURCE_URL=jdbc:h2:mem:other;MODE=PostgreSQL;DB_CLOSE_DELAY=-1`; quote this value in a shell. Persistent or PostgreSQL URLs are rejected for this setting. Use the default profile to exercise PostgreSQL/Flyway.
 
-Development OTPs are available at `GET /api/v1/dev/otps?email=<email>`. Email delivery in real profiles uses durable background jobs and retry processing; it does not send synchronously in the request transaction.
+Development tools are disabled by default. In a local dev/docker environment only, explicitly set `APP_DEV_OTP_ENDPOINT=true` for `/api/v1/dev/otps`, `APP_DEV_SEED_DATA=true` for demo seed data, or `APP_DEV_MOCK_MAIL=true` to suppress SMTP. Mock mail never logs OTPs. Bind development servers to loopback and do not expose these tools publicly. Production/staging reject dev/docker profiles and all three flags at startup, including on Render even if `APP_ENVIRONMENT=local` was mistakenly set.
+
+`APP_ENVIRONMENT` defaults to `production`; supported values are `local`, `test`, `staging`, and `production`. Tests set their own environment. Deployment with dev flags, H2 console or destructive Hibernate schema updates fails before beans are created.
+
+V46 disables accounts still using the exact public V12/V14 demo password hash, revokes their sessions, and invalidates outstanding OTPs. It preserves orders, organizations and users who changed their password. Before rollout, provision a verified administrator with a unique password and a tested recovery procedure; do not re-enable an account while it retains the demo hash. Production credential rotation and recovery must use the owner's access to the provider.
+
+Email delivery in real profiles uses durable background jobs and retry processing; it does not send synchronously in the request transaction.
 
 ## Migration recovery
 
@@ -77,3 +83,9 @@ Use one `KEY=value` assignment per line. Base64 `=`, `/` and `+` characters in v
 Check `docker compose ps` for a healthy backend and request `/api/v1/public/events?size=1`. Compose and the Dockerfile use this endpoint for healthchecks. Do not print `docker compose config`, container environments or application properties containing real credentials into shared logs. A healthy endpoint verifies startup and database access; it does not prove SMTP, Storage uploads or Gemini requests work.
 
 If Docker reports `no space left on device`, free host disk space before rebuilding. On Arch, `sudo paccache -rk2` keeps two cached versions per package; it does not uninstall packages. Avoid deleting database volumes. A runtime `.env` should never be copied into the Docker build context.
+
+## Cookie auth and checkout rollout
+
+Production frontend auth uses the same-origin `/api` reverse proxy configured in `frontend/vercel.json`. Use exact HTTPS frontend origins for `APP_CORS_ALLOWED_ORIGINS`; production refuses localhost HTTP origins. Keep `APP_AUTH_COOKIE_SECURE`, `APP_RATE_LIMIT_SHARED`, and `APP_CHECKOUT_EXPIRY_ENABLED` true. Local HTTP development must explicitly use `APP_ENVIRONMENT=local` and `APP_AUTH_COOKIE_SECURE=false`; never reuse a local signing key in a deployed environment.
+
+Checkout defaults are `APP_CHECKOUT_MAX_QUANTITY=10`, `APP_CHECKOUT_MAX_PENDING=3`, and `APP_CHECKOUT_PENDING_HOURS=48`. Configure real SMTP and validate email delivery before accepting guest checkout. See [security rollout](../docs/reviews/2026-10-05-payment-security/ROLLOUT.md) for V46/V47 migrations, Supabase privileges and rollback gates.

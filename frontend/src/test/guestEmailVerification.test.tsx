@@ -1,0 +1,34 @@
+import { act, fireEvent, render, screen, cleanup } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import { GuestEmailVerification } from "../components/GuestEmailVerification";
+const api = vi.hoisted(() => ({ send: vi.fn(), verify: vi.fn() }));
+vi.mock("../api/checkoutSecurity", () => ({ requestCheckoutCode: api.send, verifyCheckoutCode: api.verify }));
+vi.mock("../api/auth", () => ({ getApiErrorMessage: () => "Mã không hợp lệ" }));
+afterEach(() => { cleanup(); vi.resetAllMocks(); });
+it("permits pasted codes, delivers a verified grant and announces success", async () => {
+  api.send.mockResolvedValue("challenge"); api.verify.mockResolvedValue("grant");
+  const verified = vi.fn();
+  render(<GuestEmailVerification email="guest@uit.edu.vn" onVerified={verified} />);
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Gửi mã xác minh email" })); });
+  const code = screen.getByRole("textbox");
+  expect(code.getAttribute("autocomplete")).toBe("one-time-code");
+  fireEvent.change(code, { target: { value: "123456" } });
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Xác minh" })); });
+  expect(api.verify).toHaveBeenCalledWith("guest@uit.edu.vn", "challenge", "123456");
+  expect(verified).toHaveBeenCalledExactlyOnceWith("grant");
+  expect(screen.getByRole("status").textContent).toContain("Email đã xác minh");
+});
+it("ignores a verification response when the buyer changes email", async () => {
+  api.send.mockResolvedValue("challenge");
+  let resolve!: (token: string) => void;
+  api.verify.mockReturnValue(new Promise<string>(done => { resolve = done; }));
+  const verified = vi.fn();
+  const { rerender } = render(<GuestEmailVerification email="first@uit.edu.vn" onVerified={verified} />);
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Gửi mã xác minh email" })); });
+  fireEvent.change(screen.getByRole("textbox"), { target: { value: "123456" } });
+  fireEvent.click(screen.getByRole("button", { name: "Xác minh" }));
+  rerender(<GuestEmailVerification email="second@uit.edu.vn" onVerified={verified} />);
+  await act(async () => { resolve("old-grant"); });
+  expect(verified).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "Gửi mã xác minh email" })).toBeDefined();
+});

@@ -1,31 +1,11 @@
+import { mockBrowserSession } from "./auth-fixture";
 import { test, expect, type Page } from "@playwright/test";
 
 async function setupNav(page: Page, role?: "CUSTOMER" | "ORGANIZER" | "ADMIN") {
-  if (role)
-    await page.addInitScript((role) => {
-      const user = {
-        id: "nav-user",
-        role,
-        email: "nav@uit.edu.vn",
-        fullName: "Nguyễn Thị Khánh Linh tên dài để kiểm tra điều hướng",
-        isVerified: true,
-        avatarUrl: "/assets/figma/account-icon.svg",
-      };
-      localStorage.setItem(
-        "uitmerch-auth",
-        JSON.stringify({
-          state: {
-            user,
-            accessToken: "test-token",
-            refreshToken: "test-refresh",
-            tokenType: "Bearer",
-          },
-          version: 0,
-        }),
-      );
-    }, role);
+  await mockBrowserSession(page,role ? {id:"nav-user",role,email:"nav@uit.edu.vn",fullName:"Nguyễn Thị Khánh Linh tên dài để kiểm tra điều hướng",isVerified:true,avatarUrl:"/assets/figma/account-icon.svg"} : undefined);
   await page.route("**/api/v1/**", (route) => {
     const path = new URL(route.request().url()).pathname;
+    if (path.startsWith("/api/v1/auth/")) return route.fallback();
     if (path.endsWith("/stream"))
       return route.fulfill({ contentType: "text/event-stream", body: "" });
     if (path.startsWith("/api/v1/public/campaigns/"))

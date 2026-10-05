@@ -1,0 +1,1686 @@
+{
+  "date": "2026-10-05",
+  "npm": {
+    "frontend": {
+      "all": {
+        "auditReportVersion": 2,
+        "vulnerabilities": {
+          "braces": {
+            "name": "braces",
+            "severity": "high",
+            "isDirect": false,
+            "via": [
+              {
+                "source": 1240992,
+                "name": "braces",
+                "dependency": "braces",
+                "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+                "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+                "severity": "high",
+                "cwe": [
+                  "CWE-674"
+                ],
+                "cvss": {
+                  "score": 7.5,
+                  "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+                },
+                "range": "<=3.0.3"
+              }
+            ],
+            "effects": [
+              "chokidar",
+              "micromatch"
+            ],
+            "range": "*",
+            "nodes": [
+              "node_modules/braces"
+            ],
+            "fixAvailable": {
+              "name": "tailwindcss",
+              "version": "4.3.3",
+              "isSemVerMajor": true
+            }
+          },
+          "chokidar": {
+            "name": "chokidar",
+            "severity": "high",
+            "isDirect": false,
+            "via": [
+              "braces"
+            ],
+            "effects": [
+              "tailwindcss"
+            ],
+            "range": "2.0.0 - 3.6.0",
+            "nodes": [
+              "node_modules/chokidar"
+            ],
+            "fixAvailable": {
+              "name": "tailwindcss",
+              "version": "4.3.3",
+              "isSemVerMajor": true
+            }
+          },
+          "fast-glob": {
+            "name": "fast-glob",
+            "severity": "high",
+            "isDirect": false,
+            "via": [
+              "micromatch"
+            ],
+            "effects": [
+              "tailwindcss"
+            ],
+            "range": "*",
+            "nodes": [
+              "node_modules/fast-glob"
+            ],
+            "fixAvailable": {
+              "name": "tailwindcss",
+              "version": "4.3.3",
+              "isSemVerMajor": true
+            }
+          },
+          "micromatch": {
+            "name": "micromatch",
+            "severity": "high",
+            "isDirect": false,
+            "via": [
+              "braces"
+            ],
+            "effects": [
+              "fast-glob",
+              "tailwindcss"
+            ],
+            "range": ">=0.2.0",
+            "nodes": [
+              "node_modules/micromatch"
+            ],
+            "fixAvailable": {
+              "name": "tailwindcss",
+              "version": "4.3.3",
+              "isSemVerMajor": true
+            }
+          },
+          "tailwindcss": {
+            "name": "tailwindcss",
+            "severity": "high",
+            "isDirect": true,
+            "via": [
+              "chokidar",
+              "fast-glob",
+              "micromatch"
+            ],
+            "effects": [],
+            "range": "<=0.0.0-oxide-insiders.ff2c25f || 2.1.0-canary.1 - 3.4.19",
+            "nodes": [
+              "node_modules/tailwindcss"
+            ],
+            "fixAvailable": {
+              "name": "tailwindcss",
+              "version": "4.3.3",
+              "isSemVerMajor": true
+            }
+          }
+        },
+        "metadata": {
+          "vulnerabilities": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 5,
+            "critical": 0,
+            "total": 5
+          },
+          "dependencies": {
+            "prod": 149,
+            "dev": 184,
+            "optional": 28,
+            "peer": 13,
+            "peerOptional": 0,
+            "total": 335
+          }
+        }
+      },
+      "production": {
+        "auditReportVersion": 2,
+        "vulnerabilities": {},
+        "metadata": {
+          "vulnerabilities": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "total": 0
+          },
+          "dependencies": {
+            "prod": 149,
+            "dev": 184,
+            "optional": 28,
+            "peer": 13,
+            "peerOptional": 0,
+            "total": 335
+          }
+        }
+      }
+    },
+    "scripts": {
+      "all": {
+        "auditReportVersion": 2,
+        "vulnerabilities": {},
+        "metadata": {
+          "vulnerabilities": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "total": 0
+          },
+          "dependencies": {
+            "prod": 57,
+            "dev": 0,
+            "optional": 0,
+            "peer": 0,
+            "peerOptional": 0,
+            "total": 56
+          }
+        }
+      },
+      "production": {
+        "auditReportVersion": 2,
+        "vulnerabilities": {},
+        "metadata": {
+          "vulnerabilities": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 0,
+            "critical": 0,
+            "total": 0
+          },
+          "dependencies": {
+            "prod": 57,
+            "dev": 0,
+            "optional": 0,
+            "peer": 0,
+            "peerOptional": 0,
+            "total": 56
+          }
+        }
+      }
+    }
+  },
+  "maven": [
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.twelvemonkeys.imageio:imageio-webp"
+        },
+        "version": "3.15.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.twelvemonkeys.imageio:imageio-core"
+        },
+        "version": "3.15.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.twelvemonkeys.imageio:imageio-metadata"
+        },
+        "version": "3.15.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.twelvemonkeys.common:common-lang"
+        },
+        "version": "3.15.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.twelvemonkeys.common:common-io"
+        },
+        "version": "3.15.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.twelvemonkeys.common:common-image"
+        },
+        "version": "3.15.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-actuator"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-logging"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "ch.qos.logback:logback-classic"
+        },
+        "version": "1.5.34"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "ch.qos.logback:logback-core"
+        },
+        "version": "1.5.34"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.logging.log4j:log4j-to-slf4j"
+        },
+        "version": "2.25.5"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.logging.log4j:log4j-api"
+        },
+        "version": "2.25.5"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.slf4j:jul-to-slf4j"
+        },
+        "version": "2.0.18"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "jakarta.annotation:jakarta.annotation-api"
+        },
+        "version": "2.1.1"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.yaml:snakeyaml"
+        },
+        "version": "2.4"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-actuator-autoconfigure"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-actuator"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.micrometer:micrometer-observation"
+        },
+        "version": "1.15.12"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.micrometer:micrometer-commons"
+        },
+        "version": "1.15.12"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.micrometer:micrometer-jakarta9"
+        },
+        "version": "1.15.12"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.micrometer:micrometer-core"
+        },
+        "version": "1.15.12"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.hdrhistogram:HdrHistogram"
+        },
+        "version": "2.2.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.latencyutils:LatencyUtils"
+        },
+        "version": "2.0.3"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-web"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-json"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+        },
+        "version": "2.21.7"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.module:jackson-module-parameter-names"
+        },
+        "version": "2.21.7"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-tomcat"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.tomcat.embed:tomcat-embed-core"
+        },
+        "version": "10.1.60"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.tomcat.embed:tomcat-embed-websocket"
+        },
+        "version": "10.1.60"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-web"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-beans"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-webmvc"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-context"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-expression"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-cache"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-context-support"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.github.ben-manes.caffeine:caffeine"
+        },
+        "version": "3.2.4"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.jspecify:jspecify"
+        },
+        "version": "1.0.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.google.errorprone:error_prone_annotations"
+        },
+        "version": "2.49.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-data-jpa"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-jdbc"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.zaxxer:HikariCP"
+        },
+        "version": "6.3.3"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-jdbc"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.hibernate.orm:hibernate-core"
+        },
+        "version": "6.6.53.Final"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "jakarta.persistence:jakarta.persistence-api"
+        },
+        "version": "3.1.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "jakarta.transaction:jakarta.transaction-api"
+        },
+        "version": "2.0.1"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.jboss.logging:jboss-logging"
+        },
+        "version": "3.6.3.Final"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.hibernate.common:hibernate-commons-annotations"
+        },
+        "version": "7.0.3.Final"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.smallrye:jandex"
+        },
+        "version": "3.2.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml:classmate"
+        },
+        "version": "1.7.3"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "net.bytebuddy:byte-buddy"
+        },
+        "version": "1.17.8"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.glassfish.jaxb:jaxb-runtime"
+        },
+        "version": "4.0.9"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.glassfish.jaxb:jaxb-core"
+        },
+        "version": "4.0.9"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.glassfish.jaxb:txw2"
+        },
+        "version": "4.0.9"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.sun.istack:istack-commons-runtime"
+        },
+        "version": "4.1.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "jakarta.inject:jakarta.inject-api"
+        },
+        "version": "2.0.1"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.antlr:antlr4-runtime"
+        },
+        "version": "4.13.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.data:spring-data-jpa"
+        },
+        "version": "3.5.13"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.data:spring-data-commons"
+        },
+        "version": "3.5.13"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-orm"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-tx"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.slf4j:slf4j-api"
+        },
+        "version": "2.0.18"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-aspects"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.aspectj:aspectjweaver"
+        },
+        "version": "1.9.25.1"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-security"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-aop"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.security:spring-security-config"
+        },
+        "version": "6.5.11"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.security:spring-security-core"
+        },
+        "version": "6.5.11"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.security:spring-security-crypto"
+        },
+        "version": "6.5.11"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.security:spring-security-web"
+        },
+        "version": "6.5.11"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-validation"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.tomcat.embed:tomcat-embed-el"
+        },
+        "version": "10.1.60"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.hibernate.validator:hibernate-validator"
+        },
+        "version": "8.0.3.Final"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "jakarta.validation:jakarta.validation-api"
+        },
+        "version": "3.0.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.flywaydb:flyway-core"
+        },
+        "version": "11.7.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.dataformat:jackson-dataformat-toml"
+        },
+        "version": "2.21.7"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.core:jackson-core"
+        },
+        "version": "2.21.7"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+        },
+        "version": "2.21.7"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.core:jackson-annotations"
+        },
+        "version": "2.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.flywaydb:flyway-database-postgresql"
+        },
+        "version": "11.7.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.postgresql:postgresql"
+        },
+        "version": "42.7.13"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.checkerframework:checker-qual"
+        },
+        "version": "3.55.1"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springdoc:springdoc-openapi-starter-webmvc-ui"
+        },
+        "version": "2.8.17"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springdoc:springdoc-openapi-starter-webmvc-api"
+        },
+        "version": "2.8.17"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springdoc:springdoc-openapi-starter-common"
+        },
+        "version": "2.8.17"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.swagger.core.v3:swagger-core-jakarta"
+        },
+        "version": "2.2.47"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.commons:commons-lang3"
+        },
+        "version": "3.21.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.swagger.core.v3:swagger-annotations-jakarta"
+        },
+        "version": "2.2.47"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.swagger.core.v3:swagger-models-jakarta"
+        },
+        "version": "2.2.47"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml"
+        },
+        "version": "2.21.7"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.webjars:swagger-ui"
+        },
+        "version": "5.32.2"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.webjars:webjars-locator-lite"
+        },
+        "version": "1.1.3"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-devtools"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-autoconfigure"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.projectlombok:lombok"
+        },
+        "version": "1.18.46"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "me.paulschwarz:spring-dotenv"
+        },
+        "version": "4.0.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.github.cdimascio:dotenv-java"
+        },
+        "version": "3.0.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.jsonwebtoken:jjwt-api"
+        },
+        "version": "0.12.3"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.jsonwebtoken:jjwt-impl"
+        },
+        "version": "0.12.3"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.jsonwebtoken:jjwt-jackson"
+        },
+        "version": "0.12.3"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.core:jackson-databind"
+        },
+        "version": "2.21.7"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:s3"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:aws-xml-protocol"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:aws-query-protocol"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:protocol-core"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:arns"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:profiles"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:crt-core"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:http-auth"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:identity-spi"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:http-auth-spi"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.reactivestreams:reactive-streams"
+        },
+        "version": "1.0.4"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:http-auth-aws"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:checksums"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:checksums-spi"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:retries-spi"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:sdk-core"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:retries"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:auth"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:http-auth-aws-eventstream"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.eventstream:eventstream"
+        },
+        "version": "1.0.1"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:http-client-spi"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:regions"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:annotations"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:utils"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:aws-core"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:metrics-spi"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:json-utils"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:third-party-jackson-core"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:endpoints-spi"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "software.amazon.awssdk:apache-client"
+        },
+        "version": "2.27.21"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.httpcomponents:httpclient"
+        },
+        "version": "4.5.13"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.httpcomponents:httpcore"
+        },
+        "version": "4.4.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "commons-codec:commons-codec"
+        },
+        "version": "1.18.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot-starter-mail"
+        },
+        "version": "3.5.16"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.eclipse.angus:jakarta.mail"
+        },
+        "version": "2.0.5"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "jakarta.activation:jakarta.activation-api"
+        },
+        "version": "2.1.4"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.eclipse.angus:angus-activation"
+        },
+        "version": "2.0.3"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.h2database:h2"
+        },
+        "version": "2.3.232"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "net.logstash.logback:logstash-logback-encoder"
+        },
+        "version": "8.0"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "jakarta.xml.bind:jakarta.xml.bind-api"
+        },
+        "version": "4.0.5"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-core"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    },
+    {
+      "package": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-jcl"
+        },
+        "version": "6.2.19"
+      },
+      "vulnerabilities": []
+    }
+  ],
+  "exceptions": [
+    {
+      "package": "braces",
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "reason": "No patched braces release exists. Tailwind 3 calls it only for repository-controlled build globs. The package is absent from the production dependency tree and browser bundle; Vite binds loopback for tests. CI runs untrusted PR code without deployment secrets. Tailwind 4 migration requires separate visual regression validation. Remove this exception once the dependency chain is replaced.",
+      "expires": "2026-11-04"
+    }
+  ],
+  "failures": []
+}

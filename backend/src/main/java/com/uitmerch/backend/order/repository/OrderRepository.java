@@ -12,6 +12,8 @@ import java.util.UUID;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecificationExecutor<Order> {
+    java.util.List<Order> findTop100ByStatusAndPendingExpiresAtBeforeOrderByPendingExpiresAtAsc(
+        OrderStatus status,java.time.Instant now);
 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("SELECT o FROM Order o WHERE o.id = :id")

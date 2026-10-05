@@ -93,7 +93,7 @@ public class AuthService {
             otp.setAttemptCount(otp.getAttemptCount() + 1);
             if (otp.getAttemptCount() >= OTP_MAX_ATTEMPTS) {
                 otp.setLockedUntil(LocalDateTime.now().plusMinutes(OTP_LOCK_MINUTES));
-                log.warn("OTP locked for user {} after {} failed attempts", user.getEmail(), OTP_MAX_ATTEMPTS);
+                log.warn("OTP locked for user {} after {} failed attempts", user.getId(), OTP_MAX_ATTEMPTS);
             }
             otpTokenRepository.save(otp);
             throw genericError;
@@ -105,7 +105,7 @@ public class AuthService {
         user.setVerified(true);
         userRepository.save(user);
 
-        log.info("Email verified for user: {}", user.getEmail());
+        log.info("Email verified for user: {}", user.getId());
     }
 
     @Transactional
@@ -255,7 +255,7 @@ public class AuthService {
         userRepository.findLockedByEmail(email).ifPresent(user -> {
             if (user.isActive() && !user.isVerified()) {
                 issueOtp(user);
-                log.info("OTP re-issued for unverified user {}", email);
+                log.info("OTP re-issued for unverified user {}", user.getId());
             }
         });
     }
@@ -280,7 +280,7 @@ public class AuthService {
                     .build();
                 otpTokenRepository.save(otp);
                 emailService.sendPasswordReset(user.getEmail(), code);
-                log.info("Password-reset OTP issued for {}", email);
+                log.info("Password-reset OTP issued for user {}", user.getId());
             }
         });
     }
@@ -324,7 +324,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        log.info("Password reset successfully for {}", user.getEmail());
+        log.info("Password reset successfully for user {}", user.getId());
     }
 
     @Transactional

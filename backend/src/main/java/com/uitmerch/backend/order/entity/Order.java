@@ -48,6 +48,12 @@ public class Order {
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(length=64)
+    private String checkoutId;
+    @Column(length=80)
+    private String checkoutActor;
+    private java.time.Instant pendingExpiresAt;
+
     @Builder.Default
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)

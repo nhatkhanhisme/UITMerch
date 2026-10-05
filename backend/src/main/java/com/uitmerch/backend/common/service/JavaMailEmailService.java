@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service("mailTransport")
-@Profile("!(dev | docker)")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.dev.mock-mail", havingValue = "false", matchIfMissing = true)
 @RequiredArgsConstructor
 public class JavaMailEmailService implements EmailService {
 

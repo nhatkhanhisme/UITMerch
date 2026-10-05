@@ -22,7 +22,7 @@ public class TraceIdInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String traceId = request.getHeader(TRACE_ID_HEADER);
         
-        if (traceId == null || traceId.isEmpty()) {
+        if (traceId == null || !traceId.matches("[A-Za-z0-9._-]{1,64}")) {
             traceId = UUID.randomUUID().toString();
         }
         

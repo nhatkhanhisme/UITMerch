@@ -12,9 +12,9 @@ import java.time.Duration;
  */
 public class GeminiQuotaTest {
 
-    // ── Paste your two API keys here ──────────────────────────────────────────
-    private static final String KEY1 = "AIzaSyDLzfkhTkvIxvQ2oFYDaac8WBjENGxYifE";
-    private static final String KEY2 = "AIzaSyBAol4JVKrWCP-LnD-Po--JYy_qv6MFb1Q";
+    // Provide credentials through environment variables; never commit them.
+    private static final String KEY1 = System.getenv("GEMINI_QUOTA_KEY1");
+    private static final String KEY2 = System.getenv("GEMINI_QUOTA_KEY2");
     // ─────────────────────────────────────────────────────────────────────────
 
     private static final String BASE_URL =
@@ -26,8 +26,8 @@ public class GeminiQuotaTest {
     private static final int MAX_REQUESTS = 2000;
 
     public static void main(String[] args) throws Exception {
-        if (KEY1.startsWith("YOUR_") || KEY2.startsWith("YOUR_")) {
-            System.err.println("[ERROR] Hãy điền KEY1 và KEY2 vào file trước khi chạy.");
+        if (KEY1 == null || KEY1.isBlank() || KEY2 == null || KEY2.isBlank()) {
+            System.err.println("[ERROR] Set GEMINI_QUOTA_KEY1 and GEMINI_QUOTA_KEY2 in the environment.");
             System.exit(1);
         }
 

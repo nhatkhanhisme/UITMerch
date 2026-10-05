@@ -1,0 +1,16 @@
+# Rollout và rollback security
+
+Chỉ phát hành sau khi có quyền vào đúng Supabase UITMerch và Render. Không áp dụng thay đổi vào project khác. Không đưa secret vào repo, ticket hay log.
+
+1. Thu hồi hai Gemini key đã lộ ở provider, tạo key giới hạn phù hợp và cập nhật secret manager. Đặt JWT secret ngẫu nhiên đủ mạnh; nếu key cũ từng public thì rotate, chấp nhận đăng nhập lại. Lưu bằng chứng thu hồi đã che giá trị.
+2. Backup PostgreSQL và xác minh đường phục hồi. Provision một admin có mật khẩu riêng an toàn trước V46; kiểm tra số tài khoản còn seed hash, phiên và dữ liệu đơn liên quan. Chạy V46/V47 trên staging trước. Không sửa migration cũ đã chạy.
+3. Kiểm tra grants của anon/authenticated trên mọi schema/table/view/function; RLS và policy không được đọc đơn/customer/checkout/token/rate-limit trực tiếp. Storage public read chỉ cho media cần công khai; gỡ anon write/delete và policy cho phép caller chọn tùy ý thư mục. S3 secret chỉ ở backend. Kiểm tra bằng anonymous client thực.
+4. Render: APP_ENVIRONMENT=staging/production, không dev/docker; APP_DEV_OTP_ENDPOINT/SEED_DATA/MOCK_MAIL=false; APP_AUTH_COOKIE_SECURE=true, APP_RATE_LIMIT_SHARED=true, APP_CHECKOUT_EXPIRY_ENABLED=true; ddl-auto=validate. CORS là origin frontend HTTPS chính xác, không trailing slash. SMTP thật phải gửi được OTP/tracking. DB có quyền migration và runtime tối thiểu phù hợp. Kiểm tra scheduler expiry hoạt động, lỗi được quan sát và retry.
+5. Deploy backend và frontend `/api` proxy trỏ `https://uitmerch-backend.onrender.com/api/:path*`. Kiểm tra URL đích đúng service trước rollout; rewrite `/api` phải đứng trước SPA fallback. Frontend production gọi cùng origin, không gọi auth trực tiếp cross-site.
+6. Trên HTTPS staging chạy login/reload/refresh/logout, missing/tampered CSRF, Origin khác, hai tab refresh, cookie Secure/HttpOnly/host-only/path; kiểm tra access/refresh không vào localStorage hoặc URL/log. Kiểm tra guest OTP, retry idempotency, quota, expiry restore stock, tracking redaction và foreign upload rejection. Xác minh CSP, HSTS và API responses qua proxy, không chỉ file cấu hình.
+7. Thu thập CSP violations cho visual search, ảnh và các flow chính; giới hạn connect/img theo host cần thiết rồi enforce script CSP sau khi xác minh. Cấu hình giám sát 401/403/429/5xx, mail, shared limiter và worker; giới hạn quyền xem audit log và thời hạn giữ log.
+8. Chỉ mở lại traffic khi các gate pass; chạy dependency scan sát ngày deploy. Xử lý exception braces trước 2026-11-04. Thiết kế payment/webhook/idempotency/refund là công việc kế tiếp, chưa nằm trong hardening COD này.
+
+## Rollback
+
+Nếu cutover lỗi, tạm dừng checkout/upload hoặc đặt maintenance, giữ log đã redact và backup. Ưu tiên roll forward hoặc phiên bản sửa vẫn giữ cookie/CSRF và quyền guest mới; không đưa code cũ đọc token localStorage/UUID+email lên lại. V46 disable/revoke không tự đảo ngược; chỉ mở tài khoản qua quy trình reset password được xác minh. V47 additive giữ nguyên bảng/cột và dữ liệu idempotency; không drop bảng trong rollback. Không tự bật dev/mock-mail hay tắt rate limiter/expiry để khôi phục dịch vụ. Sau JWT rotation, token cũ không được khôi phục. Với schema restore phải reconcile đơn và tồn kho phát sinh sau snapshot trước mở checkout.

@@ -10,8 +10,11 @@ import java.util.UUID;
 @Builder
 public class AuthResponse {
 
+    @lombok.ToString.Exclude
     private String token;
     private String tokenType;
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @lombok.ToString.Exclude
     private String refreshToken;
     private UUID userId;
     private String email;

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 @Data
 public class InstantOrderRequest {
+    private UUID requestId;
 
     @NotNull(message = "Merch ID is required")
     private UUID merchId;

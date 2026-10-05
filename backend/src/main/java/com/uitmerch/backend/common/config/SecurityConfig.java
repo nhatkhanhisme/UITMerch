@@ -72,9 +72,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).filter(origin -> !origin.isEmpty()).toList());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "X-Guest-Tracking", "X-CSRF-TOKEN"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
@@ -115,6 +115,10 @@ public class SecurityConfig {
             // Enable CORS for local frontend development
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             
+            .headers(headers -> headers
+                .referrerPolicy(policy -> policy.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                .contentSecurityPolicy(policy -> policy.policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'").reportOnly()))
+
             // Define authorization rules
             .authorizeHttpRequests(authz -> {
                 // Let the servlet container render errors without replacing the
@@ -134,7 +138,8 @@ public class SecurityConfig {
                 }
 
                 // Dev OTP endpoint — only opened on dev or docker profiles
-                if (environment.acceptsProfiles(Profiles.of("dev", "docker"))) {
+                if (environment.acceptsProfiles(Profiles.of("dev", "docker"))
+                        && environment.getProperty("app.dev.otp-endpoint", Boolean.class, false)) {
                     authz.requestMatchers("/api/v1/dev/**").permitAll();
                 }
 
