@@ -105,7 +105,7 @@ BEGIN
     END IF;
     SELECT jsonb_build_object(
         'overduePendingOrders',count(*) FILTER (WHERE status='PENDING' AND pending_expires_at < now()-interval '5 minutes'),
-        'recentDeadJobs',(SELECT count(*) FROM public.background_jobs WHERE state='DEAD' AND failed_at > now()-interval '1 hour'),
+        'unresolvedDeadJobs',(SELECT count(*) FROM public.background_jobs WHERE state='DEAD' AND failed_at IS NOT NULL),
         'historicalDeadJobs',(SELECT count(*) FROM public.background_jobs WHERE state='DEAD' AND failed_at IS NULL),
         'stalledJobs',(SELECT count(*) FROM public.background_jobs WHERE state IN ('PENDING','PROCESSING') AND next_attempt_at < now()-interval '1 hour'),
         'cronFailures',cron_failed,'expiryLastSuccess',expiry_last,'retentionLastSuccess',retention_last

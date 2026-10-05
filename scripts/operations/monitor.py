@@ -51,7 +51,7 @@ def main():
     elif query("SELECT app_ops.audit_probe_seen('" + trace + "')") != 't':
         failures.append('durable_audit_probe_missing')
     report = json.loads(query('SELECT app_ops.health_report()'))
-    for field in ('overduePendingOrders', 'recentDeadJobs', 'stalledJobs', 'cronFailures'):
+    for field in ('overduePendingOrders', 'unresolvedDeadJobs', 'stalledJobs', 'cronFailures'):
         if report[field] != 0:
             failures.append(field)
     now = dt.datetime.now(dt.timezone.utc)

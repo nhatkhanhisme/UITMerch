@@ -83,9 +83,10 @@ class DatabaseMaintenanceTest {
             jdbc.update("INSERT INTO background_jobs(id,kind,payload) VALUES (?,'EMBEDDING','test')",id);
             jdbc.update("UPDATE background_jobs SET state='DEAD' WHERE id=?",id);
             assertThat(jdbc.queryForObject("SELECT failed_at IS NOT NULL FROM background_jobs WHERE id=?",Boolean.class,id)).isTrue();
+            jdbc.update("UPDATE background_jobs SET failed_at=now()-interval '2 hours' WHERE id=?",id);
             jdbc.execute("RESET ROLE");
             jdbc.execute("SET LOCAL ROLE uitmerch_monitor");
-            assertThat(jdbc.queryForObject("SELECT (app_ops.health_report()->>'recentDeadJobs')::integer",Integer.class)).isGreaterThanOrEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT (app_ops.health_report()->>'unresolvedDeadJobs')::integer",Integer.class)).isGreaterThanOrEqualTo(1);
             assertThat(jdbc.queryForObject("SELECT has_table_privilege(current_user,'public.users','SELECT')",Boolean.class)).isFalse();
             assertThat(jdbc.queryForObject("SELECT has_function_privilege(current_user,'app_ops.expire_pending_orders()','EXECUTE')",Boolean.class)).isFalse();
             jdbc.execute("RESET ROLE");status.setRollbackOnly();

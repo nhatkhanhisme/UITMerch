@@ -5,7 +5,7 @@ Work is isolated in `UITMerch-ops-hardening`, branch `security/operations-harden
 Implemented:
 
 - V51 creates separate runtime/backup/monitor identities without passwords in source. Runtime permits business DML through role-specific RLS policies, appends audit only, cannot modify schema/roles or Flyway history, and cannot bypass RLS. Backup reads protected data; monitor can execute fixed aggregate/probe functions only.
-- V52 adds private database maintenance, atomic COD expiry with inventory/restock/history/pickup/notification effects, independent audit retention, and failure timestamps for future DEAD jobs. Supabase cron installation is separate from portable Flyway migrations.
+- V52 adds private database maintenance, atomic COD expiry with inventory/restock/history/pickup/notification effects, independent audit retention, and failure timestamps for future DEAD jobs. Monitoring continues to flag unresolved failures even when they are older than one hour. Supabase cron installation is separate from portable Flyway migrations.
 - Runtime database maintenance flag disables application-only expiry/retention workers when database scheduling is active. ASYNC servlet completion is allowed after initial authenticated SSE dispatch; per-event revocation remains enforced.
 - Trusted main CI deploy validates/migrates with credentials isolated in a protected-branch `production` environment before triggering Render. Render Auto-Deploy is verified Off.
 - Production monitoring and daily encrypted off-provider database/Storage backups, with decryption/checksum/local database restore scripts. Backup plaintext never enters Actions artifacts. The private restore key stays outside Git and CI.
@@ -21,6 +21,8 @@ Validation before rollout:
 - Full encrypted backup captured 4 buckets and 95 Storage object bodies (37,305,463 bytes). Decryption and all 95 object checksums verified. Restored encrypted database contains 44 users, 29 orders, 38 embeddings and 15 audit events, with zero invalid indexes. Tampered ciphertext rejected.
 - Live old-key revocation is confirmed by the user, not independently verified through Google key-management APIs.
 
-Existing operational debt: 90 historical DEAD delivery jobs. They are preserved for triage; old emails are not replayed automatically. An independent scheduler persists notifications/restock work while Render sleeps; delivery/email/SSE latency still depends on the application worker. The restore key needs a separate offline copy. Alerts currently surface as failed GitHub workflows; a separate delivery channel is not configured.
+Existing operational debt: 90 historical DEAD EMBEDDING jobs. They are preserved for triage; old emails are not replayed automatically. An independent scheduler persists notifications/restock work while Render sleeps; delivery/email/SSE latency still depends on the application worker. The restore key needs a separate offline copy. Alerts currently surface as failed GitHub workflows; a separate delivery channel is not configured.
+
+Production preparation: Supabase pg_cron is enabled, but no application maintenance schedules are active until V52 is deployed. GitHub production environment secrets are configured. Live invalid-login probe returned 401 and persisted its audit event. The PR backend check passed; frontend/security jobs were cancelled by GitHub with “The job was not acquired by Runner of type hosted even after multiple attempts” during the Actions incident.
 
 Production rollout results will be recorded after PR gates, migration, role provisioning, cron installation, runtime credential cutover and live verification complete.

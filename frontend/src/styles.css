@@ -45,7 +45,7 @@
 @utility text-7xl { font-size: 4.5rem; line-height: 1; }
 @utility text-8xl { font-size: 6rem; line-height: 1; }
 @utility text-9xl { font-size: 8rem; line-height: 1; }
-@utility outline-none { outline: 2px solid transparent; outline-offset: 2px; }
+@utility outline-none { outline: 2px solid transparent !important; outline-offset: 2px; }
 @utility flex-shrink-0 { flex-shrink: 0; }
 @utility flex-grow { flex-grow: 1; }
 
