@@ -1,8 +1,54 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;600;700;800&display=swap");
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source(none);
+@config "../tailwind.config.ts";
+@source "./";
+@source "../index.html";
+
+/* Preserve the established v3 defaults while replacing its vulnerable build dependency. */
+@theme {
+  --text-xs: initial;
+  --text-sm: initial;
+  --text-base: initial;
+  --text-lg: initial;
+  --text-xl: initial;
+  --text-2xl: initial;
+  --text-3xl: initial;
+  --text-4xl: initial;
+  --text-5xl: initial;
+  --text-6xl: initial;
+  --text-7xl: initial;
+  --text-8xl: initial;
+  --text-9xl: initial;
+  --default-ring-width: 3px;
+  --default-ring-color: #3b82f6;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --radius-sm: 0.125rem;
+  --blur-sm: 4px;
+}
+@layer base {
+  *, ::before, ::after, ::backdrop, ::file-selector-button { border-color: #e5e7eb; }
+  input::placeholder, textarea::placeholder { color: #9ca3af; }
+  button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+}
+/* Responsive font utilities retain their v3 line-height rather than inheriting --tw-leading. */
+@utility text-xs { font-size: .75rem; line-height: 1rem; }
+@utility text-sm { font-size: .875rem; line-height: 1.25rem; }
+@utility text-base { font-size: 1rem; line-height: 1.5rem; }
+@utility text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+@utility text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+@utility text-2xl { font-size: 1.5rem; line-height: 2rem; }
+@utility text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+@utility text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+@utility text-5xl { font-size: 3rem; line-height: 1; }
+@utility text-6xl { font-size: 3.75rem; line-height: 1; }
+@utility text-7xl { font-size: 4.5rem; line-height: 1; }
+@utility text-8xl { font-size: 6rem; line-height: 1; }
+@utility text-9xl { font-size: 8rem; line-height: 1; }
+@utility outline-none { outline: 2px solid transparent !important; outline-offset: 2px; }
+@utility flex-shrink-0 { flex-shrink: 0; }
+@utility flex-grow { flex-grow: 1; }
+
 
 @layer utilities {
   .scrollbar-hide {

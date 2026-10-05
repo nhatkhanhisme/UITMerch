@@ -335,6 +335,26 @@ class PostgresRegressionTest {
         assertThat(orderRepository.findById(id).orElseThrow().getStatus()).isEqualTo(OrderStatus.CONFIRMED);
     }
     @Test
+    void logoutCompletesAuthorizedAsyncStreamWithoutAllowingNewRevokedOrAnonymousStreams() throws Exception {
+        String path="/api/v1/customer/notifications/stream";
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(path))
+            .andExpect(status().isUnauthorized());
+        User customer=user(true); var login=auth.login(credentials(customer));
+        var stream=mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(path)
+                .header("Authorization","Bearer "+login.getToken()))
+            .andExpect(status().isOk()).andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.request().asyncStarted())
+            .andReturn();
+        auth.logout(login.getToken());
+        streams.send(customer.getId(),Map.of("private","must never be delivered"));
+        stream.getAsyncResult(5000);
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch(stream))
+            .andExpect(status().isOk());
+        assertThat(stream.getResponse().getContentAsString()).doesNotContain("must never be delivered");
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(path)
+                .header("Authorization","Bearer "+login.getToken())).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void revokedSessionsStopReceivingLiveNotifications() {
         User user = user(true); var login = auth.login(credentials(user));
         streams.add(user.getId(), jwt.getSessionIdFromToken(login.getToken()), user.getAuthVersion(), jwt.getExpiryFromToken(login.getToken()));

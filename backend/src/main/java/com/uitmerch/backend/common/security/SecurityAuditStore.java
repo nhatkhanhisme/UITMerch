@@ -19,6 +19,8 @@ public class SecurityAuditStore {
     private final JdbcTemplate jdbc;
     private final MeterRegistry metrics;
     private final int retentionDays;
+    @Value("${app.maintenance.database-scheduler:false}")
+    private boolean databaseScheduler;
 
     public SecurityAuditStore(JdbcTemplate jdbc, MeterRegistry metrics,
             @Value("${app.audit.retention-days:90}") int retentionDays) {
@@ -44,6 +46,7 @@ public class SecurityAuditStore {
     @Scheduled(initialDelayString="${app.audit.cleanup-initial-delay-ms:60000}",
                fixedDelayString="${app.audit.cleanup-delay-ms:3600000}")
     public void pruneExpired() {
+        if (databaseScheduler) return;
         try {
             int removed = jdbc.update("""
                 WITH expired AS (

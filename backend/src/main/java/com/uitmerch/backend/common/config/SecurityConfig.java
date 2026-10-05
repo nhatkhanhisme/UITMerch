@@ -123,7 +123,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> {
                 // Let the servlet container render errors without replacing the
                 // original response with an authentication failure.
-                authz.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                // Initial REQUEST authentication and per-event SSE session checks remain enforced.
+                authz.dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.ASYNC).permitAll()
                     .requestMatchers("/").permitAll()
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/v1/public/**").permitAll()

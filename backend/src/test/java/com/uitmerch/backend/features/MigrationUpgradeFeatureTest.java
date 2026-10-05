@@ -30,8 +30,8 @@ class MigrationUpgradeFeatureTest {
                 configuration.getPluginRegister().getPlugin(org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension.class)
                     .setTransactionalLock(false);
                 Flyway current=configuration.load();
-                assertThat(current.migrate().migrationsExecuted).isEqualTo(16); current.validate();
-                assertThat(current.info().current().getVersion().getVersion()).isEqualTo("50");
+                assertThat(current.migrate().migrationsExecuted).isEqualTo(18); current.validate();
+                assertThat(current.info().current().getVersion().getVersion()).isEqualTo("52");
                 try(Connection db=DriverManager.getConnection(upgrade,"postgres","uitmerch_test_only");Statement sql=db.createStatement()) {
                     try(ResultSet rs=sql.executeQuery("SELECT SUM(stock) FROM merch_items")){rs.next();assertThat(rs.getLong(1)).isEqualTo(stock);}
                     try(ResultSet rs=sql.executeQuery("SELECT COUNT(*) FROM merch_items WHERE status='PUBLISHED' AND NOT publication_announced")){rs.next();assertThat(rs.getLong(1)).isZero();}

@@ -12,11 +12,14 @@ import java.util.Map;
 @Hidden
 @RestController
 public class HealthController {
+    @org.springframework.beans.factory.annotation.Value("${RENDER_GIT_COMMIT:local}")
+    private String buildCommit;
 
     @GetMapping("/")
     public ResponseEntity<ApiResponse<Map<String, Object>>> health() {
         Map<String, Object> data = Map.of(
             "status", "UP",
+            "buildCommit", buildCommit,
             "app", "UITMerch Backend",
             "timestamp", Instant.now().toString(),
             "links", Map.of(

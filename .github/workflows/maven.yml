@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     name: Backend build and PostgreSQL tests
@@ -93,6 +97,13 @@ jobs:
             scripts/package-lock.json
       - run: npm ci --prefix frontend
       - run: npm ci --prefix scripts
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Scan locked backup SDK dependencies
+        run: |
+          python3 -m pip install pip-audit==2.10.1
+          python3 -m pip_audit -r scripts/operations/requirements.txt
       - name: Scan dependencies with expiring scoped exceptions
         run: python3 scripts/security-check.py --report security-report.json
       - name: Scan source for secrets with redaction
@@ -110,15 +121,35 @@ jobs:
 
   deploy:
     name: Deploy to Render
+    environment: production
     runs-on: ubuntu-latest
     needs: [test, frontend_tests, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    concurrency:
+      group: production-backend-deploy
+      cancel-in-progress: false
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+      - name: Validate and migrate with credentials isolated from application runtime
+        working-directory: backend
+        env:
+          UITMERCH_MIGRATION_URL: ${{ secrets.UITMERCH_MIGRATION_URL }}
+          UITMERCH_MIGRATION_USER: ${{ secrets.UITMERCH_MIGRATION_USER }}
+          UITMERCH_MIGRATION_PASSWORD: ${{ secrets.UITMERCH_MIGRATION_PASSWORD }}
+          FLYWAY_POSTGRESQL_TRANSACTIONAL_LOCK: 'false'
+        run: |
+          test -n "$UITMERCH_MIGRATION_URL" && test -n "$UITMERCH_MIGRATION_USER" && test -n "$UITMERCH_MIGRATION_PASSWORD"
+          ./mvnw -B -q flyway:migrate flyway:validate
       - name: Trigger Render redeploy
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-        run: curl -fsS --max-time 30 "$RENDER_DEPLOY_HOOK_URL"
-      - name: Check public campaign API readiness
+        run: curl -fsS --max-time 30 "${RENDER_DEPLOY_HOOK_URL}&ref=${GITHUB_SHA}" >/dev/null
+      - name: Wait for tested commit and public API readiness
         env:
           RENDER_PUBLIC_API_URL: ${{ vars.RENDER_PUBLIC_API_URL || 'https://uitmerch-backend.onrender.com' }}
-        run: curl -fsS --max-time 20 --retry 10 --retry-all-errors --retry-delay 15 "${RENDER_PUBLIC_API_URL%/}/api/v1/public/campaigns?size=1" >/dev/null
+        run: python3 scripts/operations/wait-for-deploy.py

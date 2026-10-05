@@ -3,6 +3,8 @@ server:
 
 app:
   environment: ${APP_ENVIRONMENT:production}
+  maintenance:
+    database-scheduler: ${APP_MAINTENANCE_DATABASE_SCHEDULER:false}
   audit:
     retention-days: ${APP_AUDIT_RETENTION_DAYS:90}
   dev:

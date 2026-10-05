@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.scheduling.annotation.Scheduled;
 import java.time.Instant;
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="app.maintenance.database-scheduler",havingValue="false",matchIfMissing=true)
 @Component @RequiredArgsConstructor @Slf4j
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="app.checkout.expiry-enabled",havingValue="true",matchIfMissing=true)
 public class PendingOrderExpiryWorker {
