@@ -66,5 +66,5 @@ jobs:
         with:
           name: encrypted-production-backup-${{ github.run_id }}
           path: operations-backup.cms
-          retention-days: 14
+          retention-days: 7
           if-no-files-found: error
