@@ -3,7 +3,7 @@ import type { AuthSession } from "../types/auth";
 import { withRefreshLock } from "../lib/refreshLock";
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.PROD ? "" : import.meta.env.VITE_API_BASE_URL,
   timeout: 20000,
 });
 export const authTransport = axios.create({
@@ -13,7 +13,7 @@ export const authTransport = axios.create({
 });
 // Use only for catalog reads whose response does not depend on the account.
 export const publicClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.PROD ? "" : import.meta.env.VITE_API_BASE_URL,
   timeout: 20000,
   withCredentials: false,
 });

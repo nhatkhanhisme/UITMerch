@@ -3,6 +3,8 @@ server:
 
 app:
   environment: ${APP_ENVIRONMENT:production}
+  audit:
+    retention-days: ${APP_AUDIT_RETENTION_DAYS:90}
   dev:
     otp-endpoint: ${APP_DEV_OTP_ENDPOINT:false}
     seed-data: ${APP_DEV_SEED_DATA:false}
@@ -96,6 +98,7 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
+      connection-init-sql: SET search_path TO public, extensions
       maximum-pool-size: ${APP_DB_POOL_MAX:10}
       minimum-idle: ${APP_DB_POOL_MIN_IDLE:2}
       connection-timeout: ${APP_DB_CONNECTION_TIMEOUT_MS:20000}

@@ -56,8 +56,11 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # The production build must use the frontend proxy even with a legacy API setting.
+          VITE_API_BASE_URL: "https://api-build-fixture.example.invalid"
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: npx playwright test --config playwright.csp.config.ts
       - name: Upload browser reports
         if: always()
         uses: actions/upload-artifact@v4
